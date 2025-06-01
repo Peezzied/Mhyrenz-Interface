@@ -89,7 +89,11 @@
 
     </mah:MetroWindow.Resources>
     <Grid>
-        <mah:HamburgerMenu x:Name="HamburgerMenuControl"
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
                           DisplayMode="CompactInline"
                           IsPaneOpen="False"
                           ItemInvoked="HamburgerMenuControl_OnItemInvoked"
@@ -113,5 +117,14 @@
                 </Grid>
             </mah:HamburgerMenu.Content>
         </mah:HamburgerMenu>
+        <StatusBar Grid.Row="1" VerticalAlignment="Bottom" DockPanel.Dock="Bottom"
+                   Foreground="White">
+            <StatusBar.Background>
+                <SolidColorBrush Color="{DynamicResource MahApps.Colors.Accent}"/>
+            </StatusBar.Background>
+            <StatusBarItem Content="Ready" />
+            <StatusBarItem Content="User: JohnDoe" />
+            <StatusBarItem Content="Time: 12:34 PM" HorizontalAlignment="Right" />
+        </StatusBar>
     </Grid>
 </mah:MetroWindow>
