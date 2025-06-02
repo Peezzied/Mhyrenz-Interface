@@ -1,5 +1,6 @@
 ﻿<UserControl x:Class="Mhyrenz_Interface.Views.HomeView"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -13,7 +14,33 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
-        <TextBlock FontSize="32">Dashboard</TextBlock>
+        <StackPanel Margin="30">
+            <TextBlock FontSize="32">Dashboard</TextBlock>
+            <TextBox 
+                mah:TextBoxHelper.Watermark="Search a Product..."
+                mah:TextBoxHelper.UseFloatingWatermark="True" >
+                <TextBox.Style>
+                    <Style BasedOn="{StaticResource MahApps.Styles.TextBox.Search}" TargetType="{x:Type TextBox}">
+                        <Style.Triggers>
+                            <Trigger Property="mah:TextBoxHelper.HasText" Value="True">
+                                <Setter Property="mah:TextBoxHelper.ButtonContent" Value="r" />
+                                <Setter Property="mah:TextBoxHelper.ButtonContentTemplate" Value="{x:Null}" />
+                                <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="True" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <UniformGrid Grid.Column="1" Columns="3">
+                    
+                </UniformGrid>
+            </Grid>
+        </StackPanel>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="305"/>
@@ -26,7 +53,17 @@
 
             </Grid>
             <Grid Grid.Row="1">
-
+                <ListView Margin="10">
+    <ListView.View>
+        <GridView>
+            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Name}" Width="Auto"/>
+            <GridViewColumn Header="NAME" DisplayMemberBinding="{Binding Age}" Width="Auto"/>
+            <GridViewColumn Header="QTY" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
+            <GridViewColumn Header="UNIT PRICE" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
+            <GridViewColumn Header="QTY PRICE" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
+        </GridView>
+    </ListView.View>
+</ListView>
             </Grid>
         </Grid>
 
