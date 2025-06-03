@@ -190,6 +190,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Core\BaseViewModel.cs" />
+    <Compile Include="Models\Inventory.cs" />
+    <Compile Include="Models\Pharmacy.cs" />
+    <Compile Include="Models\Product.cs" />
     <Compile Include="Navigation\NavigationServiceEx.cs" />
     <Compile Include="ViewModels\MenuItem.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
