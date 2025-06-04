@@ -1,5 +1,4 @@
-﻿using Mhyrenz_Interface.Domain.Models.Primatives;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Transaction
+    public class Category
     {
         public int Id { get; set; }
+        public string Name { get; set; }
 
-        public int ProductId { get; set; }
-        public Product Item { get; set; }
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

@@ -16,11 +16,29 @@ namespace Mhyrenz_Interface.Domain.Models
             _source = source ?? Enumerable.Empty<Transaction>();
         }
 
+        // Precompute unique Ids
+        private HashSet<int> uniqueIds => _source
+            .Where(tx => tx != null)
+            .GroupBy(tx => tx.Id)
+            .Where(g => g.Count() == 1)
+            .Select(g => g.Key)
+            .ToHashSet();
+
+        // Precompute unique ProductIds
+        private HashSet<int> uniqueProductIds => _source
+            .Where(tx => tx != null)
+            .GroupBy(tx => tx.ProductId)
+            .Where(g => g.Count() == 1)
+            .Select(g => g.Key)
+            .ToHashSet();
+
+        // Filter transactions by unique Id and unique ProductId
         public int Count => _source
             .Where(tx => tx != null)
-            .Select(tx => tx.Id)
-            .Distinct()
+            .Where(tx => uniqueIds.Contains(tx.Id))
+            .Where(tx => uniqueProductIds.Contains(tx.ProductId))
             .Count();
+
 
         public IEnumerator<Transaction> GetEnumerator() => _source.GetEnumerator();
 

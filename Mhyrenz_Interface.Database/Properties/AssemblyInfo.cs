@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mhyrenz_Interface.EntityFramework")]
+[assembly: AssemblyTitle("Mhyrenz_Interface.Database")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Mhyrenz_Interface.EntityFramework")]
+[assembly: AssemblyProduct("Mhyrenz_Interface.Database")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ae3088b5-2b87-4ed0-b169-186ff4c00877")]
+[assembly: Guid("8c2897ea-6d4d-485f-8610-17cab9d58981")]
 
 // Version information for an assembly consists of the following four values:
 //
