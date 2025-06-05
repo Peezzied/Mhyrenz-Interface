@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Transactions : IEnumerable<Transaction>
+    public class Transactions : DomainObject, IEnumerable<Transaction>
     {
         private readonly IEnumerable<Transaction> _source;
 

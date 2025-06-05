@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Category: DomainObject
+    public class DomainObject
     {
-        public string Name { get; set; }
-
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public int Id { get; set; }
     }
 }

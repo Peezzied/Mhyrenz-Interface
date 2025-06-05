@@ -92,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\Category.cs" />
-    <Compile Include="Models\Primatives\IProduct.cs" />
+    <Compile Include="Models\DomainObject.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\Transactions.cs" />

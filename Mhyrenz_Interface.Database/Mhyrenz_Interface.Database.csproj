@@ -32,10 +32,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <RuntimeIdentifiers>win;win-x64;win-x86</RuntimeIdentifiers>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -49,13 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
-    <Compile Include="Migrations\20250604102855_initial.cs" />
-    <Compile Include="Migrations\20250604102855_initial.Designer.cs">
-      <DependentUpon>20250604102855_initial.cs</DependentUpon>
+    <Compile Include="Migrations\20250605050035_factory.cs" />
+    <Compile Include="Migrations\20250605050035_factory.Designer.cs">
+      <DependentUpon>20250605050035_factory.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\GenericDataService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

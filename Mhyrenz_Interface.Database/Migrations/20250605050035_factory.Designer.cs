@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20250604102855_initial")]
-    partial class initial
+    [Migration("20250605050035_factory")]
+    partial class factory
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

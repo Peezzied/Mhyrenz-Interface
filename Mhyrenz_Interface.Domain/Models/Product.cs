@@ -1,5 +1,4 @@
-﻿using Mhyrenz_Interface.Domain.Models.Primatives;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -8,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Product
+    public class Product: DomainObject
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         //public string Supplier { get; set; } // for later
         public int Qty { get; set; }

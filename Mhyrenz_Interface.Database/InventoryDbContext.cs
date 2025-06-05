@@ -13,12 +13,6 @@ namespace Mhyrenz_Interface.Database
         public DbSet<Product> Products { get; set; }    
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Category> Categories { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite("Data Source=inventory.db");
-
-            base.OnConfiguring(optionsBuilder);
-        }
+        public InventoryDbContext(DbContextOptions options) : base(options) { }
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class initial : Migration
+    public partial class factory : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
