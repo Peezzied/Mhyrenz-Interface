@@ -11,15 +11,12 @@
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Title="MainWindow" MinHeight="800" MinWidth="1280" WindowStyle="None">
-    <mah:MetroWindow.DataContext>
-        <viewModels:ShellViewModel/>
-    </mah:MetroWindow.DataContext>
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands ShowSeparators="False">
             <Button x:Name="GoBackButton"
               Width="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength}"
               AutomationProperties.Name="Go back"
-              Click="GoBack_OnClick">
+              Command="{Binding GoBackCommand}">
                 <mah:FontIcon AutomationProperties.Name="Go back icon"
                            FontSize="14"
                            Glyph="&#xE72B;" />
@@ -96,11 +93,14 @@
         <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
                           DisplayMode="CompactInline"
                           IsPaneOpen="False"
-                          ItemInvoked="HamburgerMenuControl_OnItemInvoked"
+                          ItemCommand="{Binding NavigateCommand}"
+                          ItemCommandParameter="."
                           ItemTemplate="{StaticResource MenuItemTemplate}"
                           ItemsSource="{Binding Menu}"
                           OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                          OptionsItemsSource="{Binding OptionsMenu}">
+                          OptionsItemsSource="{Binding OptionsMenu}"
+                          SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
+                          SelectedOptionsItem="{Binding SelectedOptionsMenuItem, Mode=TwoWay}">
             <mah:HamburgerMenu.Content>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -112,6 +112,7 @@
                     </StackPanel>
                     <ContentPresenter 
                         Grid.Row="1"
+                        DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
                         Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
                     <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible"/>
                 </Grid>

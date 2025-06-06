@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public delegate TViewModel CreateViewModel<TViewModel>() where TViewModel : BaseViewModel;
+
+    public abstract class BaseViewModel : INotifyPropertyChanged
     {
+        public virtual void Dispose() { }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

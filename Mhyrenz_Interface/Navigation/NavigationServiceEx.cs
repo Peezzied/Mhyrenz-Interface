@@ -1,11 +1,27 @@
 ﻿using System;
+using System.Web.UI.WebControls;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
 namespace Mhyrenz_Interface.Navigation
 {
-    public class NavigationServiceEx
+    public class NavigationServiceEx: INavigationServiceEx
     {
+        private BaseViewModel _currentViewModel;
+        public BaseViewModel CurrentViewModel
+        {
+            get
+            {
+                return _currentViewModel;
+            }
+            set
+            {
+                _currentViewModel?.Dispose();
+
+                _currentViewModel = value;
+            }
+        }
+
         public event NavigatedEventHandler Navigated;
 
         public event NavigationFailedEventHandler NavigationFailed;
@@ -36,9 +52,12 @@ namespace Mhyrenz_Interface.Navigation
 
         public bool CanGoForward => this.Frame.CanGoForward;
 
-        public void GoBack() => this.Frame.GoBack();
 
         public void GoForward() => this.Frame.GoForward();
+        public void GoBack()
+        {
+            this.Frame.GoBack();
+        }
 
         public bool Navigate(Uri sourcePageUri, object extraData = null)
         {
