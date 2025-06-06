@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace Mhyrenz_Interface.Views
 {
     /// <summary>
-    /// Interaction logic for Inventory.xaml
+    /// Interaction logic for Settings.xaml
     /// </summary>
-    public partial class Inventory : UserControl
+    public partial class SettingsView : UserControl
     {
-        public Inventory()
+        public SettingsView()
         {
             InitializeComponent();
         }

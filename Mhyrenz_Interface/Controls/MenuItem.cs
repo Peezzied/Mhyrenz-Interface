@@ -2,7 +2,7 @@
 using System.Windows;
 using MahApps.Metro.Controls;
 
-namespace Mhyrenz_Interface.ViewModels
+namespace Mhyrenz_Interface.Controls
 {
     public class MenuItem : HamburgerMenuIconItem
     {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mhyrenz_Interface.Views;
+using System;
 
 namespace Mhyrenz_Interface.ViewModels.Factory
 {
@@ -28,13 +25,13 @@ namespace Mhyrenz_Interface.ViewModels.Factory
         {
             switch (viewType.Name)
             {
-                case nameof(HomeViewModel):
+                case nameof(HomeView):
                     return _createHomeViewModel();
-                case nameof(InventoryViewModel):
+                case nameof(InventoryView):
                     return _createInventoryViewModel();
-                case nameof(TransactionsViewModel):
+                case nameof(TransactionsView):
                     return _createTransactionsViewModel();
-                case nameof(SettingsViewModel):
+                case nameof(SettingsView):
                     return _createSettingsViewModel();
                 default:
                     throw new ArgumentException($"No view model found for type {viewType.Name}");

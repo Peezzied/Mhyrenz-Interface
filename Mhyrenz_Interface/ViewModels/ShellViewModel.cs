@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.IconPacks;
+﻿using MahApps.Metro.Controls;
+using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -6,11 +7,13 @@ using Mhyrenz_Interface.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Web.UI.WebControls;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using MenuItem = Mhyrenz_Interface.Controls.MenuItem;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -21,7 +24,6 @@ namespace Mhyrenz_Interface.ViewModels
 
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
-
         public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
 
         public ObservableCollection<MenuItem> Menu => AppMenu;
@@ -48,12 +50,12 @@ namespace Mhyrenz_Interface.ViewModels
         public ShellViewModel(INavigationServiceEx navigationServiceEx, IViewModelFactory viewModelFactory)
         {
             _navigationServiceEx = navigationServiceEx;
-            _navigationServiceEx.Navigated += _OnNavigated;
+            _navigationServiceEx.Navigated += OnNavigated;
 
             _navigationServiceEx.Navigate(new Uri("Views/HomeView.xaml", UriKind.RelativeOrAbsolute));
 
-            NavigateCommand = new RelayCommand(_Navigate);
-            GoBackCommand = new RelayCommand(execute: _GoBack, canExecute: _ => _navigationServiceEx.CanGoBack);
+            NavigateCommand = new RelayCommand<HamburgerMenu>(Navigate);
+            GoBackCommand = new RelayCommand(execute: GoBack, canExecute: _ => _navigationServiceEx.CanGoBack);
 
             _viewModelFactory = viewModelFactory;
 
@@ -69,32 +71,46 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
                 Label = "Inventory",
-                NavigationType = typeof(Inventory),
-                NavigationDestination = new Uri("Views/Inventory.xaml", UriKind.RelativeOrAbsolute)
+                NavigationType = typeof(InventoryView),
+                NavigationDestination = new Uri("Views/InventoryView.xaml", UriKind.RelativeOrAbsolute)
+            });
+            this.Menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.ClockRotateLeftSolid },
+                Label = "Transactions",
+                NavigationType = typeof(TransactionsView),
+                NavigationDestination = new Uri("Views/TransactionsView.xaml", UriKind.RelativeOrAbsolute)
             });
             this.OptionsMenu.Add(new MenuItem()
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.GearSolid },
                 Label = "Settings",
-                NavigationType = typeof(Settings),
-                NavigationDestination = new Uri("Views/Settings.xaml", UriKind.RelativeOrAbsolute)
+                NavigationType = typeof(SettingsView),
+                NavigationDestination = new Uri("Views/SettingsView.xaml", UriKind.RelativeOrAbsolute)
             });
         }
 
-        private void _Navigate(object parameter)
+        private void Navigate(HamburgerMenu menuItem)
         {
-            if (parameter is MenuItem menuItem && menuItem.IsNavigation)
+            //if (menuItem.IsNavigation)
+            //{
+            //    _navigationServiceEx.Navigate(menuItem.NavigationDestination);
+            //}
+
+            if (((MenuItem)menuItem.SelectedItem).IsNavigation)
             {
-                _navigationServiceEx.Navigate(menuItem.NavigationDestination);
+                _navigationServiceEx.Navigate(((MenuItem)menuItem.SelectedItem).NavigationDestination);
             }
+
+            Debug.WriteLine($"Executed command with parameter: {((MenuItem)menuItem.SelectedItem).NavigationDestination}");
         }
 
-        private void _GoBack(object parameter)
+        private void GoBack(object parameter)
         {
             _navigationServiceEx.GoBack();
         }
 
-        private void _OnNavigated(object sender, NavigationEventArgs e)
+        private void OnNavigated(object sender, NavigationEventArgs e)
         {
             var contentType = e.Content?.GetType();
 
@@ -108,6 +124,8 @@ namespace Mhyrenz_Interface.ViewModels
         {
             _navigationServiceEx.CurrentViewModel = _viewModelFactory.CreateViewModel(viewType);
             OnPropertyChanged(nameof(CurrentViewModel));
+
+            Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
     }

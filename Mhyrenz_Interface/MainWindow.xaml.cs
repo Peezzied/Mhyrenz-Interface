@@ -6,7 +6,6 @@ using System.Windows.Navigation;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
-using MenuItem = Mhyrenz_Interface.ViewModels.MenuItem;
 
 namespace Mhyrenz_Interface
 {
@@ -18,14 +17,13 @@ namespace Mhyrenz_Interface
         private readonly NavigationServiceEx _navigationServiceEx;
         public Frame NavigationFrame => _navigationServiceEx.Frame;
 
+        public BaseViewModel HomeViewModel => new HomeViewModel();
+
         public MainWindow(object dataContext)
         {
-            InitializeComponent();
-
-            _navigationServiceEx = new NavigationServiceEx();
             DataContext = dataContext;
-
-
+            InitializeComponent();
+            _navigationServiceEx = new NavigationServiceEx();
         }
 
         //private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)

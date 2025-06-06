@@ -18,9 +18,9 @@ namespace Mhyrenz_Interface.Views
     /// <summary>
     /// Interaction logic for Test.xaml
     /// </summary>
-    public partial class Test : UserControl
+    public partial class TransactionsView : UserControl
     {
-        public Test()
+        public TransactionsView()
         {
             InitializeComponent();
         }
