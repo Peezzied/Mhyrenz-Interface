@@ -98,18 +98,12 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void Navigate(NavigationCommandParams parameters)
         {
-            var menuItems = parameters.MenuItem;
-            bool isMenuEqual = menuItems.Zip(Menu, (a, b) =>
-                    a.NavigationDestination == b.NavigationDestination &&
-                    a.NavigationType == b.NavigationType
-                ).All(match => match);
+            var selectedItem = ReferenceEquals(parameters.MenuItem, Menu)
+                ? parameters.Menu.SelectedItem
+                : parameters.Menu.SelectedOptionsItem;
 
-            if (isMenuEqual) 
+            if (selectedItem is MenuItem menuItem && menuItem.NavigationDestination != null && menuItem.IsNavigation)
             {
-                var menuItem = parameters.Menu.SelectedItem as MenuItem;
-                _navigationServiceEx.Navigate(menuItem.NavigationDestination);
-            } else {
-                var menuItem = parameters.Menu.SelectedOptionsItem as MenuItem;
                 _navigationServiceEx.Navigate(menuItem.NavigationDestination);
             }
         }
