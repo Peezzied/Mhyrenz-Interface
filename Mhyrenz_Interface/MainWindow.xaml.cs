@@ -14,16 +14,17 @@ namespace Mhyrenz_Interface
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private readonly NavigationServiceEx _navigationServiceEx;
+        private readonly INavigationServiceEx _navigationServiceEx;
         public Frame NavigationFrame => _navigationServiceEx.Frame;
 
         public BaseViewModel HomeViewModel => new HomeViewModel();
 
-        public MainWindow(object dataContext)
+        public MainWindow(object dataContext, INavigationServiceEx navigationServiceEx)
         {
             DataContext = dataContext;
+            _navigationServiceEx = navigationServiceEx;
+
             InitializeComponent();
-            _navigationServiceEx = new NavigationServiceEx();
         }
 
         //private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)

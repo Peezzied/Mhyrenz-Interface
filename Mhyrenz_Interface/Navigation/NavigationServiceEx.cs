@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Web.UI.WebControls;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -63,6 +64,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.CurrentSource != sourcePageUri)
             {
+                Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}"); 
                 return this.Frame.Navigate(sourcePageUri, extraData);
             }
 
@@ -73,6 +75,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.NavigationService?.Content?.GetType() != sourceType)
             {
+                Debug.WriteLine($"Navigating to {sourceType}");
                 return this.Frame.Navigate(Activator.CreateInstance(sourceType));
             }
 

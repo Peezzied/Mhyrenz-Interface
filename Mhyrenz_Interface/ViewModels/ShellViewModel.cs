@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using MahApps.Metro.IconPacks;
+using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -24,6 +25,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
+
+        private bool Flag { get; set; }
+
         public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
 
         public ObservableCollection<MenuItem> Menu => AppMenu;
@@ -52,9 +56,11 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
 
+            Flag = false;
+
             _navigationServiceEx.Navigate(new Uri("Views/HomeView.xaml", UriKind.RelativeOrAbsolute));
 
-            NavigateCommand = new RelayCommand<HamburgerMenu>(Navigate);
+            NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
             GoBackCommand = new RelayCommand(execute: GoBack, canExecute: _ => _navigationServiceEx.CanGoBack);
 
             _viewModelFactory = viewModelFactory;
@@ -90,19 +96,22 @@ namespace Mhyrenz_Interface.ViewModels
             });
         }
 
-        private void Navigate(HamburgerMenu menuItem)
+        private void Navigate(NavigationCommandParams parameters)
         {
-            //if (menuItem.IsNavigation)
-            //{
-            //    _navigationServiceEx.Navigate(menuItem.NavigationDestination);
-            //}
+            var menuItems = parameters.MenuItem;
+            bool isMenuEqual = menuItems.Zip(Menu, (a, b) =>
+                    a.NavigationDestination == b.NavigationDestination &&
+                    a.NavigationType == b.NavigationType
+                ).All(match => match);
 
-            if (((MenuItem)menuItem.SelectedItem).IsNavigation)
+            if (isMenuEqual) 
             {
-                _navigationServiceEx.Navigate(((MenuItem)menuItem.SelectedItem).NavigationDestination);
+                var menuItem = parameters.Menu.SelectedItem as MenuItem;
+                _navigationServiceEx.Navigate(menuItem.NavigationDestination);
+            } else {
+                var menuItem = parameters.Menu.SelectedOptionsItem as MenuItem;
+                _navigationServiceEx.Navigate(menuItem.NavigationDestination);
             }
-
-            Debug.WriteLine($"Executed command with parameter: {((MenuItem)menuItem.SelectedItem).NavigationDestination}");
         }
 
         private void GoBack(object parameter)
@@ -113,6 +122,9 @@ namespace Mhyrenz_Interface.ViewModels
         private void OnNavigated(object sender, NavigationEventArgs e)
         {
             var contentType = e.Content?.GetType();
+            var lastOptionsMenuItem = SelectedOptionsMenuItem;
+
+            //Debug.WriteLine($"Navigated to: {contentType?.Name}");
 
             SelectedMenuItem = Menu.FirstOrDefault(x => x.NavigationType == contentType);
             SelectedOptionsMenuItem = OptionsMenu.FirstOrDefault(x => x.NavigationType == contentType);
@@ -125,7 +137,7 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.CurrentViewModel = _viewModelFactory.CreateViewModel(viewType);
             OnPropertyChanged(nameof(CurrentViewModel));
 
-            Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
+            //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
     }

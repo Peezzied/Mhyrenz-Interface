@@ -9,6 +9,7 @@
         xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
         xmlns:viewModels="clr-namespace:Mhyrenz_Interface.ViewModels"
         xmlns:views="clr-namespace:Mhyrenz_Interface.Views"
+        xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Title="MainWindow" MinHeight="800" MinWidth="1280" WindowStyle="None">
@@ -43,7 +44,7 @@
                    Text="{Binding Label}" />
             </Grid>
         </DataTemplate>
-
+        <converters:NavigationCommandParamsConverter x:Key="NavigationCommandParamsConverter" />
         <Style BasedOn="{StaticResource {x:Type Frame}}" TargetType="{x:Type Frame}">
             <Setter Property="ClipToBounds" Value="True" />
             <Setter Property="ContentTemplate">
@@ -93,17 +94,27 @@
         </Grid.RowDefinitions>
         <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
                           DisplayMode="CompactInline"
-                          IsPaneOpen="False"
+                          IsPaneOpen="True"
                           ItemCommand="{Binding NavigateCommand}"
-
                           OptionsItemCommand="{Binding NavigateCommand}"
-
                           ItemTemplate="{StaticResource MenuItemTemplate}"
                           ItemsSource="{Binding Menu}"
                           OptionsItemTemplate="{StaticResource MenuItemTemplate}"
                           OptionsItemsSource="{Binding OptionsMenu}"
                           SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
                           SelectedOptionsItem="{Binding SelectedOptionsMenuItem, Mode=TwoWay}">
+            <mah:HamburgerMenu.ItemCommandParameter>
+                <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
+                    <Binding RelativeSource="{RelativeSource Self}"/>
+                    <Binding Path="Menu"/>
+                </MultiBinding>
+            </mah:HamburgerMenu.ItemCommandParameter>
+            <mah:HamburgerMenu.OptionsItemCommandParameter>
+                <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
+                    <Binding RelativeSource="{RelativeSource Self}"/>
+                    <Binding Path="OptionsMenu"/>
+                </MultiBinding>
+            </mah:HamburgerMenu.OptionsItemCommandParameter>
             <mah:HamburgerMenu.Content>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -117,18 +128,12 @@
                         Grid.Row="1"
                         DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
                         Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
+                    <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />
+
                     <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible"/>
                 </Grid>
             </mah:HamburgerMenu.Content>
         </mah:HamburgerMenu>
-        <StatusBar Grid.Row="1" VerticalAlignment="Bottom" DockPanel.Dock="Bottom"
-                   Foreground="White">
-            <StatusBar.Background>
-                <SolidColorBrush Color="{DynamicResource MahApps.Colors.Accent}"/>
-            </StatusBar.Background>
-            <StatusBarItem Content="Ready" />
-            <StatusBarItem Content="User: JohnDoe" />
-            <StatusBarItem Content="Time: 12:34 PM" HorizontalAlignment="Right" />
-        </StatusBar>
+        <controls:StatusBar Grid.Row="1"/>
     </Grid>
 </mah:MetroWindow>

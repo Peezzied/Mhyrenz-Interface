@@ -58,8 +58,8 @@ namespace Mhyrenz_Interface
                     return () => s.GetRequiredService<SettingsViewModel>();
                 })
 
-                .AddScoped<ShellViewModel>()
-                .AddScoped<MainWindow>(s => new MainWindow(s.GetRequiredService<ShellViewModel>()));
+                .AddSingleton<ShellViewModel>()
+                .AddSingleton<MainWindow>(s => new MainWindow(s.GetRequiredService<ShellViewModel>(), s.GetRequiredService<INavigationServiceEx>()));
 
             return services.BuildServiceProvider();
         }

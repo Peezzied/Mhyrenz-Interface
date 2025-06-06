@@ -25,5 +25,7 @@ namespace Mhyrenz_Interface.Controls
         }
 
         public bool IsNavigation => this.NavigationDestination != null;
+
+
     }
 }
