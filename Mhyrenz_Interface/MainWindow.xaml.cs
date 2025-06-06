@@ -40,24 +40,24 @@ namespace Mhyrenz_Interface
         private void NavigationServiceEx_OnNavigated(object sender, NavigationEventArgs e)
         {
             // select the menu item
+            //this.HamburgerMenuControl.SelectedItem = this.HamburgerMenuControl
+            //                                             .Items
+            //                                             .OfType<MenuItem>()
+            //                                             .FirstOrDefault(x => x.NavigationDestination == e.Uri);
+            //this.HamburgerMenuControl.SelectedOptionsItem = this.HamburgerMenuControl
+            //                                                    .OptionsItems
+            //                                                    .OfType<MenuItem>()
+            //                                                    .FirstOrDefault(x => x.NavigationDestination == e.Uri);
+
+            // or when using the NavigationType on menu item
             this.HamburgerMenuControl.SelectedItem = this.HamburgerMenuControl
                                                          .Items
                                                          .OfType<MenuItem>()
-                                                         .FirstOrDefault(x => x.NavigationDestination == e.Uri);
+                                                         .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
             this.HamburgerMenuControl.SelectedOptionsItem = this.HamburgerMenuControl
                                                                 .OptionsItems
                                                                 .OfType<MenuItem>()
-                                                                .FirstOrDefault(x => x.NavigationDestination == e.Uri);
-
-            // or when using the NavigationType on menu item
-            // this.HamburgerMenuControl.SelectedItem = this.HamburgerMenuControl
-            //                                              .Items
-            //                                              .OfType<MenuItem>()
-            //                                              .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
-            // this.HamburgerMenuControl.SelectedOptionsItem = this.HamburgerMenuControl
-            //                                                     .OptionsItems
-            //                                                     .OfType<MenuItem>()
-            //                                                     .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
+                                                                .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
 
         }
 

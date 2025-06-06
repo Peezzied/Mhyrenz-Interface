@@ -18,6 +18,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         public ShellViewModel()
         {
+
+
+
             // Build the menus
             this.Menu.Add(new MenuItem()
             {
