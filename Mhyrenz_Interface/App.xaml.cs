@@ -1,6 +1,8 @@
-﻿using Mhyrenz_Interface.Navigation;
+﻿using Mhyrenz_Interface.Database;
+using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,12 @@ namespace Mhyrenz_Interface
         protected override void OnStartup(StartupEventArgs e)
         {
             IServiceProvider serviceProvider = CreateServiceProvider();
+
+            InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
+            using(InventoryDbContext context = contextFactory.CreateDbContext())
+            {
+                context.Database.Migrate();
+            }
             
             MainWindow mainWindow = serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
@@ -31,7 +39,15 @@ namespace Mhyrenz_Interface
         {
             IServiceCollection services = new ServiceCollection();
 
+            Action<DbContextOptionsBuilder> configureDbContext = options =>
+            {
+                options.UseSqlite("Data Source=dev_inventory.db");
+            };
+
             services
+                .AddDbContext<InventoryDbContext>(configureDbContext)
+                .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(configureDbContext))
+
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<IViewModelFactory, ViewModelFactory>()
 

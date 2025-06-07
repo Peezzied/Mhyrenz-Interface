@@ -1,0 +1,167 @@
+[
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 1,
+        "Expiry": null,
+        "Id": 1,
+        "ListPrice": "9",
+        "Name": "Acetylcysteine 600mg Powder",
+        "Qty": 7,
+        "RetailPrice": "20"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 1,
+        "Expiry": null,
+        "Id": 2,
+        "ListPrice": "13",
+        "Name": "Acetylcysteine 600mg Powder NELPA",
+        "Qty": 2,
+        "RetailPrice": "20"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 1,
+        "Expiry": null,
+        "Id": 3,
+        "ListPrice": "5.4",
+        "Name": "Aceclofenac 100mg Tablet",
+        "Qty": 10,
+        "RetailPrice": "12"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 1,
+        "Expiry": null,
+        "Id": 4,
+        "ListPrice": "0.49",
+        "Name": "Allopurinol 100mg Tablet",
+        "Qty": 26,
+        "RetailPrice": "3"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 1,
+        "Expiry": null,
+        "Id": 5,
+        "ListPrice": "0.43",
+        "Name": "Aluminum Magnesium Hydroxide tablet",
+        "Qty": 68,
+        "RetailPrice": "1.5"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 2,
+        "Expiry": null,
+        "Id": 6,
+        "ListPrice": "20.29",
+        "Name": "4G Antioxidant Capsule",
+        "Qty": 27,
+        "RetailPrice": "23"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 2,
+        "Expiry": null,
+        "Id": 7,
+        "ListPrice": "7.67",
+        "Name": "Advil Liquigel 200mg Capsule",
+        "Qty": 115,
+        "RetailPrice": "9"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 2,
+        "Expiry": null,
+        "Id": 8,
+        "ListPrice": "7.84",
+        "Name": "Alaxan FR 200mg/325mg Capsule",
+        "Qty": 364,
+        "RetailPrice": "9"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 2,
+        "Expiry": null,
+        "Id": 9,
+        "ListPrice": "7.5",
+        "Name": "Alaxan 200mg/325mg Tablet",
+        "Qty": 371,
+        "RetailPrice": "8.5"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 2,
+        "Expiry": null,
+        "Id": 10,
+        "ListPrice": "21.51",
+        "Name": "Allerta 10mg Tablet",
+        "Qty": 49,
+        "RetailPrice": "24"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 3,
+        "Expiry": null,
+        "Id": 11,
+        "ListPrice": "44.11",
+        "Name": "Alaska Instant 150g",
+        "Qty": 7,
+        "RetailPrice": "46"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 3,
+        "Expiry": null,
+        "Id": 12,
+        "ListPrice": "95.3",
+        "Name": "Alaska Instant 300g",
+        "Qty": 11,
+        "RetailPrice": "99"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 3,
+        "Expiry": null,
+        "Id": 13,
+        "ListPrice": "139.42",
+        "Name": "Alaska Instant 450g",
+        "Qty": 2,
+        "RetailPrice": "143"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 3,
+        "Expiry": null,
+        "Id": 14,
+        "ListPrice": "262.83",
+        "Name": "Alaska Instant 900g",
+        "Qty": 7,
+        "RetailPrice": "270"
+    },
+    {
+        "Barcode": null,
+        "Batch": null,
+        "CategoryId": 3,
+        "Expiry": null,
+        "Id": 15,
+        "ListPrice": "443.17",
+        "Name": "Alaska Instant 1.6K",
+        "Qty": 2,
+        "RetailPrice": "452"
+    }
+]

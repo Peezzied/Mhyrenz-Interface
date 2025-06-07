@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Transaction
+    public class Transaction: DomainObject
     {
-        public int Id { get; set; }
-
         public int ProductId { get; set; }
         public Product Item { get; set; }
     }

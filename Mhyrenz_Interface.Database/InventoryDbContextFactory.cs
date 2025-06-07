@@ -9,31 +9,22 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Database
 {
-    public class InventoryDbContextFactory : IDesignTimeDbContextFactory<InventoryDbContext>
+    public class InventoryDbContextFactory
     {
-        static InventoryDbContextFactory()
+        private readonly Action<DbContextOptionsBuilder> _configureDbContext;
+
+        public InventoryDbContextFactory(Action<DbContextOptionsBuilder> configureDbContext)
         {
-            SQLitePCL.Batteries.Init();
-        }
-        public InventoryDbContext CreateDbContext(string[] args = null)
-        {
-            var options = new DbContextOptionsBuilder<InventoryDbContext>();
-            options.UseSqlite("Data Source=inventory.db");
-
-            var context = new InventoryDbContext(options.Options);
-
-            if (!IsDesignTime())
-            {
-                context.Database.Migrate();
-            }
-
-            return context;
+            _configureDbContext = configureDbContext;
         }
 
-        // Helper to detect design-time context creation
-        private static bool IsDesignTime()
+        public InventoryDbContext CreateDbContext()
         {
-            return AppDomain.CurrentDomain.FriendlyName.Contains("ef");
+            DbContextOptionsBuilder<InventoryDbContext> options = new DbContextOptionsBuilder<InventoryDbContext>();
+
+            _configureDbContext(options);
+
+            return new InventoryDbContext(options.Options);
         }
     }
 }

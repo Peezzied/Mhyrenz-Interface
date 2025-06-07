@@ -14,8 +14,8 @@ namespace Mhyrenz_Interface.Domain.Models
         public int Qty { get; set; }
         public decimal RetailPrice { get; set; }
         public decimal ListPrice { get; set; }
-        public int Barcode { get; set; }
-        public DateTime Expiry { get; set; }
+        public int? Barcode { get; set; }
+        public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 
         // Category
@@ -23,7 +23,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public Category Category { get; set; }
 
         // Transaction
-        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+        public ICollection<Transaction> Transactions { get; set; }
         [NotMapped]
         public Transactions Purchase => new Transactions(Transactions);
 
