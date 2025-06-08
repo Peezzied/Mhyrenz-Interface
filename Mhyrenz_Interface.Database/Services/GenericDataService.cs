@@ -41,7 +41,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<T> Get(int id)
+        public async virtual Task<T> Get(int id)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
@@ -50,7 +50,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public async virtual Task<IEnumerable<T>> GetAll()
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {

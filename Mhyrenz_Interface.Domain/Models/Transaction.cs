@@ -10,5 +10,6 @@ namespace Mhyrenz_Interface.Domain.Models
     {
         public int ProductId { get; set; }
         public Product Item { get; set; }
+        //public DateTime Period { get; set; }
     }
 }

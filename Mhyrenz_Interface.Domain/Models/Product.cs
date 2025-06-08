@@ -25,14 +25,14 @@ namespace Mhyrenz_Interface.Domain.Models
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
         [NotMapped]
-        public Transactions Purchase => new Transactions(Transactions);
+        public int Purchase => Transactions.Count;
 
         // Calculated
-        public int NetQty => Qty - Purchase.Count;
-        public decimal NetRetail => Purchase.Count * RetailPrice;
+        public int NetQty => Qty - Purchase;
+        public decimal NetRetail => Purchase * RetailPrice;
         public decimal CostPrice => Qty * RetailPrice;
         public decimal ProfitRevenue => RetailPrice - ListPrice;
-        public decimal Profit => Purchase.Count * ProfitRevenue;
+        public decimal Profit => Purchase * ProfitRevenue;
         public decimal TotalListPrice => ListPrice * Qty;
 
     }

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,14 +18,14 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            var contextFactory = new InventoryDbContextFactory(options => 
+            var contextFactory = new InventoryDbContextFactory(options =>
             {
                 options.UseSqlite("Data Source=dev_inventory.db");
             });
 
-            IDataService<Category> categoryService = new GenericDataService<Category>(contextFactory);
-            IDataService<Product> productService = new GenericDataService<Product>(contextFactory);
-            IDataService<Transaction> transactionsService = new GenericDataService<Transaction>(contextFactory);
+            var categoryService = new CategoryDataService(contextFactory);
+            var productService = new ProductDataService(contextFactory);
+            var transactionsService = new TransactionsDataService(contextFactory);
 
 
             //using (InventoryDbContext context = contextFactory.CreateDbContext())
@@ -32,20 +33,61 @@ namespace ConsoleApp1
             //    context.Database.Migrate();
             //}
 
-            var categoryTable = new ConsoleTable("Name", "Id");
+            //productService.Create(new Product() { Name = "Test", CategoryId = 2 });
+            //productService.Create(new Product() { Name = "With new category", Category = new Category() { Name = "New cat" } });
+
+            var categoryTable = new ConsoleTable("Name", "Id", "Products");
             DisplayEntities(
                 categoryService,
                 categoryTable,
                 "Category",
-                (table, item) => table.AddRow(item.Name, item.Id)
+                (table, item) =>
+                {
+                    string productNames = string.Join(", ", item.Products.Select(p => p.Name));
+                    table.AddRow(item.Name, item.Id, productNames);
+
+                    Debug.WriteLine($"Category: {item.Name}, Id: {item.Id}, Products: {item.Products}");
+                }
             ).GetAwaiter();
 
-            var productsTable = new ConsoleTable("Name", "Id", "CategoryId");
+            var transactionsTable = new ConsoleTable("Name", "Id", "Products");
+            DisplayEntities(
+                transactionsService,
+                transactionsTable,
+                "Transactions",
+                (table, item) =>
+                {
+                    //string productNames = string.Join(", ", item.Products.Select(p => p.Name));
+                    table.AddRow(item.Id, item.ProductId, item.Item.Name);
+                }
+            ).GetAwaiter();
+
+            string[] productCols = {
+                "Name", "Id", "Purchase", "Qty", "Net Qty", "CategoryId", "Category", "Retail", "List", "TOTAL COST PRICE", "PROFIT REVENUE", "TOTAL LIST PRICE"};
+
+            // Common row adder logic
+            Action<ConsoleTable, Product> addProductRow = (table, item) =>
+            {
+                table.AddRow(
+                    item.Name, item.Id, item.Purchase, item.Qty, item.NetQty, item.CategoryId, item.Category?.Name,
+                    item.RetailPrice, item.ListPrice, item.CostPrice, item.ProfitRevenue, item.TotalListPrice
+                );
+            };
+
+            var productsTable = new ConsoleTable(productCols);
             DisplayEntities(
                 productService,
                 productsTable,
                 "Products",
-                (table, item) => productsTable.AddRow(item.Name, item.Id, item.CategoryId)
+                addProductRow
+            ).GetAwaiter();
+
+            var genericTable = new ConsoleTable(productCols);
+            DisplayEntities(
+                genericTable,
+                "Generic Table",
+                addProductRow,
+                () => productService.GetAllByCategory("Generic", 1)
             ).GetAwaiter();
 
             //var transactionsTable = new ConsoleTable("Name", "Id", "CategoryId");
@@ -56,23 +98,40 @@ namespace ConsoleApp1
             //    (table, item) => transactionsTable.AddRow(item.Name, item.Id, item.CategoryId)
             //).GetAwaiter();
         }
-
         private static async Task DisplayEntities<T>(
             IDataService<T> dataService,
             ConsoleTable table,
             string title,
-            Action<ConsoleTable, T> addRowAction)
-                {
-                    var items = await dataService.GetAll();
-                    Console.WriteLine($"{title} in the database:");
-                    foreach (var item in items)
-                    {
-                        addRowAction(table, item);
-                    }
-                    table.Write(Format.Minimal);
-                }
+            Action<ConsoleTable, T> addRowAction,
+            Func<IDataService<T>, Task<IEnumerable<T>>> data = null)
+        {
+            var items = data != null
+                ? await data(dataService)
+                : await dataService.GetAll();
 
+            Console.WriteLine($"{title} in the database:");
+            foreach (var item in items)
+            {
+                addRowAction(table, item);
+            }
+            table.Write(Format.Minimal);
+        }
+
+        private static async Task DisplayEntities<T>(
+            ConsoleTable table,
+            string title,
+            Action<ConsoleTable, T> addRowAction,
+            Func<Task<IEnumerable<T>>> data)
+        {
+            var items = await data();
+
+            Console.WriteLine($"{title} in the database:");
+            foreach (var item in items)
+            {
+                addRowAction(table, item);
+            }
+            table.Write(Format.Minimal);
+        }
     }
-
 
 }
