@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class initial : Migration
+    public partial class updated : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -52,7 +52,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ProductId = table.Column<int>(nullable: false)
+                    UniqueId = table.Column<Guid>(nullable: false),
+                    ProductId = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {

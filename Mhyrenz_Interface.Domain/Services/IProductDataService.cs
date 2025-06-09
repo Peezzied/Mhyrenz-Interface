@@ -1,10 +1,9 @@
 ﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Mhyrenz_Interface.Database.Services
+namespace Mhyrenz_Interface.Domain.Services
 {
     public interface IProductDataService : IDataService<Product>
     {

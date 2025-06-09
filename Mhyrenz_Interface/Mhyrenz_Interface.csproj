@@ -331,6 +331,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\InventoryDataGrid.xaml.cs">
+      <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\StatusBar.xaml.cs">
       <DependentUpon>StatusBar.xaml</DependentUpon>
     </Compile>
@@ -359,6 +362,10 @@
     <Compile Include="Views\TransactionsView.cs">
       <DependentUpon>TransactionsView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\InventoryDataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\StatusBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -59,17 +59,21 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<T> Update(int id, T entity)
-        {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
-            {
-                entity.Id = id;
 
-                context.Set<T>().Update(entity);
+        public async Task<T> Update(int id, T updatedEntity)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var existingEntity = await context.Set<T>().FindAsync(id);
+                if (existingEntity == null) return null;
+
+                // Update only what you want
+                context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
                 await context.SaveChangesAsync();
 
-                return entity;
+                return existingEntity;
             }
         }
+
     }
 }

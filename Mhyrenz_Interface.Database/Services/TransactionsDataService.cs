@@ -1,4 +1,5 @@
 ﻿using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -28,5 +29,18 @@ namespace Mhyrenz_Interface.Database.Services
 
             }
         }
+
+        public async Task<Transaction> GetLast()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await context.Transactions
+                    .AsNoTracking()
+                    .Include(t => t.Item)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .FirstOrDefaultAsync();
+            }
+        }
+
     }
 }

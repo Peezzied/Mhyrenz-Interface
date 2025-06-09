@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20250608115226_initial")]
-    partial class initial
+    [Migration("20250609063336_updated")]
+    partial class updated
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -75,8 +75,14 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UniqueId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

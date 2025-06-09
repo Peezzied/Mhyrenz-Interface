@@ -9,9 +9,17 @@ namespace Mhyrenz_Interface.Domain.Models
 {
     public class Product: DomainObject
     {
+        public Product(string name, decimal retailPrice, decimal listPrice, int categoryId)
+        {
+            Name = name;
+            RetailPrice = retailPrice;
+            ListPrice = listPrice;
+            CategoryId = categoryId;
+        }
+
         public string Name { get; set; }
         //public string Supplier { get; set; } // for later
-        public int Qty { get; set; }
+        public int Qty { get; set; } = 0;
         public decimal RetailPrice { get; set; }
         public decimal ListPrice { get; set; }
         public int? Barcode { get; set; }

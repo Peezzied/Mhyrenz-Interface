@@ -1,11 +1,13 @@
 ﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
+using System;
+using System.Threading.Tasks;
 
-namespace Mhyrenz_Interface.Database.Services
+namespace Mhyrenz_Interface.Domain.Services
 {
     public interface ITransactionsDataService: IDataService<Transaction>
     {
         //Task<IEnumerable<Transaction>> GetAllByProduct(int productId);
         //Task<IEnumerable<Transaction>> GetAllByDateRange(DateTime startDate, DateTime endDate);
+        Task<Transaction> GetLast(); 
     }
 }

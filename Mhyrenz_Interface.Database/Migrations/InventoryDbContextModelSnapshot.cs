@@ -73,8 +73,14 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UniqueId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
