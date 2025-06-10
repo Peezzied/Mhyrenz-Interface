@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mhyrenz_Interface.ViewModels.Factory;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface
 {
-    public delegate TViewModel CreateViewModel<TViewModel>() where TViewModel : BaseViewModel;
+    public delegate TViewModel CreateViewModel<TViewModel>(object parameter = null);
 
     public abstract class BaseViewModel : INotifyPropertyChanged
     {

@@ -1,41 +1,23 @@
-﻿using Mhyrenz_Interface.Views;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.ViewModels.Factory
 {
-    public class ViewModelFactory : IViewModelFactory
+    public class ViewModelFactory<T> : IViewModelFactory<T> where T : BaseViewModel
     {
-        private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
-        private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
-        private readonly CreateViewModel<TransactionsViewModel> _createTransactionsViewModel;
-        private readonly CreateViewModel<SettingsViewModel> _createSettingsViewModel;
+        private readonly CreateViewModel<T> _vm;
 
-        public ViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
-            CreateViewModel<InventoryViewModel> createInventoryViewModel,
-            CreateViewModel<TransactionsViewModel> createTransactionsViewModel,
-            CreateViewModel<SettingsViewModel> createSettingsViewModel)
+        public ViewModelFactory(CreateViewModel<T> entity)
         {
-            _createHomeViewModel = createHomeViewModel;
-            _createInventoryViewModel = createInventoryViewModel;
-            _createTransactionsViewModel = createTransactionsViewModel;
-            _createSettingsViewModel = createSettingsViewModel;
+            _vm = entity;
         }
 
-        public BaseViewModel CreateViewModel(Type viewType)
+        public T CreateViewModel(object parameter = null)
         {
-            switch (viewType.Name)
-            {
-                case nameof(HomeView):
-                    return _createHomeViewModel();
-                case nameof(InventoryView):
-                    return _createInventoryViewModel();
-                case nameof(TransactionsView):
-                    return _createTransactionsViewModel();
-                case nameof(SettingsView):
-                    return _createSettingsViewModel();
-                default:
-                    throw new ArgumentException($"No view model found for type {viewType.Name}");
-            }
+            return _vm(parameter);
         }
     }
 }

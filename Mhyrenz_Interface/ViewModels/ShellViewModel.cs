@@ -21,7 +21,7 @@ namespace Mhyrenz_Interface.ViewModels
     public class ShellViewModel : BaseViewModel
     {
         private readonly INavigationServiceEx _navigationServiceEx;
-        private readonly IViewModelFactory _viewModelFactory;
+        private readonly IViewModelFactory<NavigationViewModel> _viewModelFactory;
 
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
@@ -51,7 +51,7 @@ namespace Mhyrenz_Interface.ViewModels
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
 
-        public ShellViewModel(INavigationServiceEx navigationServiceEx, IViewModelFactory viewModelFactory)
+        public ShellViewModel(INavigationServiceEx navigationServiceEx, IViewModelFactory<NavigationViewModel> viewModelFactory)
         {
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;

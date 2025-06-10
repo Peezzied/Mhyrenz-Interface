@@ -2,8 +2,8 @@
 
 namespace Mhyrenz_Interface.ViewModels.Factory
 {
-    public interface IViewModelFactory
+    public interface IViewModelFactory<T>
     {
-        BaseViewModel CreateViewModel(Type viewType);
+        T CreateViewModel(object parameter = null);
     }
 }

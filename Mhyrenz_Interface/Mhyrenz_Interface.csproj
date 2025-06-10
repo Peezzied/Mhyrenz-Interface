@@ -331,6 +331,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="State\UndoRedoManager.cs" />
+    <Compile Include="Commands\IUndoableCommand.cs" />
+    <Compile Include="Commands\PropertyChangeCommand.cs" />
     <Compile Include="Controls\InventoryDataGrid.xaml.cs">
       <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
     </Compile>
@@ -339,14 +342,19 @@
     </Compile>
     <Compile Include="Converters\NavigationCommandParamsConverter.cs" />
     <Compile Include="Core\BaseViewModel.cs" />
+    <Compile Include="Core\PropertyChangeTracker.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="Navigation\INavigationServiceEx.cs" />
     <Compile Include="Navigation\NavigationServiceEx.cs" />
-    <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
+    <Compile Include="State\IInventroyStore.cs" />
+    <Compile Include="State\InventoryStore.cs" />
     <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
+    <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
+    <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
+    <Compile Include="ViewModels\ProductViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TransactionsViewModel.cs" />

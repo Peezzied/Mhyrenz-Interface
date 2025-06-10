@@ -1,8 +1,12 @@
-﻿using Mhyrenz_Interface.Database;
+﻿using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore;
@@ -51,11 +55,27 @@ namespace Mhyrenz_Interface
                 .AddDbContext<InventoryDbContext>(configureDbContext)
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(configureDbContext))
 
+                .AddSingleton<UndoRedoManager>()
+                .AddSingleton<IInventroyStore, InventoryStore>()
+
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
-                .AddSingleton<IViewModelFactory, ViewModelFactory>()
+                .AddSingleton<IViewModelFactory<NavigationViewModel>, NavigationViewModelFactory>()
+
+                .AddSingleton<IViewModelFactory<ProductViewModel>, ViewModelFactory<ProductViewModel>>()
 
                 .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
+
+                .AddSingleton<CreateViewModel<ProductViewModel>>(s =>
+                {
+                    return (object parameter) => 
+                    {
+                        if (parameter is Product product)
+                            return new ProductViewModel(product);
+                        throw new ArgumentException("Invalid parameter type for ProductViewModel creation.");
+                    };
+                }
+                )
 
                 .AddTransient<HomeViewModel>()
                 .AddTransient<InventoryViewModel>()
@@ -64,19 +84,19 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {
-                    return () => s.GetRequiredService<HomeViewModel>();
+                    return _ => s.GetRequiredService<HomeViewModel>();
                 })
                 .AddSingleton<CreateViewModel<InventoryViewModel>>(s =>
                 {
-                    return () => s.GetRequiredService<InventoryViewModel>();
+                    return _ => s.GetRequiredService<InventoryViewModel>();
                 })
                 .AddSingleton<CreateViewModel<TransactionsViewModel>>(s =>
                 {
-                    return () => s.GetRequiredService<TransactionsViewModel>();
+                    return _ => s.GetRequiredService<TransactionsViewModel>();
                 })
                 .AddSingleton<CreateViewModel<SettingsViewModel>>(s =>
                 {
-                    return () => s.GetRequiredService<SettingsViewModel>();
+                    return _ => s.GetRequiredService<SettingsViewModel>();
                 })
 
                 .AddSingleton<ShellViewModel>()
