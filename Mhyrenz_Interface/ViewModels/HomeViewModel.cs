@@ -1,6 +1,9 @@
 ﻿using Mhyrenz_Interface;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +12,28 @@ namespace Mhyrenz_Interface.ViewModels
 {
     public class HomeViewModel: BaseViewModel
     {
-        private readonly ProductService _productService;
+        private readonly IProductService _productService;
+        public ObservableCollection<Product> Inventory { get; set; } = new ObservableCollection<Product>();
+
+        public string Bindtest { get; set; } = "Hello, World!";
+
+        public HomeViewModel(IProductService productService)
+        {
+            _productService = productService;
+
+            LoadProducts();
+        }
+
+
+        private async void LoadProducts()
+        {
+            var products = await _productService.GetAll();
+            Inventory?.Clear();
+            foreach (var product in products)
+            {
+                Inventory.Add(product);
+            }
+        }
+
     }
 }

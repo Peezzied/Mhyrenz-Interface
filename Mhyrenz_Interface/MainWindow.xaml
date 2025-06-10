@@ -122,13 +122,13 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <StackPanel Background="Black" Grid.Row="0" Orientation="Vertical">
-
+                        <TextBlock Foreground="White" Text="{Binding CurrentViewModel}"/>
                     </StackPanel>
                     <ContentPresenter 
                         Grid.Row="1"
                         DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
                         Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />
+                    <!--<Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />-->
 
                     <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible"/>
                 </Grid>

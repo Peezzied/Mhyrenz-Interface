@@ -431,6 +431,10 @@
       <Project>{8C2897EA-6D4D-485F-8610-17CAB9D58981}</Project>
       <Name>Mhyrenz_Interface.Database</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Mhyrenz_Interface.Domain\Mhyrenz_Interface.Domain.csproj">
+      <Project>{04B6ED9D-C5B6-41C7-8337-8F20D5FA1468}</Project>
+      <Name>Mhyrenz_Interface.Domain</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -107,6 +107,8 @@
     <Compile Include="Services\ITransactionsDataService.cs" />
     <Compile Include="Services\TransactionService\ITransactionsService.cs" />
     <Compile Include="Services\TransactionService\TransactionService.cs" />
+    <Compile Include="State\Mediator\IMediator.cs" />
+    <Compile Include="State\Mediator\InventoryMediator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

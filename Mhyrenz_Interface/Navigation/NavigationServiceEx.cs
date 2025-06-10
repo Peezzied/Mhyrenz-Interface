@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Web.UI.WebControls;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
@@ -64,8 +65,14 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.CurrentSource != sourcePageUri)
             {
-                Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}"); 
-                return this.Frame.Navigate(sourcePageUri, extraData);
+
+                Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}");
+                var result = this.Frame.Navigate(sourcePageUri, extraData);
+
+                if (result)
+                    this.Frame.Navigated += SetDataContextAfterNavigation;
+
+                return result;
             }
 
             return false;
@@ -76,7 +83,10 @@ namespace Mhyrenz_Interface.Navigation
             if (this.Frame.NavigationService?.Content?.GetType() != sourceType)
             {
                 Debug.WriteLine($"Navigating to {sourceType}");
-                return this.Frame.Navigate(Activator.CreateInstance(sourceType));
+                var result = this.Frame.Navigate(Activator.CreateInstance(sourceType));
+
+                if (result)
+                    this.Frame.Navigated += SetDataContextAfterNavigation;
             }
 
             return false;
@@ -99,6 +109,18 @@ namespace Mhyrenz_Interface.Navigation
                 this._frame.NavigationFailed -= this.Frame_NavigationFailed;
             }
         }
+
+        private void SetDataContextAfterNavigation(object sender, NavigationEventArgs e)
+        {
+            if (e.Content is FrameworkElement element && CurrentViewModel != null)
+            {
+                element.DataContext = CurrentViewModel;
+            }
+
+            // Unsubscribe after setting it once
+            Frame.Navigated -= SetDataContextAfterNavigation;
+        }
+
 
         private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => this.NavigationFailed?.Invoke(sender, e);
 

@@ -17,17 +17,17 @@ namespace Mhyrenz_Interface.Domain.Models
             CategoryId = categoryId;
         }
 
-        public string Name { get; set; }
+        public string Name { get; }
         //public string Supplier { get; set; } // for later
         public int Qty { get; set; } = 0;
-        public decimal RetailPrice { get; set; }
-        public decimal ListPrice { get; set; }
+        public decimal RetailPrice { get; }
+        public decimal ListPrice { get; }
         public int? Barcode { get; set; }
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 
         // Category
-        public int CategoryId { get; set; }
+        public int CategoryId { get; }
         public Category Category { get; set; }
 
         // Transaction
@@ -43,5 +43,15 @@ namespace Mhyrenz_Interface.Domain.Models
         public decimal Profit => Purchase * ProfitRevenue;
         public decimal TotalListPrice => ListPrice * Qty;
 
+    }
+
+    public class ProductUpdateMessage
+    {
+        public ProductUpdateMessage(Product product)
+        {
+            Product = product;
+        }
+
+        public Product Product { get; }
     }
 }

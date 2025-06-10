@@ -1,6 +1,5 @@
 ﻿using Mhyrenz_Interface.Domain.Exceptions;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -37,6 +36,11 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
             var newEntity = await _productDataService.Update(id, entity) ?? throw new DataException($"Product with ID {id} not found.");
             return newEntity;
+        }
+
+        public async Task<IEnumerable<Product>> GetAll()
+        {
+            return await _productDataService.GetAll() ?? throw new DataException("No products found.");
         }
 
         public async Task<bool> Remove(Product entity)

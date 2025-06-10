@@ -131,7 +131,7 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.CurrentViewModel = _viewModelFactory.CreateViewModel(viewType);
             OnPropertyChanged(nameof(CurrentViewModel));
 
-            //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
+            Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
     }

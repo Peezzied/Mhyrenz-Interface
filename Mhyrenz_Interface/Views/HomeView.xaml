@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Mhyrenz_Interface.Views"
+      xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="1280" Loaded="UserControl_Loaded"
 >
@@ -15,6 +16,7 @@
             <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <StackPanel Margin="30">
+            <TextBlock Text="{Binding Bindtest}" />
             <TextBlock FontSize="32">Dashboard</TextBlock>
             <TextBox 
                 mah:TextBoxHelper.Watermark="Search a Product..."
@@ -36,6 +38,7 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
+                <controls:InventoryDataGrid Grid.Column="0" Height="500"/>
                 <UniformGrid Grid.Column="1" Columns="3">
                     
                 </UniformGrid>

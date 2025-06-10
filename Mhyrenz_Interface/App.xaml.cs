@@ -1,4 +1,7 @@
 ﻿using Mhyrenz_Interface.Database;
+using Mhyrenz_Interface.Database.Services;
+using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -51,11 +54,13 @@ namespace Mhyrenz_Interface
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<IViewModelFactory, ViewModelFactory>()
 
+                .AddSingleton<IProductDataService, ProductDataService>()
+                .AddSingleton<IProductService, ProductService>()
 
-                .AddSingleton<HomeViewModel>()
-                .AddSingleton<InventoryViewModel>()
-                .AddSingleton<TransactionsViewModel>()
-                .AddSingleton<SettingsViewModel>()
+                .AddTransient<HomeViewModel>()
+                .AddTransient<InventoryViewModel>()
+                .AddTransient<TransactionsViewModel>()
+                .AddTransient<SettingsViewModel>()
 
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {
