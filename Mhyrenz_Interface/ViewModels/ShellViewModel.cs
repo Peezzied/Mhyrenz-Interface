@@ -2,7 +2,9 @@
 using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
 using System;
@@ -25,6 +27,8 @@ namespace Mhyrenz_Interface.ViewModels
 
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
+        private readonly IInventroyStore _inventoryStore;
+        private readonly IProductService _productService;
 
         private bool Flag { get; set; }
 
@@ -51,7 +55,10 @@ namespace Mhyrenz_Interface.ViewModels
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
 
-        public ShellViewModel(INavigationServiceEx navigationServiceEx, IViewModelFactory<NavigationViewModel> viewModelFactory)
+        public ShellViewModel(IInventroyStore inventroyStore,
+                              IProductService productService,
+                              INavigationServiceEx navigationServiceEx,
+                              IViewModelFactory<NavigationViewModel> viewModelFactory)
         {
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
@@ -93,6 +100,25 @@ namespace Mhyrenz_Interface.ViewModels
                 Label = "Settings",
                 NavigationType = typeof(SettingsView),
                 NavigationDestination = new Uri("Views/SettingsView.xaml", UriKind.RelativeOrAbsolute)
+            });
+
+            _inventoryStore = inventroyStore;
+            _productService = productService;
+
+            _productService.GetAll().ContinueWith(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    var products = task.Result;
+                    _inventoryStore.LoadProducts(products);
+
+                    Debug.WriteLine("Loaded products: " + products);
+                }
+                else
+                {
+                    // Handle error
+                    Debug.WriteLine("Failed to load products: " + task.Exception?.Message);
+                }
             });
         }
 

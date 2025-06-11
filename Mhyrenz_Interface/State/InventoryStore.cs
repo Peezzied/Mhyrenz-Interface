@@ -1,6 +1,8 @@
 ﻿using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using System;
@@ -10,6 +12,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Mhyrenz_Interface.State
 {
@@ -17,14 +20,26 @@ namespace Mhyrenz_Interface.State
     {
         private readonly UndoRedoManager _undoRedoManager;
         private readonly IViewModelFactory<ProductViewModel> _productsViewModelFactory;
-        public ObservableCollection<ProductViewModel> Products { get; } = new ObservableCollection<ProductViewModel>();
+        private readonly IProductService _productService;
+        private readonly ITransactionsService _transactionService;
 
-        public InventoryStore(UndoRedoManager undoRedoManager, IEnumerable<Product> products, IViewModelFactory<ProductViewModel> productsViewModelFactory)
+        public ObservableCollection<ProductViewModel> Products { get; } = new ObservableCollection<ProductViewModel>();
+        public ICommand UpdateProductCommand { get; set; }
+        public ICommand PurchaseProductCommand { get; set; }
+        public InventoryStore(
+            UndoRedoManager undoRedoManager,
+            IEnumerable<Product> products,
+            IViewModelFactory<ProductViewModel> productsViewModelFactory,
+            IProductService productService,
+            ITransactionsService transactionsService)
         {
             _undoRedoManager = undoRedoManager;
             _productsViewModelFactory = productsViewModelFactory;
+            _productService = productService;
+            _transactionService = transactionsService;
 
-            //LoadProducts(products);
+            UpdateProductCommand = new UpdateProductCommand(_productService, this);
+            PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
         }
 
         public void LoadProducts(IEnumerable<Product> products)
@@ -35,26 +50,36 @@ namespace Mhyrenz_Interface.State
             {
                 var viewModel = _productsViewModelFactory.CreateViewModel(product);
 
-                var tracker = new PropertyChangeTracker<ProductViewModel>(
-                    viewModel,
-                    (propertyName, oldValue, newValue) =>
-                    {
-                        _undoRedoManager.Execute(new PropertyChangeCommand<ProductViewModel>(
-                            viewModel,
-                            propertyName,
-                            oldValue,
-                            newValue));
-                    });
+                var tracker = new PropertyChangeTracker<ProductViewModel>(viewModel);
+                Action<string, object, object> commonCommand = (propertyName, oldValue, newValue) => {
+                    _undoRedoManager.Execute(new ProductViewModelCommand(
+                        viewModel,
+                        propertyName,
+                        oldValue,
+                        newValue,
+                        UpdateProductCommand
+                    ));
+                };
+                Action<string, object, object> purchaseCommand = (propertyName, oldValue, newValue) => {
+                    _undoRedoManager.Execute(new ProductViewModelCommand(
+                        viewModel,
+                        propertyName,
+                        oldValue,
+                        newValue,
+                        PurchaseProductCommand
+                    ));
+                };
 
                 // Track initial values
-                tracker.Track(nameof(ProductViewModel.RetailPrice), viewModel.RetailPrice);
-                tracker.Track(nameof(ProductViewModel.ListPrice), viewModel.ListPrice);
-                tracker.Track(nameof(ProductViewModel.Qty), viewModel.Qty);
-                tracker.Track(nameof(ProductViewModel.Name), viewModel.Name);
-                tracker.Track(nameof(ProductViewModel.Barcode), viewModel.Barcode);
-                tracker.Track(nameof(ProductViewModel.Expiry), viewModel.Expiry);
-                tracker.Track(nameof(ProductViewModel.Batch), viewModel.Batch);
-                tracker.Track(nameof(ProductViewModel.CategoryId), viewModel.CategoryId);
+                tracker.Track(nameof(ProductViewModel.Purchase), viewModel.Purchase, purchaseCommand);
+                tracker.Track(nameof(ProductViewModel.RetailPrice), viewModel.RetailPrice, commonCommand);
+                tracker.Track(nameof(ProductViewModel.ListPrice), viewModel.ListPrice, commonCommand);
+                tracker.Track(nameof(ProductViewModel.Qty), viewModel.Qty, commonCommand);
+                tracker.Track(nameof(ProductViewModel.Name), viewModel.Name, commonCommand);
+                tracker.Track(nameof(ProductViewModel.Barcode), viewModel.Barcode, commonCommand);
+                tracker.Track(nameof(ProductViewModel.Expiry), viewModel.Expiry, commonCommand);
+                tracker.Track(nameof(ProductViewModel.Batch), viewModel.Batch, commonCommand);
+                tracker.Track(nameof(ProductViewModel.CategoryId), viewModel.CategoryId, commonCommand);
                 //tracker.Track(nameof(ProductViewModel.Item), viewModel.Item);
                 
 

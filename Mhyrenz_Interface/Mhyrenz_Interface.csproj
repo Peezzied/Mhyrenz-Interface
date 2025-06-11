@@ -331,6 +331,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\ProductViewModelCommand.cs" />
+    <Compile Include="Commands\PurchaseProductCommand.cs" />
+    <Compile Include="Core\BaseAsyncCommand.cs" />
+    <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />

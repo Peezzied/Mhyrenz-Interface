@@ -3,6 +3,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,18 +63,39 @@ namespace Mhyrenz_Interface.Database.Services
 
         public async Task<T> Update(int id, T updatedEntity)
         {
-            using (var context = _contextFactory.CreateDbContext())
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                var existingEntity = await context.Set<T>().FindAsync(id);
-                if (existingEntity == null) return null;
+                updatedEntity.Id = id;
 
-                // Update only what you want
-                context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
+                context.Set<T>().Update(updatedEntity);
                 await context.SaveChangesAsync();
 
-                return existingEntity;
+                return updatedEntity;
             }
         }
+
+        public async Task<T> UpdateProperty(
+            int id, string propertyName, object newValue)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var entity = await context.Set<T>().FindAsync(id);
+                if (entity == null)
+                    return null;
+
+                var property = typeof(T).GetProperty(propertyName);
+                if (property == null || !property.CanWrite)
+                    throw new InvalidOperationException($"'{propertyName}' is not a valid property of {typeof(T).Name}");
+
+                var convertedValue = Convert.ChangeType(newValue, property.PropertyType);
+                property.SetValue(entity, convertedValue);
+
+                await context.SaveChangesAsync();
+                return entity;
+            }
+
+        }
+
 
     }
 }

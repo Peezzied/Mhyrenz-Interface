@@ -10,6 +10,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task <IEnumerable<Product>> GetAll();
         Task<Product> Add(Product entity);
         Task<bool> Remove(Product entity);
-        Task<Product> Edit(int id, Product entity);
+        Task<Product> Edit(int id, string propertyName, object value);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mhyrenz_Interface.State;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -10,21 +11,22 @@ namespace Mhyrenz_Interface.Core
     public class PropertyChangeTracker<T> where T : BaseViewModel
     {
         private readonly Dictionary<string, object> _previousValues = new Dictionary<string, object>();
-        private readonly Action<string, object, object> _onPropertyChanged;
+        private Action<string, object, object> _onPropertyChanged;
 
-        public PropertyChangeTracker(T target, Action<string, object, object> onPropertyChanged)
+        public PropertyChangeTracker(T target)
         {
-            _onPropertyChanged = onPropertyChanged;
             target.PropertyChanged += HandlePropertyChanged;
         }
 
-        public void Track(string propertyName, object value)
+        public void Track(string propertyName, object value, Action<string, object, object> onPropertyChanged)
         {
+            _onPropertyChanged = onPropertyChanged;
             _previousValues[propertyName] = value;
         }
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if ( ChangeTracking.Suppress ) return;
             if (!(sender is T target)) return;
 
             var propertyName = e.PropertyName;

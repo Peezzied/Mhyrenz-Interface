@@ -36,6 +36,15 @@ namespace ConsoleApp1
             //productService.Create(new Product() { Name = "Test", CategoryId = 2 });
             //productService.Create(new Product() { Name = "With new category", Category = new Category() { Name = "New cat" } });
 
+            productService.Update(1, new Product()
+            {
+                Name = "Updated Product",
+                CategoryId = 3,
+                Qty = 10,
+                RetailPrice = 150.0m,
+                ListPrice = 200.0m,
+            }).GetAwaiter();
+
             var categoryTable = new ConsoleTable("Name", "Id", "Products");
             DisplayEntities(
                 categoryService,

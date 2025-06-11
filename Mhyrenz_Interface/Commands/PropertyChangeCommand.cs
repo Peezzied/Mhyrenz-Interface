@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Mhyrenz_Interface.Domain.DTO;
+using Mhyrenz_Interface.State;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class PropertyChangeCommand<T> : IUndoableCommand
+    public abstract class PropertyChangeCommand<T> : IUndoableCommand
     {
         private readonly T _target;
         private readonly string _propertyName;
@@ -23,25 +26,32 @@ namespace Mhyrenz_Interface.Commands
         public void Execute()
         {
             SetProperty(_newValue);
-            SetProperty(_oldValue); // This line is not necessary, but it can be used to ensure the property is set to the new value first.
+            
+            Command(_newValue);
         }
 
         public void Undo()
         {
             SetProperty(_oldValue);
+            Command(_oldValue);
         }
 
         public void Redo()
         {
             SetProperty(_newValue);
+            Command(_newValue);
         }
+
+        public abstract bool Command(object parameter);
 
         private void SetProperty(object value)
         {
             var prop = typeof(T).GetProperty(_propertyName);
             if (prop != null && prop.CanWrite)
             {
+                ChangeTracking.Suppress = true;
                 prop.SetValue(_target, value);
+                ChangeTracking.Suppress = false;
             }
         }
 

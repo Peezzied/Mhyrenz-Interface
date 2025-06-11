@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTO\IDTObject.cs" />
     <Compile Include="Exceptions\InsufficientQuantityException.cs" />
     <Compile Include="Exceptions\InvalidPriceException.cs" />
     <Compile Include="Exceptions\NegativeException.cs" />

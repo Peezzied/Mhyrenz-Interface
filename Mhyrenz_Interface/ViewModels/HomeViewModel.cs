@@ -7,6 +7,7 @@ using Mhyrenz_Interface.ViewModels.Factory;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IProductService _productService;
         private readonly IInventroyStore _inventoryStore;
 
-        public ObservableCollection<ProductViewModel> Products => _inventoryStore.Products;
+        public ObservableCollection<ProductViewModel> Inventory => _inventoryStore.Products;
 
         public string Bindtest { get; set; } = "Hello, World!";
 

@@ -16,6 +16,8 @@ namespace Mhyrenz_Interface.Domain.Services
 
         Task<T> Update(int id, T entity);
 
+        Task<T> UpdateProperty(int id, string propertyName, object newValue);
+
         Task<bool> Delete(int id);
     }
 }

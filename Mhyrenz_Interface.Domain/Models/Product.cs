@@ -44,6 +44,21 @@ namespace Mhyrenz_Interface.Domain.Models
         public decimal Profit => Purchase * ProfitRevenue;
         public decimal TotalListPrice => ListPrice * Qty;
 
+        public Product Clone()
+        {
+            return new Product()
+            {
+                Name = this.Name,
+                RetailPrice = this.RetailPrice,
+                ListPrice = this.ListPrice,
+                Barcode = this.Barcode,
+                Expiry = this.Expiry,
+                Batch = this.Batch,
+                CategoryId = this.CategoryId,
+                Category = this.Category,
+                Qty = this.Qty
+            };
+        }
     }
 
     public class ProductUpdateMessage

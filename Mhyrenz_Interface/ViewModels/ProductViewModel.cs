@@ -12,100 +12,123 @@ namespace Mhyrenz_Interface.ViewModels
         {
             Item = product;
         }
+        
+        private int _purchase;
+        public int Purchase
+        {
+            get => Item.Purchase;
 
-        private string _name;
+            set
+            {
+                if (Item.Purchase != value)
+                {
+                    _purchase = value;
+                    OnPropertyChanged(nameof(Purchase));
+                }
+            }
+        }
         public string Name 
         {
             get => Item.Name;
 
             set
             {
-                if (SetProperty(ref _name, value, nameof(value)))
+                if (Item.Name != value)
+                {
                     Item.Name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
             }
         }
-
-        private int _qty;
         public int Qty
         {
             get => Item.Qty;
 
             set
             {
-                if (SetProperty(ref _qty, value, nameof(value)))
+                if (Item.Qty != value)
+                {
                     Item.Qty = value;
+                    OnPropertyChanged(nameof(Qty));
+                }
             }
         }
-
-        private decimal _retailPrice;
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
 
             set
             {
-                if (SetProperty(ref _retailPrice, value, nameof(value)))
+                if (Item.RetailPrice != value)
+                {
                     Item.RetailPrice = value;
+                    OnPropertyChanged(nameof(RetailPrice));
+                }
             }
         }
-
-        private decimal _listPrice;
         public decimal ListPrice
         {
             get => Item.ListPrice;
 
             set
             {
-                if (SetProperty(ref _listPrice, value, nameof(value)))
+                if (Item.ListPrice != value)
+                {
                     Item.ListPrice = value;
+                    OnPropertyChanged(nameof(ListPrice));
+                }
             }
         }
-
-        private int? _barcode;
         public int? Barcode
         {
             get => Item.Barcode;
 
             set
             {
-                if (SetProperty(ref _barcode, value, nameof(value)))
+                if (Item.Barcode != value)
+                {
                     Item.Barcode = value;
+                    OnPropertyChanged(nameof(Barcode));
+                }
             }
         }
-
-        private DateTime? _expiry;
         public DateTime? Expiry
         {
             get => Item.Expiry;
 
             set
             {
-                if (SetProperty(ref _expiry, value, nameof(value)))
+                if (Item.Expiry != value)
+                {
                     Item.Expiry = value;
+                    OnPropertyChanged(nameof(Expiry));
+                }
             }
         }
-
-        private string _batch;
         public string Batch
         {
             get => Item.Batch;
 
             set
             {
-                if (SetProperty(ref _batch, value, nameof(value)))
+                if (Item.Batch != value)
+                {
                     Item.Batch = value;
+                    OnPropertyChanged(nameof(Batch));
+                }
             }
         }
-
-        private int _categoryId;
         public int CategoryId
         {
             get => Item.CategoryId;
 
             set
             {
-                if (SetProperty(ref _categoryId, value, nameof(value)))
+                if (Item.CategoryId != value)
+                {
                     Item.CategoryId = value;
+                    OnPropertyChanged(nameof(Name));
+                }
             }
         }
     }
