@@ -8,20 +8,36 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Core
 {
+    public class TargetChangedEventArgs : EventArgs
+    {
+        public object Target { get; }
+        public string PropertyOf { get; set; }
+
+        public TargetChangedEventArgs(object target, string propertyOf)
+        {
+            Target = target;
+            PropertyOf = propertyOf;
+        }
+    }
+
+
     public class PropertyChangeTracker<T> where T : BaseViewModel
     {
-        private readonly Dictionary<string, object> _previousValues = new Dictionary<string, object>();
-        private Action<string, object, object> _onPropertyChanged;
+        public Dictionary<string, object> PreviousValues { get; } = new Dictionary<string, object>();
+        private readonly Action<string, object, object> _onPropertyChanged;
 
-        public PropertyChangeTracker(T target)
+        public event EventHandler<TargetChangedEventArgs> PropertyChanged;
+
+        public PropertyChangeTracker(T target, Action<string, object, object> onPropertyChanged)
         {
+            _onPropertyChanged = onPropertyChanged;
             target.PropertyChanged += HandlePropertyChanged;
         }
 
-        public void Track(string propertyName, object value, Action<string, object, object> onPropertyChanged)
+        public PropertyChangeTracker<T> Track(string propertyName, object value)
         {
-            _onPropertyChanged = onPropertyChanged;
-            _previousValues[propertyName] = value;
+            PreviousValues[propertyName] = value;
+            return this;
         }
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -36,13 +52,15 @@ namespace Mhyrenz_Interface.Core
             if (property == null) return;
 
             var newValue = property.GetValue(target);
-            if (_previousValues.TryGetValue(propertyName, out var oldValue))
+            if (PreviousValues.TryGetValue(propertyName, out var oldValue))
             {
                 _onPropertyChanged?.Invoke(propertyName, oldValue, newValue);
             }
 
+            PropertyChanged?.Invoke(this, new TargetChangedEventArgs(sender, propertyName));
+
             // Update the last known value
-            _previousValues[propertyName] = newValue;
+            PreviousValues[propertyName] = newValue;
         }
     }
 

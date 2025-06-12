@@ -4,6 +4,7 @@ using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
@@ -65,6 +66,8 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
+                .AddSingleton<ITransactionsDataService, TransactionsDataService>()
+                .AddSingleton<ITransactionsService, TransactionService>()
 
                 .AddSingleton<CreateViewModel<ProductViewModel>>(s =>
                 {

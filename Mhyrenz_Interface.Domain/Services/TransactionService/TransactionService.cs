@@ -19,25 +19,32 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
 
         public async Task<Product> Add(Product product, int amount = 1)
         {
+            var detachedEntity = product.Clone();
+
             if (amount < 0)
                 throw new NegativeException(amount, product);
 
             if (product.Qty <= 0 || product.NetQty <= 0)
                 throw new InsufficientQuantityException(product.Qty, product.NetQty, product);
 
+            if (product.NetQty - amount < 0)
+                throw new InsufficientQuantityException(product.NetQty, amount, product);
+
             var lastItem = await _transactionsDataService.GetLast();
             var isNew = lastItem != null && lastItem?.ProductId == product.Id;
+            var newGuid = Guid.NewGuid();
 
             for (int i = 0; i < amount; i++)
             {
-                await _transactionsDataService.Create(new Transaction
+                await _transactionsDataService.Create(new Transaction()
                 {
-                    Item = product,
-                    UniqueId = isNew ? lastItem.UniqueId : default,
+                    ProductId = product.Id,
+                    UniqueId = isNew ? lastItem.UniqueId : newGuid,
+                    CreatedAt = DateTime.Now,
                 });
             }
 
-            return product;
+            return detachedEntity;
         }
 
         public async Task<Product> Remove(Product product, int amount = 1)

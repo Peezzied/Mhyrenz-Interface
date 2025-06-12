@@ -55,7 +55,6 @@ namespace Mhyrenz_Interface.Domain.Models
                 Expiry = this.Expiry,
                 Batch = this.Batch,
                 CategoryId = this.CategoryId,
-                Category = this.Category,
                 Qty = this.Qty
             };
         }

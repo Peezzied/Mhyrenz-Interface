@@ -5,13 +5,16 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Mhyrenz_Interface.State
@@ -45,46 +48,94 @@ namespace Mhyrenz_Interface.State
         public void LoadProducts(IEnumerable<Product> products)
         {
             Products.Clear();
+            ChangeTracking.IsInventoryLoaded = true;
 
             foreach (var product in products)
             {
                 var viewModel = _productsViewModelFactory.CreateViewModel(product);
 
-                var tracker = new PropertyChangeTracker<ProductViewModel>(viewModel);
-                Action<string, object, object> commonCommand = (propertyName, oldValue, newValue) => {
-                    _undoRedoManager.Execute(new ProductViewModelCommand(
-                        viewModel,
-                        propertyName,
-                        oldValue,
-                        newValue,
-                        UpdateProductCommand
-                    ));
-                };
-                Action<string, object, object> purchaseCommand = (propertyName, oldValue, newValue) => {
-                    _undoRedoManager.Execute(new ProductViewModelCommand(
-                        viewModel,
-                        propertyName,
-                        oldValue,
-                        newValue,
-                        PurchaseProductCommand
-                    ));
-                };
-
-                // Track initial values
-                tracker.Track(nameof(ProductViewModel.Purchase), viewModel.Purchase, purchaseCommand);
-                tracker.Track(nameof(ProductViewModel.RetailPrice), viewModel.RetailPrice, commonCommand);
-                tracker.Track(nameof(ProductViewModel.ListPrice), viewModel.ListPrice, commonCommand);
-                tracker.Track(nameof(ProductViewModel.Qty), viewModel.Qty, commonCommand);
-                tracker.Track(nameof(ProductViewModel.Name), viewModel.Name, commonCommand);
-                tracker.Track(nameof(ProductViewModel.Barcode), viewModel.Barcode, commonCommand);
-                tracker.Track(nameof(ProductViewModel.Expiry), viewModel.Expiry, commonCommand);
-                tracker.Track(nameof(ProductViewModel.Batch), viewModel.Batch, commonCommand);
-                tracker.Track(nameof(ProductViewModel.CategoryId), viewModel.CategoryId, commonCommand);
-                //tracker.Track(nameof(ProductViewModel.Item), viewModel.Item);
-                
+                TrackProducts(viewModel);
 
                 Products.Add(viewModel);
             }
+        }
+
+        private void TrackProducts(ProductViewModel viewModel)
+        {
+            // Track changes to properties and execute commands on change
+            // * Commons
+            var commons = new PropertyChangeTracker<ProductViewModel>(viewModel, (propertyName, oldValue, newValue) =>
+            {
+                _undoRedoManager.Execute(new ProductVMCommandCommon(
+                    viewModel,
+                    propertyName,
+                    oldValue,
+                    newValue,
+                    UpdateProductCommand
+                ));
+            })
+                .Track(nameof(ProductViewModel.RetailPrice), viewModel.RetailPrice)
+                .Track(nameof(ProductViewModel.ListPrice), viewModel.ListPrice)
+                .Track(nameof(ProductViewModel.Qty), viewModel.Qty)
+                .Track(nameof(ProductViewModel.Name), viewModel.Name)
+                .Track(nameof(ProductViewModel.Barcode), viewModel.Barcode)
+                .Track(nameof(ProductViewModel.Expiry), viewModel.Expiry)
+                .Track(nameof(ProductViewModel.Batch), viewModel.Batch)
+                .Track(nameof(ProductViewModel.CategoryId), viewModel.CategoryId);
+
+            // * EditPurchase
+            var purchase = new PropertyChangeTracker<ProductViewModel>(viewModel, (propertyName, oldValue, newValue) => {
+                _undoRedoManager.Execute(new ProductVMCommandPurchase(
+                    viewModel,
+                    propertyName,
+                    oldValue,
+                    newValue,
+                    PurchaseProductCommand
+                ));
+            })
+                .Track(nameof(ProductViewModel.EditPurchase), viewModel.EditPurchase);
+
+            commons.PropertyChanged += CommonsPropertyChanged;
+            purchase.PropertyChanged += PurchasePropertyChanged;
+        }
+
+        private async void PurchasePropertyChanged(object sender, TargetChangedEventArgs e)
+        {
+            await PropertyChanged(sender, e, async (index, target, tracker) =>
+            {
+                var product = await _productService.Get(target.Item.Id);
+                Products[index] = _productsViewModelFactory.CreateViewModel(product);
+                TrackProducts(Products[index]);
+            });
+        }
+
+        private async Task PropertyChanged(
+            object sender,
+            TargetChangedEventArgs e,
+            Func<int, ProductViewModel, PropertyChangeTracker<ProductViewModel>, Task> action)
+        {
+            var tracker = (PropertyChangeTracker<ProductViewModel>)sender;
+            var target = (ProductViewModel)e.Target;
+            var propertyOf = e.PropertyOf;
+
+            if (!!!tracker.PreviousValues.TryGetValue(propertyOf, out var previousValue) && previousValue is null)
+                return;
+
+            int index = Products.IndexOf(Products.FirstOrDefault(x => ReferenceEquals(x, target)));
+
+            if (index >= 0)
+                await action(index, target, tracker);
+
+        }
+
+        private async void CommonsPropertyChanged(object sender, TargetChangedEventArgs e)
+        {
+            await PropertyChanged(sender, e, async (index, target, _) =>
+            {
+                var product = await _productService.Get(target.Item.Id);
+                Products[index] = _productsViewModelFactory.CreateViewModel(product);
+                TrackProducts(Products[index]);
+            });
         }
     }
 }

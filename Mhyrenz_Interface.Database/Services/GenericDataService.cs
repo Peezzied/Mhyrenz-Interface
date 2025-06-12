@@ -23,6 +23,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
+
                 var result = await context.Set<T>().AddAsync(entity);
                 await context.SaveChangesAsync();
 

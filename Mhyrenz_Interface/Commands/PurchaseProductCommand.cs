@@ -1,4 +1,5 @@
 ﻿using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Exceptions;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.State;
 using System;
@@ -20,9 +21,32 @@ namespace Mhyrenz_Interface.Commands
             _inventroyStore = inventroyStore;
         }
 
-        public override Task ExecuteAsync(object parameter)
+        public override async Task ExecuteAsync(object parameter)
         {
-            
+            var DTO = parameter as PurchaseProductDTO;
+            try
+            {
+                switch (DTO.Method)
+                {
+                    case PurchaseProductDTO.Type.Add:
+                        await _transactionsService.Add(DTO.Product, DTO.Amount);
+                        break;
+                    case PurchaseProductDTO.Type.Remove:
+                        await _transactionsService.Remove(DTO.Product, DTO.Amount);
+                        break;
+                    //default:
+                    //    throw new ArgumentException("Invalid purchase method specified.", nameof(DTO.Method));
+                }
+            }
+            catch (InsufficientQuantityException)
+            {
+
+                throw;
+            }
+            catch (NegativeException)
+            {
+                throw;
+            }
         }
     }
 }

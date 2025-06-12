@@ -1,6 +1,8 @@
 ﻿using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -12,21 +14,33 @@ namespace Mhyrenz_Interface.ViewModels
         {
             Item = product;
         }
-        
+
+        public int NetQty { 
+            get => Item.NetQty;
+        }
+
+        private int _cachedPurchase;
         private int _purchase;
-        public int Purchase
+        public int EditPurchase
         {
-            get => Item.Purchase;
+            get => _purchase;
 
             set
             {
-                if (Item.Purchase != value)
+                if (_purchase != value)
                 {
                     _purchase = value;
-                    OnPropertyChanged(nameof(Purchase));
+                    _cachedPurchase += value;
+                    OnPropertyChanged(nameof(EditPurchase));
                 }
             }
         }
+        public int Purchase
+        {
+            get => Item.Purchase;
+        }
+
+
         public string Name 
         {
             get => Item.Name;
@@ -130,6 +144,12 @@ namespace Mhyrenz_Interface.ViewModels
                     OnPropertyChanged(nameof(Name));
                 }
             }
+        }
+
+        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            ChangeTracking.IsInventoryLoaded = false;
+            base.OnPropertyChanged(propertyName);
         }
     }
 }

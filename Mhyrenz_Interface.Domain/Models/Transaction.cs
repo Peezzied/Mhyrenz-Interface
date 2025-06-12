@@ -8,9 +8,15 @@ namespace Mhyrenz_Interface.Domain.Models
 {
     public class Transaction: DomainObject
     {
-        public Guid UniqueId { get; set; } = Guid.NewGuid();
+        public Guid UniqueId { get; set; }
         public int ProductId { get; set; }
         public Product Item { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+
+        //public Transaction()
+        //{
+        //    UniqueId = Guid.NewGuid();
+        //    CreatedAt = DateTime.Now;
+        //}
     }
 }

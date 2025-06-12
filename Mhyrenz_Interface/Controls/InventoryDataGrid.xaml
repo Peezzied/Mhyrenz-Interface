@@ -12,12 +12,29 @@
             <DataGrid.Columns>
                 <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice}" Width="Auto"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=LostFocus}" Width="Auto"/>
-                <mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 
-                    Minimum="0" Maximum="100" NumericInputMode="Numbers"/>
+                <!--<mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 
+                    Minimum="0" Maximum="100" NumericInputMode="Numbers"/>-->
+                <DataGridTemplateColumn Header="Purchase">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <!-- MahApps NumericUpDown inside editing template -->
+                            <mah:NumericUpDown Value="{Binding EditPurchase, Mode=TwoWay}" 
+                                       Minimum="0" Maximum="100" 
+                                       NumericInputMode="Numbers"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <!--<DataGridTextColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=LostFocus}" Width="Auto"/>-->
+                <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="Auto"/>
                 <mah:DataGridNumericUpDownColumn Header="Qty" Binding="{Binding Qty}" Width="Auto" 
                     Minimum="0" Maximum="100" NumericInputMode="Numbers"/>
-                <!--<DataGridTextColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=LostFocus}" Width="Auto"/>-->
-                <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Binding="{Binding Item.NetQty}" Width="Auto"/>
                 <DataGridTextColumn IsReadOnly="True" Header="Category" Binding="{Binding Item.Category.Name}" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>

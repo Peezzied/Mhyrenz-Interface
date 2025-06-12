@@ -38,6 +38,11 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return newEntity;
         }
 
+        public async Task<Product> Get(int id)
+        {
+            return await _productDataService.Get(id) ?? throw new DataException("No product found. Please add a product first.");
+        }
+
         public async Task<IEnumerable<Product>> GetAll()
         {
             return await _productDataService.GetAll() ?? throw new DataException("No products found.");

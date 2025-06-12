@@ -9,6 +9,7 @@ namespace Mhyrenz_Interface.State
     public static class ChangeTracking
     {
         public static bool Suppress { get; set; } = false;
+        public static bool IsInventoryLoaded { get; set; } = false;
     }
 
 }
