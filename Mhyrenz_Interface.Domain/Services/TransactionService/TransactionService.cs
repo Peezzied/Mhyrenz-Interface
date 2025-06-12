@@ -55,10 +55,19 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             if (product.Qty <= 0 || product.NetQty <= 0)
                 throw new InsufficientQuantityException(product.Qty, product.NetQty, product);
 
-            for (int i = 0; i < amount; i++)
+            var transactions = await _transactionsDataService.GetAll();
+
+            var matching = transactions
+                .Where(t => t.Item.Id == product.Id)
+                .Reverse()
+                .Take(amount)
+                .ToList();
+
+            foreach (var transaction in matching)
             {
-                await _transactionsDataService.Delete(product.Id);
+                await _transactionsDataService.Delete(transaction.Id);
             }
+
 
             return product;
         }

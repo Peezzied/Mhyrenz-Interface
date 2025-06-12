@@ -19,9 +19,21 @@ namespace Mhyrenz_Interface.ViewModels
             get => Item.NetQty;
         }
 
-        private int _cachedPurchase;
+        private bool _isCtrlClicked = false;
+        public bool IsCtrlClicked 
+        { 
+            get => _isCtrlClicked; 
+            set
+            {
+                _isCtrlClicked = value;
+                OnPropertyChanged(nameof(IsCtrlClicked));
+            }
+        }
+
+
+        //private int _cachedPurchase;
         private int _purchase;
-        public int EditPurchase
+        public int PurchaseDefaultEdit
         {
             get => _purchase;
 
@@ -30,11 +42,28 @@ namespace Mhyrenz_Interface.ViewModels
                 if (_purchase != value)
                 {
                     _purchase = value;
-                    _cachedPurchase += value;
-                    OnPropertyChanged(nameof(EditPurchase));
+                    //_cachedPurchase += value;
+                    OnPropertyChanged(nameof(PurchaseDefaultEdit));
                 }
             }
         }
+
+        private int _purchaseNormal;
+        public int PurchaseNormalEdit
+        {
+            get => _purchaseNormal + Item.Purchase;
+
+            set
+            {
+                if (Item.Purchase != value)
+                {
+                    _purchaseNormal = value - Item.Purchase;
+                    //_cachedPurchase += value;
+                    OnPropertyChanged(nameof(PurchaseNormalEdit));
+                }
+            }
+        }
+
         public int Purchase
         {
             get => Item.Purchase;

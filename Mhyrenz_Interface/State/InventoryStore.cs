@@ -96,7 +96,8 @@ namespace Mhyrenz_Interface.State
                     PurchaseProductCommand
                 ));
             })
-                .Track(nameof(ProductViewModel.EditPurchase), viewModel.EditPurchase);
+                .Track(nameof(ProductViewModel.PurchaseDefaultEdit), viewModel.PurchaseDefaultEdit)
+                .Track(nameof(ProductViewModel.PurchaseNormalEdit), viewModel.PurchaseNormalEdit);
 
             _trackerManager.Track(
                 viewModel,
@@ -109,8 +110,8 @@ namespace Mhyrenz_Interface.State
             await HandlePropertyChanged(sender, e, async (index, target, tracker) =>
             {
                 var product = await _productService.Get(target.Item.Id);
-                Products[index] = _productsViewModelFactory.CreateViewModel(product);
                 _trackerManager.Untrack(target);
+                Products[index] = _productsViewModelFactory.CreateViewModel(product);
                 TrackProducts(Products[index]);
             });
         }

@@ -334,6 +334,7 @@
     <Compile Include="Commands\ProductVMCommandCommon.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
+    <Compile Include="Controls\Behaviors\CtrlClickBehavior.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Core\TrackerManager.cs" />

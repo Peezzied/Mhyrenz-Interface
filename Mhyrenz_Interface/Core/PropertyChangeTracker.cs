@@ -56,8 +56,9 @@ namespace Mhyrenz_Interface.Core
             {
                 _onPropertyChanged?.Invoke(propertyName, oldValue, newValue);
             }
+            else return;
 
-            PropertyChanged?.Invoke(this, new TargetChangedEventArgs(sender, propertyName));
+                PropertyChanged?.Invoke(this, new TargetChangedEventArgs(sender, propertyName));
 
             // Update the last known value
             PreviousValues[propertyName] = newValue;

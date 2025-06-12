@@ -60,7 +60,7 @@ namespace Mhyrenz_Interface.Commands
 
             _command.Execute(new PurchaseProductDTO()
             {
-                Amount = amount,
+                Amount = Math.Abs(oldValue - amount),
                 Product = _target.Item,
                 Method = method.Value
             });
