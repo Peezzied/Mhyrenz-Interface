@@ -25,6 +25,7 @@ namespace Mhyrenz_Interface.State
         private readonly IViewModelFactory<ProductViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
+        private readonly TrackerManager<ProductViewModel> _trackerManager;
 
         public ObservableCollection<ProductViewModel> Products { get; } = new ObservableCollection<ProductViewModel>();
         public ICommand UpdateProductCommand { get; set; }
@@ -40,6 +41,7 @@ namespace Mhyrenz_Interface.State
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
             _transactionService = transactionsService;
+            _trackerManager = new TrackerManager<ProductViewModel>();
 
             UpdateProductCommand = new UpdateProductCommand(_productService, this);
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
@@ -62,6 +64,7 @@ namespace Mhyrenz_Interface.State
 
         private void TrackProducts(ProductViewModel viewModel)
         {
+
             // Track changes to properties and execute commands on change
             // * Commons
             var commons = new PropertyChangeTracker<ProductViewModel>(viewModel, (propertyName, oldValue, newValue) =>
@@ -95,21 +98,24 @@ namespace Mhyrenz_Interface.State
             })
                 .Track(nameof(ProductViewModel.EditPurchase), viewModel.EditPurchase);
 
-            commons.PropertyChanged += CommonsPropertyChanged;
-            purchase.PropertyChanged += PurchasePropertyChanged;
+            _trackerManager.Track(
+                viewModel,
+                (commons, HandleCommonsChanged),
+                (purchase, HandlePurchaseChanged));
         }
 
-        private async void PurchasePropertyChanged(object sender, TargetChangedEventArgs e)
+        private async void HandlePurchaseChanged(object sender, TargetChangedEventArgs e)
         {
-            await PropertyChanged(sender, e, async (index, target, tracker) =>
+            await HandlePropertyChanged(sender, e, async (index, target, tracker) =>
             {
                 var product = await _productService.Get(target.Item.Id);
                 Products[index] = _productsViewModelFactory.CreateViewModel(product);
+                _trackerManager.Untrack(target);
                 TrackProducts(Products[index]);
             });
         }
 
-        private async Task PropertyChanged(
+        private async Task HandlePropertyChanged(
             object sender,
             TargetChangedEventArgs e,
             Func<int, ProductViewModel, PropertyChangeTracker<ProductViewModel>, Task> action)
@@ -128,100 +134,16 @@ namespace Mhyrenz_Interface.State
 
         }
 
-        private async void CommonsPropertyChanged(object sender, TargetChangedEventArgs e)
+        private async void HandleCommonsChanged(object sender, TargetChangedEventArgs e)
         {
-            await PropertyChanged(sender, e, async (index, target, _) =>
+            await HandlePropertyChanged(sender, e, async (index, target, _) =>
             {
                 var product = await _productService.Get(target.Item.Id);
+                _trackerManager.Untrack(target);
                 Products[index] = _productsViewModelFactory.CreateViewModel(product);
                 TrackProducts(Products[index]);
             });
         }
     }
 }
-
-
-
-//public class AppStateService
-//{
-//    private readonly UndoRedoManager _undoRedoManager;
-//    public ObservableCollection<ProductViewModel> Products { get; } = new();
-
-//    public AppStateService(UndoRedoManager undoRedoManager)
-//    {
-//        _undoRedoManager = undoRedoManager;
-//    }
-
-//    public void LoadProducts(IEnumerable<Product> products)
-//    {
-//        Products.Clear();
-
-//        foreach (var product in products)
-//        {
-//            var viewModel = new ProductViewModel(product);
-
-//            var tracker = new PropertyChangeTracker<ProductViewModel>(
-//                viewModel,
-//                (propertyName, oldValue, newValue) =>
-//                {
-//                    _undoRedoManager.Execute(new PropertyChangeCommand<ProductViewModel>(
-//                        viewModel,
-//                        propertyName,
-//                        oldValue,
-//                        newValue));
-//                });
-
-//            // Track initial values
-//            tracker.Track(nameof(ProductViewModel.RetailPrice), viewModel.RetailPrice);
-//            tracker.Track(nameof(ProductViewModel.ListPrice), viewModel.ListPrice);
-//            // Track more properties as needed
-
-//            Products.Add(viewModel);
-//        }
-//    }
-//}
-
-
-
-
-//public class AppStateService
-//{
-//    private readonly UndoRedoManager _undoRedoManager;
-
-//    public ObservableCollection<ProductViewModel> Products { get; } = new();
-
-//    public AppStateService(UndoRedoManager undoRedoManager)
-//    {
-//        _undoRedoManager = undoRedoManager;
-//    }
-
-//    public void LoadProducts(IEnumerable<Product> products)
-//    {
-//        Products.Clear();
-
-//        foreach (var product in products)
-//        {
-//            var viewModel = new ProductViewModel(product);
-//            viewModel.PropertyChanged += Product_PropertyChanged;
-//            Products.Add(viewModel);
-//        }
-//    }
-
-//    private void Product_PropertyChanged(object sender, PropertyChangedEventArgs e)
-//    {
-//        if (sender is not ProductViewModel productVm) return;
-
-//        switch (e.PropertyName)
-//        {
-//            case nameof(ProductViewModel.RetailPrice):
-//                _undoRedoManager.Execute(new ChangeProductRetailPriceCommand(
-//                    productVm,
-//                    oldValue: ???,  // You need a way to track old value
-//                    newValue: productVm.RetailPrice));
-//                break;
-
-//                // Add other property tracking here...
-//        }
-//    }
-//}
 
