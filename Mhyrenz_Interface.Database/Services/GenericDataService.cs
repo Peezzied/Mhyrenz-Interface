@@ -53,6 +53,15 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
+        public async Task DeleteMany(IEnumerable<T> entities)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Set<T>().RemoveRange(entities);
+                await context.SaveChangesAsync();
+            }
+        }
+
         public async virtual Task<T> Get(int id)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
