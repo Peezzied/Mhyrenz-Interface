@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Diagnostics;
 using System.Web.UI.WebControls;
 using System.Windows;
@@ -23,6 +24,7 @@ namespace Mhyrenz_Interface.Navigation
                 _currentViewModel = value;
             }
         }
+        public event EventHandler Navigating;
 
         public event NavigatedEventHandler Navigated;
 
@@ -65,7 +67,6 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.CurrentSource != sourcePageUri)
             {
-
                 Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}");
                 var result = this.Frame.Navigate(sourcePageUri, extraData);
 
@@ -96,6 +97,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this._frame != null)
             {
+                this._frame.LostFocus += (s, e) => Navigating?.Invoke(s, EventArgs.Empty);
                 this._frame.Navigated += this.Frame_Navigated;
                 this._frame.NavigationFailed += this.Frame_NavigationFailed;
             }
@@ -105,6 +107,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this._frame != null)
             {
+                this._frame.LostFocus -= (s, e) => Navigating?.Invoke(s, EventArgs.Empty);
                 this._frame.Navigated -= this.Frame_Navigated;
                 this._frame.NavigationFailed -= this.Frame_NavigationFailed;
             }

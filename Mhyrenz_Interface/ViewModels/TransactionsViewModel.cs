@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.ViewModels.Factory;
+﻿using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.ViewModels.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class TransactionsViewModel: NavigationViewModel
+    public class TransactionsViewModel : NavigationViewModel
     {
+        public TransactionsViewModel(INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
+        {
+        }
     }
 }

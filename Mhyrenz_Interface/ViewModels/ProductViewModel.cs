@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class ProductViewModel: NavigationViewModel
+    public class ProductViewModel: BaseViewModel
     {
         public Product Item { get; set; }
 

@@ -11,23 +11,30 @@ using System.Windows.Media;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class CtrlClickBehavior : Behavior<DataGrid>
+    public class InventoryDataGridBehavior : Behavior<DataGrid>
     {
         protected override void OnAttached()
         {
             AssociatedObject.CellEditEnding += OnCellEditEnding;
+            AssociatedObject.CurrentCellChanged += OnCellChanged;
             AssociatedObject.ContextMenuOpening += OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown += OnRightClick;
-            AssociatedObject.PreviewMouseLeftButtonDown += OnLeftClick;
         }
 
         protected override void OnDetaching()
         {
             AssociatedObject.CellEditEnding -= OnCellEditEnding;
+            AssociatedObject.CurrentCellChanged -= OnCellChanged;
             AssociatedObject.ContextMenuOpening -= OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown -= OnRightClick;
-            AssociatedObject.PreviewMouseLeftButtonDown -= OnLeftClick;
         }
+        private void OnCellChanged(object sender, EventArgs e)
+        {
+            var grid = (DataGrid)sender;
+            grid.CommitEdit(DataGridEditingUnit.Cell, true);
+            grid.CommitEdit(DataGridEditingUnit.Row, true);
+        }
+
 
         private void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
@@ -45,7 +52,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             GetCell(e, out var cell);
             if (cell != null && cell.DataContext is ProductViewModel vm)
-                vm.IsCtrlClicked = true;
+                vm.IsCtrlClicked = !vm.IsCtrlClicked;
 
             state = true;
 
@@ -91,7 +98,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             {
                 vm.IsCtrlClicked = false;
             }
-
         }
 
         private static void BeginEditOnCell(DataGrid dataGrid, object rowData, DataGridColumn column)
@@ -101,18 +107,28 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 dataGrid.ScrollIntoView(rowData, column);
                 dataGrid.UpdateLayout();
 
-                var row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(rowData);
+                var row = dataGrid.ItemContainerGenerator.ContainerFromItem(rowData) as DataGridRow;
                 if (row == null) return;
 
                 var presenter = FindVisualChild<DataGridCellsPresenter>(row);
-                if (presenter == null) return;
+                if (presenter == null)
+                {
+                    dataGrid.UpdateLayout();
+                    presenter = FindVisualChild<DataGridCellsPresenter>(row);
+                    if (presenter == null) return;
+                }
 
-                var cell = presenter.ItemContainerGenerator.ContainerFromIndex(dataGrid.Columns.IndexOf(column)) as DataGridCell;
+                var columnIndex = dataGrid.Columns.IndexOf(column);
+                var cell = presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex) as DataGridCell;
                 if (cell == null) return;
 
-                dataGrid.SelectedItem = rowData;
-                dataGrid.CurrentCell = new DataGridCellInfo(rowData, column);
-                //cell.Focus();
+                // Proper way to set current cell in SelectionUnit=Cell mode
+                dataGrid.CurrentCell = new DataGridCellInfo(cell);
+
+                // Ensure focus is on the cell
+                cell.Focus();
+
+                // Begin editing the cell
                 dataGrid.BeginEdit();
             });
         }
@@ -143,9 +159,4 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             return null;
         }
     }
-
-
-
-
-
 }

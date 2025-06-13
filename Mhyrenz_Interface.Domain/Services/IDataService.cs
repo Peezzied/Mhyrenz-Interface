@@ -14,6 +14,8 @@ namespace Mhyrenz_Interface.Domain.Services
 
         Task<T> Create(T entity);
 
+        Task CreateMany(IEnumerable<T> entities);
+
         Task<T> Update(int id, T entity);
 
         Task<T> UpdateProperty(int id, string propertyName, object newValue);

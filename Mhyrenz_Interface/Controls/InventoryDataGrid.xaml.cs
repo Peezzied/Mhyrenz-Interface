@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Mhyrenz_Interface.ViewModels.Factory;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,5 +27,14 @@ namespace Mhyrenz_Interface.Controls
         {
             InitializeComponent();
         }
+
+        private void OnUserControlUnload(object sender, EventArgs e)
+        {
+            IEnumerable source = ((DataGrid)sender).ItemsSource;
+            var view = (IEditableCollectionView)CollectionViewSource.GetDefaultView(source);
+            view?.CommitEdit();
+        }
+
+
     }
 }

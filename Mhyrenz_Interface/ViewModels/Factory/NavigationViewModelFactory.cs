@@ -1,9 +1,28 @@
-﻿using Mhyrenz_Interface.Views;
+﻿using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Views;
+using Microsoft.Xaml.Behaviors.Core;
 using System;
+using System.Windows.Navigation;
 
 namespace Mhyrenz_Interface.ViewModels.Factory
 {
-    public class NavigationViewModel: BaseViewModel { }
+    public class NavigationViewModel: BaseViewModel 
+    {
+        private readonly INavigationServiceEx _navigationServiceEx;
+
+        public NavigationViewModel(INavigationServiceEx navigationServiceEx)
+        {
+            _navigationServiceEx = navigationServiceEx;
+            _navigationServiceEx.Navigating += OnNavigating;
+        }
+
+        private void OnNavigating(object sender, EventArgs e)
+        {
+            Navigating?.Invoke(sender, e);
+        }
+
+        public event EventHandler Navigating;
+    }
     public class NavigationViewModelFactory : IViewModelFactory<NavigationViewModel>
     {
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;

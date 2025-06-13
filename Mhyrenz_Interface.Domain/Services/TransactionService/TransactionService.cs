@@ -34,15 +34,16 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             var isNew = lastItem != null && lastItem?.ProductId == product.Id;
             var newGuid = Guid.NewGuid();
 
-            for (int i = 0; i < amount; i++)
-            {
-                await _transactionsDataService.Create(new Transaction()
+            var newTransactions = Enumerable.Range(0, amount)
+                .Select(_ => new Transaction
                 {
                     ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.Now
                 });
-            }
+
+            await _transactionsDataService.CreateMany(newTransactions);
+
 
             return detachedEntity;
         }

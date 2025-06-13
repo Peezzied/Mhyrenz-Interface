@@ -131,7 +131,7 @@ namespace Mhyrenz_Interface.State
             int index = Products.IndexOf(Products.FirstOrDefault(x => ReferenceEquals(x, target)));
 
             if (index >= 0)
-                await action(index, target, tracker);
+               await action(index, target, tracker);
 
         }
 

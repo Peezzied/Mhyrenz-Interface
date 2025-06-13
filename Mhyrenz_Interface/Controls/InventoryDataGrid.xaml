@@ -12,23 +12,23 @@
     <UserControl.Resources>
         <DataTemplate x:Key="NumericEdit">
             <!-- MahApps NumericUpDown inside editing template -->
-            <mah:NumericUpDown Value="{Binding PurchaseDefaultEdit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" 
+            <mah:NumericUpDown Value="{Binding PurchaseDefaultEdit}" 
                Minimum="0" Maximum="100" 
-               NumericInputMode="Numbers"
-               VerticalAlignment="Center"/>
+               NumericInputMode="Numbers" TextAlignment="Center"
+               VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
         </DataTemplate>
         <DataTemplate x:Key="NormalEdit">
-            <TextBox 
-                Text="{Binding PurchaseNormalEdit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                Style="{StaticResource MahApps.Styles.TextBox}"
-                VerticalAlignment="Center"/>
+            <mah:NumericUpDown Value="{Binding PurchaseNormalEdit}" 
+               Minimum="0" Maximum="100" HideUpDownButtons="True"
+               NumericInputMode="Numbers" TextAlignment="Center"
+               VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
         </DataTemplate>
 
     </UserControl.Resources>
     <Grid>
-        <DataGrid mah:DataGridHelper.EnableCellEditAssist="True" GridLinesVisibility="All" ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" Focusable="True" AutoGenerateColumns="False" >
+        <DataGrid Unloaded="OnUserControlUnload" x:Name="InventoryDataGridRef" GridLinesVisibility="All" ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" AutoGenerateColumns="False" >
             <i:Interaction.Behaviors>
-                <behaviors:CtrlClickBehavior />
+                <behaviors:InventoryDataGridBehavior />
             </i:Interaction.Behaviors>
             <DataGrid.Columns>
                 <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice}" Width="Auto"/>

@@ -8,6 +8,7 @@ namespace Mhyrenz_Interface.Navigation
     {
         BaseViewModel CurrentViewModel { get; set; }
 
+        event EventHandler Navigating;
         event NavigatedEventHandler Navigated;
         event NavigationFailedEventHandler NavigationFailed;
 

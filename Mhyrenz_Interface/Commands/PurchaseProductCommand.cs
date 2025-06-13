@@ -34,8 +34,6 @@ namespace Mhyrenz_Interface.Commands
                     case PurchaseProductDTO.Type.Remove:
                         await _transactionsService.Remove(DTO.Product, DTO.Amount);
                         break;
-                    //default:
-                    //    throw new ArgumentException("Invalid purchase method specified.", nameof(DTO.Method));
                 }
             }
             catch (InsufficientQuantityException)
