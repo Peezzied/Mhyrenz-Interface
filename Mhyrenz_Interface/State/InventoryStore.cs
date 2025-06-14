@@ -52,13 +52,12 @@ namespace Mhyrenz_Interface.State
             Products.Clear();
             ChangeTracking.IsInventoryLoaded = true;
 
-            foreach (var product in products)
+            var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(product));
+
+            foreach (var item in displayProducts)
             {
-                var viewModel = _productsViewModelFactory.CreateViewModel(product);
-
-                TrackProducts(viewModel);
-
-                Products.Add(viewModel);
+                TrackProducts(item);
+                Products.Add(item);
             }
         }
 

@@ -107,7 +107,8 @@ namespace Mhyrenz_Interface.Database.Services
                 if (property == null || !property.CanWrite)
                     throw new InvalidOperationException($"'{propertyName}' is not a valid property of {typeof(T).Name}");
 
-                var convertedValue = Convert.ChangeType(newValue, property.PropertyType);
+                Type targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                var convertedValue = Convert.ChangeType(newValue, targetType);
                 property.SetValue(entity, convertedValue);
 
                 await context.SaveChangesAsync();

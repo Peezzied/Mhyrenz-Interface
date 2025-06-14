@@ -9,32 +9,46 @@ namespace Mhyrenz_Interface.ViewModels
 {
     public class TransactionDataViewModelDTO
     {
-        public Transaction Transaction { get; set; }
+        public ProductDataViewModel Product { get; set; }
         public int Amount { get; set; }
         public DateTime Date { get; set; }
     }
 
     public class TransactionDataViewModel: BaseViewModel
     {
-        public Transaction Item { get; }
-
+        private readonly TransactionDataViewModelDTO _dto;
         public TransactionDataViewModel(TransactionDataViewModelDTO dto)
         {
-            Item = dto.Transaction;
-            Amount = dto.Amount;
-            Date = dto.Date;
+            _dto = dto;
         }
 
-        public string Barcode { get; set; }
+        public int? Barcode 
+        {
+            get => _dto.Product.Barcode;
+            set
+            {
+                if (_dto.Product.Barcode != value)
+                {
+                    _dto.Product.Barcode = value;
+                    OnPropertyChanged(nameof(Barcode));
+                }
+            }
+        }
         public string Name 
         {
-            get => Item.Item.Name ?? "- -";
+            get => _dto.Product.Name;
         }
         public decimal Price 
         { 
-            get => Item.Item.ListPrice;
+            get => _dto.Product.RetailPrice;
         }
-        public int Amount { get; } 
-        public DateTime Date { get; }
+        public int Amount 
+        {
+            get => _dto.Amount;
+        } 
+        public DateTime Date 
+        { 
+            get => _dto.Date;
+        }
     }
 }

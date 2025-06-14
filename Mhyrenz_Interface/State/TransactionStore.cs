@@ -18,7 +18,7 @@ namespace Mhyrenz_Interface.State
     {
         private readonly UndoRedoManager _undoRedoManager;
         private readonly IViewModelFactory<TransactionDataViewModel> _transactionsViewModelFactory;
-        private readonly IProductService _productService;
+        private readonly IInventroyStore _inventoryStore;
         private readonly ITransactionsService _transactionService;
         private readonly TrackerManager<TransactionDataViewModel> _trackerManager;
 
@@ -26,17 +26,19 @@ namespace Mhyrenz_Interface.State
             UndoRedoManager undoRedoManager,
             IEnumerable<Product> products,
             IViewModelFactory<TransactionDataViewModel> productsViewModelFactory,
-            IProductService productService,
+            IInventroyStore inventoryStore,
             ITransactionsService transactionsService)
         {
             _undoRedoManager = undoRedoManager;
             _transactionsViewModelFactory = productsViewModelFactory;
-            _productService = productService;
+            _inventoryStore = inventoryStore;
             _transactionService = transactionsService;
             _trackerManager = new TrackerManager<TransactionDataViewModel>();
 
             
         }
+
+        private ObservableCollection<ProductDataViewModel> _products => _inventoryStore.Products;
 
         public ObservableCollection<TransactionDataViewModel> Transactions { get; } = new ObservableCollection<TransactionDataViewModel>();
 
@@ -45,17 +47,20 @@ namespace Mhyrenz_Interface.State
             Transactions.Clear();
             ChangeTracking.IsInventoryLoaded = true;
 
-            foreach (var transaction in transactions)
+            var displayTransaction = transactions
+                .GroupBy(transaction => transaction.UniqueId)
+                .Select(group => _transactionsViewModelFactory.CreateViewModel(new TransactionDataViewModelDTO() { 
+                    Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),
+                    Amount = group.Count(),
+                    Date = group.Max(t => t.CreatedAt),
+                }));
+
+            foreach (var item in displayTransaction)
             {
-                var viewModel = _transactionsViewModelFactory.CreateViewModel(new TransactionDataViewModelDTO() 
-                { 
-                    Transaction = transaction,
-                });
-
-                //TrackTransactions(viewModel);
-
-                Transactions.Add(viewModel);
+                Transactions.Add(item);
             }
+
+
         }
 
         private void TrackTransactions(TransactionDataViewModel viewModel)
