@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class TransactionsViewModel : NavigationViewModel
+    public class TransactionViewModel : NavigationViewModel
     {
-        public TransactionsViewModel(INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
+        public TransactionViewModel(INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
         {
         }
     }

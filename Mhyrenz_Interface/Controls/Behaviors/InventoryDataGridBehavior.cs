@@ -46,29 +46,29 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             dataGrid = FindParent<DataGridCell>(e.OriginalSource as DependencyObject);
         }
 
-        private static bool state = false;
+        private bool _state = false;
 
         private void OnRightClick(object sender, MouseButtonEventArgs e)
         {
             GetCell(e, out var cell);
-            if (cell != null && cell.DataContext is ProductViewModel vm)
+            if (cell != null && cell.DataContext is ProductDataViewModel vm)
                 vm.IsCtrlClicked = !vm.IsCtrlClicked;
 
-            state = true;
+            _state = true;
 
             ClickHandler(sender, e);
         }
 
         private void OnLeftClick(object sender, MouseButtonEventArgs e)
         {
-            if (state)
+            if (_state)
             {
-                state = false;
+                _state = false;
                 return;
             }
 
             GetCell(e, out var cell);
-            if (cell != null && cell.DataContext is ProductViewModel vm)
+            if (cell != null && cell.DataContext is ProductDataViewModel vm)
                 vm.IsCtrlClicked = false;
 
             ClickHandler(sender, e);
@@ -94,7 +94,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void OnCellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
 
-            if (e.Row.Item is ProductViewModel vm)
+            if (e.Row.Item is ProductDataViewModel vm)
             {
                 vm.IsCtrlClicked = false;
             }

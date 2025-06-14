@@ -56,17 +56,7 @@
 
             </Grid>
             <Grid Grid.Row="1">
-                <ListView Margin="10">
-    <ListView.View>
-        <GridView>
-            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Name}" Width="Auto"/>
-            <GridViewColumn Header="NAME" DisplayMemberBinding="{Binding Age}" Width="Auto"/>
-            <GridViewColumn Header="QTY" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
-            <GridViewColumn Header="UNIT PRICE" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
-            <GridViewColumn Header="QTY PRICE" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
-        </GridView>
-    </ListView.View>
-</ListView>
+                <controls:TransactionsDataGrid/>
             </Grid>
         </Grid>
 

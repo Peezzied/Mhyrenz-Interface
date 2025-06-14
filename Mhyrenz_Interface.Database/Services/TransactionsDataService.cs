@@ -55,5 +55,17 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
+        public async Task<IEnumerable<Transaction>> GetLatests()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                IEnumerable<Transaction> entity = await context.Transactions
+                    .Include(a => a.Item)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .ToListAsync();
+                return entity;
+
+            }
+        }
     }
 }

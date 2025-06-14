@@ -48,6 +48,11 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             return detachedEntity;
         }
 
+        public async Task<IEnumerable<Transaction>> GetLatests()
+        {
+            return await _transactionsDataService.GetLatests();
+        }
+
         public async Task<Product> Remove(Product product, int amount = 1)
         {
             if (amount <= 0)

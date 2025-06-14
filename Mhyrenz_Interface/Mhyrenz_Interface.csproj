@@ -335,10 +335,16 @@
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
+    <Compile Include="Controls\MaxLinesTextBlock.cs" />
+    <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
+      <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Core\TrackerManager.cs" />
     <Compile Include="State\ChangeTracking.cs" />
+    <Compile Include="State\ITransactionStore.cs" />
+    <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />
@@ -362,10 +368,11 @@
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
-    <Compile Include="ViewModels\ProductViewModel.cs" />
+    <Compile Include="ViewModels\ProductDataViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
-    <Compile Include="ViewModels\TransactionsViewModel.cs" />
+    <Compile Include="ViewModels\TransactionViewModel.cs" />
+    <Compile Include="ViewModels\TransactionDataViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
@@ -383,6 +390,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\StatusBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TransactionsDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

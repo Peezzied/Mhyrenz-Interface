@@ -6,11 +6,11 @@ using System.Runtime.CompilerServices;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class ProductViewModel: BaseViewModel
+    public class ProductDataViewModel: BaseViewModel
     {
         public Product Item { get; set; }
 
-        public ProductViewModel(Product product)
+        public ProductDataViewModel(Product product)
         {
             Item = product;
         }

@@ -27,12 +27,12 @@ namespace Mhyrenz_Interface.ViewModels.Factory
     {
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
-        private readonly CreateViewModel<TransactionsViewModel> _createTransactionsViewModel;
+        private readonly CreateViewModel<TransactionViewModel> _createTransactionsViewModel;
         private readonly CreateViewModel<SettingsViewModel> _createSettingsViewModel;
 
         public NavigationViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
             CreateViewModel<InventoryViewModel> createInventoryViewModel,
-            CreateViewModel<TransactionsViewModel> createTransactionsViewModel,
+            CreateViewModel<TransactionViewModel> createTransactionsViewModel,
             CreateViewModel<SettingsViewModel> createSettingsViewModel)
         {
             _createHomeViewModel = createHomeViewModel;

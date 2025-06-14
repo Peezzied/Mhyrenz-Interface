@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 
 namespace Mhyrenz_Interface.State
 {
-    public interface IInventroyStore
+    public interface ITransactionStore
     {
-        ObservableCollection<ProductDataViewModel> Products { get; }
-        void LoadProducts(IEnumerable<Product> products);
+        ObservableCollection<TransactionDataViewModel> Transactions { get; }
+        void LoadTransactions(IEnumerable<Transaction> transactions);
     }
 }

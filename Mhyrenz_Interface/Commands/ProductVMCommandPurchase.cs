@@ -22,16 +22,16 @@ namespace Mhyrenz_Interface.Commands
         public Type Method { get; set; }
     }
 
-    public class ProductVMCommandPurchase : PropertyChangeCommand<ProductViewModel>
+    public class ProductVMCommandPurchase : PropertyChangeCommand<ProductDataViewModel>
     {
-        private readonly ProductViewModel _target;
+        private readonly ProductDataViewModel _target;
         private readonly string _propertyName;
         private readonly object _oldValue;
         private readonly object _newValue;
         private readonly ICommand _command;
 
         public ProductVMCommandPurchase(
-            ProductViewModel target,
+            ProductDataViewModel target,
             string propertyName,
             object oldValue,
             object newValue,

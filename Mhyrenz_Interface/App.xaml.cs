@@ -58,31 +58,41 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<UndoRedoManager>()
                 .AddSingleton<IInventroyStore, InventoryStore>()
+                .AddSingleton<ITransactionStore, TransactionStore>()
 
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<IViewModelFactory<NavigationViewModel>, NavigationViewModelFactory>()
 
-                .AddSingleton<IViewModelFactory<ProductViewModel>, ViewModelFactory<ProductViewModel>>()
+                .AddSingleton<IViewModelFactory<ProductDataViewModel>, ViewModelFactory<ProductDataViewModel>>()
+                .AddSingleton<IViewModelFactory<TransactionDataViewModel>, ViewModelFactory<TransactionDataViewModel>>()
 
                 .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
                 .AddSingleton<ITransactionsDataService, TransactionsDataService>()
                 .AddSingleton<ITransactionsService, TransactionService>()
 
-                .AddSingleton<CreateViewModel<ProductViewModel>>(s =>
+                .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
                 {
-                    return (object parameter) => 
+                    return (object parameter) =>
                     {
                         if (parameter is Product product)
-                            return new ProductViewModel(product);
-                        throw new ArgumentException("Invalid parameter type for ProductViewModel creation.");
+                            return new ProductDataViewModel(product);
+                        throw new ArgumentException("Invalid parameter type for ProductDataViewModel creation.");
                     };
-                }
-                )
+                })
+                .AddSingleton<CreateViewModel<TransactionDataViewModel>>(s =>
+                {
+                    return (object parameter) =>
+                    {
+                        if (parameter is TransactionDataViewModelDTO dto)
+                            return new TransactionDataViewModel(dto);
+                        throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
+                    };
+                })
 
                 .AddTransient<HomeViewModel>()
                 .AddTransient<InventoryViewModel>()
-                .AddTransient<TransactionsViewModel>()
+                .AddTransient<TransactionViewModel>()
                 .AddTransient<SettingsViewModel>()
 
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
@@ -93,9 +103,9 @@ namespace Mhyrenz_Interface
                 {
                     return _ => s.GetRequiredService<InventoryViewModel>();
                 })
-                .AddSingleton<CreateViewModel<TransactionsViewModel>>(s =>
+                .AddSingleton<CreateViewModel<TransactionViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<TransactionsViewModel>();
+                    return _ => s.GetRequiredService<TransactionViewModel>();
                 })
                 .AddSingleton<CreateViewModel<SettingsViewModel>>(s =>
                 {

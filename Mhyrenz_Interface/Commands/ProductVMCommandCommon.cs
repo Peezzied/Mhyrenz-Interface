@@ -10,16 +10,16 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class ProductVMCommandCommon : PropertyChangeCommand<ProductViewModel>
+    public class ProductVMCommandCommon : PropertyChangeCommand<ProductDataViewModel>
     {
-        private readonly ProductViewModel _target;
+        private readonly ProductDataViewModel _target;
         private readonly string _propertyName;
         //private readonly object _oldValue;
         //private readonly object _newValue;
         private readonly ICommand _command;
 
         public ProductVMCommandCommon(
-            ProductViewModel target,
+            ProductDataViewModel target,
             string propertyName,
             object oldValue,
             object newValue,

@@ -19,18 +19,25 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private readonly IProductService _productService;
         private readonly IInventroyStore _inventoryStore;
+        private readonly ITransactionStore _transactionStore;
         private readonly INavigationServiceEx _navigationServiceEx;
 
-        public ObservableCollection<ProductViewModel> Inventory => _inventoryStore.Products;
+        public ObservableCollection<ProductDataViewModel> Inventory => _inventoryStore.Products;
+        public ObservableCollection<TransactionDataViewModel> Transactions => _transactionStore.Transactions;
 
         public string Bindtest { get; set; } = "Hello, World!";
 
-        public HomeViewModel(IProductService productService, IInventroyStore inventroyStore, INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
+        public HomeViewModel(
+            IProductService productService,
+            ITransactionStore transactionStore,
+            IInventroyStore inventroyStore,
+            INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
         {
             _navigationServiceEx = navigationServiceEx;
 
             _productService = productService;
             _inventoryStore = inventroyStore;
+            _transactionStore = transactionStore;
 
         }
 

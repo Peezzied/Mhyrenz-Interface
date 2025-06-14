@@ -2,6 +2,7 @@
 using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
@@ -28,7 +29,9 @@ namespace Mhyrenz_Interface.ViewModels
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
         private readonly IInventroyStore _inventoryStore;
+        private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
+        private readonly ITransactionsService _transactionService;
 
         private bool Flag { get; set; }
 
@@ -55,10 +58,13 @@ namespace Mhyrenz_Interface.ViewModels
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
 
-        public ShellViewModel(IInventroyStore inventroyStore,
-                              IProductService productService,
-                              INavigationServiceEx navigationServiceEx,
-                              IViewModelFactory<NavigationViewModel> viewModelFactory)
+        public ShellViewModel(
+            IInventroyStore inventroyStore,
+            IProductService productService,
+            ITransactionsService transactionService,
+            ITransactionStore transactionStore,
+            INavigationServiceEx navigationServiceEx,
+            IViewModelFactory<NavigationViewModel> viewModelFactory)
         {
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
@@ -103,7 +109,9 @@ namespace Mhyrenz_Interface.ViewModels
             });
 
             _inventoryStore = inventroyStore;
+            _transactionStore = transactionStore;
             _productService = productService;
+            _transactionService = transactionService;
 
             _productService.GetAll().ContinueWith(task =>
             {
@@ -118,6 +126,22 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     // Handle error
                     Debug.WriteLine("Failed to load products: " + task.Exception?.Message);
+                }
+            });
+
+            _transactionService.GetLatests().ContinueWith(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    var products = task.Result;
+                    _transactionStore.LoadTransactions(products);
+
+                    Debug.WriteLine("Loaded transactions: " + products);
+                }
+                else
+                {
+                    // Handle error
+                    Debug.WriteLine("Failed to load transactions: " + task.Exception?.Message);
                 }
             });
         }

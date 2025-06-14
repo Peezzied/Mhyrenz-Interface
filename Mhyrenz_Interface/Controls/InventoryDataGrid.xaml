@@ -31,6 +31,13 @@
                 <behaviors:InventoryDataGridBehavior />
             </i:Interaction.Behaviors>
             <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice}" Width="Auto"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=LostFocus}" Width="Auto"/>
                 <!--<mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 

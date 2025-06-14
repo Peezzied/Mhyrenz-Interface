@@ -8,6 +8,7 @@ namespace Mhyrenz_Interface.Domain.Services
 {
     public interface ITransactionsService
     {
+        Task<IEnumerable<Transaction>> GetLatests();
         Task<Product> Add(Product entity, int amount = 1);
         Task<Product> Remove(Product entity, int amount = 1);
 
