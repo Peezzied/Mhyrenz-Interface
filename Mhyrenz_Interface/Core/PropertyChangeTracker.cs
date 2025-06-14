@@ -24,19 +24,25 @@ namespace Mhyrenz_Interface.Core
     public class PropertyChangeTracker<T> where T : BaseViewModel
     {
         public Dictionary<string, object> PreviousValues { get; } = new Dictionary<string, object>();
-        private readonly Action<string, object, object> _onPropertyChanged;
+        public Dictionary<string, Action<PropertyChangeTracker<T>, TargetChangedEventArgs, object, object>> Methods { get; } = new Dictionary<string, Action<PropertyChangeTracker<T>, TargetChangedEventArgs, object, object>>();
 
-        public event EventHandler<TargetChangedEventArgs> PropertyChanged;
-
-        public PropertyChangeTracker(T target, Action<string, object, object> onPropertyChanged)
+        public PropertyChangeTracker(T target)
         {
-            _onPropertyChanged = onPropertyChanged;
+
             target.PropertyChanged += HandlePropertyChanged;
         }
 
-        public PropertyChangeTracker<T> Track(string propertyName, object value)
+        public PropertyChangeTracker<T> Track(string propertyName, object value, Action<PropertyChangeTracker<T>, TargetChangedEventArgs, object, object> onPropertyChanged)
         {
             PreviousValues[propertyName] = value;
+            Methods[propertyName] = onPropertyChanged;
+            return this;
+        }
+
+        public PropertyChangeTracker<T> Untrack()
+        {
+            PreviousValues.Clear();
+            Methods.Clear();
             return this;
         }
 
@@ -54,12 +60,12 @@ namespace Mhyrenz_Interface.Core
             var newValue = property.GetValue(target);
             if (PreviousValues.TryGetValue(propertyName, out var oldValue))
             {
-                _onPropertyChanged?.Invoke(propertyName, oldValue, newValue);
+                Methods[propertyName]?.Invoke(this, new TargetChangedEventArgs(
+                    sender,
+                    propertyName), oldValue, newValue);
             }
             else 
                 return;
-
-            PropertyChanged?.Invoke(this, new TargetChangedEventArgs(sender, propertyName));
 
             // Update the last known value
             PreviousValues[propertyName] = newValue;

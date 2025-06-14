@@ -21,7 +21,6 @@ namespace Mhyrenz_Interface.State
         private readonly IViewModelFactory<TransactionDataViewModel> _transactionsViewModelFactory;
         private readonly IInventroyStore _inventoryStore;
         private readonly ITransactionsService _transactionService;
-        private readonly TrackerManager<TransactionDataViewModel> _trackerManager;
 
         public TransactionStore(
             UndoRedoManager undoRedoManager,
@@ -34,7 +33,6 @@ namespace Mhyrenz_Interface.State
             _transactionsViewModelFactory = productsViewModelFactory;
             _inventoryStore = inventoryStore;
             _transactionService = transactionsService;
-            _trackerManager = new TrackerManager<TransactionDataViewModel>();
 
             
         }
@@ -67,11 +65,11 @@ namespace Mhyrenz_Interface.State
 
         private void TrackTransactions(TransactionDataViewModel viewModel)
         {
-            var barcode = new PropertyChangeTracker<TransactionDataViewModel>(viewModel, (propertyName, oldValue, newValue) =>
-            {
-                HandleBarcodeChange(propertyName, oldValue, newValue);
-            })
-                .Track(nameof(TransactionDataViewModel.Barcode), viewModel.Barcode);
+            //var barcode = new PropertyChangeTracker<TransactionDataViewModel>(viewModel, (propertyName, oldValue, newValue) =>
+            //{
+            //    HandleBarcodeChange(propertyName, oldValue, newValue);
+            //})
+            //    .Track(nameof(TransactionDataViewModel.Barcode), viewModel.Barcode);
         }
 
         private void HandleBarcodeChange(string propertyName, object oldValue, object newValue)

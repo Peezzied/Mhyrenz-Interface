@@ -341,7 +341,6 @@
     </Compile>
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
-    <Compile Include="Core\TrackerManager.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
