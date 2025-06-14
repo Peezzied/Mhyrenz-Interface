@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -57,6 +58,7 @@ namespace Mhyrenz_Interface.State
 
             foreach (var item in displayTransaction)
             {
+                TrackTransactions(item);
                 Transactions.Add(item);
             }
 
@@ -64,6 +66,15 @@ namespace Mhyrenz_Interface.State
         }
 
         private void TrackTransactions(TransactionDataViewModel viewModel)
+        {
+            var barcode = new PropertyChangeTracker<TransactionDataViewModel>(viewModel, (propertyName, oldValue, newValue) =>
+            {
+                HandleBarcodeChange(propertyName, oldValue, newValue);
+            })
+                .Track(nameof(TransactionDataViewModel.Barcode), viewModel.Barcode);
+        }
+
+        private void HandleBarcodeChange(string propertyName, object oldValue, object newValue)
         {
             throw new NotImplementedException();
         }

@@ -46,9 +46,9 @@ namespace Mhyrenz_Interface.ViewModels
         {
             get => _dto.Amount;
         } 
-        public DateTime Date 
+        public string Date 
         { 
-            get => _dto.Date;
+            get => _dto.Date.ToString("h:mm tt");
         }
     }
 }

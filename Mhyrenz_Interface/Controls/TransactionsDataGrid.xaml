@@ -21,10 +21,10 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Price" Binding="{Binding Price}" Width="Auto"/>
-                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Amount" Binding="{Binding Amount}" Width="Auto"/>
-                <DataGridTextColumn IsReadOnly="True" Header="Date" Binding="{Binding Date}" Width="Auto"/>
-                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="" Width="Auto"/>
+                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Price" Binding="{Binding Price}" Width="Auto" MinWidth="70"/>
+                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Qty" Binding="{Binding Amount}" Width="Auto" MinWidth="50"/>
+                <DataGridTextColumn IsReadOnly="True" Header="Date" Binding="{Binding Date}" Width="Auto" MinWidth="60"/>
+                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="" Width="*" CanUserReorder="False"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

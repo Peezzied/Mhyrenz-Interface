@@ -71,6 +71,7 @@
                 <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="Auto"/>
                 <mah:DataGridNumericUpDownColumn Header="Qty" Binding="{Binding Qty}" Width="Auto" 
                     Minimum="0" Maximum="100" NumericInputMode="Numbers"/>
+                <DataGridTextColumn IsReadOnly="True" Header="Barcode" Binding="{Binding Barcode}" Width="Auto"/>
                 <DataGridTextColumn IsReadOnly="True" Header="Category" Binding="{Binding Item.Category.Name}" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
