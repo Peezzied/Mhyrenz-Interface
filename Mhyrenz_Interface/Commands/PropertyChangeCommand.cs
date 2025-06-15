@@ -25,7 +25,7 @@ namespace Mhyrenz_Interface.Commands
         }
         public void Execute()
         {
-            SetProperty(_newValue);
+            //SetProperty(_newValue);
             
             Command(_newValue);
         }

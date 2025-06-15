@@ -44,7 +44,9 @@ namespace Mhyrenz_Interface.ViewModels
                     _purchase = value;
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseDefaultEdit));
+                    OnPropertyChanged(nameof(NetQty));
                 }
+                _purchase = 0;
             }
         }
 
@@ -60,6 +62,7 @@ namespace Mhyrenz_Interface.ViewModels
                     _purchaseNormal = value - Item.Purchase;
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseNormalEdit));
+                    OnPropertyChanged(nameof(NetQty));
                 }
             }
         }
@@ -93,34 +96,17 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     Item.Qty = value;
                     OnPropertyChanged(nameof(Qty));
+                    OnPropertyChanged(nameof(NetQty));
                 }
             }
         }
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
-
-            set
-            {
-                if (Item.RetailPrice != value)
-                {
-                    Item.RetailPrice = value;
-                    OnPropertyChanged(nameof(RetailPrice));
-                }
-            }
         }
         public decimal ListPrice
         {
             get => Item.ListPrice;
-
-            set
-            {
-                if (Item.ListPrice != value)
-                {
-                    Item.ListPrice = value;
-                    OnPropertyChanged(nameof(ListPrice));
-                }
-            }
         }
         public int? Barcode
         {
@@ -181,4 +167,4 @@ namespace Mhyrenz_Interface.ViewModels
             base.OnPropertyChanged(propertyName);
         }
     }
-}
+}   

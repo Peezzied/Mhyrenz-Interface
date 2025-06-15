@@ -39,9 +39,12 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <controls:InventoryDataGrid Grid.Column="0" Height="500"/>
-                <UniformGrid Grid.Column="1" Columns="3">
+                <!--<UniformGrid Grid.Column="1" Columns="3">
                     
-                </UniformGrid>
+                </UniformGrid>-->
+                <Grid Grid.Column="1">
+                    <controls:OverviewChart DataContext="{Binding OverviewChartViewModel}"/>
+                </Grid>
             </Grid>
         </StackPanel>
         <Grid Grid.Column="1">

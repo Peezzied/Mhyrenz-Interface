@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
@@ -19,7 +21,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.State
 {
-    public class InventoryStore : IInventroyStore
+    public class InventoryStore : IInventoryStore
     {
         private readonly UndoRedoManager _undoRedoManager;
         private readonly IViewModelFactory<ProductDataViewModel> _productsViewModelFactory;
@@ -79,17 +81,20 @@ namespace Mhyrenz_Interface.State
                     UpdateProductCommand
                 ));
 
-                HandlePropertyChanged(tracker, args);
+                HandlePropertyChanged(tracker, args, (vm, product, _) =>
+                {
+                    PropertyChanged?.Invoke(vm, new InventoryStoreEventArgs()
+                    {
+                        ProductId = product.Id
+                    });
+                });
             };
             _tracker
-                .Track(nameof(ProductDataViewModel.RetailPrice), viewModel.RetailPrice, method)
-                .Track(nameof(ProductDataViewModel.ListPrice), viewModel.ListPrice, method)
                 .Track(nameof(ProductDataViewModel.Qty), viewModel.Qty, method)
                 .Track(nameof(ProductDataViewModel.Name), viewModel.Name, method)
                 .Track(nameof(ProductDataViewModel.Barcode), viewModel.Barcode, method)
                 .Track(nameof(ProductDataViewModel.Expiry), viewModel.Expiry, method)
-                .Track(nameof(ProductDataViewModel.Batch), viewModel.Batch, method)
-                .Track(nameof(ProductDataViewModel.CategoryId), viewModel.CategoryId, method);
+                .Track(nameof(ProductDataViewModel.Batch), viewModel.Batch, method);
 
             // * EditPurchase
             method = (tracker, args, oldValue, newValue) =>
@@ -102,7 +107,17 @@ namespace Mhyrenz_Interface.State
                     PurchaseProductCommand
                 ));
 
-                HandlePropertyChanged(tracker, args);
+                HandlePropertyChanged(tracker, args, (vm, product, index) =>
+                {
+
+                    Products[index] = _productsViewModelFactory.CreateViewModel(product);
+
+                    PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
+                    {
+                        ProductId = product.Id,
+                        Product = product
+                    });
+                });
             };
             _tracker
                 .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), viewModel.PurchaseDefaultEdit, method)
@@ -113,7 +128,8 @@ namespace Mhyrenz_Interface.State
 
         private async void HandlePropertyChanged(
             object sender,
-            TargetChangedEventArgs e)
+            TargetChangedEventArgs e,
+            Action<ProductDataViewModel, Product, int> propChanged = null)
         {
             var tracker = (PropertyChangeTracker<ProductDataViewModel>)sender;
             var target = (ProductDataViewModel)e.Target;
@@ -130,11 +146,20 @@ namespace Mhyrenz_Interface.State
 
                 _trackers.Remove(tracker);
 
-                Products[index] = _productsViewModelFactory.CreateViewModel(product);
+                propChanged?.Invoke(Products[index], product, index);
 
                 _trackers.Add(TrackProducts(Products[index]));
             }
         }
+
+        public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
+        public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
+    }
+
+    public class InventoryStoreEventArgs
+    {
+        public int ProductId { get; set; }
+        public Product Product { get; set; }
     }
 }
 

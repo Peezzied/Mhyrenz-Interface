@@ -10,6 +10,9 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <!-- Theme setting -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+
+                <ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/Colors/metro.xaml" />
+                <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

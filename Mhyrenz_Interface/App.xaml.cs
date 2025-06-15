@@ -57,7 +57,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(configureDbContext))
 
                 .AddSingleton<UndoRedoManager>()
-                .AddSingleton<IInventroyStore, InventoryStore>()
+                .AddSingleton<IInventoryStore, InventoryStore>()
                 .AddSingleton<ITransactionStore, TransactionStore>()
 
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
@@ -85,7 +85,11 @@ namespace Mhyrenz_Interface
                     return (object parameter) =>
                     {
                         if (parameter is TransactionDataViewModelDTO dto)
-                            return new TransactionDataViewModel(dto);
+                        {
+                            var inventoryStore = s.GetRequiredService<IInventoryStore>();
+                            return new TransactionDataViewModel(dto, inventoryStore);
+                        }   
+
                         throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
                     };
                 })
@@ -94,6 +98,7 @@ namespace Mhyrenz_Interface
                 .AddTransient<InventoryViewModel>()
                 .AddTransient<TransactionViewModel>()
                 .AddTransient<SettingsViewModel>()
+                .AddTransient<OverviewChartViewModel>()
 
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {

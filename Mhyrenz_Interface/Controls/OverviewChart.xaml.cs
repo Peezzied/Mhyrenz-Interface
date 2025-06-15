@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,15 +18,18 @@ using System.Windows.Shapes;
 namespace Mhyrenz_Interface.Controls
 {
     /// <summary>
-    /// Interaction logic for TransactionsDataGrid.xaml
+    /// Interaction logic for OverviewChart.xaml
     /// </summary>
-    public partial class TransactionsDataGrid : UserControl
+    public partial class OverviewChart : UserControl
     {
-        public TransactionsDataGrid()
+        public SeriesCollection SeriesCollection { get; set; } = new SeriesCollection();
+
+        public OverviewChart()
         {
             InitializeComponent();
 
-            
+           
         }
+
     }
 }

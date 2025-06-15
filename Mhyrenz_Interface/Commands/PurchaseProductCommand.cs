@@ -13,9 +13,9 @@ namespace Mhyrenz_Interface.Commands
     public class PurchaseProductCommand : BaseAsyncCommand
     {
         private readonly ITransactionsService _transactionsService;
-        private readonly IInventroyStore _inventroyStore;
+        private readonly IInventoryStore _inventroyStore;
 
-        public PurchaseProductCommand(ITransactionsService transactionsService, IInventroyStore inventroyStore)
+        public PurchaseProductCommand(ITransactionsService transactionsService, IInventoryStore inventroyStore)
         {
             _transactionsService = transactionsService;
             _inventroyStore = inventroyStore;

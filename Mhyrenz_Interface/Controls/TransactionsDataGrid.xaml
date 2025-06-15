@@ -15,7 +15,7 @@
                         <DataTemplate>
                             <local:MaxLinesTextBlock Text="{Binding Name}"
                                      LineHeight="16"
-                                     MaxLines="2"
+                                     MaxLines="3"
                                      Padding="4"
                                      Width="Auto"/>
                         </DataTemplate>

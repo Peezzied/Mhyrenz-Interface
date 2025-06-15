@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             _transactionsDataService = transactionsDataService;
         }
 
-        public async Task<Product> Add(Product product, int amount = 1)
+        public async Task<Product> Add(Product product, int amount = 1, bool withRecent = false)
         {
             var detachedEntity = product.Clone();
 
@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             if (product.NetQty - amount < 0)
                 throw new InsufficientQuantityException(product.NetQty, amount, product);
 
-            var lastItem = await _transactionsDataService.GetLast();
+            var lastItem = withRecent ? await _transactionsDataService.GetLast() : default;
             var isNew = lastItem != null && lastItem?.ProductId == product.Id;
             var newGuid = Guid.NewGuid();
 

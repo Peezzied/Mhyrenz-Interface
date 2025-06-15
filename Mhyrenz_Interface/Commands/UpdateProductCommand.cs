@@ -22,9 +22,9 @@ namespace Mhyrenz_Interface.Commands
     public class UpdateProductCommand : BaseAsyncCommand
     {
         private readonly IProductService _productService;
-        private readonly IInventroyStore _inventroyStore;
+        private readonly IInventoryStore _inventroyStore;
 
-        public UpdateProductCommand(IProductService productService, IInventroyStore inventroyStore)
+        public UpdateProductCommand(IProductService productService, IInventoryStore inventroyStore)
         {
             _productService = productService;
             _inventroyStore = inventroyStore;

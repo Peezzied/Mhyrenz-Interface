@@ -28,7 +28,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
-        private readonly IInventroyStore _inventoryStore;
+        private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
@@ -59,7 +59,7 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         public ShellViewModel(
-            IInventroyStore inventroyStore,
+            IInventoryStore inventroyStore,
             IProductService productService,
             ITransactionsService transactionService,
             ITransactionStore transactionStore,
@@ -113,6 +113,8 @@ namespace Mhyrenz_Interface.ViewModels
             _productService = productService;
             _transactionService = transactionService;
 
+            _transactionStore.RequestTransactionsUpdate += OnRequestTransactionsUpdate;
+
             _productService.GetAll().ContinueWith(task =>
             {
                 if (task.IsCompleted)
@@ -129,6 +131,11 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             });
 
+            TransactionsLoad();
+        }
+
+        private void TransactionsLoad()
+        {
             _transactionService.GetLatests().ContinueWith(task =>
             {
                 if (task.IsCompleted)
@@ -144,6 +151,11 @@ namespace Mhyrenz_Interface.ViewModels
                     Debug.WriteLine("Failed to load transactions: " + task.Exception?.Message);
                 }
             });
+        }
+
+        private void OnRequestTransactionsUpdate(object sender, EventArgs e)
+        {
+            TransactionsLoad();
         }
 
         private void Navigate(NavigationCommandParams parameters)

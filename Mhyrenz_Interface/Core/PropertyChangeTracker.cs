@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,6 +45,23 @@ namespace Mhyrenz_Interface.Core
             PreviousValues.Clear();
             Methods.Clear();
             return this;
+        }
+
+        public static void AmendChangedProperties(T source, T target)
+        {
+            var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                 .Where(p => p.CanRead && p.CanWrite);
+
+            foreach (var prop in props)
+            {
+                var sourceValue = prop.GetValue(source);
+                var targetValue = prop.GetValue(target);
+
+                if (!Equals(sourceValue, targetValue))
+                {
+                    prop.SetValue(target, sourceValue);
+                }
+            }
         }
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)

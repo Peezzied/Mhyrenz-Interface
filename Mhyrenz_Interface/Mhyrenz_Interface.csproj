@@ -81,6 +81,12 @@
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
+    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>packages\MahApps.Metro.2.4.10\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -336,6 +342,9 @@
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
+    <Compile Include="Controls\OverviewChart.xaml.cs">
+      <DependentUpon>OverviewChart.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
@@ -367,6 +376,7 @@
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
+    <Compile Include="ViewModels\OverviewChartViewModel.cs" />
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -385,6 +395,10 @@
       <DependentUpon>TransactionsView.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\InventoryDataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\OverviewChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
