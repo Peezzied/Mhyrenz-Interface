@@ -22,6 +22,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 Category entity = await context.Categories
                     .Include(a => a.Products)
+                        .ThenInclude(p => p.Transactions)
                     .FirstOrDefaultAsync((e) => e.Id == id);
                 return entity;
             }
@@ -32,6 +33,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 IEnumerable<Category> entity = await context.Categories
                     .Include(a => a.Products)
+                        .ThenInclude(p => p.Transactions)
                     .ToListAsync();
                 return entity;
             }

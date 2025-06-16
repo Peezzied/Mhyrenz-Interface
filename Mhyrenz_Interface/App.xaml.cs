@@ -3,6 +3,7 @@ using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Domain.State.Mediator;
@@ -59,6 +60,13 @@ namespace Mhyrenz_Interface
                 .AddSingleton<UndoRedoManager>()
                 .AddSingleton<IInventoryStore, InventoryStore>()
                 .AddSingleton<ITransactionStore, TransactionStore>()
+                .AddSingleton<ICategoryStore, CategoryStore>(s =>
+                {
+                    return CategoryStore.LoadCategoryStore(
+                        s.GetRequiredService<ICategoryService>(),
+                        s.GetRequiredService<IInventoryStore>()
+                    );
+                })
 
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<IViewModelFactory<NavigationViewModel>, NavigationViewModelFactory>()
@@ -66,10 +74,19 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IViewModelFactory<ProductDataViewModel>, ViewModelFactory<ProductDataViewModel>>()
                 .AddSingleton<IViewModelFactory<TransactionDataViewModel>, ViewModelFactory<TransactionDataViewModel>>()
 
+                .AddSingleton<ICategoryDataService, CategoryDataService>()
+                .AddSingleton<ICategoryService, CategoryService>() 
                 .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
                 .AddSingleton<ITransactionsDataService, TransactionsDataService>()
                 .AddSingleton<ITransactionsService, TransactionService>()
+
+
+                .AddTransient<OverviewChartViewModel>()
+                .AddTransient<HomeViewModel>()
+                .AddTransient<InventoryViewModel>()
+                .AddTransient<TransactionViewModel>()
+                .AddTransient<SettingsViewModel>()
 
                 .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
                 {
@@ -93,13 +110,6 @@ namespace Mhyrenz_Interface
                         throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
                     };
                 })
-
-                .AddTransient<HomeViewModel>()
-                .AddTransient<InventoryViewModel>()
-                .AddTransient<TransactionViewModel>()
-                .AddTransient<SettingsViewModel>()
-                .AddTransient<OverviewChartViewModel>()
-
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {
                     return _ => s.GetRequiredService<HomeViewModel>();

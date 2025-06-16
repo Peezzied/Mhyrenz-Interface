@@ -337,6 +337,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Commands\ProductVMCommandCommon.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
@@ -345,12 +346,17 @@
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Tooltips\OverviewChartTooltip.xaml.cs">
+      <DependentUpon>OverviewChartTooltip.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
+    <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
@@ -403,6 +409,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\StatusBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Tooltips\OverviewChartTooltip.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

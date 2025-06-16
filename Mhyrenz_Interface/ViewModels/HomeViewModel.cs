@@ -17,7 +17,6 @@ namespace Mhyrenz_Interface.ViewModels
 {
     public class HomeViewModel: NavigationViewModel
     {
-        private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
         private readonly INavigationServiceEx _navigationServiceEx;
@@ -29,15 +28,12 @@ namespace Mhyrenz_Interface.ViewModels
         public string Bindtest { get; set; } = "Hello, World!";
 
         public HomeViewModel(
-            IProductService productService,
             ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel) : base(navigationServiceEx)
         {
             _navigationServiceEx = navigationServiceEx;
-
-            _productService = productService;
             _inventoryStore = inventroyStore;
             _transactionStore = transactionStore;
             _overviewChartViewModel = overviewChartViewModel;

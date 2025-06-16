@@ -3,6 +3,7 @@ using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
