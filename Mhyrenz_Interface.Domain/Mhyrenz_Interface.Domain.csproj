@@ -107,6 +107,8 @@
     <Compile Include="Services\ICategoryDataService.cs" />
     <Compile Include="Services\IDataService.cs" />
     <Compile Include="Services\IProductDataService.cs" />
+    <Compile Include="Services\ISalesRecordDataService.cs" />
+    <Compile Include="Services\ISessionDataService.cs" />
     <Compile Include="Services\ProductService\IProductService.cs" />
     <Compile Include="Services\ProductService\ProductService.cs" />
     <Compile Include="Services\ITransactionsDataService.cs" />

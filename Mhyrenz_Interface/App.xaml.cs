@@ -74,6 +74,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IViewModelFactory<ProductDataViewModel>, ViewModelFactory<ProductDataViewModel>>()
                 .AddSingleton<IViewModelFactory<TransactionDataViewModel>, ViewModelFactory<TransactionDataViewModel>>()
 
+                .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ICategoryDataService, CategoryDataService>()
                 .AddSingleton<ICategoryService, CategoryService>() 
                 .AddSingleton<IProductDataService, ProductDataService>()

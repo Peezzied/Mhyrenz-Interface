@@ -90,6 +90,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     UniqueId = table.Column<Guid>(nullable: false),
                     ProductId = table.Column<int>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
+                    Amount = table.Column<int>(nullable: false),
                     SessionId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>

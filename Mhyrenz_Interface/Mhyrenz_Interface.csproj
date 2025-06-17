@@ -395,7 +395,9 @@
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
+    <Compile Include="State\ISessionStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
+    <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />

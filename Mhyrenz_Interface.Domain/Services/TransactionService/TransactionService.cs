@@ -11,10 +11,17 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
     public class TransactionService: ITransactionsService
     {
         private readonly ITransactionsDataService _transactionsDataService;
+        private readonly ISessionDataService _sessionDataService;
+        private readonly ISessionsStore _store;
 
-        public TransactionService(ITransactionsDataService transactionsDataService)
+        public TransactionService(
+            ITransactionsDataService transactionsDataService,
+            ISessionDataService sessionDataService,
+            ISessionsStore store)
         {
             _transactionsDataService = transactionsDataService;
+            _store = store;
+            _sessionDataService = sessionDataService;
         }
 
         public async Task<Product> Add(Product product, int amount = 1, bool withRecent = false)
@@ -34,12 +41,15 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             var isNew = lastItem != null && lastItem?.ProductId == product.Id;
             var newGuid = Guid.NewGuid();
 
+            var session = _store.CurrentSession;
+
             var newTransactions = Enumerable.Range(0, amount)
                 .Select(_ => new Transaction
                 {
                     ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    SessionId = session.Id
                 });
 
             await _transactionsDataService.CreateMany(newTransactions);

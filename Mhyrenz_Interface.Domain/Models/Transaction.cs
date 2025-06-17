@@ -12,6 +12,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public int ProductId { get; set; }
         public Product Item { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int Amount { get; set; }
 
         // Session
         public Guid SessionId { get; set; }

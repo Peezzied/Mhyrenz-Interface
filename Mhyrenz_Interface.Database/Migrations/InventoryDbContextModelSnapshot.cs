@@ -115,6 +115,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -163,7 +166,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .IsRequired();
 
                     b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -48,15 +48,17 @@
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20250617052726_initial.cs" />
-    <Compile Include="Migrations\20250617052726_initial.Designer.cs">
-      <DependentUpon>20250617052726_initial.cs</DependentUpon>
+    <Compile Include="Migrations\20250617112609_initial.cs" />
+    <Compile Include="Migrations\20250617112609_initial.Designer.cs">
+      <DependentUpon>20250617112609_initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CategoryDataService.cs" />
     <Compile Include="Services\GenericDataService.cs" />
     <Compile Include="Services\ProductDataService.cs" />
+    <Compile Include="Services\SalesRecordDataService.cs" />
+    <Compile Include="Services\SessionDataService.cs" />
     <Compile Include="Services\TransactionsDataService.cs" />
   </ItemGroup>
   <ItemGroup>

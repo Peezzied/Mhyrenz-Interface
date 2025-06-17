@@ -12,5 +12,6 @@ namespace Mhyrenz_Interface.Domain.Models
         [Key]
         public Guid UniqueId { get; set; }
         public DateTime Period { get; set; }
+        public IEnumerable<Transaction> Transactions { get; set; }
     }
 }
