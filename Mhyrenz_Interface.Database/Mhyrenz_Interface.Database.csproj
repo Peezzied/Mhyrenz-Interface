@@ -45,14 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InterfaceDbContext.cs" />
+    <Compile Include="InterfaceDbContextFactory.cs" />
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
+    <Compile Include="InterfaceDbContextFactoryDesignTime.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20250609063336_updated.cs" />
-    <Compile Include="Migrations\20250609063336_updated.Designer.cs">
-      <DependentUpon>20250609063336_updated.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CategoryDataService.cs" />
     <Compile Include="Services\GenericDataService.cs" />

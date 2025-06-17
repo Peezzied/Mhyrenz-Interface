@@ -98,6 +98,8 @@
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\DomainObject.cs" />
     <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\SalesRecord.cs" />
+    <Compile Include="Models\Session.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CategoryService\CategoryService.cs" />

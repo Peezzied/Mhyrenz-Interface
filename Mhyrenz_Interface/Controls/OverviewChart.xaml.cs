@@ -1,6 +1,8 @@
 ﻿using LiveCharts;
+using LiveCharts.Definitions.Charts;
 using LiveCharts.Wpf;
 using LiveCharts.Wpf.Points;
+using Mhyrenz_Interface.Controls.Tooltips;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,21 +30,6 @@ namespace Mhyrenz_Interface.Controls
         public OverviewChart()
         {
             InitializeComponent();
-        }
-
-        private void PieChart_DataHover(object sender, ChartPoint chartPoint)
-        {
-            var slice = (PieSlice)sender;
-
-            slice.Opacity = 0;
-        }
-
-        private void PieChart_MouseLeave(object sender, MouseEventArgs e)
-        {
-            foreach (var series in ((PieChart)sender).Series.Cast<Series>())
-            {
-                series.Opacity = 1.0; // Reset to full opacity
-            }
 
         }
     }

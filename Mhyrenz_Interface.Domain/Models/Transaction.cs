@@ -13,6 +13,10 @@ namespace Mhyrenz_Interface.Domain.Models
         public Product Item { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        // Session
+        public Guid SessionId { get; set; }
+        public Session Session { get; set; }
+
         //public Transaction()
         //{
         //    UniqueId = Guid.NewGuid();

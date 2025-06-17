@@ -3,15 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls.Tooltips"
              mc:Ignorable="d" 
              Height="Auto" Width="Auto">
-    <Border Background="#FF333333" Padding="10" CornerRadius="6">
-        <StackPanel>
-            <TextBlock Text="{Binding Points[0].SeriesView.Title}" 
-                       Foreground="White" FontWeight="Bold" />
-            <TextBlock Text="{Binding Points[0].ChartPoint.Y}" 
-                       Foreground="White" />
-        </StackPanel>
-    </Border>
+    <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
+                <Grid Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="4 0" Text="{Binding Series.Title}" Foreground="White" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="4 0" Text="{Binding ChartPoint.Instance}" Foreground="White" VerticalAlignment="Center" />
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
 </UserControl>
