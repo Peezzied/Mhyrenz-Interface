@@ -12,7 +12,11 @@ namespace Mhyrenz_Interface.Database
     {
         public DbSet<Product> Products { get; set; }    
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Category> Categories { get; set; } 
+        public DbSet<Category> Categories { get; set; }
+
+        DbSet<Session> Sessions { get; set; }
+        DbSet<SalesRecord> SalesRecords { get; set; }
+
         public InventoryDbContext(DbContextOptions options) : base(options) { }
 
         //protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -53,17 +53,9 @@ namespace Mhyrenz_Interface
                 options.UseSqlite("Data Source=dev_inventory.db");
             };
 
-            Action<DbContextOptionsBuilder> interfaceConfig = options =>
-            {
-                options.UseSqlite("Data Source=dev_interface.db");
-            };
-
             services
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
-
-                .AddDbContext<InterfaceDbContext>(interfaceConfig)
-                .AddSingleton<InterfaceDbContextFactory>(new InterfaceDbContextFactory(inventoryConfig))
 
                 .AddSingleton<UndoRedoManager>()
                 .AddSingleton<IInventoryStore, InventoryStore>()

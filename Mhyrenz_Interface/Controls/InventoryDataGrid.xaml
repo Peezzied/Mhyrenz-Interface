@@ -26,7 +26,13 @@
 
     </UserControl.Resources>
     <Grid>
-        <DataGrid Unloaded="OnUserControlUnload" x:Name="InventoryDataGridRef" GridLinesVisibility="All" ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" AutoGenerateColumns="False" >
+        <DataGrid 
+            EnableRowVirtualization="True" Unloaded="OnUserControlUnload" 
+            x:Name="InventoryDataGridRef" GridLinesVisibility="All" 
+            ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" 
+            AutoGenerateColumns="False" EnableColumnVirtualization="True"
+            VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+            
             <i:Interaction.Behaviors>
                 <behaviors:InventoryDataGridBehavior />
             </i:Interaction.Behaviors>
