@@ -1,5 +1,6 @@
 ﻿using Mhyrenz_Interface.Domain.Exceptions;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.State;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,12 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
     {
         private readonly ITransactionsDataService _transactionsDataService;
         private readonly ISessionDataService _sessionDataService;
-        private readonly ISessionsStore _store;
+        private readonly ISessionStore _store;
 
         public TransactionService(
             ITransactionsDataService transactionsDataService,
             ISessionDataService sessionDataService,
-            ISessionsStore store)
+            ISessionStore store)
         {
             _transactionsDataService = transactionsDataService;
             _store = store;
@@ -49,7 +50,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
                     ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
                     CreatedAt = DateTime.Now,
-                    SessionId = session.Id
+                    SessionId = session.UniqueId
                 });
 
             await _transactionsDataService.CreateMany(newTransactions);

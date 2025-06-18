@@ -112,8 +112,13 @@
     <Compile Include="Services\ProductService\IProductService.cs" />
     <Compile Include="Services\ProductService\ProductService.cs" />
     <Compile Include="Services\ITransactionsDataService.cs" />
+    <Compile Include="Services\SalesRecordService\ISalesRecordService.cs" />
+    <Compile Include="Services\SalesRecordService\SalesRecordService.cs" />
+    <Compile Include="Services\SessionService\ISessionService.cs" />
+    <Compile Include="Services\SessionService\SessionService.cs" />
     <Compile Include="Services\TransactionService\ITransactionsService.cs" />
     <Compile Include="Services\TransactionService\TransactionService.cs" />
+    <Compile Include="State\ISessionStore.cs" />
     <Compile Include="State\Mediator\IMediator.cs" />
     <Compile Include="State\Mediator\InventoryMediator.cs" />
   </ItemGroup>

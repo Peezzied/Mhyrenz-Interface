@@ -379,6 +379,7 @@
     <Compile Include="Commands\ProductVMCommandCommon.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
+    <Compile Include="Commands\SalesRegisterCommand.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
@@ -395,7 +396,6 @@
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
-    <Compile Include="State\ISessionStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
