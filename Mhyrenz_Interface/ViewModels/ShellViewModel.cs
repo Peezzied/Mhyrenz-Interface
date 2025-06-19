@@ -135,6 +135,11 @@ namespace Mhyrenz_Interface.ViewModels
             TransactionsLoad();
         }
 
+        public void OnTransitionComplete()
+        {
+            _navigationServiceEx.TransitionComplete();
+        }
+
         private void TransactionsLoad()
         {
             _transactionService.GetLatests().ContinueWith(task =>

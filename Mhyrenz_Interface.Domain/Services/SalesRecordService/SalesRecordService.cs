@@ -12,12 +12,15 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
     public class SalesRecordService : ISalesRecordService
     {
         private readonly ISalesRecordDataService _salesRecordDataService;
-        public SalesRecordService(ISalesRecordDataService salesRecordDataService)
+        private readonly ITransactionsService _transactionsService;
+        public SalesRecordService(ISalesRecordDataService salesRecordDataService, ITransactionsService transactionsService)
         {
             _salesRecordDataService = salesRecordDataService;
+            _transactionsService = transactionsService;
         }
         public async Task<bool> RegisterSales(SalesRecord sales)
         {
+            await _transactionsService.RemoveAll();
             await _salesRecordDataService.Create(sales);
 
             return true;

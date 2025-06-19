@@ -94,6 +94,7 @@
     <Compile Include="DTO\IDTObject.cs" />
     <Compile Include="Exceptions\InsufficientQuantityException.cs" />
     <Compile Include="Exceptions\InvalidPriceException.cs" />
+    <Compile Include="Exceptions\InvalidSession.cs" />
     <Compile Include="Exceptions\NegativeException.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\DomainObject.cs" />

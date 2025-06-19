@@ -11,6 +11,7 @@ namespace Mhyrenz_Interface.Navigation
         event EventHandler Navigating;
         event NavigatedEventHandler Navigated;
         event NavigationFailedEventHandler NavigationFailed;
+        event Action TransitionCompleted;
 
         Frame Frame { get; set; }
 
@@ -22,5 +23,6 @@ namespace Mhyrenz_Interface.Navigation
 
         bool Navigate(Uri sourcePageUri, object extraData = null);
         bool Navigate(Type sourceType);
+        void TransitionComplete();
     }
 }

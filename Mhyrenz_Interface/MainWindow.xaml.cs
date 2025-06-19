@@ -25,6 +25,11 @@ namespace Mhyrenz_Interface
             InitializeComponent();
         }
 
+        private void TransitioningContentControl_TransitionCompleted(object sender, RoutedEventArgs e)
+        {
+            ((ShellViewModel)DataContext).OnTransitionComplete();
+        }
+
         //private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
         //{
         //    if (e.InvokedItem is MenuItem menuItem && menuItem.IsNavigation)

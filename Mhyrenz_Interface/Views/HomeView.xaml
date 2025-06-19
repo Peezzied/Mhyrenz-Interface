@@ -19,6 +19,7 @@
             <TextBlock Text="{Binding Bindtest}" />
             <TextBlock FontSize="32">Dashboard</TextBlock>
             <TextBox 
+                Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}"
                 mah:TextBoxHelper.Watermark="Search a Product..."
                 mah:TextBoxHelper.UseFloatingWatermark="True" >
                 <TextBox.Style>

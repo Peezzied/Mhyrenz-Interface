@@ -53,7 +53,8 @@
                         <mah:TransitioningContentControl Content="{Binding}"
                                                   Grid.Row="1"
                                                   RestartTransitionOnContentChange="True"
-                                                  Transition="Custom">
+                                                  Transition="Custom"
+                                                  TransitionCompleted="TransitioningContentControl_TransitionCompleted">
                             <mah:TransitioningContentControl.CustomVisualStates>
                                 <VisualState x:Name="CustomTransition">
                                     <Storyboard>

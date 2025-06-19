@@ -33,7 +33,7 @@ namespace Mhyrenz_Interface.Commands
 
         public override async Task ExecuteAsync(object parameter)
         {
-            var transactions = _transactionStore.Transactions;
+            var transactions = _transactionStore.Transactions.Where(t => t.DTO.Session.Equals(_sessionStore.CurrentSession));
 
             var session = await _sessionService.GenerateSession(new Session { Period = DateTime.Now });
 
@@ -45,6 +45,8 @@ namespace Mhyrenz_Interface.Commands
                 Profit = (double)transactions.Sum(t => t.DTO.Product.Item.Profit), // REFACTOR TRANSACTION MODELTYPES decimal TO double
                 RegisteredAt = session.Period
             };
+
+            _transactionStore.Transactions.Clear();
 
             _sessionStore.CurrentSession = session;
             await _salesRecordService.RegisterSales(sales);

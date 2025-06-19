@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Mhyrenz_Interface.State
@@ -31,6 +32,7 @@ namespace Mhyrenz_Interface.State
         private List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
+        public ICollectionView ProductsCollectionView { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
         public InventoryStore(
@@ -61,6 +63,8 @@ namespace Mhyrenz_Interface.State
                 _trackers.Add(TrackProducts(item));
                 Products.Add(item);
             }
+
+            ProductsCollectionView = CollectionViewSource.GetDefaultView(Products);
         }
 
         private PropertyChangeTracker<ProductDataViewModel> TrackProducts(ProductDataViewModel viewModel)

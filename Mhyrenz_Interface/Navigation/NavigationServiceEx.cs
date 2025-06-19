@@ -29,6 +29,7 @@ namespace Mhyrenz_Interface.Navigation
         public event NavigatedEventHandler Navigated;
 
         public event NavigationFailedEventHandler NavigationFailed;
+        public event Action TransitionCompleted;
 
         private Frame _frame;
 
@@ -128,5 +129,10 @@ namespace Mhyrenz_Interface.Navigation
         private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => this.NavigationFailed?.Invoke(sender, e);
 
         private void Frame_Navigated(object sender, NavigationEventArgs e) => this.Navigated?.Invoke(sender, e);
+
+        public void TransitionComplete()
+        {
+            TransitionCompleted?.Invoke();
+        }
     }
 }

@@ -44,6 +44,9 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
 
             var session = _store.CurrentSession;
 
+            if (session is null)
+                throw new InvalidSession(session);
+
             var newTransactions = Enumerable.Range(0, amount)
                 .Select(_ => new Transaction
                 {
@@ -81,6 +84,16 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             await _transactionsDataService.DeleteMany(matching);
 
             return product;
+        }
+
+        public async Task<bool> RemoveAll()
+        {
+            var transactions = await _transactionsDataService.GetLatests();
+
+            if (transactions.Any())
+                await _transactionsDataService.DeleteMany(transactions);
+
+            return true;
         }
     }
 }

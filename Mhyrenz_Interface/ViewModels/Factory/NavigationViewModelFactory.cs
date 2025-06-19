@@ -13,15 +13,18 @@ namespace Mhyrenz_Interface.ViewModels.Factory
         public NavigationViewModel(INavigationServiceEx navigationServiceEx)
         {
             _navigationServiceEx = navigationServiceEx;
-            _navigationServiceEx.Navigating += OnNavigating;
-        }
-
-        private void OnNavigating(object sender, EventArgs e)
-        {
-            Navigating?.Invoke(sender, e);
+            _navigationServiceEx.Navigating += (s, e) => Navigating?.Invoke(s, e);
+            _navigationServiceEx.TransitionCompleted += () => TransitionCompleted?.Invoke();
         }
 
         public event EventHandler Navigating;
+        public event Action TransitionCompleted;
+
+        public override void Dispose()
+        {
+            _navigationServiceEx.Navigating -= (s, e) => Navigating?.Invoke(s, e);
+            _navigationServiceEx.TransitionCompleted -= () => TransitionCompleted?.Invoke(); base.Dispose();
+        }
     }
     public class NavigationViewModelFactory : IViewModelFactory<NavigationViewModel>
     {

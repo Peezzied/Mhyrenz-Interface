@@ -87,6 +87,7 @@ namespace Mhyrenz_Interface.State
                         Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),
                         Amount = group.Count(),
                         Date = group.Max(t => t.CreatedAt),
+                        Session = group.First().Session,
                     }));
 
                 foreach (var item in displayTransaction)

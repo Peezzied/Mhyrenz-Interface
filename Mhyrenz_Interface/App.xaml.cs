@@ -5,7 +5,10 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
@@ -58,6 +61,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
 
                 .AddSingleton<UndoRedoManager>()
+                .AddSingleton<ISessionStore, SessionStore>()
                 .AddSingleton<IInventoryStore, InventoryStore>()
                 .AddSingleton<ITransactionStore, TransactionStore>()
                 .AddSingleton<ICategoryStore, CategoryStore>(s =>
@@ -75,6 +79,9 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IViewModelFactory<TransactionDataViewModel>, ViewModelFactory<TransactionDataViewModel>>()
 
                 .AddSingleton<ISessionDataService, SessionDataService>()
+                .AddSingleton<ISessionService, SessionService>()
+                .AddSingleton<ISalesRecordDataService, SalesRecordDataService>()
+                .AddSingleton<ISalesRecordService, SalesRecordService>()
                 .AddSingleton<ICategoryDataService, CategoryDataService>()
                 .AddSingleton<ICategoryService, CategoryService>() 
                 .AddSingleton<IProductDataService, ProductDataService>()
