@@ -1,4 +1,5 @@
 ﻿using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using System;
@@ -6,13 +7,24 @@ using System.Runtime.CompilerServices;
 
 namespace Mhyrenz_Interface.ViewModels
 {
+    public class ProductDataViewModelDTO
+    {
+        public Product Product { get; set; }
+        public ISessionStore SessionStore { get; set; }
+        public Action OnSessionNull { get; set; }
+    }
+
     public class ProductDataViewModel: BaseViewModel
     {
+        private readonly ISessionStore _sessionStore;
+        private readonly Action _requireSession;
         public Product Item { get; set; }
 
-        public ProductDataViewModel(Product product)
+        public ProductDataViewModel(ProductDataViewModelDTO dto)
         {
-            Item = product;
+            Item = dto.Product;
+            _sessionStore = dto.SessionStore;
+            _requireSession = dto.OnSessionNull;
         }
 
         public int NetQty { 
@@ -41,6 +53,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (_purchase != value)
                 {
+                    if (!SessionRequire()) return;
                     _purchase = value;
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseDefaultEdit));
@@ -59,6 +72,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Purchase != value)
                 {
+                    if (!SessionRequire()) return;
                     _purchaseNormal = value - Item.Purchase;
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseNormalEdit));
@@ -94,6 +108,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Qty != value)
                 {
+                    if (!SessionRequire()) return;
                     Item.Qty = value;
                     OnPropertyChanged(nameof(Qty));
                     OnPropertyChanged(nameof(NetQty));
@@ -158,6 +173,17 @@ namespace Mhyrenz_Interface.ViewModels
                     Item.CategoryId = value;
                     OnPropertyChanged(nameof(Name));
                 }
+            }
+        }
+        
+        private bool SessionRequire()
+        {
+            if (_sessionStore.CurrentSession is Session)
+                return true;
+            else
+            {
+                _requireSession?.Invoke();
+                return false;
             }
         }
 

@@ -62,6 +62,15 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             return detachedEntity;
         }
 
+        public async Task Clear()
+        {
+            var transactions = await GetLatests();
+
+            await _transactionsDataService.DeleteMany(transactions);
+
+            await _transactionsDataService.Clean();
+        }
+
         public async Task<IEnumerable<Transaction>> GetLatests()
         {
             return await _transactionsDataService.GetLatests();

@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
@@ -33,6 +34,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
+        private readonly IDialogCoordinator _dialogCoordinator;
 
         private bool Flag { get; set; }
 
@@ -65,10 +67,13 @@ namespace Mhyrenz_Interface.ViewModels
             ITransactionsService transactionService,
             ITransactionStore transactionStore,
             INavigationServiceEx navigationServiceEx,
-            IViewModelFactory<NavigationViewModel> viewModelFactory)
+            IViewModelFactory<NavigationViewModel> viewModelFactory,
+            IDialogCoordinator dialogCoordinator)
         {
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
+
+            _dialogCoordinator = dialogCoordinator;
 
             Flag = false;
 
@@ -192,6 +197,8 @@ namespace Mhyrenz_Interface.ViewModels
             SelectedOptionsMenuItem = OptionsMenu.FirstOrDefault(x => x.NavigationType == contentType);
 
             UpdateCurrentViewModel(contentType);
+
+            
         }
 
         private void UpdateCurrentViewModel(Type viewType)

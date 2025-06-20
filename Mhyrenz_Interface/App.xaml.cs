@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.Commands;
+﻿using MahApps.Metro.Controls.Dialogs;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
@@ -44,7 +45,21 @@ namespace Mhyrenz_Interface
             MainWindow mainWindow = serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
-            base.OnStartup(e);
+            var sessionStore = serviceProvider.GetRequiredService<ISessionStore>();
+            var sessionService = serviceProvider.GetRequiredService<ISessionService>();
+
+            var session = sessionService.GetSession().GetAwaiter().GetResult();
+
+            if (session != null)
+            {
+                sessionStore.CurrentSession = session;
+            }
+            else
+            {
+                sessionStore.CurrentSession = sessionService.GenerateSession(new Session { Period = DateTime.Now }).GetAwaiter().GetResult();
+            }
+
+                base.OnStartup(e);
         }
 
         private IServiceProvider CreateServiceProvider()
@@ -71,6 +86,8 @@ namespace Mhyrenz_Interface
                         s.GetRequiredService<IInventoryStore>()
                     );
                 })
+
+                .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG
 
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<IViewModelFactory<NavigationViewModel>, NavigationViewModelFactory>()
@@ -100,8 +117,8 @@ namespace Mhyrenz_Interface
                 {
                     return (object parameter) =>
                     {
-                        if (parameter is Product product)
-                            return new ProductDataViewModel(product);
+                        if (parameter is ProductDataViewModelDTO dto)
+                            return new ProductDataViewModel(dto);
                         throw new ArgumentException("Invalid parameter type for ProductDataViewModel creation.");
                     };
                 })

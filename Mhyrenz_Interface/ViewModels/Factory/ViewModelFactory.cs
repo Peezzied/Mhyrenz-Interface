@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.ViewModels.Factory
 
         public T CreateViewModel(object parameter = null)
         {
-            return _vm(parameter);
+                return _vm(parameter);
         }
     }
 }

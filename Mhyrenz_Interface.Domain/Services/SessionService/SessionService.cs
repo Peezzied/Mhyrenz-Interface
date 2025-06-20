@@ -28,6 +28,11 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             return result;
         }
 
+        public async Task<Session> GetSession()
+        {
+            var result = await _sessionDataService.GetAll();
 
+            return result.OrderByDescending(s => s.Period).FirstOrDefault();
+        }
     }
 }

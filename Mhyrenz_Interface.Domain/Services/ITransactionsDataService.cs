@@ -9,6 +9,7 @@ namespace Mhyrenz_Interface.Domain.Services
     {
         Task<IEnumerable<Transaction>> GetLatestsByProduct(int productId);
         Task<IEnumerable<Transaction>> GetLatests();
-        Task<Transaction> GetLast(); 
+        Task<Transaction> GetLast();
+        Task Clean();
     }
 }

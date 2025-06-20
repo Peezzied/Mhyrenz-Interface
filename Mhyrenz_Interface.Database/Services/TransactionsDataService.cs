@@ -18,6 +18,15 @@ namespace Mhyrenz_Interface.Database.Services
             _contextFactory = contextFactory;
         }
 
+        public async Task Clean()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                await context.Database.ExecuteSqlRawAsync($"DELETE FROM sqlite_sequence WHERE name = '{nameof(context.Transactions)}';");
+                await context.Database.ExecuteSqlRawAsync("VACUUM;");
+            }
+        }
+
         public override async Task<IEnumerable<Transaction>> GetAll()
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())

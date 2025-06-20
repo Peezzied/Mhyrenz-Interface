@@ -1,5 +1,6 @@
 ﻿using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
@@ -17,25 +18,33 @@ namespace Mhyrenz_Interface.Commands
     {
         private readonly ISalesRecordService _salesRecordService;
         private readonly ITransactionStore _transactionStore;
-        private readonly ISessionService _sessionService;
+        private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
+        private readonly IInventoryStore _inventoryStore;
+        private readonly HomeViewModel _homeViewModel;
+
         public SalesRegisterCommand(
+            HomeViewModel homeViewModel,
             ISalesRecordService salesRecordService,
-            ISessionService sessionService,
             ITransactionStore transactionStore,
-            ISessionStore sessionStore)
+            ITransactionsService transactionsService,
+            ISessionStore sessionStore,
+            IInventoryStore inventoryStore)
         {
             _salesRecordService = salesRecordService;
-            _sessionService = sessionService;
             _transactionStore = transactionStore;
+            _transactionService = transactionsService;
             _sessionStore = sessionStore;
+            _inventoryStore = inventoryStore;
         }
 
         public override async Task ExecuteAsync(object parameter)
         {
+            _homeViewModel.IsLoading = true;
+
             var transactions = _transactionStore.Transactions.Where(t => t.DTO.Session.Equals(_sessionStore.CurrentSession));
 
-            var session = await _sessionService.GenerateSession(new Session { Period = DateTime.Now });
+            var session =  _sessionStore.CurrentSession;
 
             var sales = new SalesRecord()
             {
@@ -46,10 +55,21 @@ namespace Mhyrenz_Interface.Commands
                 RegisteredAt = session.Period
             };
 
-            _transactionStore.Transactions.Clear();
+            var grouped = transactions.GroupBy(t => t.Product.Item.Id)
+                .Select(g => new Product() 
+                { 
+                    Qty = g.Sum(t => t.Amount)
+                }).ToList();
 
-            _sessionStore.CurrentSession = session;
+            await _inventoryStore.Register(grouped);
+
+            _transactionStore.Transactions.Clear();
+            await _transactionService.Clear();
+
+            _sessionStore.CurrentSession = null;
             await _salesRecordService.RegisterSales(sales);
+
+            _homeViewModel.IsLoading = false;
         }
     }
 }

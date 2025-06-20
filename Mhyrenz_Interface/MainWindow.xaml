@@ -10,6 +10,8 @@
         xmlns:viewModels="clr-namespace:Mhyrenz_Interface.ViewModels"
         xmlns:views="clr-namespace:Mhyrenz_Interface.Views"
         xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        Dialog:DialogParticipation.Register="{Binding}"
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
         Title="MainWindow" MinHeight="800" MinWidth="1280" WindowStyle="None">

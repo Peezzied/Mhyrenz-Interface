@@ -1,8 +1,11 @@
-﻿using Mhyrenz_Interface.Commands;
+﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -15,6 +18,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -28,7 +32,7 @@ namespace Mhyrenz_Interface.State
         private readonly IViewModelFactory<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
-
+        private readonly ISessionStore _sessionStore;
         private List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
@@ -40,12 +44,14 @@ namespace Mhyrenz_Interface.State
             IEnumerable<Product> products,
             IViewModelFactory<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
-            ITransactionsService transactionsService)
+            ITransactionsService transactionsService,
+            ISessionStore sessionStore)
         {
             _undoRedoManager = undoRedoManager;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
             _transactionService = transactionsService;
+            _sessionStore = sessionStore;
 
             UpdateProductCommand = new UpdateProductCommand(_productService, this);
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
@@ -56,7 +62,12 @@ namespace Mhyrenz_Interface.State
             Products.Clear();
             ChangeTracking.IsInventoryLoaded = true;
 
-            var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(product));
+            var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+            {
+                Product = product,
+                SessionStore = _sessionStore,
+                OnSessionNull = PromptSession
+            }));
 
             foreach (var item in displayProducts)
             {
@@ -64,7 +75,16 @@ namespace Mhyrenz_Interface.State
                 Products.Add(item);
             }
 
-            ProductsCollectionView = CollectionViewSource.GetDefaultView(Products);
+            App.Current.Invoke(()=>
+            {
+                ProductsCollectionView = CollectionViewSource.GetDefaultView(Products);
+            });
+        }
+
+        #region "Helper"
+        private void PromptSession()
+        {
+            PromptSessionEvent?.Invoke();
         }
 
         private PropertyChangeTracker<ProductDataViewModel> TrackProducts(ProductDataViewModel viewModel)
@@ -113,8 +133,14 @@ namespace Mhyrenz_Interface.State
 
                 HandlePropertyChanged(tracker, args, (vm, product, index) =>
                 {
-
-                    Products[index] = _productsViewModelFactory.CreateViewModel(product);
+                    var updated = _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+                    {
+                        Product = product,
+                        SessionStore = _sessionStore,
+                        OnSessionNull = PromptSession
+                    });
+                    Products.RemoveAt(index);
+                    Products.Insert(index, updated);
 
                     PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
                     {
@@ -155,9 +181,24 @@ namespace Mhyrenz_Interface.State
                 _trackers.Add(TrackProducts(Products[index]));
             }
         }
+        #endregion
+
+        public async Task Register(IEnumerable<Product> transactions)
+        {
+            var tasks = transactions.Select(item =>
+                _productService.Edit(item.Id, nameof(Product.Qty), item.Qty)
+            );
+
+            await Task.WhenAll(tasks);
+
+            var products = await _productService.GetAll();
+
+            LoadProducts(products);
+        }
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
+        public event Action PromptSessionEvent;
     }
 
     public class InventoryStoreEventArgs

@@ -12,6 +12,6 @@ namespace Mhyrenz_Interface.Domain.Services
         Task<Product> Add(Product entity, int amount = 1, bool withRecent = false);
         Task<Product> Remove(Product entity, int amount = 1);
         Task<bool> RemoveAll();
-
+        Task Clear();
     }
 }

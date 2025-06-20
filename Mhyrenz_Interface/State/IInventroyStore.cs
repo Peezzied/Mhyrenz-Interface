@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.State
 {
@@ -13,6 +14,9 @@ namespace Mhyrenz_Interface.State
         ICollectionView ProductsCollectionView { get; set; }
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
+        event Action PromptSessionEvent;
+
+        Task Register(IEnumerable<Product> transactions);
         void LoadProducts(IEnumerable<Product> products);
     }
 }
