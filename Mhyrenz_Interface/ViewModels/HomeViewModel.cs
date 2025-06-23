@@ -1,8 +1,10 @@
 ﻿using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
@@ -17,6 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -27,9 +30,12 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionStore _transactionStore;
         private readonly INavigationServiceEx _navigationServiceEx;
         private readonly OverviewChartViewModel _overviewChartViewModel;
+        private readonly ISalesRecordService _salesRecordService;
+        private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
 
+        public ICommand RegisterCommand { get; private set; }
         public ICollectionView Inventory { get; private set; }
         public ICollectionView Transactions { get; private set; }
         public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;   
@@ -61,6 +67,8 @@ namespace Mhyrenz_Interface.ViewModels
         //public string SearchBarTest { get; set; } = "asda";
 
         public HomeViewModel(
+            ISalesRecordService salesRecordService,
+            ITransactionsService transactionsService,
             ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             ISessionStore sessionStore,
@@ -74,14 +82,24 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore = inventroyStore;
             _transactionStore = transactionStore;
             _overviewChartViewModel = overviewChartViewModel;
+            _salesRecordService = salesRecordService;
+            _transactionService = transactionsService;
 
             _sessionStore = sessionStore;
             _inventoryStore.ProductsCollectionView.Filter = FilterProducts;
 
             base.TransitionCompleted += OnTransitionComplete;
             _inventoryStore.PromptSessionEvent += OnPromptSessionRequest;
+            _sessionStore.StateChanged += OnCurrentSession;
 
             _dialogCoordinator = dialogCoordinator;
+
+            RegisterCommand = new SalesRegisterCommand(this, _salesRecordService, _transactionStore, _transactionService, _sessionStore, inventroyStore);
+        }
+
+        private void OnCurrentSession()
+        {
+            OnPropertyChanged(nameof(Bindtest));
         }
 
         private void OnPromptSessionRequest()
@@ -93,6 +111,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             base.TransitionCompleted -= OnTransitionComplete;
             _inventoryStore.PromptSessionEvent -= OnPromptSessionRequest;
+            _sessionStore.StateChanged -= OnCurrentSession;
         }
 
         private void OnTransitionComplete()

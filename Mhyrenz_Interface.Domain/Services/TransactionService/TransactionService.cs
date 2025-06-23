@@ -76,13 +76,10 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             return await _transactionsDataService.GetLatests();
         }
 
-        public async Task<Product> Remove(Product product, int amount = 1)
+        public async Task<IEnumerable<Transaction>> Remove(Product product, int amount = 1)
         {
             if (amount <= 0)
                 throw new NegativeException(amount, product);
-
-            if (product.Qty <= 0 || product.NetQty <= 0)
-                throw new InsufficientQuantityException(product.Qty, product.NetQty, product);
 
             var transactions = await _transactionsDataService.GetLatestsByProduct(product.Id);
 
@@ -92,7 +89,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
 
             await _transactionsDataService.DeleteMany(matching);
 
-            return product;
+            return matching;
         }
 
         public async Task<bool> RemoveAll()

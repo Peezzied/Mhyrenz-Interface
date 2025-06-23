@@ -49,6 +49,9 @@
                     <controls:OverviewChart DataContext="{Binding OverviewChartViewModel}"/>
                 </Grid>
             </Grid>
+            <Grid>
+                <Button Command="{Binding RegisterCommand}">REGISTER</Button>
+            </Grid>
         </StackPanel>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>

@@ -42,6 +42,15 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        public int PurchaseMax 
+        {
+            get => Item.NetQty; 
+        }
+
+        public int PurchaseMaxNormal
+        {
+            get => Item.Qty;
+        }
 
         //private int _cachedPurchase;
         private int _purchase;
@@ -58,6 +67,7 @@ namespace Mhyrenz_Interface.ViewModels
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseDefaultEdit));
                     OnPropertyChanged(nameof(NetQty));
+                    OnPropertyChanged(nameof(PurchaseMax));
                 }
                 _purchase = 0;
             }
@@ -77,6 +87,7 @@ namespace Mhyrenz_Interface.ViewModels
                     //_cachedPurchase += value;
                     OnPropertyChanged(nameof(PurchaseNormalEdit));
                     OnPropertyChanged(nameof(NetQty));
+                    OnPropertyChanged(nameof(PurchaseMaxNormal));
                 }
             }
         }

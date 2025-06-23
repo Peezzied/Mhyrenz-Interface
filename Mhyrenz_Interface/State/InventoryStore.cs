@@ -126,7 +126,7 @@ namespace Mhyrenz_Interface.State
                 _undoRedoManager.Execute(new ProductVMCommandPurchase(
                     viewModel,
                     args.PropertyOf,
-                    oldValue,
+                    oldValue, 
                     newValue,
                     PurchaseProductCommand
                 ));

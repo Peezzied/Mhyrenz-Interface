@@ -33,6 +33,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 IEnumerable<Transaction> entity = await context.Transactions
                     .Include(a => a.Item)
+                    .Include(a => a.Session)
                     .ToListAsync();
                 return entity;
 
@@ -45,6 +46,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 IEnumerable<Transaction> entity = await context.Transactions
                     .Include(a => a.Item)
+                    .Include(a => a.Session)
                     .Where(t => t.ProductId == productId)
                     .OrderByDescending(t => t.CreatedAt)
                     .ToListAsync();
@@ -59,6 +61,7 @@ namespace Mhyrenz_Interface.Database.Services
                 return await context.Transactions
                     .AsNoTracking()
                     .Include(t => t.Item)
+                    .Include(a => a.Session)
                     .OrderByDescending(t => t.CreatedAt)
                     .FirstOrDefaultAsync();
             }
@@ -70,6 +73,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 IEnumerable<Transaction> entity = await context.Transactions
                     .Include(a => a.Item)
+                    .Include(a => a.Session)
                     .OrderByDescending(t => t.CreatedAt)
                     .ToListAsync();
                 return entity;

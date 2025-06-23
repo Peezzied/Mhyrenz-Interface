@@ -13,13 +13,13 @@
         <DataTemplate x:Key="NumericEdit">
             <!-- MahApps NumericUpDown inside editing template -->
             <mah:NumericUpDown Value="{Binding PurchaseDefaultEdit}" 
-               Minimum="0" Maximum="100" 
+               Minimum="0" Maximum="{Binding PurchaseMax}" 
                NumericInputMode="Numbers" TextAlignment="Center"
                VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
         </DataTemplate>
         <DataTemplate x:Key="NormalEdit">
             <mah:NumericUpDown Value="{Binding PurchaseNormalEdit}" 
-               Minimum="0" Maximum="100" HideUpDownButtons="True"
+               Minimum="0" Maximum="{Binding PurchaseMaxNormal}" HideUpDownButtons="True"
                NumericInputMode="Numbers" TextAlignment="Center"
                VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
         </DataTemplate>
@@ -37,8 +37,8 @@
                 <behaviors:InventoryDataGridBehavior />
             </i:Interaction.Behaviors>
             <DataGrid.Columns>
-                <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice}" Width="Auto"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto"/>
+                <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" Width="Auto"/>
                 <!--<mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 
                     Minimum="0" Maximum="100" NumericInputMode="Numbers"/>-->
                 <DataGridTemplateColumn x:Name="Purchase" Header="Purchase">

@@ -31,8 +31,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value), "Value cannot be null.");
-            if (IsInvalidNumeric(value))
-                throw new ArgumentException("Value must be greater than zero.", nameof(value));
 
             var newEntity = await _productDataService.UpdateProperty(id, propertyName, value) ?? throw new DataException($"Product with ID {id} not found.");
             return newEntity;

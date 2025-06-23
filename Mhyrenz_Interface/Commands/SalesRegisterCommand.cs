@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Mhyrenz_Interface.Commands
 {
@@ -36,13 +37,19 @@ namespace Mhyrenz_Interface.Commands
             _transactionService = transactionsService;
             _sessionStore = sessionStore;
             _inventoryStore = inventoryStore;
+            _homeViewModel = homeViewModel;
         }
 
         public override async Task ExecuteAsync(object parameter)
         {
+            var prompt = MessageBox.Show("Do you really want to register?", "Register", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (prompt == MessageBoxResult.No)
+                return;
+
             _homeViewModel.IsLoading = true;
 
-            var transactions = _transactionStore.Transactions.Where(t => t.DTO.Session.Equals(_sessionStore.CurrentSession));
+            var transactions = _transactionStore.Transactions.Where(t => t.DTO.Session.UniqueId.Equals(_sessionStore.CurrentSession.UniqueId));
 
             var session =  _sessionStore.CurrentSession;
 
@@ -58,18 +65,22 @@ namespace Mhyrenz_Interface.Commands
             var grouped = transactions.GroupBy(t => t.Product.Item.Id)
                 .Select(g => new Product() 
                 { 
-                    Qty = g.Sum(t => t.Amount)
+                    Id = g.First().Product.Item.Id,
+                    Qty = g.First().Product.NetQty
                 }).ToList();
 
-            await _inventoryStore.Register(grouped);
 
             _transactionStore.Transactions.Clear();
             await _transactionService.Clear();
+
+            await _inventoryStore.Register(grouped);
 
             _sessionStore.CurrentSession = null;
             await _salesRecordService.RegisterSales(sales);
 
             _homeViewModel.IsLoading = false;
+
+            MessageBox.Show("Register Success");
         }
     }
 }

@@ -31,8 +31,11 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void OnCellChanged(object sender, EventArgs e)
         {
             var grid = (DataGrid)sender;
-            grid.CommitEdit(DataGridEditingUnit.Cell, true);
-            grid.CommitEdit(DataGridEditingUnit.Row, true);
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                grid.CommitEdit(DataGridEditingUnit.Cell, true);
+                grid.CommitEdit(DataGridEditingUnit.Row, true);
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
 

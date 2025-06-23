@@ -16,6 +16,13 @@ namespace Mhyrenz_Interface.Commands
         private readonly object _oldValue;
         private readonly object _newValue;
 
+        public enum ActionType
+        {
+            Normal, Undo, Redo
+        }
+
+        private ActionType Action { get; set; }
+
         public PropertyChangeCommand(T target, string propertyName, object oldValue, object newValue)
         {
             _target = target;
@@ -26,19 +33,25 @@ namespace Mhyrenz_Interface.Commands
         public void Execute()
         {
             //SetProperty(_newValue);
-            
+            Action = ActionType.Normal;
             Command(_newValue);
         }
 
         public void Undo()
         {
             SetProperty(_oldValue);
+
+            Action = ActionType.Undo;
+
             Command(_oldValue);
         }
 
         public void Redo()
         {
             SetProperty(_newValue);
+
+            Action = ActionType.Redo;
+
             Command(_newValue);
         }
 
