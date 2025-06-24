@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class initial : Migration
+    public partial class stringedbarcode : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -42,7 +42,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     Qty = table.Column<int>(nullable: false),
                     RetailPrice = table.Column<decimal>(nullable: false),
                     ListPrice = table.Column<decimal>(nullable: false),
-                    Barcode = table.Column<int>(nullable: true),
+                    Barcode = table.Column<string>(nullable: true),
                     Expiry = table.Column<DateTime>(nullable: true),
                     Batch = table.Column<string>(nullable: true),
                     CategoryId = table.Column<int>(nullable: false)

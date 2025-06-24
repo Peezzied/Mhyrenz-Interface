@@ -57,7 +57,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public int? Barcode 
+        public string Barcode 
         {
             get => DTO.Product.Barcode;
             set

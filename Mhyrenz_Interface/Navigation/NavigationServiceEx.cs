@@ -68,7 +68,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.CurrentSource != sourcePageUri)
             {
-                Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}");
+                //Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}");
                 var result = this.Frame.Navigate(sourcePageUri, extraData);
 
                 if (result)
@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.Navigation
         {
             if (this.Frame.NavigationService?.Content?.GetType() != sourceType)
             {
-                Debug.WriteLine($"Navigating to {sourceType}");
+                //Debug.WriteLine($"Navigating to {sourceType}");
                 var result = this.Frame.Navigate(Activator.CreateInstance(sourceType));
 
                 if (result)

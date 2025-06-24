@@ -23,7 +23,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public int Qty { get; set; } = 0;
         public decimal RetailPrice { get; set; }
         public decimal ListPrice { get; set; }
-        public int? Barcode { get; set; }
+        public string Barcode { get; set; }
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 

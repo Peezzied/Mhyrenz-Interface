@@ -37,6 +37,7 @@ namespace Mhyrenz_Interface.State
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
         public ICollectionView ProductsCollectionView { get; set; }
+        public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
         public InventoryStore(
@@ -59,25 +60,31 @@ namespace Mhyrenz_Interface.State
 
         public void LoadProducts(IEnumerable<Product> products)
         {
-            Products.Clear();
-            ChangeTracking.IsInventoryLoaded = true;
 
-            var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+            App.Current.Dispatcher.Invoke(()=>
             {
-                Product = product,
-                SessionStore = _sessionStore,
-                OnSessionNull = PromptSession
-            }));
+                Products.Clear();
+                ChangeTracking.IsInventoryLoaded = true;
 
-            foreach (var item in displayProducts)
-            {
-                _trackers.Add(TrackProducts(item));
-                Products.Add(item);
-            }
+                var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+                {
+                    Product = product,
+                    SessionStore = _sessionStore,
+                    OnSessionNull = PromptSession
+                }));
 
-            App.Current.Invoke(()=>
-            {
+                foreach (var item in displayProducts)
+                {
+                    _trackers.Add(TrackProducts(item));
+                    Products.Add(item);
+                }
                 ProductsCollectionView = CollectionViewSource.GetDefaultView(Products);
+
+                var lookup = ProductsCollectionView.Cast<ProductDataViewModel>()
+                            .ToLookup(p => p.Item.Category.Name);
+
+                ProductsCollectionViewByCategory = lookup;
+
             });
         }
 

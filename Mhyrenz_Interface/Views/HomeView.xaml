@@ -20,22 +20,7 @@
         <StackPanel Margin="30">
             <TextBlock Text="{Binding Bindtest}" />
             <TextBlock FontSize="32">Dashboard</TextBlock>
-            <TextBox 
-                Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}"
-                mah:TextBoxHelper.Watermark="Search a Product..."
-                mah:TextBoxHelper.UseFloatingWatermark="True" >
-                <TextBox.Style>
-                    <Style BasedOn="{StaticResource MahApps.Styles.TextBox.Search}" TargetType="{x:Type TextBox}">
-                        <Style.Triggers>
-                            <Trigger Property="mah:TextBoxHelper.HasText" Value="True">
-                                <Setter Property="mah:TextBoxHelper.ButtonContent" Value="r" />
-                                <Setter Property="mah:TextBoxHelper.ButtonContentTemplate" Value="{x:Null}" />
-                                <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="True" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
+            <controls:SearchBox/>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>

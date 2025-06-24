@@ -134,7 +134,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             get => Item.ListPrice;
         }
-        public int? Barcode
+        public string Barcode
         {
             get => Item.Barcode;
 

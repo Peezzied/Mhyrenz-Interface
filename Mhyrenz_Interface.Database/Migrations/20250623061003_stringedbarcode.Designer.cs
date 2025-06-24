@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20250617112609_initial")]
-    partial class initial
+    [Migration("20250623061003_stringedbarcode")]
+    partial class stringedbarcode
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,8 +38,8 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("Barcode")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Barcode")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Batch")
                         .HasColumnType("TEXT");

@@ -37,7 +37,7 @@ namespace Mhyrenz_Interface.Commands
             try
             {
                 var updated = await _productService.Edit(DTO.Id, DTO.PropertyName, DTO.Value);
-                Debug.WriteLine($"Updated product {updated.Id} from command.");
+                //Debug.WriteLine($"Updated product {updated.Id} from command.");
             }
             catch (InvalidPriceException)
             {

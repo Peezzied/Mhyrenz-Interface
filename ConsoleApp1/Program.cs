@@ -55,7 +55,7 @@ namespace ConsoleApp1
                     string productNames = string.Join(", ", item.Products.Select(p => p.Name));
                     table.AddRow(item.Name, item.Id, productNames);
 
-                    Debug.WriteLine($"Category: {item.Name}, Id: {item.Id}, Products: {item.Products}");
+                    //Debug.WriteLine($"Category: {item.Name}, Id: {item.Id}, Products: {item.Products}");
                 }
             ).GetAwaiter();
 

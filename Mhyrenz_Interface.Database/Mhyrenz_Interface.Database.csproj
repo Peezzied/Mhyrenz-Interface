@@ -48,9 +48,9 @@
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20250617112609_initial.cs" />
-    <Compile Include="Migrations\20250617112609_initial.Designer.cs">
-      <DependentUpon>20250617112609_initial.cs</DependentUpon>
+    <Compile Include="Migrations\20250623061003_stringedbarcode.cs" />
+    <Compile Include="Migrations\20250623061003_stringedbarcode.Designer.cs">
+      <DependentUpon>20250623061003_stringedbarcode.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

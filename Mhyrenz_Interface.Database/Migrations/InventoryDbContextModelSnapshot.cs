@@ -36,8 +36,8 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("Barcode")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Barcode")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Batch")
                         .HasColumnType("TEXT");

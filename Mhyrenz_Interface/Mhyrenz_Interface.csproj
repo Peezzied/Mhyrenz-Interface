@@ -369,6 +369,12 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="zxing, Version=0.16.10.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.10\lib\net47\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.16.10.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.10\lib\net47\zxing.presentation.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -385,14 +391,19 @@
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SearchBox.xaml.cs">
+      <DependentUpon>SearchBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Tooltips\OverviewChartTooltip.xaml.cs">
       <DependentUpon>OverviewChartTooltip.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BarcodeToImageConverter.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
@@ -445,6 +456,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\OverviewChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SearchBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

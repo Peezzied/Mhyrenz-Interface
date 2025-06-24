@@ -94,6 +94,8 @@ namespace Mhyrenz_Interface.ViewModels
 
             _dialogCoordinator = dialogCoordinator;
 
+            DeferLoad();
+
             RegisterCommand = new SalesRegisterCommand(this, _salesRecordService, _transactionStore, _transactionService, _sessionStore, inventroyStore);
         }
 
@@ -116,7 +118,19 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void OnTransitionComplete()
         {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            //App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            //{
+            //    Inventory = _inventoryStore.ProductsCollectionView;
+            //    OnPropertyChanged(nameof(Inventory));
+
+            //    Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
+            //    OnPropertyChanged(nameof(Transactions));
+            //}), DispatcherPriority.ContextIdle);
+        }
+
+        private async void DeferLoad()
+        {
+            await App.Current.Dispatcher.InvokeAsync(new Action(() =>
             {
                 Inventory = _inventoryStore.ProductsCollectionView;
                 OnPropertyChanged(nameof(Inventory));

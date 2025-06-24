@@ -36,8 +36,6 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionsService _transactionService;
         private readonly IDialogCoordinator _dialogCoordinator;
 
-        private bool Flag { get; set; }
-
         public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
 
         public ObservableCollection<MenuItem> Menu => AppMenu;
@@ -74,8 +72,6 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.Navigated += OnNavigated;
 
             _dialogCoordinator = dialogCoordinator;
-
-            Flag = false;
 
             _navigationServiceEx.Navigate(new Uri("Views/HomeView.xaml", UriKind.RelativeOrAbsolute));
 
@@ -128,12 +124,12 @@ namespace Mhyrenz_Interface.ViewModels
                     var products = task.Result;
                     _inventoryStore.LoadProducts(products);
 
-                    Debug.WriteLine("Loaded products: " + products);
+                    //Debug.WriteLine("Loaded products: " + products);
                 }
                 else
                 {
                     // Handle error
-                    Debug.WriteLine("Failed to load products: " + task.Exception?.Message);
+                    //Debug.WriteLine("Failed to load products: " + task.Exception?.Message);
                 }
             });
 
@@ -154,12 +150,12 @@ namespace Mhyrenz_Interface.ViewModels
                     var products = task.Result;
                     _transactionStore.LoadTransactions(products);
 
-                    Debug.WriteLine("Loaded transactions: " + products);
+                    //Debug.WriteLine("Loaded transactions: " + products);
                 }
                 else
                 {
                     // Handle error
-                    Debug.WriteLine("Failed to load transactions: " + task.Exception?.Message);
+                    //Debug.WriteLine("Failed to load transactions: " + task.Exception?.Message);
                 }
             });
         }
@@ -206,7 +202,7 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.CurrentViewModel = _viewModelFactory.CreateViewModel(viewType);
             OnPropertyChanged(nameof(CurrentViewModel));
 
-            Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
+            //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
     }
