@@ -26,7 +26,6 @@ namespace Mhyrenz_Interface.Converters
                     {
                         Width = 30,
                         Height = 27,
-                        Margin = 3,
                     }
                 };
 

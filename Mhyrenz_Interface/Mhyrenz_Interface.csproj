@@ -402,6 +402,7 @@
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BarcodeToImageConverter.cs" />
+    <Compile Include="Converters\DetailsTextNoneConverter.cs" />
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
