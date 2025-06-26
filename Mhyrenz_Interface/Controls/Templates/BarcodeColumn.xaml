@@ -1,0 +1,24 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Mhyrenz_Interface"
+                    xmlns:conv="clr-namespace:Mhyrenz_Interface.Converters">
+
+    <!-- Your converter -->
+    <conv:BarcodeToImageConverter x:Key="BarcodeToImageConverter"/>
+
+    <!-- The column as a resource -->
+    <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
+                            Header="Barcode" CanUserSort="False" Width="87" MinWidth="87" MaxWidth="130">
+        <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+                <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}" 
+                       MaxWidth="130"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+        <DataGridTemplateColumn.CellEditingTemplate>
+            <DataTemplate>
+                <TextBox Text="{Binding Barcode}"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellEditingTemplate>
+    </DataGridTemplateColumn>
+</ResourceDictionary>

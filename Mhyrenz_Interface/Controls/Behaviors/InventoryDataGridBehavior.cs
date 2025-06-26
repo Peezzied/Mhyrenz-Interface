@@ -11,14 +11,19 @@ using System.Windows.Media;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class InventoryDataGridBehavior : Behavior<DataGrid>
+    public partial class InventoryDataGridBehavior : Behavior<DataGrid>
     {
+        partial void OnAttachedExtended();
+        partial void OnDetachingExtended();
+
         protected override void OnAttached()
         {
             AssociatedObject.CellEditEnding += OnCellEditEnding;
             AssociatedObject.CurrentCellChanged += OnCellChanged;
             AssociatedObject.ContextMenuOpening += OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown += OnRightClick;
+
+            OnAttachedExtended();
         }
 
         protected override void OnDetaching()
@@ -27,6 +32,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.CurrentCellChanged -= OnCellChanged;
             AssociatedObject.ContextMenuOpening -= OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown -= OnRightClick;
+
+            OnDetachingExtended();
         }
         private void OnCellChanged(object sender, EventArgs e)
         {

@@ -12,5 +12,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task<Product> Add(Product entity);
         Task<bool> Remove(Product entity);
         Task<Product> Edit(int id, string propertyName, object value);
+        Task RemoveMany(IEnumerable<Product> products);
     }
 }

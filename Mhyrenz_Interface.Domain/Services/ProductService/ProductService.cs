@@ -51,6 +51,11 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return await _productDataService.Delete(entity.Id);
         }
 
+        public async Task RemoveMany(IEnumerable<Product> products)
+        {
+            await _productDataService.DeleteMany(products);
+        }
+
         private bool IsInvalidNumeric(object value)
         {
             if (value is int v4)

@@ -6,8 +6,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
              xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Controls.Behaviors"
              mc:Ignorable="d" 
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <DataTemplate x:Key="NumericEdit">
@@ -23,56 +25,68 @@
                NumericInputMode="Numbers" TextAlignment="Center"
                VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
         </DataTemplate>
-
+        <converters:PurchaseToGreenConverter x:Key="PurchaseToGreenConverter"/>
     </UserControl.Resources>
-    <Grid>
-        <DataGrid 
+    <DataGrid 
             EnableRowVirtualization="True" Unloaded="OnUserControlUnload" 
-            x:Name="InventoryDataGridRef" GridLinesVisibility="All"
+            x:Name="InventoryDataGridRef" GridLinesVisibility="All" VirtualizingPanel.IsContainerVirtualizable="True"
             ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" 
-            AutoGenerateColumns="False" EnableColumnVirtualization="True"
+            AutoGenerateColumns="False" EnableColumnVirtualization="True" ScrollViewer.CanContentScroll="True"
             VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-            
-            <i:Interaction.Behaviors>
-                <behaviors:InventoryDataGridBehavior />
-            </i:Interaction.Behaviors>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto"/>
-                <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}"/>
-                <!--<mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 
-                    Minimum="0" Maximum="100" NumericInputMode="Numbers"/>-->
-                <DataGridTemplateColumn x:Name="Purchase" Header="Purchase">
-                    
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
 
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}">
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Setter Property="ContentTemplate" Value="{StaticResource NumericEdit}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
-                                                    <Setter Property="ContentTemplate" Value="{StaticResource NormalEdit}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                </ContentControl>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <!--<DataGridTextColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=LostFocus}" Width="Auto"/>-->
-                <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" />
-                <mah:DataGridNumericUpDownColumn Header="Qty" Binding="{Binding Qty}" 
-                    Minimum="0" NumericInputMode="Numbers"/>
-                <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" />
-                <DataGridTextColumn IsReadOnly="True" Header="Category" Binding="{Binding Item.Category.Name}" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+        <i:Interaction.Behaviors>
+            <behaviors:InventoryDataGridBehavior Command="{Binding DeleteCommand}"/>
+        </i:Interaction.Behaviors>
+        <DataGrid.Columns>
+            <DataGridTextColumn TextBlock.FontWeight="DemiBold" Header="Name" Binding="{Binding Name}" Width="Auto"/>
+            <DataGridTextColumn IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}"/>
+            <!--<mah:DataGridNumericUpDownColumn Header="Purchase" Binding="{Binding Purchase}" Width="Auto" 
+                    Minimum="0" Maximum="100" NumericInputMode="Numbers"/>-->
+            <DataGridTemplateColumn x:Name="Purchase" Header="Purchase">
+
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+
+                <DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate>
+                        <ContentControl Content="{Binding}">
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource NumericEdit}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
+                                            <Setter Property="ContentTemplate" Value="{StaticResource NormalEdit}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellEditingTemplate>
+            </DataGridTemplateColumn>
+            <!--<DataGridTextColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=LostFocus}" Width="Auto"/>-->
+            <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" />
+            <mah:DataGridNumericUpDownColumn Header="Qty" Binding="{Binding Qty}" NumericInputMode="Numbers">
+                <mah:DataGridNumericUpDownColumn.EditingElementStyle>
+                    <Style TargetType="mah:NumericUpDown">
+                        <Setter Property="Minimum" Value="{Binding QtyMin}"/>
+                    </Style>
+                </mah:DataGridNumericUpDownColumn.EditingElementStyle>
+            </mah:DataGridNumericUpDownColumn>
+            <StaticResource ResourceKey="BarcodeColumn"/>
+            <DataGridTextColumn IsReadOnly="True" Header="Category" Binding="{Binding Item.Category.Name}" />
+        </DataGrid.Columns>
+        <DataGrid.RowStyle>
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Purchase, Converter={StaticResource PurchaseToGreenConverter}}" Value="True">
+                        <Setter Property="Background" Value="LawnGreen"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.RowStyle>
+    </DataGrid>
 </UserControl>

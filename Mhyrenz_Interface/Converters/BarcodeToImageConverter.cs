@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string code)
+            if (value is string code && !string.IsNullOrEmpty(code))
             {
                 var writer = new BarcodeWriter
                 {
@@ -49,20 +49,47 @@ namespace Mhyrenz_Interface.Converters
                 }
                 catch (Exception e)
                 {
-                    using (var bmp = new System.Drawing.Bitmap(200, 50))
+                    using (var bmp = new System.Drawing.Bitmap(200, 50, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                     using (var g = System.Drawing.Graphics.FromImage(bmp))
                     using (var ms = new MemoryStream())
                     {
-                        g.Clear(System.Drawing.Color.White);
-                        using (var font = new System.Drawing.Font("Arial", 16))
+                        // Clear with transparency
+                        g.Clear(System.Drawing.Color.Transparent);
+
+                        // 🛠 Fix blurry text: enable ClearType
+                        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+                        string text = "Invalid Barcode!";
+                        float maxWidth = bmp.Width;
+                        float maxHeight = bmp.Height;
+
+                        float fontSize = 32f;
+                        System.Drawing.Font font;
+                        System.Drawing.SizeF textSize;
+
+                        // Fit text into the bitmap
+                        do
+                        {
+                            font = new System.Drawing.Font("Arial", fontSize);
+                            textSize = g.MeasureString(text, font);
+                            fontSize -= 1f;
+                        }
+                        while ((textSize.Width > maxWidth || textSize.Height > maxHeight) && fontSize > 1f);
+
+                        using (font)
                         using (var brush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
                         {
-                            g.DrawString("Invalid Barcode!", font, brush, new System.Drawing.PointF(10, 15));
+                            float x = (bmp.Width - textSize.Width) / 2f;
+                            float y = (bmp.Height - textSize.Height) / 2f;
+
+                            g.DrawString(text, font, brush, x, y);
                         }
 
+                        // Save to stream
                         bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                         ms.Position = 0;
 
+                        // Create BitmapImage from stream
                         var fallback = new BitmapImage();
                         fallback.BeginInit();
                         fallback.CacheOption = BitmapCacheOption.OnLoad;
@@ -70,6 +97,8 @@ namespace Mhyrenz_Interface.Converters
                         fallback.EndInit();
                         return fallback;
                     }
+
+
                 }
             }
 

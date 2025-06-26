@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,9 +24,13 @@ namespace Mhyrenz_Interface.Controls
     /// </summary>
     public partial class InventoryDataGrid : UserControl
     {
+        private static int _instanceCount;
+
         public InventoryDataGrid()
         {
             InitializeComponent();
+            _instanceCount++;
+            Debug.WriteLine($"[InventoryTabView] Instance #{_instanceCount} created.");
         }
 
         private void OnUserControlUnload(object sender, EventArgs e)
@@ -34,7 +39,5 @@ namespace Mhyrenz_Interface.Controls
             var view = (IEditableCollectionView)CollectionViewSource.GetDefaultView(source);
             view?.CommitEdit();
         }
-
-
     }
 }

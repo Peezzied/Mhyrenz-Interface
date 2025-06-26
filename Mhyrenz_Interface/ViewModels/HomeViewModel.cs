@@ -32,11 +32,22 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly OverviewChartViewModel _overviewChartViewModel;
         private readonly ISalesRecordService _salesRecordService;
         private readonly ITransactionsService _transactionService;
+        private readonly IViewModelFactory<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
 
+        private InventoryDataGridViewModel _invetoryDataGridContext;
+        public InventoryDataGridViewModel InventoryDataGridContext
+        {
+            get =>  _invetoryDataGridContext;
+            set
+            {
+                _invetoryDataGridContext = value;
+                OnPropertyChanged(nameof(InventoryDataGridContext));
+            }
+        }
+        private ICollectionView Inventory;
         public ICommand RegisterCommand { get; private set; }
-        public ICollectionView Inventory { get; private set; }
         public ICollectionView Transactions { get; private set; }
         public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;   
         public string Bindtest => _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
@@ -74,16 +85,18 @@ namespace Mhyrenz_Interface.ViewModels
             ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
-            IDialogCoordinator dialogCoordinator) : base(navigationServiceEx)
+            IDialogCoordinator dialogCoordinator,
+            IViewModelFactory<InventoryDataGridViewModel> inventoryDataGridViewModelFactory) : base(navigationServiceEx)
         {
-
-
             _navigationServiceEx = navigationServiceEx;
             _inventoryStore = inventroyStore;
             _transactionStore = transactionStore;
             _overviewChartViewModel = overviewChartViewModel;
             _salesRecordService = salesRecordService;
             _transactionService = transactionsService;
+
+            _inventoryDataGridViewModelFactory = inventoryDataGridViewModelFactory;
+            InventoryDataGridContext = _inventoryDataGridViewModelFactory.CreateViewModel();
 
             _sessionStore = sessionStore;
             _inventoryStore.ProductsCollectionView.Filter = FilterProducts;
@@ -133,7 +146,7 @@ namespace Mhyrenz_Interface.ViewModels
             await App.Current.Dispatcher.InvokeAsync(new Action(() =>
             {
                 Inventory = _inventoryStore.ProductsCollectionView;
-                OnPropertyChanged(nameof(Inventory));
+                InventoryDataGridContext.Inventory = Inventory;
 
                 Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
                 OnPropertyChanged(nameof(Transactions));

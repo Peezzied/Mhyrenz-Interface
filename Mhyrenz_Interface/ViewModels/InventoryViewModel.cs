@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.Navigation;
+﻿using Mhyrenz_Interface.Controls;
+using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using System;
@@ -16,6 +17,7 @@ namespace Mhyrenz_Interface.ViewModels
 {
     public class InventoryViewModel : NavigationViewModel
     {
+        private readonly IViewModelFactory<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
 
@@ -32,10 +34,15 @@ namespace Mhyrenz_Interface.ViewModels
         }
         public ObservableCollection<TabItems> TabItems { get; private set; }
 
-        public InventoryViewModel(INavigationServiceEx navigationServiceEx, ICategoryStore categoryStore, IInventoryStore inventoryStore) : base(navigationServiceEx)
+        public InventoryViewModel(
+            INavigationServiceEx navigationServiceEx,
+            ICategoryStore categoryStore,
+            IInventoryStore inventoryStore,
+            IViewModelFactory<InventoryDataGridViewModel> inventoryDataGridviewModelFactory) : base(navigationServiceEx)
         {
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
+            _inventoryDataGridViewModelFactory = inventoryDataGridviewModelFactory;
 
             TabItems = new ObservableCollection<TabItems>();
             App.Current.Dispatcher.Invoke(new Action(() =>
@@ -51,6 +58,7 @@ namespace Mhyrenz_Interface.ViewModels
             foreach (var category in _categorystore.Categories)
             {
                 var tab = new TabItems(
+                    _inventoryDataGridViewModelFactory.CreateViewModel(),
                     category.Name,
                     _inventoryStore.Products,
                     product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
@@ -62,21 +70,25 @@ namespace Mhyrenz_Interface.ViewModels
 
     }
 
-    public class TabItems : INotifyPropertyChanged
+    public class TabItems : BaseViewModel
     {
+        private readonly InventoryDataGridViewModel _inventoryDataGridViewModel;
+
         public string Name => _category;
 
-        private ICollectionView _inventory;
-        public ICollectionView Inventory
+        private ICollectionView Inventory;
+
+        private InventoryDataGrid _controlInstance;
+        public InventoryDataGrid ControlInstance
         {
-            get => _inventory;
-            private set
+            get
             {
-                if (_inventory != value)
+                if (_controlInstance == null)
                 {
-                    _inventory = value;
-                    OnPropertyChanged(nameof(Inventory));
+                    _controlInstance = new InventoryDataGrid();
+                    _controlInstance.DataContext = _inventoryDataGridViewModel;
                 }
+                return _controlInstance;
             }
         }
 
@@ -84,11 +96,13 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly string _category;
         private readonly Func<ProductDataViewModel, bool> _searchFilter;
 
-        public TabItems(string category, ObservableCollection<ProductDataViewModel> allProducts, Func<ProductDataViewModel, bool> searchFilter)
+        public TabItems(InventoryDataGridViewModel inventoryDataGridViewModel, string category, ObservableCollection<ProductDataViewModel> allProducts, Func<ProductDataViewModel, bool> searchFilter)
         {
             _category = category;
             _allProducts = allProducts;
             _searchFilter = searchFilter;
+
+            _inventoryDataGridViewModel = inventoryDataGridViewModel; // REFACTOR WITH FACTORY
 
             // Kick off deferred loading (non-blocking)
             DeferInventoryInitialization();
@@ -102,6 +116,8 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     Filter = FilterByCategory
                 };
+
+                _inventoryDataGridViewModel.Inventory = Inventory;
             }, System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
@@ -110,13 +126,9 @@ namespace Mhyrenz_Interface.ViewModels
             return item is ProductDataViewModel product &&
                    product.Item.Category.Name == _category &&
                    _searchFilter(product);
-        }
+    }
 
-        public void Refresh() => _inventory?.Refresh();
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        public void Refresh() => Inventory?.Refresh();
     }
 
 

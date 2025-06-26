@@ -8,26 +8,11 @@
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <converters:BarcodeToImageConverter x:Key="BarcodeToImageConverter"/>
-    </UserControl.Resources>
     <Grid>
         <DataGrid ItemsSource="{Binding Transactions}" AutoGenerateColumns="False" Style="{StaticResource MahApps.Styles.DataGrid}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Barcode" CanUserSort="False" Width="100" MinWidth="100" MaxWidth="130">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}" 
-                                   MaxWidth="130"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Barcode}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn IsReadOnly="True" CanUserSort="False" Header="Name" Width="Auto">
+                <StaticResource ResourceKey="BarcodeColumn"/>
+                <DataGridTemplateColumn IsReadOnly="True" CanUserSort="False" Header="Name" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:MaxLinesTextBlock Text="{Binding Name}"
@@ -38,7 +23,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Price" Binding="{Binding Price}" Width="Auto" MinWidth="70"/>
+                <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Price" Binding="{Binding Price, StringFormat=C, ConverterCulture=en-ph}" Width="Auto" MinWidth="60" TextBlock.TextAlignment="Center"/>
                 <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="Qty" Binding="{Binding Amount}" Width="Auto" MinWidth="50"/>
                 <DataGridTextColumn IsReadOnly="True" Header="Date" Binding="{Binding Date}" Width="Auto" MinWidth="60"/>
                 <DataGridTextColumn IsReadOnly="True" CanUserSort="False" Header="" Width="*" CanUserReorder="False"/>

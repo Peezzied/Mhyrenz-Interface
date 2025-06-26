@@ -52,6 +52,11 @@ namespace Mhyrenz_Interface.ViewModels
             get => Item.Qty;
         }
 
+        public int QtyMin 
+        {
+            get => Purchase; 
+        }
+
         //private int _cachedPurchase;
         private int _purchase;
         public int PurchaseDefaultEdit
