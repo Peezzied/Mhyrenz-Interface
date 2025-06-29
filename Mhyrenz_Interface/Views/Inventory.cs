@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using HandyControl.Themes;
+
 namespace Mhyrenz_Interface.Views
 {
     public partial class InventoryView : UserControl
@@ -20,6 +22,11 @@ namespace Mhyrenz_Interface.Views
         public InventoryView()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            DrawerRight.IsOpen = !DrawerRight.IsOpen;
         }
     }
 }

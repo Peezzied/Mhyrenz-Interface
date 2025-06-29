@@ -115,7 +115,7 @@
                     <StackPanel Background="Black" Grid.Row="0" Orientation="Vertical">
                         <TextBlock Foreground="White" Text="{Binding CurrentViewModel}"/>
                     </StackPanel>
-                    <ContentPresenter 
+                    <ContentControl 
                         Grid.Row="1"
                         DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
                         Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />

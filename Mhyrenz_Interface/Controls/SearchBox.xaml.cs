@@ -24,5 +24,10 @@ namespace Mhyrenz_Interface.Controls
         {
             InitializeComponent();
         }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }

@@ -36,11 +36,27 @@
         </DataTemplate>
         <converters:PurchaseToGreenConverter x:Key="PurchaseToGreenConverter"/>
         <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
+
+        <Style BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}"
+               TargetType="{x:Type DataGridCell}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
+                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1" />
+                        <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=IsSelected}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent2}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <DataGrid 
-            EnableRowVirtualization="True" Unloaded="OnUserControlUnload" 
+            EnableRowVirtualization="True" Unloaded="OnUserControlUnload" RowDetailsVisibilityMode="Collapsed"
             x:Name="InventoryDataGridRef" GridLinesVisibility="All" VirtualizingPanel.IsContainerVirtualizable="True"
-            ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" 
+            ItemsSource="{Binding Inventory}" Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
             AutoGenerateColumns="False" EnableColumnVirtualization="True" ScrollViewer.CanContentScroll="True"
             VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
 
@@ -48,14 +64,15 @@
             <behaviors:InventoryDataGridBehavior Command="{Binding DeleteCommand}"/>
         </i:Interaction.Behaviors>
         <DataGrid.Columns>
-            <DataGridTemplateColumn IsReadOnly="True" CanUserSort="False" Header="Name" Width="Auto">
+            <DataGridCheckBoxColumn/>
+            <DataGridTemplateColumn CanUserSort="False" Header="Name" Width="Auto">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <local:MaxLinesTextBlock Text="{Binding Name}"
-                     LineHeight="16"
-                     MaxLines="3"
-                     Padding="4"
-                     Width="Auto"/>
+                             LineHeight="16"
+                             MaxLines="3"
+                             Padding="4"
+                             Width="Auto"/>
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
