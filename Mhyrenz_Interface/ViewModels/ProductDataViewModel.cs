@@ -31,6 +31,18 @@ namespace Mhyrenz_Interface.ViewModels
             get => Item.NetQty;
         }
 
+        private bool _isSelected;
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+
         private bool _isCtrlClicked = false;
         public bool IsCtrlClicked 
         { 

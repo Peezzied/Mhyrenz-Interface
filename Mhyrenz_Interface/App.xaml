@@ -19,6 +19,7 @@
                 <hc:Theme/>
 
                 <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
+                <ResourceDictionary Source="/Controls/Templates/InventoryDataGridStyle.xaml"/>
                 <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

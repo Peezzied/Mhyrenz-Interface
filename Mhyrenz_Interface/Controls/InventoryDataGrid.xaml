@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Mhyrenz_Interface.Controls.InventoryDataGrid"
+﻿<UserControl x:Class="Mhyrenz_Interface.Controls.InventoryDataGridDep"
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -37,21 +37,7 @@
         <converters:PurchaseToGreenConverter x:Key="PurchaseToGreenConverter"/>
         <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
 
-        <Style BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}"
-               TargetType="{x:Type DataGridCell}">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
-                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-                </DataTrigger>
-                <MultiDataTrigger>
-                    <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1" />
-                        <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=IsSelected}" Value="True" />
-                    </MultiDataTrigger.Conditions>
-                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent2}" />
-                </MultiDataTrigger>
-            </Style.Triggers>
-        </Style>
+
     </UserControl.Resources>
     <DataGrid 
             EnableRowVirtualization="True" Unloaded="OnUserControlUnload" RowDetailsVisibilityMode="Collapsed"
@@ -64,7 +50,7 @@
             <behaviors:InventoryDataGridBehavior Command="{Binding DeleteCommand}"/>
         </i:Interaction.Behaviors>
         <DataGrid.Columns>
-            <DataGridCheckBoxColumn/>
+            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" />
             <DataGridTemplateColumn CanUserSort="False" Header="Name" Width="Auto">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
@@ -116,11 +102,30 @@
             <StaticResource ResourceKey="BarcodeColumn"/>
             <DataGridTextColumn IsReadOnly="True" Header="Category" Binding="{Binding Item.Category.Name}" />
         </DataGrid.Columns>
+        <DataGrid.CellStyle>
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
+                    </DataTrigger>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1" />
+                            <Condition Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=IsSelected}" Value="True" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent2}" />
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.CellStyle>
         <DataGrid.RowStyle>
             <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Purchase, Converter={StaticResource PurchaseToGreenConverter}}" Value="True">
                         <Setter Property="Background" Value="LawnGreen"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>

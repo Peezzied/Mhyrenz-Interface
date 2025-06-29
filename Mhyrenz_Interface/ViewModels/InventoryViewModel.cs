@@ -111,8 +111,11 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (_controlInstance == null)
                 {
-                    _controlInstance = new InventoryDataGrid();
-                    _controlInstance.DataContext = _inventoryDataGridViewModel;
+                    _controlInstance = new InventoryDataGrid()
+                    {
+                        DataContext = _inventoryDataGridViewModel,
+                        LayoutType = LayoutType.Detailed
+                    };
                 }
                 return _controlInstance;
             }

@@ -22,15 +22,13 @@ namespace Mhyrenz_Interface.Controls
     /// <summary>
     /// Interaction logic for InventoryDataGrid.xaml
     /// </summary>
-    public partial class InventoryDataGrid : UserControl
+    public partial class InventoryDataGridDep : UserControl
     {
         private static int _instanceCount;
 
-        public InventoryDataGrid()
+        public InventoryDataGridDep()
         {
             InitializeComponent();
-            _instanceCount++;
-            Debug.WriteLine($"[InventoryTabView] Instance #{_instanceCount} created.");
         }
 
         private void OnUserControlUnload(object sender, EventArgs e)

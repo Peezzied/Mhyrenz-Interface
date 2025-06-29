@@ -26,7 +26,7 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <controls:InventoryDataGrid DataContext="{Binding InventoryDataGridContext}" Grid.Column="0" Height="500"/>
+                <controls:InventoryDataGrid LayoutType="Compact" DataContext="{Binding InventoryDataGridContext}" Grid.Column="0" Height="500"/>
                 <!--<UniformGrid Grid.Column="1" Columns="3">
                     
                 </UniformGrid>-->

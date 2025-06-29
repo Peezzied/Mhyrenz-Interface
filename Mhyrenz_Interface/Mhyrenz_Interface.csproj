@@ -390,8 +390,10 @@
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
     <Compile Include="Controls\Behaviors\Class1.cs" />
+    <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />
+    <Compile Include="Controls\InventoryDataGrid.cs" />
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
@@ -480,6 +482,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Templates\IconButtonWithTipStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Templates\InventoryDataGridStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
