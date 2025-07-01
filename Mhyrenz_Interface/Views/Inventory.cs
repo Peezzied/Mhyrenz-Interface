@@ -23,10 +23,5 @@ namespace Mhyrenz_Interface.Views
         {
             InitializeComponent();
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            DrawerRight.IsOpen = !DrawerRight.IsOpen;
-        }
     }
 }

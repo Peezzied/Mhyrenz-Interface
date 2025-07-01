@@ -389,6 +389,9 @@
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
+    <Compile Include="Controls\AddProductDrawer.xaml.cs">
+      <DependentUpon>AddProductDrawer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Behaviors\Class1.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
@@ -416,6 +419,7 @@
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
+    <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
@@ -434,8 +438,11 @@
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="Navigation\INavigationServiceEx.cs" />
     <Compile Include="Navigation\NavigationServiceEx.cs" />
-    <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\InventoryStore.cs" />
+    <Compile Include="Test\TestWindowViewModel.cs" />
+    <Compile Include="Test\TestWindow.xaml.cs">
+      <DependentUpon>TestWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
@@ -461,6 +468,10 @@
     <Compile Include="Views\TransactionsView.cs">
       <DependentUpon>TransactionsView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\AddProductDrawer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\InventoryDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -509,6 +520,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Test\TestWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\HomeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

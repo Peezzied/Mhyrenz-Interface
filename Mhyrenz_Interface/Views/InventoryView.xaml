@@ -20,17 +20,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <hc:Drawer Name="DrawerRight" Dock="Right">
-                <Border Background="Black" Width="300" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <!--<TextBlock Margin="10,0,0,0" Text="Header" Style="{StaticResource TextBlockTitle}" HorizontalAlignment="Left"/>-->
-                        <!--<Button Command="hc:ControlCommands.Close" Grid.Row="0" HorizontalAlignment="Right" Foreground="{DynamicResource PrimaryTextBrush}" Style="{StaticResource ButtonIcon}" hc:IconElement.Geometry="{StaticResource DeleteFillCircleGeometry}"/>-->
-                    </Grid>
-                </Border>
-            </hc:Drawer>
+            
+        </hc:Drawer>
         <Grid Margin="17,10,17,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -41,7 +32,7 @@
             <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
                 <controls:IconButtonWithTip Foreground="Red" Tiptext="Delete selected">
                     <controls:IconButtonWithTip.IconContent>
-                        <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" /> 
+                        <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
                     </controls:IconButtonWithTip.IconContent>
                 </controls:IconButtonWithTip>
                 <controls:IconButtonWithTip Tiptext="Export to xlsx">
@@ -53,20 +44,18 @@
                 <hc:SplitButton Style="{StaticResource SplitButtonPrimary}" hc:IconElement.Geometry="{StaticResource AddGeometry}" hc:IconElement.Width="12" Content="Add Product" Command="{Binding AddProductCommand}" CommandParameter="{Binding ElementName=DrawerRight}"/>
             </hc:UniformSpacingPanel>
         </Grid>
-        <mah:MetroTabControl
+        <mah:MetroAnimatedSingleRowTabControl
                 Grid.Row="1"
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                KeepVisualTreeInMemoryWhenChangingTabs="True"
                 ItemsSource="{Binding TabItems}"
                 mah:TabControlHelper.Underlined="TabPanel"
-                DisplayMemberPath="Name"
-                Style="{StaticResource MahApps.Styles.TabControl.AnimatedSingleRow}">
-            <mah:MetroTabControl.ContentTemplate>
+                DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
+            <mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
                 <DataTemplate>
                     <ContentControl Content="{Binding ControlInstance}" />
                 </DataTemplate>
-            </mah:MetroTabControl.ContentTemplate>
-        </mah:MetroTabControl>
+            </mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
+        </mah:MetroAnimatedSingleRowTabControl>
     </Grid>
 
 </UserControl>

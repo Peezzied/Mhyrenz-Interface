@@ -117,22 +117,6 @@ namespace Mhyrenz_Interface.ViewModels
 
             _transactionStore.RequestTransactionsUpdate += OnRequestTransactionsUpdate;
 
-            _productService.GetAll().ContinueWith(task =>
-            {
-                if (task.IsCompleted)
-                {
-                    var products = task.Result;
-                    _inventoryStore.LoadProducts(products);
-
-                    //Debug.WriteLine("Loaded products: " + products);
-                }
-                else
-                {
-                    // Handle error
-                    //Debug.WriteLine("Failed to load products: " + task.Exception?.Message);
-                }
-            });
-
             TransactionsLoad();
         }
 

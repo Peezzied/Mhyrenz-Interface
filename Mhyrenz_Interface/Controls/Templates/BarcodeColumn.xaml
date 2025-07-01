@@ -1,23 +1,49 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Mhyrenz_Interface"
+                    xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                     xmlns:conv="clr-namespace:Mhyrenz_Interface.Converters">
 
     <!-- Your converter -->
     <conv:BarcodeToImageConverter x:Key="BarcodeToImageConverter"/>
+    <DataTemplate x:Key="BarcodeImageTemplate">
+        <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}"
+           MaxWidth="130"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="FallbackTextTemplate">
+        <TextBlock Text="Invalid!" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"
+               Foreground="Red"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"/>
+    </DataTemplate>
 
     <!-- The column as a resource -->
     <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
                             Header="Barcode" CanUserSort="False" Width="87" MinWidth="87" MaxWidth="130">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
-                <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}" 
-                       MaxWidth="130"/>
+                <ContentControl x:Name="BarcodeContent" Content="{Binding}">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
+                            <Style.Triggers>
+                                <DataTrigger Value="Invalid">
+                                    <DataTrigger.Binding>
+                                        <Binding Path="Barcode"
+                                             Converter="{StaticResource BarcodeToImageConverter}"/>
+                                    </DataTrigger.Binding>
+                                    <Setter Property="ContentTemplate" Value="{StaticResource FallbackTextTemplate}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
             </DataTemplate>
         </DataGridTemplateColumn.CellTemplate>
         <DataGridTemplateColumn.CellEditingTemplate>
             <DataTemplate>
-                <TextBox Text="{Binding Barcode}"/>
+                <TextBox Text="{Binding Barcode}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
