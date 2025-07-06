@@ -41,7 +41,7 @@ namespace Mhyrenz_Interface.Core
 
         public abstract Task ExecuteAsync(object parameter);
 
-        protected void OnCanExecuteChanged()
+        public void OnCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, new EventArgs());
         }

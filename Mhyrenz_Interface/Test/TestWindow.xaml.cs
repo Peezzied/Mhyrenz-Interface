@@ -1,10 +1,10 @@
-﻿using MahApps.Metro.Controls;
+﻿using HandyControl.Controls;
+using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -18,7 +18,7 @@ namespace Mhyrenz_Interface.Test
     /// <summary>
     /// Interaction logic for TestWindow.xaml
     /// </summary>
-    public partial class TestWindow : MetroWindow
+    public partial class TestWindow : Window
     {
         public TestWindow(TestWindowViewModel viewModel)
         {

@@ -1,13 +1,17 @@
-﻿using Mhyrenz_Interface.Core;
+﻿using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -15,7 +19,8 @@ namespace Mhyrenz_Interface.ViewModels
     public class InventoryDataGridVmDTO
     {
         public IEnumerable<ProductDataViewModel> ProductData { get; set; }
-        public Action DeleteHandle { get; internal set; }
+        public Action DeleteHandle { get; set; }
+        public Action RemoveItems { get; set; }
     }
 
     public class InventoryDataGridViewModel: BaseViewModel
@@ -38,29 +43,43 @@ namespace Mhyrenz_Interface.ViewModels
 
         public ICommand DeleteCommand { get; set; }
 
+        private IEnumerable<ProductDataViewModel> _selectedItems;
+        public IEnumerable<ProductDataViewModel> SelectedItems 
+        { 
+            get => _selectedItems; 
+            set
+            {
+                _selectedItems = value;
+
+                bool state;
+                if (value.Any())
+                    state = true;
+                else state = false;
+
+                SelectedItemsChanged?.Invoke(state);
+            }
+        }
+
+        public event Action<bool> SelectedItemsChanged;
+        public event Action SwitchSelectedItem;
+        public Action RemoveItems { get; internal set; }
+
         public InventoryDataGridViewModel(IProductService productService)
         {
             _productService = productService;
 
-            DeleteCommand = new RelayCommand(DeleteCommandExecute); // TO UNDO MANAGER
+            DeleteCommand = new DeleteCommand(_productService); // TO UNDO MANAGER
         }
 
-        private void DeleteCommandExecute(object parameter)
+        public bool IsDiff { get; set; }
+        public int SwitchSelectItem { get; set; } = -1;
+
+        public void SelectItem(bool isDiff, int index)
         {
-            if (parameter is InventoryDataGridVmDTO dto)
-            {
-                var items = dto.ProductData;
-                var prompt = MessageBox.Show($"Do you really want to remove {items.Count()} items?", "Remove Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            IsDiff = isDiff;
+            SwitchSelectItem = index;
 
-                if (prompt == MessageBoxResult.No)
-                {
-                    dto.DeleteHandle();
-                }
-
-                _productService.RemoveMany(items.Select(i => i.Item));
-
-
-            }
+            SwitchSelectedItem?.Invoke();
         }
     }
 }

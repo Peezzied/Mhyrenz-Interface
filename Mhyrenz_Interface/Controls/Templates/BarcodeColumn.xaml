@@ -3,11 +3,10 @@
                     xmlns:local="clr-namespace:Mhyrenz_Interface"
                     xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                     xmlns:conv="clr-namespace:Mhyrenz_Interface.Converters">
-
-    <!-- Your converter -->
+    
     <conv:BarcodeToImageConverter x:Key="BarcodeToImageConverter"/>
     <DataTemplate x:Key="BarcodeImageTemplate">
-        <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}"
+        <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}, IsAsync=True}"
            MaxWidth="130"/>
     </DataTemplate>
 
@@ -18,9 +17,8 @@
                VerticalAlignment="Center"/>
     </DataTemplate>
 
-    <!-- The column as a resource -->
     <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
-                            Header="Barcode" CanUserSort="False" Width="87" MinWidth="87" MaxWidth="130">
+                            Header="Barcode" CanUserSort="False" Width="121" MinWidth="121" MaxWidth="130">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
                 <ContentControl x:Name="BarcodeContent" Content="{Binding}">

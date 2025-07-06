@@ -65,7 +65,6 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
                     }
                     catch (Exception ex)
                     {
-                        // Optional: log or ignore
                         Console.WriteLine($"Failed to delete '{file}': {ex.Message}");
                     }
                 }
@@ -173,9 +172,9 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
                     Format = GuessFormat(code),
                     Options = new ZXing.Common.EncodingOptions
                     {
-                        Width = 30,
-                        Height = 27,
-                        Margin = 2
+                        Width = 150,
+                        Height = 30,
+                        Margin = 4
                     }
                 };
 

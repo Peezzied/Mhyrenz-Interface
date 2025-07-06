@@ -384,6 +384,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\AddCommand.cs" />
+    <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Commands\ProductVMCommandCommon.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
@@ -392,11 +394,13 @@
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Behaviors\Class1.cs" />
+    <Compile Include="Controls\Behaviors\InventoryDataGridSelect.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />
-    <Compile Include="Controls\InventoryDataGrid.cs" />
+    <Compile Include="Controls\InventoryDataGrid.xaml.cs">
+      <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
@@ -411,10 +415,12 @@
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BarcodeToImageConverter.cs" />
+    <Compile Include="Converters\DoubleToCurrencyStringConverter.cs" />
     <Compile Include="Converters\DetailsTextNoneConverter.cs" />
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
@@ -426,9 +432,6 @@
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Commands\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />
-    <Compile Include="Controls\InventoryDataGrid.xaml.cs">
-      <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\StatusBar.xaml.cs">
       <DependentUpon>StatusBar.xaml</DependentUpon>
     </Compile>
@@ -443,6 +446,7 @@
     <Compile Include="Test\TestWindow.xaml.cs">
       <DependentUpon>TestWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\AddProductViewModel.cs" />
     <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
@@ -473,8 +477,8 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\InventoryDataGrid.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\OverviewChart.xaml">
       <SubType>Designer</SubType>

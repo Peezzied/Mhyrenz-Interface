@@ -22,11 +22,11 @@ namespace Mhyrenz_Interface.Controls
     /// <summary>
     /// Interaction logic for InventoryDataGrid.xaml
     /// </summary>
-    public partial class InventoryDataGridDep : UserControl
+    public partial class InventoryDataGrid : UserControl
     {
         private static int _instanceCount;
 
-        public InventoryDataGridDep()
+        public InventoryDataGrid()
         {
             InitializeComponent();
         }

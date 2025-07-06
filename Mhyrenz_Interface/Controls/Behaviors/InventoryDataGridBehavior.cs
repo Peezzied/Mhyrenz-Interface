@@ -1,4 +1,5 @@
 ﻿
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.Xaml.Behaviors;
 using System;
@@ -13,8 +14,10 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public partial class InventoryDataGridBehavior : Behavior<DataGrid>
     {
-        partial void OnAttachedExtended();
-        partial void OnDetachingExtended();
+        partial void OnAttachedDelete();
+        partial void OnDetachingDelete();
+        partial void OnAttachedSelect();
+        partial void OnDetachingSelect();
 
         protected override void OnAttached()
         {
@@ -23,7 +26,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.ContextMenuOpening += OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown += OnRightClick;
 
-            OnAttachedExtended();
+            OnAttachedDelete();
+            OnAttachedSelect();
         }
 
         protected override void OnDetaching()
@@ -33,7 +37,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.ContextMenuOpening -= OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown -= OnRightClick;
 
-            OnDetachingExtended();
+            OnDetachingDelete();
+            OnDetachingSelect();
         }
         private void OnCellChanged(object sender, EventArgs e)
         {
@@ -53,7 +58,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
         private void GetCell(MouseButtonEventArgs e, out DataGridCell dataGrid)
         {
-            dataGrid = FindParent<DataGridCell>(e.OriginalSource as DependencyObject);
+            dataGrid = Utils.FindParent<DataGridCell>(e.OriginalSource as DependencyObject);
         }
 
         private bool _state = false;
@@ -120,11 +125,11 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 var row = dataGrid.ItemContainerGenerator.ContainerFromItem(rowData) as DataGridRow;
                 if (row == null) return;
 
-                var presenter = FindVisualChild<DataGridCellsPresenter>(row);
+                var presenter = Utils.FindChild<DataGridCellsPresenter>(row);
                 if (presenter == null)
                 {
                     dataGrid.UpdateLayout();
-                    presenter = FindVisualChild<DataGridCellsPresenter>(row);
+                    presenter = Utils.FindChild<DataGridCellsPresenter>(row);
                     if (presenter == null) return;
                 }
 
@@ -141,32 +146,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 // Begin editing the cell
                 dataGrid.BeginEdit();
             });
-        }
-
-        private static T FindParent<T>(DependencyObject current) where T : DependencyObject
-        {
-            while (current != null)
-            {
-                if (current is T found)
-                    return found;
-                current = VisualTreeHelper.GetParent(current);
-            }
-            return null;
-        }
-
-        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T found)
-                    return found;
-
-                var result = FindVisualChild<T>(child);
-                if (result != null)
-                    return result;
-            }
-            return null;
         }
     }
 }

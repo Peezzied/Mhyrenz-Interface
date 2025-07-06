@@ -20,11 +20,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
         public async Task<Product> Add(Product entity)
         {
-            if (entity.ListPrice <= 0 && entity.RetailPrice <= 0)
-                throw new InvalidPriceException(entity.ListPrice, entity.RetailPrice);
-
-            await _productDataService.Create(entity);
-            return entity;
+            return await _productDataService.Create(entity);
         }
 
         public async Task<Product> Edit(int id, string propertyName, object value)

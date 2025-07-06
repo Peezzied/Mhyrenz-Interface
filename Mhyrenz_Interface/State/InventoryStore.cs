@@ -58,12 +58,28 @@ namespace Mhyrenz_Interface.State
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
         }
 
+        public ProductDataViewModel AddProduct(Product product)
+        {
+            var productVm = _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+            {
+                Product = product,
+                SessionStore = _sessionStore,
+                OnSessionNull = PromptSession
+            });
+
+            _trackers.Add(TrackProducts(productVm));
+            Products.Add(productVm);
+
+            return productVm;
+        }
+
         public void LoadProducts(IEnumerable<Product> products)
         {
 
             App.Current.Dispatcher.Invoke(()=>
             {
                 Products.Clear();
+                _trackers.Clear();
                 ChangeTracking.IsInventoryLoaded = true;
 
                 var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO

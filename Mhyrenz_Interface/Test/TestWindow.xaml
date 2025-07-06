@@ -1,4 +1,5 @@
-﻿<mah:MetroWindow x:Class="Mhyrenz_Interface.Test.TestWindow"
+﻿<hc:Window x:Class="Mhyrenz_Interface.Test.TestWindow"
+        xmlns:hc="https://handyorg.github.io/handycontrol"  
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
         xmlns:views="clr-namespace:Mhyrenz_Interface.Views"
@@ -12,4 +13,4 @@
     <Grid>
         <views:InventoryView DataContext="{Binding Context}"/>
     </Grid>
-</mah:MetroWindow>
+</hc:Window>

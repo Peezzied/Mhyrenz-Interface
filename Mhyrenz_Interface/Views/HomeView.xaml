@@ -26,7 +26,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <controls:InventoryDataGrid LayoutType="Compact" DataContext="{Binding InventoryDataGridContext}" Grid.Column="0" Height="500"/>
+
+                <ContentControl Content="{Binding InventoryDataGridContext}" ContentTemplate="{StaticResource DataGridCompactLayout}" Height="500"/>
                 <!--<UniformGrid Grid.Column="1" Columns="3">
                     
                 </UniformGrid>-->
@@ -50,7 +51,7 @@
 
             </Grid>
             <Grid Grid.Row="1">
-                <controls:TransactionsDataGrid/>
+                <!--<controls:TransactionsDataGrid/>-->
             </Grid>
         </Grid>
 

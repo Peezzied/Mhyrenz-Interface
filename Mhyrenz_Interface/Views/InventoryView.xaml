@@ -19,8 +19,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <hc:Drawer Name="DrawerRight" Dock="Right">
-            
+        <hc:Drawer IsOpen="{Binding DrawerIsOpen}" ShowMode="Push" Name="DrawerRight" Dock="Right">
+            <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="300">
+                <ContentControl Content="{Binding DrawerContent}" Margin="30"/>
+            </Border>
         </hc:Drawer>
         <Grid Margin="17,10,17,0">
             <Grid.ColumnDefinitions>
@@ -30,7 +32,7 @@
             </Grid.ColumnDefinitions>
             <controls:SearchBox Grid.Column="0"/>
             <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
-                <controls:IconButtonWithTip Foreground="Red" Tiptext="Delete selected">
+                <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
                     <controls:IconButtonWithTip.IconContent>
                         <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
                     </controls:IconButtonWithTip.IconContent>
@@ -52,7 +54,7 @@
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
             <mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding ControlInstance}" />
+                    <ContentControl Loaded="ContentControl_Loaded" Unloaded="ContentControl_Unloaded" Content="{Binding ControlInstance}"/>
                 </DataTemplate>
             </mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
         </mah:MetroAnimatedSingleRowTabControl>

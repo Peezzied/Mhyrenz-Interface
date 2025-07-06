@@ -21,16 +21,16 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             set => SetValue(CommandProperty, value);
         }
 
-        partial void OnAttachedExtended()
+        partial void OnAttachedDelete()
         {
             base.OnAttached();
             CommandManager.AddPreviewExecutedHandler(AssociatedObject, OnPreviewExecuted);
         }
 
-        partial void OnDetachingExtended()
+        partial void OnDetachingDelete()
         {
             CommandManager.RemovePreviewExecutedHandler(AssociatedObject, OnPreviewExecuted);
-            base.OnDetaching();
+            base.OnDetaching(); 
         }
 
         private void OnPreviewExecuted(object sender, ExecutedRoutedEventArgs e)

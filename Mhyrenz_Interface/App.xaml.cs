@@ -124,6 +124,8 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<IViewModelFactory<InventoryDataGridViewModel>, ViewModelFactory<InventoryDataGridViewModel>>()
 
+                .AddSingleton<IViewModelFactory<AddProductViewModel>, ViewModelFactory<AddProductViewModel>>()
+
                 .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ISessionService, SessionService>()
                 .AddSingleton<ISalesRecordDataService, SalesRecordDataService>()
@@ -142,6 +144,7 @@ namespace Mhyrenz_Interface
                 .AddTransient<TransactionViewModel>()
                 .AddTransient<SettingsViewModel>()
                 .AddTransient<InventoryDataGridViewModel>()
+                .AddTransient<AddProductViewModel>()
 
                 .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
                 {
@@ -164,6 +167,10 @@ namespace Mhyrenz_Interface
 
                         throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
                     };
+                })
+                .AddSingleton<CreateViewModel<AddProductViewModel>>(s =>
+                {
+                    return _ => s.GetRequiredService<AddProductViewModel>();
                 })
                 .AddSingleton<CreateViewModel<InventoryDataGridViewModel>>(s =>
                 {

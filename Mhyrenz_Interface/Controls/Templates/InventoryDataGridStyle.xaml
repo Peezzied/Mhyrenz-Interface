@@ -6,6 +6,7 @@
                     xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style x:Key="DetailsTextStyle" TargetType="TextBlock">
         <Style.Triggers>
@@ -85,7 +86,7 @@
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
     <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"  MinWidth="70" MaxWidth="100"/>
-    <DataGridTemplateColumn  x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="100"  MinWidth="80" MaxWidth="100">
+    <DataGridTemplateColumn  x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="70"  MinWidth="70" MaxWidth="100">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
                 <TextBlock TextAlignment="Center" Text="{Binding Qty}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
@@ -123,7 +124,6 @@
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
             </DataTrigger>
         </Style.Triggers>
-        <Setter Property="MaxHeight" Value="40"/>
     </Style>
 
     <DataTemplate x:Key="DetailsRow">
@@ -131,14 +131,11 @@
             <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Item.Category.Name}" FontSize="14" Margin="0,0,7,5" VerticalAlignment="Bottom"/>
-                    <Button x:Name="GoBackButton"
-                        Padding="0" Background="Transparent" BorderThickness="0"
-                        AutomationProperties.Name="Go back" VerticalAlignment="Center"
-                        Command="{Binding GoBackCommand}">
-                        <mah:FontIcon AutomationProperties.Name="Go back icon"
-                       FontSize="14"
-                       Glyph="&#xE8A7;" />
-                    </Button>
+                    <controls:IconButtonWithTip Tiptext="{Binding Name, StringFormat=See more: {0}}" Command="{Binding GoToItem}" CommandParameter="{RelativeSource Self}">
+                        <controls:IconButtonWithTip.IconContent>
+                            <iconPacks:PackIconMicrons Kind="External" Width="15"/>
+                        </controls:IconButtonWithTip.IconContent>
+                    </controls:IconButtonWithTip>
                 </StackPanel>
                 <Grid Margin="5,0">
                     <Grid.ColumnDefinitions>
@@ -146,24 +143,40 @@
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Product: " VerticalAlignment="Center" />
-                        <TextBlock Text="Generic Name: " VerticalAlignment="Center" />
-                        <TextBlock Text="Expiry: " VerticalAlignment="Center" />
-                        <TextBlock Text="Batch #: " VerticalAlignment="Center" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                Style="{StaticResource DetailsTextStyle}" />
-                        <TextBlock Text="{Binding Item.GenericName, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                Style="{StaticResource DetailsTextStyle}" />
-                        <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                Style="{StaticResource DetailsTextStyle}" />
-                        <TextBlock Text="{Binding Item.Batch, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                Style="{StaticResource DetailsTextStyle}" />
-                    </StackPanel>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Product: " VerticalAlignment="Center" />
+                            <TextBlock Text="Generic Name: " VerticalAlignment="Center" />
+                            <TextBlock Text="Expiry: " VerticalAlignment="Center" />
+                            <TextBlock Text="Batch #: " VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
+                                    Style="{StaticResource DetailsTextStyle}" />
+                            <TextBlock Text="{Binding Item.GenericName, Converter={StaticResource DetailsTextNoneConverter}}" 
+                                    Style="{StaticResource DetailsTextStyle}" />
+                            <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
+                                    Style="{StaticResource DetailsTextStyle}" />
+                            <TextBlock Text="{Binding Item.Batch, Converter={StaticResource DetailsTextNoneConverter}}" 
+                                    Style="{StaticResource DetailsTextStyle}" />
+                        </StackPanel>
                 </Grid>
-                <Image Margin="0,19,0,0" Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}"/>
+                <ContentControl x:Name="BarcodeContent" Content="{Binding}" Margin="5,19,0,0" HorizontalAlignment="Left">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
+                            <Setter Property="Height" Value="50"/>
+                            <Style.Triggers>
+                                <DataTrigger Value="Invalid">
+                                    <DataTrigger.Binding>
+                                        <Binding Path="Barcode"
+                                            Converter="{StaticResource BarcodeToImageConverter}"/>
+                                    </DataTrigger.Binding>      
+                                    <Setter Property="Height" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
             </StackPanel>
         </Border>
     </DataTemplate>
@@ -173,7 +186,7 @@
         <Setter Property="EnableRowVirtualization" Value="True"/>
         <Setter Property="GridLinesVisibility" Value="All"/>
         <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
-        <Setter Property="ItemsSource" Value="{Binding DataContext.Inventory, RelativeSource={RelativeSource AncestorType=controls:InventoryDataGrid}, IsAsync=True}"/>
+        <Setter Property="ItemsSource" Value="{Binding Inventory, IsAsync=True}"/>
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
         <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
@@ -195,59 +208,33 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type controls:InventoryDataGrid}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type controls:InventoryDataGrid}">
-                    <ControlTemplate.Resources>
-                        <DataTemplate x:Key="CompactLayoutTemplate">
-                            <DataGrid Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False">
-                                <DataGrid.Columns>
-                                    <StaticResource ResourceKey="CheckboxColumn" />
-                                    <StaticResource ResourceKey="NameColumn" />
-                                    <StaticResource ResourceKey="RetailColumn" />
-                                    <StaticResource ResourceKey="PurchaseColumn" />
-                                    <StaticResource ResourceKey="NetQtyColumn" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </DataTemplate>
+    <DataTemplate x:Key="DataGridCompactLayout">
+        <DataGrid Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False">
+            <DataGrid.Columns>
+                <StaticResource ResourceKey="CheckboxColumn" />
+                <StaticResource ResourceKey="NameColumn" />
+                <StaticResource ResourceKey="RetailColumn" />
+                <StaticResource ResourceKey="PurchaseColumn" />
+                <StaticResource ResourceKey="NetQtyColumn" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DataTemplate>
 
-                        <DataTemplate x:Key="DetailedLayoutTemplate">
-                            <DataGrid Style="{StaticResource DataGridStyle}" RowDetailsTemplate="{x:Null}" SelectionUnit="FullRow" SelectionMode="Extended">
-                                <i:Interaction.Behaviors>
-                                    <behaviors:InventoryDataGridBehavior Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=controls:InventoryDataGrid}}" />
-                                </i:Interaction.Behaviors>
-                                <DataGrid.Columns>
-                                    <StaticResource ResourceKey="CheckboxColumn" />
-                                    <StaticResource ResourceKey="NameColumn" />
-                                    <StaticResource ResourceKey="RetailColumn" />
-                                    <StaticResource ResourceKey="PurchaseColumn" />
-                                    <StaticResource ResourceKey="NetQtyColumn" />
-                                    <StaticResource ResourceKey="QtyColumn" />
-                                    <StaticResource ResourceKey="BarcodeColumn" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </DataTemplate>
-                    </ControlTemplate.Resources>
-
-                    <ContentControl x:Name="LayoutContent" />
-
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="LayoutType" Value="Compact">
-                            <Setter TargetName="LayoutContent" Property="ContentTemplate" 
-                                    Value="{StaticResource CompactLayoutTemplate}" />
-                            <Setter TargetName="LayoutContent" Property="Content" 
-                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}}" />
-                        </Trigger>
-                        <Trigger Property="LayoutType" Value="Detailed">
-                            <Setter TargetName="LayoutContent" Property="ContentTemplate" 
-                                    Value="{StaticResource DetailedLayoutTemplate}" />
-                            <Setter TargetName="LayoutContent" Property="Content" 
-                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <DataTemplate x:Key="DataGridDetailedLayout">
+        <DataGrid Style="{StaticResource DataGridStyle}" RowDetailsTemplate="{x:Null}" SelectionUnit="FullRow" SelectionMode="Extended">
+            <i:Interaction.Behaviors>
+                <behaviors:InventoryDataGridSelect/>
+                <behaviors:InventoryDataGridBehavior Command="{Binding DeleteCommand}" />
+            </i:Interaction.Behaviors>
+            <DataGrid.Columns>
+                <StaticResource ResourceKey="CheckboxColumn" />
+                <StaticResource ResourceKey="NameColumn" />
+                <StaticResource ResourceKey="RetailColumn" />
+                <StaticResource ResourceKey="PurchaseColumn" />
+                <StaticResource ResourceKey="NetQtyColumn" />
+                <StaticResource ResourceKey="QtyColumn" />
+                <StaticResource ResourceKey="BarcodeColumn" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DataTemplate>
 </ResourceDictionary>
