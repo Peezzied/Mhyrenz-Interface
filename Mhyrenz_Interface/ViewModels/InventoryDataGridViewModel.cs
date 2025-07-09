@@ -11,6 +11,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
@@ -25,6 +26,11 @@ namespace Mhyrenz_Interface.ViewModels
 
     public class InventoryDataGridViewModel: BaseViewModel
     {
+        public InventoryDataGridViewModel()
+        {
+            
+        }
+
         private ICollectionView _inventory;
         public ICollectionView Inventory
         {
@@ -40,6 +46,7 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private readonly IProductService _productService;
+        private readonly IInventoryStore _inventoryStore;
 
         public ICommand DeleteCommand { get; set; }
 
@@ -60,19 +67,44 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private object _selectedItem;
+        public object SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                _selectedItem = value;
+                OnPropertyChanged(nameof(SelectedItem));
+            }
+        }
+
+        public event Action<ProductDataViewModel> Purchased;
         public event Action<bool> SelectedItemsChanged;
         public event Action SwitchSelectedItem;
         public Action RemoveItems { get; internal set; }
 
-        public InventoryDataGridViewModel(IProductService productService)
+        public InventoryDataGridViewModel(IProductService productService, IInventoryStore inventoryStore)
         {
             _productService = productService;
+            _inventoryStore = inventoryStore;
+
+            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
 
             DeleteCommand = new DeleteCommand(_productService); // TO UNDO MANAGER
         }
 
+        private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
+        {
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Purchased?.Invoke(e.Product);
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
         public bool IsDiff { get; set; }
         public int SwitchSelectItem { get; set; } = -1;
+
+        public Func<DataGridCell> GetCell { get; set; }
 
         public void SelectItem(bool isDiff, int index)
         {
@@ -81,5 +113,6 @@ namespace Mhyrenz_Interface.ViewModels
 
             SwitchSelectedItem?.Invoke();
         }
+
     }
 }

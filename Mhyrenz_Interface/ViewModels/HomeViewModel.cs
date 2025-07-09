@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls.Dialogs;
+﻿using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Domain.Models;
@@ -20,6 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -27,6 +29,7 @@ namespace Mhyrenz_Interface.ViewModels
     public class HomeViewModel: NavigationViewModel
     {
         private readonly IInventoryStore _inventoryStore;
+        private readonly ICategoryStore _categoryStore;
         private readonly ITransactionStore _transactionStore;
         private readonly INavigationServiceEx _navigationServiceEx;
         private readonly OverviewChartViewModel _overviewChartViewModel;
@@ -35,7 +38,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IViewModelFactory<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
-
+        private readonly InfoPanelViewModel _infoPanelViewModel;
         private InventoryDataGridViewModel _invetoryDataGridContext;
         public InventoryDataGridViewModel InventoryDataGridContext
         {
@@ -49,7 +52,8 @@ namespace Mhyrenz_Interface.ViewModels
         private ICollectionView Inventory;
         public ICommand RegisterCommand { get; private set; }
         public ICollectionView Transactions { get; private set; }
-        public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;   
+        public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;
+        public InfoPanelViewModel InfoPanelViewModel => _infoPanelViewModel;
         public string Bindtest => _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
 
         private bool _isLoading = false;
@@ -63,6 +67,9 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private int currentCount = 0;
+        private readonly int maxItems = 14;
+
         private string _searchBar = string.Empty;
         public string SearchBar 
         {
@@ -71,17 +78,18 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
+
                 _inventoryStore.ProductsCollectionView.Refresh();
+                currentCount = 0;
             }
         }
-
-        //public string SearchBarTest { get; set; } = "asda";
 
         public HomeViewModel(
             ISalesRecordService salesRecordService,
             ITransactionsService transactionsService,
             ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
+            ICategoryStore categoryStore,
             ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
@@ -90,6 +98,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             _navigationServiceEx = navigationServiceEx;
             _inventoryStore = inventroyStore;
+            _categoryStore = categoryStore;
             _transactionStore = transactionStore;
             _overviewChartViewModel = overviewChartViewModel;
             _salesRecordService = salesRecordService;
@@ -98,8 +107,10 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryDataGridViewModelFactory = inventoryDataGridViewModelFactory;
             InventoryDataGridContext = _inventoryDataGridViewModelFactory.CreateViewModel();
 
+            _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
+
             _sessionStore = sessionStore;
-            _inventoryStore.ProductsCollectionView.Filter = FilterProducts;
+            _inventoryStore.ProductsCollectionView.Filter += FilterProducts;
 
             base.TransitionCompleted += OnTransitionComplete;
             _inventoryStore.PromptSessionEvent += OnPromptSessionRequest;
@@ -127,6 +138,10 @@ namespace Mhyrenz_Interface.ViewModels
             base.TransitionCompleted -= OnTransitionComplete;
             _inventoryStore.PromptSessionEvent -= OnPromptSessionRequest;
             _sessionStore.StateChanged -= OnCurrentSession;
+            _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
+
+            _overviewChartViewModel.Dispose();
+            _infoPanelViewModel.Dispose();
         }
 
         private void OnTransitionComplete()
@@ -148,6 +163,11 @@ namespace Mhyrenz_Interface.ViewModels
                 Inventory = _inventoryStore.ProductsCollectionView;
                 InventoryDataGridContext.Inventory = Inventory;
 
+                foreach (var item in _inventoryStore.Products)
+                {
+                    item.CategoryColor = _categoryStore.Colors[item.CategoryId];
+                }
+
                 Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
                 OnPropertyChanged(nameof(Transactions));
             }), DispatcherPriority.ContextIdle);
@@ -157,23 +177,21 @@ namespace Mhyrenz_Interface.ViewModels
         {
             if (obj is ProductDataViewModel productDataViewModel)
             {
-                return productDataViewModel.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0;
+                var search = productDataViewModel.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0;
+
+                if (!search)
+                    return false;
+
+                if (currentCount >= maxItems)
+                    return false;
+
+                currentCount++;
+                return true;
+
             }
             else return false;
             
         }
-
-
-
-        //private async void LoadProducts()
-        //{
-        //    var products = await _productService.GetAll();
-        //    Inventory?.Clear();
-        //    foreach (var product in products)
-        //    {
-        //        Inventory.Add(product);
-        //    }
-        //}
 
     }
 }

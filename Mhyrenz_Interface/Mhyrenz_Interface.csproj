@@ -89,12 +89,6 @@
     <Reference Include="HarfBuzzSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\HarfBuzzSharp.7.3.0.3\lib\net462\HarfBuzzSharp.dll</HintPath>
     </Reference>
-    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
-    </Reference>
-    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="LiveChartsCore, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc92a3e13d40c573, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveChartsCore.2.0.0-rc5.4\lib\net462\LiveChartsCore.dll</HintPath>
     </Reference>
@@ -394,10 +388,14 @@
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Behaviors\InventoryDataGridCompact.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridSelect.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />
+    <Compile Include="Controls\InfoPanel.xaml.cs">
+      <DependentUpon>InfoPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\InventoryDataGrid.xaml.cs">
       <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
     </Compile>
@@ -408,15 +406,13 @@
     <Compile Include="Controls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Tooltips\OverviewChartTooltip.xaml.cs">
-      <DependentUpon>OverviewChartTooltip.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BarcodeToImageConverter.cs" />
     <Compile Include="Converters\DoubleToCurrencyStringConverter.cs" />
     <Compile Include="Converters\DetailsTextNoneConverter.cs" />
+    <Compile Include="Converters\EmptyStringToZero.cs" />
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
@@ -450,7 +446,9 @@
     <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
+    <Compile Include="ViewModels\Fake\FakeInfoPanelViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
+    <Compile Include="ViewModels\InfoPanelViewModel.cs" />
     <Compile Include="ViewModels\InventoryDataGridViewModel.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
@@ -473,6 +471,10 @@
       <DependentUpon>TransactionsView.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\AddProductDrawer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\InfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -501,10 +503,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Templates\InventoryDataGridStyle.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Tooltips\OverviewChartTooltip.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

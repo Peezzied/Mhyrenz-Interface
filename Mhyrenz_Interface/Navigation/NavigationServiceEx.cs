@@ -120,8 +120,7 @@ namespace Mhyrenz_Interface.Navigation
             {
                 element.DataContext = CurrentViewModel;
             }
-
-            // Unsubscribe after setting it once
+             
             Frame.Navigated -= SetDataContextAfterNavigation;
         }
 

@@ -1,9 +1,13 @@
 ﻿
+using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.Xaml.Behaviors;
 using System;
+using System.Drawing;
 using System.Runtime.Remoting.Contexts;
+using System.Runtime.Remoting.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -14,20 +18,12 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public partial class InventoryDataGridBehavior : Behavior<DataGrid>
     {
-        partial void OnAttachedDelete();
-        partial void OnDetachingDelete();
-        partial void OnAttachedSelect();
-        partial void OnDetachingSelect();
-
         protected override void OnAttached()
         {
             AssociatedObject.CellEditEnding += OnCellEditEnding;
             AssociatedObject.CurrentCellChanged += OnCellChanged;
             AssociatedObject.ContextMenuOpening += OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown += OnRightClick;
-
-            OnAttachedDelete();
-            OnAttachedSelect();
         }
 
         protected override void OnDetaching()
@@ -36,42 +32,58 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.CurrentCellChanged -= OnCellChanged;
             AssociatedObject.ContextMenuOpening -= OnContextMenuOpening;
             AssociatedObject.PreviewMouseRightButtonDown -= OnRightClick;
-
-            OnDetachingDelete();
-            OnDetachingSelect();
         }
         private void OnCellChanged(object sender, EventArgs e)
         {
             var grid = (DataGrid)sender;
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            App.Current.Dispatcher.Invoke(() =>
             {
+                if (_state)
+                {
+                    _state = false;
+                    return;
+                }
                 grid.CommitEdit(DataGridEditingUnit.Cell, true);
                 grid.CommitEdit(DataGridEditingUnit.Row, true);
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+            }, System.Windows.Threading.DispatcherPriority.Input);
         }
 
 
         private void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            e.Handled = true; // Cancels the context menu
-        }
-
-        private void GetCell(MouseButtonEventArgs e, out DataGridCell dataGrid)
-        {
-            dataGrid = Utils.FindParent<DataGridCell>(e.OriginalSource as DependencyObject);
+            e.Handled = true;
         }
 
         private bool _state = false;
 
         private void OnRightClick(object sender, MouseButtonEventArgs e)
         {
-            GetCell(e, out var cell);
+            var cell = TreeHelper.TryFindParent<DataGridCell>(e.OriginalSource as DependencyObject);
+            
+
             if (cell != null && cell.DataContext is ProductDataViewModel vm)
-                vm.IsCtrlClicked = !vm.IsCtrlClicked;
+            {
+                sender.CastTo<DataGrid>().SelectedItem = vm;
+                vm.IsCtrlClicked = true;
+            }
 
             _state = true;
 
             ClickHandler(sender, e);
+            
+                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var inputBox = TreeHelper.FindChild<NumericUpDown>(cell);
+
+                    if (cell != null && cell.DataContext is ProductDataViewModel && inputBox != null)
+                    {
+                        inputBox.Focus();   
+                        Keyboard.Focus(inputBox);
+
+                        AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().GetCell = () => cell;
+                    }
+
+                }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
         private void OnLeftClick(object sender, MouseButtonEventArgs e)
@@ -82,7 +94,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 return;
             }
 
-            GetCell(e, out var cell);
+            var cell = TreeHelper.TryFindParent<DataGridCell>(e.OriginalSource as DependencyObject);
             if (cell != null && cell.DataContext is ProductDataViewModel vm)
                 vm.IsCtrlClicked = false;
 
@@ -91,7 +103,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
         private void ClickHandler(object sender, MouseButtonEventArgs e)
         {
-            GetCell(e, out var cell);
+            var cell = TreeHelper.TryFindParent<DataGridCell>(e.OriginalSource as DependencyObject);
             if (cell == null) return;
 
             var dataGrid = AssociatedObject;
@@ -125,11 +137,11 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 var row = dataGrid.ItemContainerGenerator.ContainerFromItem(rowData) as DataGridRow;
                 if (row == null) return;
 
-                var presenter = Utils.FindChild<DataGridCellsPresenter>(row);
+                var presenter = TreeHelper.FindChild<DataGridCellsPresenter>(row);
                 if (presenter == null)
                 {
                     dataGrid.UpdateLayout();
-                    presenter = Utils.FindChild<DataGridCellsPresenter>(row);
+                    presenter = TreeHelper.FindChild<DataGridCellsPresenter>(row);
                     if (presenter == null) return;
                 }
 

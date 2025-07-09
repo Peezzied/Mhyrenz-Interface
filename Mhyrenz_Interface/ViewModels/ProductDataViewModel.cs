@@ -4,6 +4,8 @@ using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using System;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -143,6 +145,10 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
+        public decimal NetRetailPrice
+        {
+            get => Item.NetRetail;
+        }
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
@@ -190,20 +196,20 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
-        public int CategoryId
-        {
-            get => Item.CategoryId;
 
+        private Brush _categoryColor;
+        public Brush CategoryColor
+        {
+            get => _categoryColor;
             set
             {
-                if (Item.CategoryId != value)
-                {
-                    Item.CategoryId = value;
-                    OnPropertyChanged(nameof(Name));
-                }
+                _categoryColor = value;
+                OnPropertyChanged(nameof(CategoryColor));
             }
         }
-        
+        public int CategoryId => Item.CategoryId;
+        public string CategoryName => Item.Category.Name;
+
         private bool SessionRequire()
         {
             if (_sessionStore.CurrentSession is Session)
@@ -220,5 +226,6 @@ namespace Mhyrenz_Interface.ViewModels
             ChangeTracking.IsInventoryLoaded = false;
             base.OnPropertyChanged(propertyName);
         }
+
     }
 }   

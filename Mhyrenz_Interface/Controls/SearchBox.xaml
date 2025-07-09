@@ -6,9 +6,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             d:Width="400">
     <hc:SimplePanel Height="40">
-        <TextBox VerticalAlignment="Center"
+        <hc:SearchBar Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}" FontSize="16" hc:InfoElement.ShowClearButton="True" hc:InfoElement.Placeholder="Search a product..." Style="{StaticResource SearchBarPlus}"/>
+        <!--<TextBox VerticalAlignment="Center"
+            FontSize="16"
+            Height="30"
             Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}"
             mah:TextBoxHelper.Watermark="Search a Product..."
             mah:TextBoxHelper.UseFloatingWatermark="True" >
@@ -23,6 +27,6 @@
                 </Style.Triggers>
             </Style>
         </TextBox.Style>
-        </TextBox>
+        </TextBox>-->
     </hc:SimplePanel>
 </UserControl>

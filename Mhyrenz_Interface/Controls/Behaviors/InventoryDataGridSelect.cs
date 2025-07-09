@@ -1,5 +1,6 @@
 ﻿using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.ViewModels;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Xaml.Behaviors;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
@@ -18,6 +20,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
     {
         private int SelectInto;
         private bool CanSelectInto;
+        private bool _overrideCurrentCell;
 
         protected override void OnAttached()
         {

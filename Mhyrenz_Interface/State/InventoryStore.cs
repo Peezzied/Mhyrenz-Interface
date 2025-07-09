@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Diagnostics;
 using System.Windows.Input;
 
 namespace Mhyrenz_Interface.State
@@ -36,7 +37,7 @@ namespace Mhyrenz_Interface.State
         private List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
-        public ICollectionView ProductsCollectionView { get; set; }
+        public ICollectionView ProductsCollectionView { get; set; } 
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
@@ -53,6 +54,7 @@ namespace Mhyrenz_Interface.State
             _productService = productService;
             _transactionService = transactionsService;
             _sessionStore = sessionStore;
+            //_categoryStore = categoryStore;
 
             UpdateProductCommand = new UpdateProductCommand(_productService, this);
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
@@ -69,6 +71,8 @@ namespace Mhyrenz_Interface.State
 
             _trackers.Add(TrackProducts(productVm));
             Products.Add(productVm);
+
+            AddProductEvent?.Invoke(this, productVm);
 
             return productVm;
         }
@@ -94,12 +98,10 @@ namespace Mhyrenz_Interface.State
                     _trackers.Add(TrackProducts(item));
                     Products.Add(item);
                 }
+
                 ProductsCollectionView = CollectionViewSource.GetDefaultView(Products);
 
-                var lookup = ProductsCollectionView.Cast<ProductDataViewModel>()
-                            .ToLookup(p => p.Item.Category.Name);
-
-                ProductsCollectionViewByCategory = lookup;
+                Loaded?.Invoke();
 
             });
         }
@@ -151,7 +153,7 @@ namespace Mhyrenz_Interface.State
                     args.PropertyOf,
                     oldValue, 
                     newValue,
-                    PurchaseProductCommand
+                    PurchaseProductCommand  
                 ));
 
                 HandlePropertyChanged(tracker, args, (vm, product, index) =>
@@ -162,14 +164,15 @@ namespace Mhyrenz_Interface.State
                         SessionStore = _sessionStore,
                         OnSessionNull = PromptSession
                     });
-                    Products.RemoveAt(index);
-                    Products.Insert(index, updated);
-
                     PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
                     {
                         ProductId = product.Id,
-                        Product = product
+                        Product = updated
                     });
+
+                        Products.RemoveAt(index);
+                        Products.Insert(index, updated);
+
                 });
             };
             _tracker
@@ -197,19 +200,24 @@ namespace Mhyrenz_Interface.State
             {
                 var product = await _productService.Get(target.Item.Id);
 
-                _trackers.Remove(tracker);
+                await App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _trackers.Remove(tracker);
 
-                propChanged?.Invoke(Products[index], product, index);
+                    propChanged?.Invoke(Products[index], product, index);
 
-                _trackers.Add(TrackProducts(Products[index]));
+                    _trackers.Add(TrackProducts(Products[index]));
+                }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }
         #endregion
 
         public async Task Register(IEnumerable<Product> transactions)
         {
+            // SLOW TIME COMPLEXITY - RESOLVE LATER
+
             var tasks = transactions.Select(item =>
-                _productService.Edit(item.Id, nameof(Product.Qty), item.Qty)
+                _productService.Edit(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
             );
 
             await Task.WhenAll(tasks);
@@ -222,12 +230,14 @@ namespace Mhyrenz_Interface.State
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
         public event Action PromptSessionEvent;
+        public event EventHandler<ProductDataViewModel> AddProductEvent;
+        public event Action Loaded;
     }
 
     public class InventoryStoreEventArgs
     {
         public int ProductId { get; set; }
-        public Product Product { get; set; }
+        public ProductDataViewModel Product { get; set; }
     }
 }
 

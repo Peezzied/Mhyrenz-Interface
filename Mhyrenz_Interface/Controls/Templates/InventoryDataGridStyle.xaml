@@ -21,6 +21,8 @@
         <Setter Property="TextAlignment" Value="Center"/>
     </Style>
 
+    <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
+
     <DataTemplate x:Key="NumericEdit">
         <!-- MahApps NumericUpDown inside editing template -->
         <mah:NumericUpDown Value="{Binding PurchaseDefaultEdit}" 
@@ -29,7 +31,7 @@
        VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
     </DataTemplate>
     <DataTemplate x:Key="NormalEdit">
-        <mah:NumericUpDown Value="{Binding PurchaseNormalEdit}" 
+        <mah:NumericUpDown Value="{Binding PurchaseNormalEdit, Mode=TwoWay, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=LostFocus}"
        Minimum="0" Maximum="{Binding PurchaseMaxNormal}" HideUpDownButtons="True"
        NumericInputMode="Numbers" TextAlignment="Center"
        VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
@@ -39,7 +41,7 @@
     <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
 
     <DataGridCheckBoxColumn x:Key="CheckboxColumn" x:Shared="False" Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
-    <DataGridTemplateColumn x:Key="NameColumn" x:Shared="False" CanUserSort="False" Header="Name" MaxWidth="545">
+    <DataGridTemplateColumn x:Key="NameColumn" x:Shared="False" CanUserSort="False" Header="Name" Width="*" MaxWidth="545">
         <DataGridTemplateColumn.HeaderStyle>
             <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -100,6 +102,14 @@
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
+    <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
+        <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+                <hc:Tag ShowCloseButton="False" Width="90" Padding="0" Margin="2" Height="22" Foreground="White" Content="{Binding CategoryName}" Background="{Binding CategoryColor}"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+    </DataGridTemplateColumn>
+    
     <Style x:Key="DataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
@@ -181,6 +191,7 @@
         </Border>
     </DataTemplate>
 
+
     <Style x:Key="DataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid.Azure}">
         <Setter Property="EnableColumnVirtualization" Value="True"/>
         <Setter Property="EnableRowVirtualization" Value="True"/>
@@ -194,7 +205,9 @@
         <Setter Property="MaxWidth" Value="1920"/>
         <Setter Property="MaxHeight" Value="1080"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
         <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
 
         <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
         <Setter Property="RowStyle" Value="{StaticResource DataGridRowStyle}"/>
@@ -209,13 +222,18 @@
     </Style>
 
     <DataTemplate x:Key="DataGridCompactLayout">
-        <DataGrid Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False">
+        <DataGrid CanUserResizeColumns="False" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False">
+            <i:Interaction.Behaviors>
+                <behaviors:InventoryDataGridBehavior/>
+                <behaviors:InventoryDataGridCompact/>
+            </i:Interaction.Behaviors>
             <DataGrid.Columns>
                 <StaticResource ResourceKey="CheckboxColumn" />
                 <StaticResource ResourceKey="NameColumn" />
                 <StaticResource ResourceKey="RetailColumn" />
                 <StaticResource ResourceKey="PurchaseColumn" />
                 <StaticResource ResourceKey="NetQtyColumn" />
+                <StaticResource ResourceKey="CategoryColumn" />
             </DataGrid.Columns>
         </DataGrid>
     </DataTemplate>
@@ -224,7 +242,8 @@
         <DataGrid Style="{StaticResource DataGridStyle}" RowDetailsTemplate="{x:Null}" SelectionUnit="FullRow" SelectionMode="Extended">
             <i:Interaction.Behaviors>
                 <behaviors:InventoryDataGridSelect/>
-                <behaviors:InventoryDataGridBehavior Command="{Binding DeleteCommand}" />
+                <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
+                <behaviors:InventoryDataGridBehavior/>
             </i:Interaction.Behaviors>
             <DataGrid.Columns>
                 <StaticResource ResourceKey="CheckboxColumn" />
@@ -234,6 +253,7 @@
                 <StaticResource ResourceKey="NetQtyColumn" />
                 <StaticResource ResourceKey="QtyColumn" />
                 <StaticResource ResourceKey="BarcodeColumn" />
+                <StaticResource ResourceKey="CategoryColumn" />
             </DataGrid.Columns>
         </DataGrid>
     </DataTemplate>

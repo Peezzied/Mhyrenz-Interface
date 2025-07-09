@@ -96,7 +96,7 @@
                         Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
                     <!--<Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />-->
 
-                    <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible"/>
+                    <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible" Loaded="HomeView_Loaded"/>
                 </Grid>
             </mah:HamburgerMenu.Content>
         </mah:HamburgerMenu>

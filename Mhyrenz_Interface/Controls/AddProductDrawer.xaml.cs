@@ -1,5 +1,6 @@
 ﻿using HandyControl.Controls;
 using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.ViewModels;
 using System;
@@ -71,7 +72,7 @@ namespace Mhyrenz_Interface.Controls
 
         private void ClearNestedNumericValidation(DependencyObject container)
         {
-            var innerNumeric = Utils.FindChild<MahApps.Metro.Controls.NumericUpDown>(container);
+            var innerNumeric = TreeHelper.FindChild<MahApps.Metro.Controls.NumericUpDown>(container);
             if (innerNumeric != null)
             {
                 var binding = innerNumeric.GetBindingExpression(MahApps.Metro.Controls.NumericUpDown.ValueProperty);

@@ -30,6 +30,11 @@ namespace Mhyrenz_Interface
             ((ShellViewModel)DataContext).OnTransitionComplete();
         }
 
+        private void HomeView_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         //private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
         //{
         //    if (e.InvokedItem is MenuItem menuItem && menuItem.IsNavigation)

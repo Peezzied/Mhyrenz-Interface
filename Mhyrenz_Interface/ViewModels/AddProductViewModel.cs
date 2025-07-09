@@ -1,4 +1,5 @@
-﻿using HandyControl.Tools.Extension;
+﻿
+using HandyControl.Tools.Extension;
 using LiveChartsCore.Kernel;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
@@ -45,7 +46,7 @@ namespace Mhyrenz_Interface.ViewModels
             ClearValidations = InvokeClearValidations;
             _categoryStore = categoryStore;
 
-            Categories = _categoryStore.Categories;
+            Categories.AddRange(_categoryStore.Categories.Select(c => c.Key));
 
             SubmitActionCommand = new AddCommand(this, productService, inventoryStore);
         }

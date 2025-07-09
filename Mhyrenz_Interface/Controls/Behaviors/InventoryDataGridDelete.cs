@@ -1,4 +1,5 @@
 ﻿using Mhyrenz_Interface.ViewModels;
+using Microsoft.Xaml.Behaviors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public partial class InventoryDataGridBehavior
+    public class InventoryDataGridDelete : Behavior<DataGrid>
     {
         public static readonly DependencyProperty CommandProperty =
-        DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(InventoryDataGridBehavior));
+            DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(InventoryDataGridDelete));
 
         public ICommand Command
         {
@@ -21,16 +22,14 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             set => SetValue(CommandProperty, value);
         }
 
-        partial void OnAttachedDelete()
+        protected override void OnAttached()
         {
-            base.OnAttached();
             CommandManager.AddPreviewExecutedHandler(AssociatedObject, OnPreviewExecuted);
         }
 
-        partial void OnDetachingDelete()
+        protected override void OnDetaching()
         {
             CommandManager.RemovePreviewExecutedHandler(AssociatedObject, OnPreviewExecuted);
-            base.OnDetaching(); 
         }
 
         private void OnPreviewExecuted(object sender, ExecutedRoutedEventArgs e)

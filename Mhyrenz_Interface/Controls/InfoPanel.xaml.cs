@@ -16,14 +16,13 @@ using System.Windows.Shapes;
 namespace Mhyrenz_Interface.Controls
 {
     /// <summary>
-    /// Interaction logic for OverviewChart.xaml
+    /// Interaction logic for InfoPanel.xaml
     /// </summary>
-    public partial class OverviewChart : UserControl
+    public partial class InfoPanel : UserControl
     {
-        public OverviewChart()
+        public InfoPanel()
         {
             InitializeComponent();
-
         }
     }
 }
