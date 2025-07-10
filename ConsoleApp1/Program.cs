@@ -3,6 +3,8 @@ using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
+using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
@@ -16,6 +18,7 @@ namespace ConsoleApp1
 {
     internal class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
             var contextFactory = new InventoryDbContextFactory(options =>
@@ -27,86 +30,80 @@ namespace ConsoleApp1
             var productService = new ProductDataService(contextFactory);
             var transactionsService = new TransactionsDataService(contextFactory);
 
+            var pathService = new CachePath();
+            var exportService = new ReportService(pathService);
 
-            //using (InventoryDbContext context = contextFactory.CreateDbContext())
+            var products = productService.GetAll().GetAwaiter().GetResult();
+
+            exportService.Export(products);
+
+            #region "Database test"
+            //productService.Update(1, new Product()
             //{
-            //    context.Database.Migrate();
-            //}
+            //    Name = "Updated Product",
+            //    CategoryId = 3,
+            //    Qty = 10,
+            //    RetailPrice = 150.0m,
+            //    ListPrice = 200.0m,
+            //}).GetAwaiter();
 
-            //productService.Create(new Product() { Name = "Test", CategoryId = 2 });
-            //productService.Create(new Product() { Name = "With new category", Category = new Category() { Name = "New cat" } });
-
-            productService.Update(1, new Product()
-            {
-                Name = "Updated Product",
-                CategoryId = 3,
-                Qty = 10,
-                RetailPrice = 150.0m,
-                ListPrice = 200.0m,
-            }).GetAwaiter();
-
-            var categoryTable = new ConsoleTable("Name", "Id", "Products");
-            DisplayEntities(
-                categoryService,
-                categoryTable,
-                "Category",
-                (table, item) =>
-                {
-                    string productNames = string.Join(", ", item.Products.Select(p => p.Name));
-                    table.AddRow(item.Name, item.Id, productNames);
-
-                    //Debug.WriteLine($"Category: {item.Name}, Id: {item.Id}, Products: {item.Products}");
-                }
-            ).GetAwaiter();
-
-            var transactionsTable = new ConsoleTable("Name", "Id", "Products");
-            DisplayEntities(
-                transactionsService,
-                transactionsTable,
-                "Transactions",
-                (table, item) =>
-                {
-                    //string productNames = string.Join(", ", item.Products.Select(p => p.Name));
-                    table.AddRow(item.Id, item.ProductId, item.Item.Name);
-                }
-            ).GetAwaiter();
-
-            string[] productCols = {
-                "Name", "Id", "Purchase", "Qty", "Net Qty", "CategoryId", "Category", "Retail", "List", "TOTAL COST PRICE", "PROFIT REVENUE", "TOTAL LIST PRICE"};
-
-            // Common row adder logic
-            Action<ConsoleTable, Product> addProductRow = (table, item) =>
-            {
-                table.AddRow(
-                    item.Name, item.Id, item.Purchase, item.Qty, item.NetQty, item.CategoryId, item.Category?.Name,
-                    item.RetailPrice, item.ListPrice, item.CostPrice, item.ProfitRevenue, item.TotalListPrice
-                );
-            };
-
-            var productsTable = new ConsoleTable(productCols);
-            DisplayEntities(
-                productService,
-                productsTable,
-                "Products",
-                addProductRow
-            ).GetAwaiter();
-
-            var genericTable = new ConsoleTable(productCols);
-            DisplayEntities(
-                genericTable,
-                "Generic Table",
-                addProductRow,
-                () => productService.GetAllByCategory("Generic", 1)
-            ).GetAwaiter();
-
-            //var transactionsTable = new ConsoleTable("Name", "Id", "CategoryId");
+            //var categoryTable = new ConsoleTable("Name", "Id", "Products");
             //DisplayEntities(
-            //    productService,
+            //    categoryService,
+            //    categoryTable,
+            //    "Category",
+            //    (table, item) =>
+            //    {
+            //        string productNames = string.Join(", ", item.Products.Select(p => p.Name));
+            //        table.AddRow(item.Name, item.Id, productNames);
+
+            //        //Debug.WriteLine($"Category: {item.Name}, Id: {item.Id}, Products: {item.Products}");
+            //    }
+            //).GetAwaiter();
+
+            //var transactionsTable = new ConsoleTable("Name", "Id", "Products");
+            //DisplayEntities(
+            //    transactionsService,
             //    transactionsTable,
             //    "Transactions",
-            //    (table, item) => transactionsTable.AddRow(item.Name, item.Id, item.CategoryId)
+            //    (table, item) =>
+            //    {
+            //        //string productNames = string.Join(", ", item.Products.Select(p => p.Name));
+            //        table.AddRow(item.Id, item.ProductId, item.Item.Name);
+            //    }
             //).GetAwaiter();
+
+            //string[] productCols = {
+            //    "Name", "Id", "Purchase", "Qty", "Net Qty", "CategoryId", "Category", "Retail", "List", "TOTAL COST PRICE", "PROFIT REVENUE", "TOTAL LIST PRICE"};
+
+            //// Common row adder logic
+            //Action<ConsoleTable, Product> addProductRow = (table, item) =>
+            //{
+            //    table.AddRow(
+            //        item.Name, item.Id, item.Purchase, item.Qty, item.NetQty, item.CategoryId, item.Category?.Name,
+            //        item.RetailPrice, item.ListPrice, item.CostPrice, item.ProfitRevenue, item.TotalListPrice
+            //    );
+            //};
+
+            //var productsTable = new ConsoleTable(productCols);
+            //DisplayEntities(
+            //    productService,
+            //    productsTable,
+            //    "Products",
+            //    addProductRow
+            //).GetAwaiter();
+
+            //var genericTable = new ConsoleTable(productCols);
+            //DisplayEntities(
+            //    genericTable,
+            //    "Generic Table",
+            //    addProductRow,
+            //    () => productService.GetAllByCategory("Generic", 1)
+            //).GetAwaiter();
+            #endregion
         }
+
+        #region "Database test methods"
         private static async Task DisplayEntities<T>(
             IDataService<T> dataService,
             ConsoleTable table,
@@ -141,6 +138,7 @@ namespace ConsoleApp1
             }
             table.Write(Format.Minimal);
         }
+        #endregion
     }
 
 }

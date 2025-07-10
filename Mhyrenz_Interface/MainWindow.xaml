@@ -1,4 +1,5 @@
 ﻿<mah:MetroWindow x:Class="Mhyrenz_Interface.MainWindow"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -53,6 +54,7 @@
         </Style>-->
 
     </mah:MetroWindow.Resources>
+    <hc:DrawerContainer>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -102,4 +104,5 @@
         </mah:HamburgerMenu>
         <controls:StatusBar Grid.Row="1"/>
     </Grid>
+    </hc:DrawerContainer>
 </mah:MetroWindow>

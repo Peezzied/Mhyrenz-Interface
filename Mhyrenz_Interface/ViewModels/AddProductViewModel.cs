@@ -69,7 +69,7 @@ namespace Mhyrenz_Interface.ViewModels
         public Action ClearValidations { get; set; }
 
 
-        public ObservableCollection<Category> Categories { get; private set; }
+        public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
 
         #region "Properties"
         private bool _isGeneric;

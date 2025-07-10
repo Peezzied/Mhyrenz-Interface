@@ -1,10 +1,13 @@
 ﻿using HandyControl.Controls;
+using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.ReportsService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -17,6 +20,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -50,9 +54,12 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
+        private readonly ISessionStore _sessionStore;
         private readonly IProductService _productService;
+        private readonly IReportService _reportService;
 
         public ICommand AddProductCommand { get; set; }
+        public ICommand ExportInventoryCommand { get; set; }
 
         private string _searchBar = string.Empty;
         public string SearchBar
@@ -124,20 +131,25 @@ namespace Mhyrenz_Interface.ViewModels
             INavigationServiceEx navigationServiceEx,
             ICategoryStore categoryStore,
             IInventoryStore inventoryStore,
+            ISessionStore sessionStore,
             IProductService productService,
+            IReportService reportService,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
+            _sessionStore = sessionStore;
             _inventoryDataGridViewModelFactory = inventoryDataGridviewModelFactory;
             _addProductViewModelFactory = addProductViewModelFactory;
             _productService = productService;
+            _reportService = reportService;
 
             _categorystore.Updated += CategoryStore_Updated;
 
             AddProductCommand = new RelayCommand(AddProduct);
             DeleteProductCommand = new RelayCommand(DeleteCommand);
+            ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
             TabItems = new ObservableCollection<TabItems>();
             App.Current.Dispatcher.Invoke(new Action(() =>
@@ -145,6 +157,7 @@ namespace Mhyrenz_Interface.ViewModels
                 LoadTabItems();
             }));
         }
+
 
         private void CategoryStore_Updated()
         {
@@ -214,6 +227,19 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private async Task ExportCommand(object obj)
+        {
+            await Task.Run(() =>
+            {
+                _reportService.Export(_inventoryStore.Products.Select(p => p.Item), _sessionStore.CurrentSession, App.Current.Dispatcher);
+            });
+
+            Growl.Info(new GrowlInfo
+            {
+                ShowDateTime = false,
+                Message = "Sucessfully exported an inventory report."
+            });
+        }
         private void DeleteCommand(object parameter)
         {
             var cmd = new DeleteCommand(_productService);
@@ -240,7 +266,7 @@ namespace Mhyrenz_Interface.ViewModels
             //DrawerViewModel = DrawerContent.DataContext as AddProductViewModel;
         }
 
-        private async void DrawerInstance_Closed(object sender, RoutedEventArgs e)
+        private void DrawerInstance_Closed(object sender, RoutedEventArgs e)
         {
             if (!IsSwitchReady)
                 return;

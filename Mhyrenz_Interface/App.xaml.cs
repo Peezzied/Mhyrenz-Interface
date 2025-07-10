@@ -7,6 +7,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
@@ -107,6 +108,7 @@ namespace Mhyrenz_Interface
                 })
 
                 .AddSingleton<ICachePath, CachePath>()
+                .AddSingleton<IReportService, ReportService>()
                 .AddSingleton<IBarcodeImageCache, BarcodeImageCache>(s =>
                 {
                     var result = s.GetRequiredService<IInventoryStore>().Products.Select(p =>

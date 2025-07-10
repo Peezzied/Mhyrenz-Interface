@@ -24,20 +24,20 @@
                 <ContentControl Content="{Binding DrawerContent}" Margin="30"/>
             </Border>
         </hc:Drawer>
-        <Grid Margin="17,10,17,0">
+        <Grid Margin="17,10,17,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <controls:SearchBox Grid.Column="0"/>
+            <controls:SearchBox Grid.Column="0" FontSize="14.22"/>
             <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
                 <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
                     <controls:IconButtonWithTip.IconContent>
                         <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
                     </controls:IconButtonWithTip.IconContent>
                 </controls:IconButtonWithTip>
-                <controls:IconButtonWithTip Tiptext="Export to xlsx">
+                <controls:IconButtonWithTip Tiptext="Export to xlsx" Command="{Binding ExportInventoryCommand}" >
                     <controls:IconButtonWithTip.IconContent>
                         <iconPacks:PackIconMaterial Kind="TableArrowRight" />
                     </controls:IconButtonWithTip.IconContent>
