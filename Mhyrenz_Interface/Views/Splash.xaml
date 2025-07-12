@@ -4,10 +4,12 @@
            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:hc="https://handyorg.github.io/handycontrol"
-           mc:Ignorable="d"
+           mc:Ignorable="d" WindowStyle="None"
            WindowStartupLocation="CenterScreen"
            Title="Splash Window" 
            Height="450" 
            Width="800">
-   
+    <Grid>
+        <TextBlock FontSize="16" Text="{Binding Message, RelativeSource={RelativeSource AncestorType=hc:SplashWindow}}"/>
+    </Grid>
 </hc:SplashWindow>

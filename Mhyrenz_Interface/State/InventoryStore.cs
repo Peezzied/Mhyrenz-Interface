@@ -10,6 +10,7 @@ using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -232,6 +233,20 @@ namespace Mhyrenz_Interface.State
         public event Action PromptSessionEvent;
         public event EventHandler<ProductDataViewModel> AddProductEvent;
         public event Action Loaded;
+
+        protected async Task InitializeAsync()
+        {
+            var products = await _productService.GetAll();
+            LoadProducts(products);
+        }
+
+        public static async Task<InventoryStore> LoadInventoryStore(IServiceProvider serviceProvider)
+        {
+            var inventoryStore = ActivatorUtilities.CreateInstance<InventoryStore>(serviceProvider);
+            await inventoryStore.InitializeAsync();
+
+            return inventoryStore;
+        }
     }
 
     public class InventoryStoreEventArgs

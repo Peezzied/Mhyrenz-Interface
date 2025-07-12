@@ -1,4 +1,5 @@
 ﻿using HandyControl.Controls;
+using HandyControl.Tools;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Database;
@@ -32,45 +33,48 @@ using System.Windows;
 
 namespace Mhyrenz_Interface
 {
-        public delegate TWindow CreateWindow<TWindow>(BaseViewModel viewModel = null) where TWindow : class;
+    public delegate TWindow CreateWindow<TWindow>(BaseViewModel viewModel = null) where TWindow : class;
+    public delegate TObject CreateObjectAsync<TObject>(IServiceProvider serviceProvider, Task<TObject> task) where TObject : class;
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
-        public static IServiceProvider Services { get; set; }
+        public static IServiceProvider ServiceProvider { get; set; }
         public static AppPresenter Presenter { get; set; }
 
-
+        public App()
+        {
+        }
         protected override async void OnStartup(StartupEventArgs e)
         {
-            Services = CreateServiceProvider();
-            IServiceProvider serviceProvider = Services;
+            var services = CreateServiceCollection();
+            var initialProvider = services.BuildServiceProvider();
 
-            SplashWindow.Init(() => {
-                Splash splash = new Splash();
-                return splash;
-            });
+            Presenter = new AppPresenter(services, initialProvider, Dispatcher);
 
-            InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
-            using (InventoryDbContext context = contextFactory.CreateDbContext())
-            {
-                context.Database.Migrate();
-            }
+            ServiceProvider = await Presenter.AppInit();
+
+            //IServiceProvider serviceProvider = ServiceProvider;
+
+            await Presenter.ShowStartUpAsync();
+            SplashWindow.Instance.LoadComplete();
+            //InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
+            //using (InventoryDbContext context = contextFactory.CreateDbContext())
+            //{
+            //    context.Database.Migrate();
+            //}
 
 
 
             //await WindowStart(serviceProvider);
 
-            var products = await serviceProvider.GetRequiredService<IProductService>().GetAll();
-            //var transactions = await serviceProvider.GetRequiredService<ITransactionsService>().GetLatests();
-            //serviceProvider.GetRequiredService<ITransactionStore>().LoadTransactions(transactions);
-            serviceProvider.GetRequiredService<IInventoryStore>().LoadProducts(products);
-            _ = serviceProvider.GetRequiredService<IBarcodeImageCache>();
+            //var products = await serviceProvider.GetRequiredService<IProductService>().GetAll();
+            ////var transactions = await serviceProvider.GetRequiredService<ITransactionsService>().GetLatests();
+            ////serviceProvider.GetRequiredService<ITransactionStore>().LoadTransactions(transactions);
+            //serviceProvider.GetRequiredService<IInventoryStore>().LoadProducts(products);
+            //_ = serviceProvider.GetRequiredService<IBarcodeImageCache>();
 
-            Presenter = new AppPresenter(serviceProvider, Dispatcher);
-
-            await Presenter.ShowStartUpAsync();
             //var sessionStore = serviceProvider.GetRequiredService<ISessionStore>();
             //var sessionService = serviceProvider.GetRequiredService<ISessionService>();
 
@@ -88,7 +92,7 @@ namespace Mhyrenz_Interface
             base.OnStartup(e);  
         }
 
-        private IServiceProvider CreateServiceProvider()
+        private IServiceCollection CreateServiceCollection()
         {
             IServiceCollection services = new ServiceCollection();
 
@@ -103,24 +107,9 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<UndoRedoManager>()
                 .AddSingleton<ISessionStore, SessionStore>()
-                .AddSingleton<IInventoryStore, InventoryStore>()
-                .AddSingleton<ITransactionStore, TransactionStore>()
-                .AddSingleton<ICategoryStore, CategoryStore>(s =>
-                {
-                    return CategoryStore.LoadCategoryStore(
-                        s.GetRequiredService<ICategoryService>(),
-                        s.GetRequiredService<IInventoryStore>()
-                    );
-                })
 
                 .AddSingleton<ICachePath, CachePath>()
                 .AddSingleton<IReportService, ReportService>()
-                .AddSingleton<IBarcodeImageCache, BarcodeImageCache>(s =>
-                {
-                    var result = s.GetRequiredService<IInventoryStore>().Products.Select(p =>
-                        new Product { Id = p.Item.Id, Barcode = p.Barcode });
-                    return BarcodeImageCache.LoadBarcodeImageCache(result, s.GetRequiredService<ICachePath>());
-                })
 
                 .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG
 
@@ -229,7 +218,7 @@ namespace Mhyrenz_Interface
                 //.AddSingleton<TestWindow>(s => ActivatorUtilities.CreateInstance<TestWindow>(s));
 
 
-            return services.BuildServiceProvider();
+            return services;
         }
     }
 }

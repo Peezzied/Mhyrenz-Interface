@@ -6,6 +6,7 @@ using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,6 +50,12 @@ namespace Mhyrenz_Interface.State
         private void OnPurchase(object sender, InventoryStoreEventArgs e)
         {
             RequestTransactionsUpdate?.Invoke(e.Product, EventArgs.Empty);
+        }
+
+        public async Task InitializeAsync()
+        {
+            var products = await _transactionService.GetLatests();
+            LoadTransactions(products);
         }
 
         public void LoadTransactions(IEnumerable<Transaction> transactions)
@@ -137,6 +144,14 @@ namespace Mhyrenz_Interface.State
                     transaction.Product = product;
                 }
             }
+        }
+
+        public static async Task<TransactionStore> LoadTransactionStore(IServiceProvider serviceProvider)
+        {
+            var store = ActivatorUtilities.CreateInstance<TransactionStore>(serviceProvider);
+            await store.InitializeAsync();
+
+            return store;
         }
     }
 }

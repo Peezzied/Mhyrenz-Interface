@@ -423,6 +423,7 @@
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="Core\ValidationAttributes.cs" />
     <Compile Include="Core\ValidationViewModel.cs" />
+    <Compile Include="StartupManager.cs" />
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />

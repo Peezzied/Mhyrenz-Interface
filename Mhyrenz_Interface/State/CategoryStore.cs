@@ -4,6 +4,7 @@ using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -19,6 +21,8 @@ namespace Mhyrenz_Interface.State
     public class CategoryStore : ICategoryStore
     {
         private readonly IInventoryStore _inventoryStore;
+        private readonly ICategoryService _categoryService;
+
         //public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
 
         public event Action Updated;
@@ -46,10 +50,11 @@ namespace Mhyrenz_Interface.State
         public CategoryStore(ICategoryService categoryService, IInventoryStore inventoryStore)
         {
             _inventoryStore = inventoryStore;
+            _categoryService = categoryService;
 
             //_inventoryStore.AddProductEvent += OnAddProduct;
 
-            LoadCategoriesCommand = new LoadCategoriesCommand(this, categoryService, _inventoryStore);
+            LoadCategoriesCommand = new LoadCategoriesCommand(this, _categoryService, _inventoryStore);
         }
 
         //private void OnAddProduct(object sender, ProductDataViewModel vm)
@@ -57,18 +62,26 @@ namespace Mhyrenz_Interface.State
         //    UpdateCategories();
         //}
 
-        private void UpdateCategories()
+        private async Task UpdateCategories()
         {
             Categories.Clear();
 
-            LoadCategoriesCommand.Execute(null);
+            var result = await _categoryService.GetAllCategories();
+
+            foreach (var item in result)
+            {
+                Categories[item] = new ListCollectionView(_inventoryStore.Products)
+                {
+                    Filter = (obj) => obj is ProductDataViewModel vm
+                        && vm.CategoryId == item.Id
+                };
+            }
         }   
 
-        public static CategoryStore LoadCategoryStore(ICategoryService categoryService, IInventoryStore inventoryStore)
+        public static async Task<CategoryStore> LoadCategoryStore(IServiceProvider serviceProvider)
         {
-            var categoryStore = new CategoryStore(categoryService, inventoryStore);
-
-            categoryStore.UpdateCategories();
+            var categoryStore = ActivatorUtilities.CreateInstance<CategoryStore>(serviceProvider);
+            await categoryStore.UpdateCategories();
 
             return categoryStore;
         }

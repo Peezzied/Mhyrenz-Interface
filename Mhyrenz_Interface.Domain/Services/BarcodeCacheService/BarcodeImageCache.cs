@@ -28,25 +28,29 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
         private readonly ConcurrentDictionary<string, object> _locks = new ConcurrentDictionary<string, object>();
         private readonly string _cacheDir;
 
-        public void Preload(IEnumerable<string> codes)
+        public Task Preload(IEnumerable<string> codes)
         {
-            var parallelOptions = new ParallelOptions
+            return Task.Run(() =>
             {
-                MaxDegreeOfParallelism = Environment.ProcessorCount // Or tune this
-            };
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                };
 
-            Parallel.ForEach(codes, parallelOptions, code =>
-            {
-                if (string.IsNullOrWhiteSpace(code))
-                    return;
+                Parallel.ForEach(codes, parallelOptions, code =>
+                {
+                    if (string.IsNullOrWhiteSpace(code))
+                        return;
 
-                BitmapImage image = GetOrCreate(code);
-                if (image != null)
-                    _memoryCache[code] = image;
+                    var image = GetOrCreate(code);
+                    if (image != null)
+                        _memoryCache[code] = image;
+                });
+
+                FlushUncached();
             });
-
-            FlushUncached();
         }
+
 
         public void FlushUncached()
         {
@@ -77,14 +81,14 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
             _cacheDir = cachePath.Dir;
         }
 
-        public static BarcodeImageCache LoadBarcodeImageCache(IEnumerable<Product> products, ICachePath cachePath)
+        public static async Task<BarcodeImageCache> LoadBarcodeImageCache(IEnumerable<Product> products, ICachePath cachePath)
         {
             var preCache = products
                     .Where(p => !string.IsNullOrEmpty(p.Barcode))
                     .Select(p => p.Barcode);
 
             var instance = new BarcodeImageCache(cachePath);
-            instance.Preload(preCache);
+            await instance.Preload(preCache);
 
             return instance;
         }
