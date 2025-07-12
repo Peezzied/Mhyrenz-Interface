@@ -378,7 +378,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
+    <Compile Include="Commands\CreateSessionCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Commands\ProductVMCommandCommon.cs" />
@@ -388,6 +390,7 @@
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Attached\ValidationHelper.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridCompact.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridSelect.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
@@ -418,6 +421,8 @@
     <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
+    <Compile Include="Core\ValidationAttributes.cs" />
+    <Compile Include="Core\ValidationViewModel.cs" />
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
@@ -456,6 +461,7 @@
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ViewModels\StartupViewModel.cs" />
     <Compile Include="ViewModels\TransactionViewModel.cs" />
     <Compile Include="ViewModels\TransactionDataViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
@@ -466,6 +472,12 @@
     </Compile>
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Splash.xaml.cs">
+      <DependentUpon>Splash.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Startup.xaml.cs">
+      <DependentUpon>Startup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TransactionsView.cs">
       <DependentUpon>TransactionsView.xaml</DependentUpon>
@@ -538,6 +550,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Splash.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Startup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\TransactionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -580,6 +600,7 @@
       <Name>Mhyrenz_Interface.Domain</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

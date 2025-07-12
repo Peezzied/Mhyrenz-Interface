@@ -35,7 +35,6 @@ namespace ConsoleApp1
 
             var products = productService.GetAll().GetAwaiter().GetResult();
 
-            exportService.Export(products);
 
             #region "Database test"
             //productService.Update(1, new Product()

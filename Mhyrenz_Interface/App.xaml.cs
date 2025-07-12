@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls.Dialogs;
+﻿using HandyControl.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
@@ -18,6 +19,7 @@ using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Test;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Mhyrenz_Interface.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -30,17 +32,25 @@ using System.Windows;
 
 namespace Mhyrenz_Interface
 {
+        public delegate TWindow CreateWindow<TWindow>(BaseViewModel viewModel = null) where TWindow : class;
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
         public static IServiceProvider Services { get; set; }
+        public static AppPresenter Presenter { get; set; }
+
 
         protected override async void OnStartup(StartupEventArgs e)
         {
             Services = CreateServiceProvider();
             IServiceProvider serviceProvider = Services;
+
+            SplashWindow.Init(() => {
+                Splash splash = new Splash();
+                return splash;
+            });
 
             InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
             using (InventoryDbContext context = contextFactory.CreateDbContext())
@@ -48,7 +58,9 @@ namespace Mhyrenz_Interface
                 context.Database.Migrate();
             }
 
-            WindowStart(serviceProvider);
+
+
+            //await WindowStart(serviceProvider);
 
             var products = await serviceProvider.GetRequiredService<IProductService>().GetAll();
             //var transactions = await serviceProvider.GetRequiredService<ITransactionsService>().GetLatests();
@@ -56,30 +68,24 @@ namespace Mhyrenz_Interface
             serviceProvider.GetRequiredService<IInventoryStore>().LoadProducts(products);
             _ = serviceProvider.GetRequiredService<IBarcodeImageCache>();
 
-            var sessionStore = serviceProvider.GetRequiredService<ISessionStore>();
-            var sessionService = serviceProvider.GetRequiredService<ISessionService>();
+            Presenter = new AppPresenter(serviceProvider, Dispatcher);
 
-            var session = await sessionService.GetSession();
+            await Presenter.ShowStartUpAsync();
+            //var sessionStore = serviceProvider.GetRequiredService<ISessionStore>();
+            //var sessionService = serviceProvider.GetRequiredService<ISessionService>();
 
-            if (session != null)
-            {
-                sessionStore.CurrentSession = session;
-            }
-            else
-            {
-                sessionStore.CurrentSession = sessionService.GenerateSession(new Session { Period = DateTime.Now }).GetAwaiter().GetResult();
-            }
+            //var session = await sessionService.GetSession();
 
-            base.OnStartup(e);
-        }
+            //if (session != null)
+            //{
+            //    sessionStore.CurrentSession = session;
+            //}
+            //else
+            //{
+            //    sessionStore.CurrentSession = sessionService.GenerateSession(new Session { Period = DateTime.Now }).GetAwaiter().GetResult();
+            //}
 
-        private static void WindowStart(IServiceProvider serviceProvider)
-        {
-            MainWindow mainWindow = serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
-
-            //Window testWindow = serviceProvider.GetRequiredService<TestWindow>();
-            //testWindow.Show();
+            base.OnStartup(e);  
         }
 
         private IServiceProvider CreateServiceProvider()
@@ -128,6 +134,8 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<IViewModelFactory<AddProductViewModel>, ViewModelFactory<AddProductViewModel>>()
 
+                .AddSingleton<IViewModelFactory<SessionBoxContext>, ViewModelFactory<SessionBoxContext>>()
+
                 .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ISessionService, SessionService>()
                 .AddSingleton<ISalesRecordDataService, SalesRecordDataService>()
@@ -147,13 +155,14 @@ namespace Mhyrenz_Interface
                 .AddTransient<SettingsViewModel>()
                 .AddTransient<InventoryDataGridViewModel>()
                 .AddTransient<AddProductViewModel>()
+                .AddTransient<SessionBoxContext>()
 
                 .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
                 {
                     return (object parameter) =>
                     {
                         if (parameter is ProductDataViewModelDTO dto)
-                            return new ProductDataViewModel(dto);
+                            return ActivatorUtilities.CreateInstance<ProductDataViewModel>(s, dto);
                         throw new ArgumentException("Invalid parameter type for ProductDataViewModel creation.");
                     };
                 })
@@ -162,44 +171,63 @@ namespace Mhyrenz_Interface
                     return (object parameter) =>
                     {
                         if (parameter is TransactionDataViewModelDTO dto)
-                        {
-                            var inventoryStore = s.GetRequiredService<IInventoryStore>();
-                            return new TransactionDataViewModel(dto, inventoryStore);
-                        }
+                            return ActivatorUtilities.CreateInstance<TransactionDataViewModel>(s, dto);
 
                         throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
                     };
                 })
+                .AddSingleton<CreateViewModel<SessionBoxContext>>(s =>
+                {
+                    return _ => s.GetRequiredService<SessionBoxContext>();
+                })
                 .AddSingleton<CreateViewModel<AddProductViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<AddProductViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<AddProductViewModel>(s);
                 })
                 .AddSingleton<CreateViewModel<InventoryDataGridViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<InventoryDataGridViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<InventoryDataGridViewModel>(s);
                 })
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<HomeViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<HomeViewModel>(s);
                 })
                 .AddSingleton<CreateViewModel<InventoryViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<InventoryViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<InventoryViewModel>(s);
                 })
                 .AddSingleton<CreateViewModel<TransactionViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<TransactionViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<TransactionViewModel>(s);
                 })
                 .AddSingleton<CreateViewModel<SettingsViewModel>>(s =>
                 {
-                    return _ => s.GetRequiredService<SettingsViewModel>();
+                    return _ => ActivatorUtilities.CreateInstance<SettingsViewModel>(s);
                 })
 
+                .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()
-                .AddSingleton<MainWindow>(s => new MainWindow(s.GetRequiredService<ShellViewModel>(), s.GetRequiredService<INavigationServiceEx>()));
+                .AddSingleton<TestWindowViewModel>()
 
-                //.AddSingleton<TestWindowViewModel>()
-                //.AddSingleton<TestWindow>(s => new TestWindow(s.GetRequiredService<TestWindowViewModel>()));
+                .AddSingleton<CreateWindow<Startup>>(s =>
+                {
+                    return (viewModel) =>
+                    {
+                        return ActivatorUtilities.CreateInstance<Startup>(s, viewModel);
+                    };
+                })
+                .AddSingleton<CreateWindow<MainWindow>>(s =>
+                {
+                    return (viewModel) =>
+                    {
+                        return ActivatorUtilities.CreateInstance<MainWindow>(s, viewModel);
+                    };
+                });
+
+                //.AddTransient<Startup>(s => ActivatorUtilities.CreateInstance<Startup>(s))
+                //.AddTransient<MainWindow>(s => ActivatorUtilities.CreateInstance<MainWindow>(s))
+                //.AddSingleton<TestWindow>(s => ActivatorUtilities.CreateInstance<TestWindow>(s));
+
 
             return services.BuildServiceProvider();
         }

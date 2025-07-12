@@ -15,7 +15,7 @@
         Dialog:DialogParticipation.Register="{Binding}"
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="800" MinWidth="1280" WindowStyle="None">
+        Title="MainWindow" MinHeight="800" MinWidth="1280">
     <mah:MetroWindow.Resources>
 
         <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type controls:MenuItem}">
@@ -36,30 +36,20 @@
             </Grid>
         </DataTemplate>
         <converters:NavigationCommandParamsConverter x:Key="NavigationCommandParamsConverter" />
-        <!--<Style BasedOn="{StaticResource {x:Type Frame}}" TargetType="{x:Type Frame}">
-            <Setter Property="ClipToBounds" Value="True" />
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <mah:TransitioningContentControl Content="{Binding}"
-                                                  Grid.Row="1"
-                                                  RestartTransitionOnContentChange="True"
-                                                  Transition="Default"
-                                                  TransitionCompleted="TransitioningContentControl_TransitionCompleted">
-                  
-                        </mah:TransitioningContentControl>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>-->
+        <Style BasedOn="{StaticResource {x:Type Frame}}" TargetType="{x:Type Frame}">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
 
     </mah:MetroWindow.Resources>
     <hc:DrawerContainer>
+        
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
         <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
                           DisplayMode="CompactInline"
                           IsPaneOpen="True"
@@ -83,24 +73,29 @@
                     <Binding Path="OptionsMenu"/>
                 </MultiBinding>
             </mah:HamburgerMenu.OptionsItemCommandParameter>
-            <mah:HamburgerMenu.Content>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="50"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Background="Black" Grid.Row="0" Orientation="Vertical">
-                        <TextBlock Foreground="White" Text="{Binding CurrentViewModel}"/>
-                    </StackPanel>
-                    <ContentControl 
-                        Grid.Row="1"
-                        DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
-                        Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    <!--<Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />-->
+                <mah:HamburgerMenu.Content>
+                    <hc:SimplePanel>
+                        <hc:ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" IsInertiaEnabled="True" IsPenetrating="True">
+                            <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" />
+                        </hc:ScrollViewer>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Background="Black" Grid.Row="0" Orientation="Vertical">
+                                <TextBlock Foreground="White" Text="{Binding CurrentViewModel}"/>
+                            </StackPanel>
+                            <ContentPresenter 
+                            Grid.Row="1"
+                            DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
+                            <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />
 
-                    <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible" Loaded="HomeView_Loaded"/>
-                </Grid>
-            </mah:HamburgerMenu.Content>
+                            <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible" Loaded="HomeView_Loaded"/>
+                        </Grid>
+                    </hc:SimplePanel>
+                </mah:HamburgerMenu.Content>
         </mah:HamburgerMenu>
         <controls:StatusBar Grid.Row="1"/>
     </Grid>

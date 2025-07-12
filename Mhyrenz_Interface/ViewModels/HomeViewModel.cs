@@ -2,6 +2,7 @@
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -26,7 +27,7 @@ using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class HomeViewModel: NavigationViewModel
+    public class HomeViewModel: NavigationViewModel, SalesRegisterHost
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
@@ -51,19 +52,20 @@ namespace Mhyrenz_Interface.ViewModels
         }
         private ICollectionView Inventory;
         public ICommand RegisterCommand { get; private set; }
+        public ICommand OpenStartupCommand { get; set; }
         public ICollectionView Transactions { get; private set; }
         public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;
         public InfoPanelViewModel InfoPanelViewModel => _infoPanelViewModel;
-        public string Bindtest => _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
+        public string Bindtest { get; private set; }
 
-        private bool _isLoading = false;
-        public bool IsLoading 
+        private bool _isRegistering;
+        public bool IsRegistering
         {
-            get => _isLoading;
+            get => _isRegistering;
             set
             {
-                _isLoading = value;
-                OnPropertyChanged(nameof(IsLoading));
+                _isRegistering = value;
+                OnPropertyChanged(nameof(IsRegistering));
             }
         }
 
@@ -110,22 +112,29 @@ namespace Mhyrenz_Interface.ViewModels
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
             _sessionStore = sessionStore;
+            _sessionStore.StateChanged += _sessionStore_StateChanged;
+            Bindtest = _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
             _inventoryStore.ProductsCollectionView.Filter += FilterProducts;
 
             base.TransitionCompleted += OnTransitionComplete;
             _inventoryStore.PromptSessionEvent += OnPromptSessionRequest;
-            _sessionStore.StateChanged += OnCurrentSession;
 
             _dialogCoordinator = dialogCoordinator;
 
             DeferLoad();
 
+            OpenStartupCommand = new AsyncRelayCommand(OpenStartupActionCommand);
             RegisterCommand = new SalesRegisterCommand(this, _salesRecordService, _transactionStore, _transactionService, _sessionStore, inventroyStore);
         }
 
-        private void OnCurrentSession()
+        private void _sessionStore_StateChanged(Session obj)
         {
-            OnPropertyChanged(nameof(Bindtest));
+            
+        }
+
+        private async Task OpenStartupActionCommand(object arg)
+        {
+            await App.Presenter.ShowStartUpAsync();
         }
 
         private void OnPromptSessionRequest()
@@ -137,7 +146,6 @@ namespace Mhyrenz_Interface.ViewModels
         {
             base.TransitionCompleted -= OnTransitionComplete;
             _inventoryStore.PromptSessionEvent -= OnPromptSessionRequest;
-            _sessionStore.StateChanged -= OnCurrentSession;
             _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
 
             _overviewChartViewModel.Dispose();
@@ -163,10 +171,11 @@ namespace Mhyrenz_Interface.ViewModels
                 Inventory = _inventoryStore.ProductsCollectionView;
                 InventoryDataGridContext.Inventory = Inventory;
 
-                foreach (var item in _inventoryStore.Products)
-                {
-                    item.CategoryColor = _categoryStore.Colors[item.CategoryId];
-                }
+                if (_categoryStore.Colors.Any())
+                    foreach (var item in _inventoryStore.Products)
+                    {
+                        item.CategoryColor = _categoryStore.Colors[item.CategoryId];
+                    }
 
                 Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
                 OnPropertyChanged(nameof(Transactions));
@@ -193,5 +202,10 @@ namespace Mhyrenz_Interface.ViewModels
             
         }
 
+    }
+
+    public interface SalesRegisterHost
+    {
+        bool IsRegistering { get; set; }
     }
 }

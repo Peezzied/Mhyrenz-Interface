@@ -6,8 +6,7 @@
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <StatusBar VerticalAlignment="Bottom"
-                   Foreground="White">
+    <StatusBar VerticalAlignment="Bottom" Style="{StaticResource MahApps.Styles.StatusBar}">
         <StatusBar.Background>
             <SolidColorBrush Color="{DynamicResource MahApps.Colors.Accent}"/>
         </StatusBar.Background>

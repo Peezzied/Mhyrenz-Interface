@@ -77,7 +77,9 @@ namespace Mhyrenz_Interface.State
             {
                 _trackers.Clear();
                 Transactions.Clear();
-                ChangeTracking.IsInventoryLoaded = true;
+
+                if (transactions == null)
+                    return;
 
                 var displayTransaction = transactions
                     .GroupBy(transaction => transaction.UniqueId)

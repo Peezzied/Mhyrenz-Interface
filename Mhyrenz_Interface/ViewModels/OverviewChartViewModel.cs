@@ -164,6 +164,9 @@ namespace Mhyrenz_Interface.ViewModels
 
                 foreach (var item in SalesByCategory)
                 {
+                    if (item.Fill is null)
+                        return;
+
                     _categoryStore.Colors[item.Tag.CastTo<int>()] = 
                         new BrushConverter().ConvertFromString(item.Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>();
                 }

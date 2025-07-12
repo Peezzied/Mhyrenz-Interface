@@ -3,6 +3,7 @@ using HandyControl.Tools.Extension;
 using LiveChartsCore.Kernel;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Core.ValidationAttributes;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
@@ -22,22 +23,12 @@ namespace Mhyrenz_Interface.ViewModels
 {
 
     #region Custom ValidationAttributes
-    public class FutureDateAttribute : ValidationAttribute
-    {
-        public override bool IsValid(object value)
-        {
-            if (value is DateTime dt)
-            {
-                return dt > DateTime.Now.AddMinutes(1);
-            }
-            return false;
-        }
-    }
+
+
     #endregion
 
-    public class AddProductViewModel : BaseViewModel, INotifyDataErrorInfo
+    public class AddProductViewModel : ValidationViewModel
     {
-        private readonly Dictionary<string, List<string>> _propertyErrors = new Dictionary<string, List<string>>();
         private Category _category;
         private readonly ICategoryStore _categoryStore;
 
@@ -48,31 +39,27 @@ namespace Mhyrenz_Interface.ViewModels
 
             Categories.AddRange(_categoryStore.Categories.Select(c => c.Key));
 
-            SubmitActionCommand = new AddCommand(this, productService, inventoryStore);
+            base.SubmitActionCommand = new AddCommand(this, productService, inventoryStore);
         }
-
-        public BaseAsyncCommand SubmitActionCommand { get; set; }
-
-        private void InvokeClearValidations()
-        {
-            DrawerClose?.Invoke();
-
-            var propertyNames = _propertyErrors.Keys.ToList(); 
-            _propertyErrors.Clear();
-
-            foreach (var propertyName in propertyNames)
-            {
-                ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-            }
-        }
-
-        public Action ClearValidations { get; set; }
-
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
 
         #region "Properties"
-        private bool _isGeneric;
+        private bool _validationHasError;
+
+        [MustBeFalse]
+        public bool ValidationHasError
+        {
+            get => _validationHasError;
+            set
+            {
+                _validationHasError = value;
+                Validate(nameof(ValidationHasError), value);
+                OnPropertyChanged(nameof(ValidationHasError));
+            }
+        }
+
+        private bool _isGeneric;    
         public bool IsGeneric
         {
             get => _isGeneric;
@@ -153,8 +140,6 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private DateTime _expiry = DateTime.Now;
-
-        [FutureDate]
         public DateTime Expiry
         {
             get => _expiry;
@@ -203,54 +188,13 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         public DateTime MinDate => DateTime.Now;
-
-        public bool HasErrors => _propertyErrors.Any();
-
-        public event Action DrawerClose;
         #endregion
 
-        public event EventHandler<ProductDataViewModel> SubmitSuccess;
-
-        public void RaiseSubmitSuccess(ProductDataViewModel product)
+        public event Action DrawerClose;
+        public override void InvokeClearValidations()
         {
-            SubmitSuccess?.Invoke(this, product);
-        }
-
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
-
-        public IEnumerable GetErrors(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName))
-                return Enumerable.Empty<string>();
-
-            _propertyErrors.TryGetValue(propertyName, out var error);
-            return error ?? Enumerable.Empty<string>();
-        }
-
-        private void Validate(string propertyName, object propertyValue)
-        {
-            var results = new List<ValidationResult>();
-
-            Validator.TryValidateProperty(propertyValue, new ValidationContext(this) { MemberName = propertyName }, results);
-
-
-            if (results.Any())
-            {
-                _propertyErrors[propertyName] = results.Select(r => r.ErrorMessage).ToList();
-            }
-            else
-            {
-                _propertyErrors.Remove(propertyName);
-            }
-
-            OnErrorsChanged(propertyName);
-            SubmitActionCommand.OnCanExecuteChanged();
-            Validator.TryValidateObject(this, new ValidationContext(this), null);
-        }
-
-        private void OnErrorsChanged(string propertyName)
-        {
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            DrawerClose?.Invoke();
+            base.InvokeClearValidations();
         }
     }
 }

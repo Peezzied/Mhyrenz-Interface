@@ -18,6 +18,19 @@ namespace Mhyrenz_Interface.Database.Services
             _contextFactory = contextFactory;
         }
 
+        public async Task<Session> Update(Guid id, Session updatedEntity)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                updatedEntity.UniqueId = id;
+
+                context.Set<Session>().Update(updatedEntity);
+                await context.SaveChangesAsync();
+
+                return updatedEntity;
+            }
+        }
+
         public async Task<Session> Create(Session entity)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())

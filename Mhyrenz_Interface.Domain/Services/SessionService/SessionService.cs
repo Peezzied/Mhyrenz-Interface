@@ -28,7 +28,12 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             return result;
         }
 
-        public async Task<Session> GetSession()
+        public async Task<Session> EditSession(Guid id, Session session)
+        {
+            return await _sessionDataService.Update(id, session);
+        }
+
+        public async Task<Session> GetSession() 
         {
             var result = await _sessionDataService.GetAll();
 

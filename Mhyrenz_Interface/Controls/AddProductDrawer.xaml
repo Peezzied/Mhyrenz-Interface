@@ -8,6 +8,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
              xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
+             xmlns:attach="clr-namespace:Mhyrenz_Interface.Controls.Attached"
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
              mc:Ignorable="d"
              d:DesignWidth="400">
@@ -43,11 +44,10 @@
                                 <ContentPresenter DockPanel.Dock="Right" TextElement.Foreground="{DynamicResource DangerBrush}" Margin="4,0,0,0" Content="{Binding Path=(hc:InfoElement.Symbol),RelativeSource={RelativeSource TemplatedParent}}" Visibility="{Binding Path=(hc:InfoElement.Necessary),RelativeSource={RelativeSource TemplatedParent},Converter={StaticResource Boolean2VisibilityConverter}}"/>
                                 <TextBlock hc:TextBlockAttach.AutoTooltip="True" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding Path=(hc:InfoElement.Title),RelativeSource={RelativeSource TemplatedParent}}"/>
                             </DockPanel>
-                            <!--<Border Grid.Row="1" x:Name="border" CornerRadius="{Binding Path=(hc:BorderElement.CornerRadius),RelativeSource={RelativeSource TemplatedParent}}" BorderBrush="Red" BorderThickness="10" Background="{TemplateBinding Background}" SnapsToDevicePixels="True"/>-->
                             <Grid Grid.Row="1" SnapsToDevicePixels="true" x:Name="root" >
-                                <mah:NumericUpDown TextAlignment="Center" Culture="en-PH" StringFormat="{Binding Path=(local:NumericUpDownEx.StringFormat),RelativeSource={RelativeSource TemplatedParent}}" Minimum="0">
+                                <mah:NumericUpDown attach:ValidationHelper.HasError="{Binding Path=(attach:ParentValidationHelper.HasError), RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}" TextAlignment="Center" Culture="en-PH" StringFormat="{Binding Path=(local:NumericUpDownEx.StringFormat),RelativeSource={RelativeSource TemplatedParent}}" Minimum="0">
                                     <mah:NumericUpDown.Value>
-                                        <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}">
+                                        <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" NotifyOnValidationError="True">
                                             <Binding.ValidationRules>
                                                 <vm:NotBlank />
                                             </Binding.ValidationRules>
@@ -97,6 +97,7 @@
                         <hc:Row Gutter="20">
                             <hc:Col Span="12">
                                 <hc:NumericUpDown x:Name="RetailPriceNumericUpDown"
+                                    attach:ParentValidationHelper.HasError="{Binding ValidationHasError, Mode=OneWayToSource}"
                                     local:NumericUpDownEx.StringFormat="C"
                                     Value="{Binding Price, UpdateSourceTrigger=PropertyChanged}"
                                     hc:InfoElement.Title="Retail Price"
@@ -105,6 +106,7 @@
                             </hc:Col>
                             <hc:Col Span="12">
                                 <hc:NumericUpDown x:Name="PrincipalStockNumericUpDown"
+                                    attach:ParentValidationHelper.HasError="{Binding ValidationHasError, Mode=OneWayToSource}"
                                     Value="{Binding Qty, UpdateSourceTrigger=PropertyChanged}"
                                     hc:InfoElement.Title="Principal Stock"
                                     hc:InfoElement.TitleWidth="100"
@@ -128,7 +130,7 @@
                             hc:InfoElement.Title="Supplier"
                             Style="{StaticResource TextBoxExtend}"/>
                     </hc:UniformSpacingPanel>
-                    <hc:UniformSpacingPanel hc:InfoElement.TitlePlacement="Left" Orientation="Vertical" Spacing="23">
+                    <hc:UniformSpacingPanel  hc:InfoElement.TitlePlacement="Left" Orientation="Vertical" Spacing="23">
                         <TextBox 
                             Text="{Binding Barcode, UpdateSourceTrigger=PropertyChanged}"
                             hc:InfoElement.Title="Barcode"
@@ -155,7 +157,7 @@
                                 </Style>
                             </ContentControl.Style>
                         </ContentControl>
-                        <Button Command="{Binding SubmitActionCommand}" Content="Submit"/>
+                        <Button Command="{Binding SubmitActionCommand}" Content="Submit" CommandParameter="{Binding (Validation.HasError), ElementName=RetailPriceNumericUpDown}"/>
                     </hc:UniformSpacingPanel>
                 </hc:UniformSpacingPanel>
             </Grid>

@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface
         private readonly INavigationServiceEx _navigationServiceEx;
         public Frame NavigationFrame => _navigationServiceEx.Frame;
 
-        public MainWindow(object dataContext, INavigationServiceEx navigationServiceEx)
+        public MainWindow(BaseViewModel dataContext, INavigationServiceEx navigationServiceEx)
         {
             DataContext = dataContext;
             _navigationServiceEx = navigationServiceEx;

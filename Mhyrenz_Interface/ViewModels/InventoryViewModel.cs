@@ -39,7 +39,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            if (value is null)
+            if (value is null || value.ToString().IsNullOrEmpty())
             {
                 return new ValidationResult(false, "Field is required.");
             }

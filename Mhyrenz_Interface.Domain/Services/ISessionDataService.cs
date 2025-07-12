@@ -13,5 +13,6 @@ namespace Mhyrenz_Interface.Domain.Services
         Task<bool> Delete(Guid uid);
         Task<Session> Get(Guid uid);
         Task<IEnumerable<Session>> GetAll();
+        Task<Session> Update(Guid id, Session updatedEntity);
     }
 }

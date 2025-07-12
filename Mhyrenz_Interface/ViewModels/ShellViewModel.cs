@@ -10,11 +10,13 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -28,8 +30,8 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly INavigationServiceEx _navigationServiceEx;
         private readonly IViewModelFactory<NavigationViewModel> _viewModelFactory;
 
-        private static readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
-        private static readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
+        private readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
+        private readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
         private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
@@ -117,7 +119,6 @@ namespace Mhyrenz_Interface.ViewModels
 
             _transactionStore.RequestTransactionsUpdate += OnRequestTransactionsUpdate;
 
-            TransactionsLoad();
         }
 
         public void OnTransitionComplete()
@@ -125,9 +126,9 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.TransitionComplete();
         }
 
-        private void TransactionsLoad()
+        private async Task TransactionsLoad()
         {
-            _transactionService.GetLatests().ContinueWith(task =>
+            await _transactionService.GetLatests().ContinueWith(task =>
             {
                 if (task.IsCompleted)
                 {
@@ -144,9 +145,9 @@ namespace Mhyrenz_Interface.ViewModels
             });
         }
 
-        private void OnRequestTransactionsUpdate(object sender, EventArgs e)
+        private async void OnRequestTransactionsUpdate(object sender, EventArgs e)
         {
-            TransactionsLoad();
+            await TransactionsLoad();
         }
 
         private void Navigate(NavigationCommandParams parameters)
@@ -189,5 +190,12 @@ namespace Mhyrenz_Interface.ViewModels
             //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
+        internal static async Task<ShellViewModel> LoadMainViewModel(IServiceProvider sp)
+        {
+            var vm = sp.GetRequiredService<ShellViewModel>();
+            await vm.TransactionsLoad();
+
+            return vm;
+        }
     }
 }

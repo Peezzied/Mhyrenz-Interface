@@ -80,9 +80,10 @@
                         </Style>
                     </ContentControl.Style>
                 </ContentControl>
-                <Grid Grid.Row="1">
+                <hc:UniformSpacingPanel Grid.Row="1">
                     <Button Command="{Binding RegisterCommand}">REGISTER</Button>
-                </Grid>
+                    <Button Command="{Binding OpenStartupCommand}">Create Session</Button>
+                </hc:UniformSpacingPanel>
             </Grid>
         </DockPanel>
         <Grid Grid.Column="1">

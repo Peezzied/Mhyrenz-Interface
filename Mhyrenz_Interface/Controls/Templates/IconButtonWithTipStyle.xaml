@@ -14,7 +14,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:IconButtonWithTip}">
-                    <Button x:Name="PART_Button" hc:Poptip.HitMode="Hover" Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}" Style="{StaticResource IconButton}" Foreground="{TemplateBinding Foreground}" >
+                    <Button Visibility="{TemplateBinding Visibility}" x:Name="PART_Button" Margin="{TemplateBinding Margin}" hc:Poptip.HitMode="Hover" Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}" Style="{StaticResource IconButton}" Foreground="{TemplateBinding Foreground}" >
                         <hc:Poptip.Instance>
                             <hc:Poptip PlacementType="BottomRight"
                                    Content="{TemplateBinding Tiptext}" />

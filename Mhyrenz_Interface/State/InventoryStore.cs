@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.State
     public class InventoryStore : IInventoryStore
     {
         private readonly UndoRedoManager _undoRedoManager;
-        private readonly IViewModelFactory<ProductDataViewModel> _productsViewModelFactory;
+        private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
@@ -44,7 +44,7 @@ namespace Mhyrenz_Interface.State
         public InventoryStore(
             UndoRedoManager undoRedoManager,
             IEnumerable<Product> products,
-            IViewModelFactory<ProductDataViewModel> productsViewModelFactory,
+            CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
             ITransactionsService transactionsService,
             ISessionStore sessionStore)
@@ -62,7 +62,7 @@ namespace Mhyrenz_Interface.State
 
         public ProductDataViewModel AddProduct(Product product)
         {
-            var productVm = _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+            var productVm = _productsViewModelFactory(new ProductDataViewModelDTO
             {
                 Product = product,
                 SessionStore = _sessionStore,
@@ -86,7 +86,7 @@ namespace Mhyrenz_Interface.State
                 _trackers.Clear();
                 ChangeTracking.IsInventoryLoaded = true;
 
-                var displayProducts = products.Select(product => _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+                var displayProducts = products.Select(product => _productsViewModelFactory(new ProductDataViewModelDTO
                 {
                     Product = product,
                     SessionStore = _sessionStore,
@@ -158,7 +158,7 @@ namespace Mhyrenz_Interface.State
 
                 HandlePropertyChanged(tracker, args, (vm, product, index) =>
                 {
-                    var updated = _productsViewModelFactory.CreateViewModel(new ProductDataViewModelDTO
+                    var updated = _productsViewModelFactory(new ProductDataViewModelDTO
                     {
                         Product = product,
                         SessionStore = _sessionStore,
