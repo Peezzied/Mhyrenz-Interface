@@ -25,7 +25,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             _sessionDataService = sessionDataService;
         }
 
-        public async Task<Product> Add(Product product, int amount = 1, bool withRecent = false)
+        public async Task<Product> Add(Product product, DateTime date, int amount = 1, bool withRecent = false)
         {
             var detachedEntity = product.Clone();
 
@@ -52,7 +52,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
                 {
                     ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = date,
                     SessionId = session.UniqueId
                 });
 

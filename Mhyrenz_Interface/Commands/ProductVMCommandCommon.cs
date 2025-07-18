@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.Commands
             _command = command;
         }
 
-        public override bool Command(object parameter)
+        public override bool Command(object parameter, ActionType intent)
         {
             _command.Execute(new UpdateProductCommandDTO()
             {

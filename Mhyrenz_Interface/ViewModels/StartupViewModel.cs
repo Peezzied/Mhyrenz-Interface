@@ -27,6 +27,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ISessionService _sessionService;
         private readonly ISessionStore _sessionStore;
         private readonly ITransactionsService _transactionService;
+        private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
 
         public SessionBoxContext SessionBoxContext { get; set; }
@@ -113,6 +114,7 @@ namespace Mhyrenz_Interface.ViewModels
             _sessionService = sessionService;
             _sessionStore = sessionStore;
             _transactionService = transactionsService;
+            _inventoryStore = inventoryStore;
             _transactionStore = transactionStore;
 
             HasTransactions = false;
@@ -155,15 +157,9 @@ namespace Mhyrenz_Interface.ViewModels
             });
         }
 
-        private void SessionBoxContext_SessionCreated()
+        private async void SessionBoxContext_SessionCreated()
         {
-            ToggleActionButtons();
-        }
-
-        private void ToggleActionButtons()
-        {
-            CanCreateSession = !CanCreateSession;
-            CanStartSession = !CanCreateSession;
+            await EvaluateConditions();
         }
         private async Task DeleteSessionActionCommand(object arg)
         {
@@ -171,9 +167,10 @@ namespace Mhyrenz_Interface.ViewModels
             await _sessionService.DeleteSession(_sessionStore.CurrentSession.UniqueId);
             await _sessionStore.UpdateSession();
 
-            _transactionStore.LoadTransactions(await _transactionService.GetLatests());
+            await _transactionStore.InitializeAsync();
+            await _inventoryStore.InitializeAsync();
 
-            ToggleActionButtons();
+            await EvaluateConditions();
 
             Growl.Info($"Successfully delete session \"{deletedSession.Period:D}\".");
             Growl.Ask(new GrowlInfo
@@ -227,6 +224,11 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private async Task InitializeAsync()
+        {
+            await EvaluateConditions();
+        }
+
+        private async Task EvaluateConditions()
         {
             var session = await _sessionStore.UpdateSession();
 

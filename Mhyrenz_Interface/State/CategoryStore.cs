@@ -62,7 +62,7 @@ namespace Mhyrenz_Interface.State
         //    UpdateCategories();
         //}
 
-        private async Task UpdateCategories()
+        public async Task UpdateCategories()
         {
             Categories.Clear();
 
@@ -70,20 +70,16 @@ namespace Mhyrenz_Interface.State
 
             foreach (var item in result)
             {
-                Categories[item] = new ListCollectionView(_inventoryStore.Products)
-                {
-                    Filter = (obj) => obj is ProductDataViewModel vm
-                        && vm.CategoryId == item.Id
-                };
+                Categories[item] = new ListCollectionView(_inventoryStore.Products);
+                Categories[item].Filter += obj => obj is ProductDataViewModel vm
+                    && vm.CategoryId == item.Id;
             }
         }   
 
-        public static async Task<CategoryStore> LoadCategoryStore(IServiceProvider serviceProvider)
+        public static async Task LoadCategoryStore(IServiceProvider serviceProvider)
         {
-            var categoryStore = ActivatorUtilities.CreateInstance<CategoryStore>(serviceProvider);
+            var categoryStore = serviceProvider.GetRequiredService<ICategoryStore>();
             await categoryStore.UpdateCategories();
-
-            return categoryStore;
         }
     }
 }

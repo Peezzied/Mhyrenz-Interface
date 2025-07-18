@@ -166,6 +166,8 @@
     <Compile Include="Services\ReportsService\ReportService.cs" />
     <Compile Include="Services\SalesRecordService\ISalesRecordService.cs" />
     <Compile Include="Services\SalesRecordService\SalesRecordService.cs" />
+    <Compile Include="Services\SerialBarcodeService\ISerialBarcodeService.cs" />
+    <Compile Include="Services\SerialBarcodeService\SerialBarcodeService.cs" />
     <Compile Include="Services\SessionService\ISessionService.cs" />
     <Compile Include="Services\SessionService\SessionService.cs" />
     <Compile Include="Services\TransactionService\ITransactionsService.cs" />

@@ -13,8 +13,8 @@ namespace Mhyrenz_Interface
     {
         public string EventName { get; set; }
         public string Output { get; set; }
-        public Func<IServiceProvider, IServiceCollection, Task> Action { get; set; }
-        public StartupAction(string name, string output, Func<IServiceProvider, IServiceCollection, Task> action)
+        public Func<IServiceProvider, Task> Action { get; set; }
+        public StartupAction(string name, string output, Func<IServiceProvider, Task> action)
         {
             EventName = name;
             Action = action;
@@ -31,20 +31,17 @@ namespace Mhyrenz_Interface
             _actions.Enqueue(startupAction);
         }
 
-        public static async Task<IServiceProvider> Init(IServiceCollection collection, IServiceProvider orginalProvider, SplashWindow splashWindow)
+        public static async Task<IServiceProvider> Init(IServiceProvider provider, SplashWindow splashWindow)
         {
-            IServiceProvider newProvider = orginalProvider;
-
             while (_actions.Count > 0)
             {
                 var item = _actions.Dequeue();
                 splashWindow.AddMessage($"{item.EventName}: {item.Output}...");
-                await item.Action(newProvider, collection);
-                newProvider = collection.BuildServiceProvider();
+                await item.Action(provider);
             }
             splashWindow.AddMessage($"Done!");
 
-            return newProvider;
+            return provider;
         }
     }
 }

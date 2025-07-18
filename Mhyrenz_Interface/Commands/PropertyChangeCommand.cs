@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.Domain.DTO;
+﻿using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.DTO;
 using Mhyrenz_Interface.State;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace Mhyrenz_Interface.Commands
         {
             //SetProperty(_newValue);
             Action = ActionType.Normal;
-            Command(_newValue);
+            Command(_newValue, ActionType.Normal);
         }
 
         public void Undo()
@@ -43,7 +44,7 @@ namespace Mhyrenz_Interface.Commands
 
             Action = ActionType.Undo;
 
-            Command(_oldValue);
+            Command(_oldValue, ActionType.Undo);
         }
 
         public void Redo()
@@ -52,10 +53,10 @@ namespace Mhyrenz_Interface.Commands
 
             Action = ActionType.Redo;
 
-            Command(_newValue);
+            Command(_newValue, ActionType.Redo);
         }
 
-        public abstract bool Command(object parameter);
+        public abstract bool Command(object parameter, ActionType intent);
 
         private void SetProperty(object value)
         {

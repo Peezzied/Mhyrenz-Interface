@@ -36,7 +36,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly OverviewChartViewModel _overviewChartViewModel;
         private readonly ISalesRecordService _salesRecordService;
         private readonly ITransactionsService _transactionService;
-        private readonly IViewModelFactory<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
+        private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
         private readonly InfoPanelViewModel _infoPanelViewModel;
@@ -50,10 +50,18 @@ namespace Mhyrenz_Interface.ViewModels
                 OnPropertyChanged(nameof(InventoryDataGridContext));
             }
         }
-        private ICollectionView Inventory;
         public ICommand RegisterCommand { get; private set; }
         public ICommand OpenStartupCommand { get; set; }
-        public ICollectionView Transactions { get; private set; }
+        private ICollectionView _transactions;
+        public ICollectionView Transactions
+        {
+            get => _transactions;
+            set
+            {
+                _transactions = value;
+                OnPropertyChanged(nameof(Transactions));
+            }
+        }
         public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;
         public InfoPanelViewModel InfoPanelViewModel => _infoPanelViewModel;
         public string Bindtest { get; private set; }
@@ -96,7 +104,7 @@ namespace Mhyrenz_Interface.ViewModels
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
             IDialogCoordinator dialogCoordinator,
-            IViewModelFactory<InventoryDataGridViewModel> inventoryDataGridViewModelFactory) : base(navigationServiceEx)
+            CreateViewModel<InventoryDataGridViewModel> inventoryDataGridViewModelFactory) : base(navigationServiceEx)
         {
             _navigationServiceEx = navigationServiceEx;
             _inventoryStore = inventroyStore;
@@ -107,14 +115,14 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionService = transactionsService;
 
             _inventoryDataGridViewModelFactory = inventoryDataGridViewModelFactory;
-            InventoryDataGridContext = _inventoryDataGridViewModelFactory.CreateViewModel();
+            InventoryDataGridContext = _inventoryDataGridViewModelFactory();
 
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
             _sessionStore = sessionStore;
             _sessionStore.StateChanged += _sessionStore_StateChanged;
             Bindtest = _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
-            _inventoryStore.ProductsCollectionView.Filter += FilterProducts;
+            //_inventoryStore.ProductsCollectionView.Filter += FilterProducts;
 
             base.TransitionCompleted += OnTransitionComplete;
             _inventoryStore.PromptSessionEvent += OnPromptSessionRequest;
@@ -164,12 +172,12 @@ namespace Mhyrenz_Interface.ViewModels
             //}), DispatcherPriority.ContextIdle);
         }
 
-        private async void DeferLoad()
+        private void DeferLoad()
         {
-            await App.Current.Dispatcher.InvokeAsync(new Action(() =>
+                InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
+            InventoryDataGridContext.Inventory.Filter += FilterProducts;
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Inventory = _inventoryStore.ProductsCollectionView;
-                InventoryDataGridContext.Inventory = Inventory;
 
                 if (_categoryStore.Colors.Any())
                     foreach (var item in _inventoryStore.Products)
@@ -177,9 +185,8 @@ namespace Mhyrenz_Interface.ViewModels
                         item.CategoryColor = _categoryStore.Colors[item.CategoryId];
                     }
 
-                Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
-                OnPropertyChanged(nameof(Transactions));
             }), DispatcherPriority.ContextIdle);
+                Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
         }
 
         private bool FilterProducts(object obj)

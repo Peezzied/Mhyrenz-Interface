@@ -399,9 +399,6 @@
     <Compile Include="Controls\InfoPanel.xaml.cs">
       <DependentUpon>InfoPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InventoryDataGrid.xaml.cs">
-      <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
@@ -419,6 +416,7 @@
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="Core\CompositeUndoableCommand.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="Core\ValidationAttributes.cs" />
@@ -432,7 +430,7 @@
     <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
-    <Compile Include="Commands\IUndoableCommand.cs" />
+    <Compile Include="Core\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />
     <Compile Include="Controls\StatusBar.xaml.cs">
       <DependentUpon>StatusBar.xaml</DependentUpon>
@@ -490,10 +488,6 @@
     <Page Include="Controls\InfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\InventoryDataGrid.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\OverviewChart.xaml">
       <SubType>Designer</SubType>

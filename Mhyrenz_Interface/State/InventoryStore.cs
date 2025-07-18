@@ -35,16 +35,15 @@ namespace Mhyrenz_Interface.State
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
-        private List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
+        private readonly List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
-        public ICollectionView ProductsCollectionView { get; set; } 
+        public ICollectionView ProductsCollectionView { get; set; }
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
         public InventoryStore(
             UndoRedoManager undoRedoManager,
-            IEnumerable<Product> products,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
             ITransactionsService transactionsService,
@@ -81,7 +80,7 @@ namespace Mhyrenz_Interface.State
         public void LoadProducts(IEnumerable<Product> products)
         {
 
-            App.Current.Dispatcher.Invoke(()=>
+            App.Current.Dispatcher.Invoke(() =>
             {
                 Products.Clear();
                 _trackers.Clear();
@@ -147,16 +146,9 @@ namespace Mhyrenz_Interface.State
                 .Track(nameof(ProductDataViewModel.Batch), viewModel.Batch, method);
 
             // * EditPurchase
-            method = (tracker, args, oldValue, newValue) =>
-            {
-                _undoRedoManager.Execute(new ProductVMCommandPurchase(
-                    viewModel,
-                    args.PropertyOf,
-                    oldValue, 
-                    newValue,
-                    PurchaseProductCommand  
-                ));
 
+            Action<object, TargetChangedEventArgs> purchaseHandlePropChange = new Action<object, TargetChangedEventArgs>((tracker, args) =>
+            {
                 HandlePropertyChanged(tracker, args, (vm, product, index) =>
                 {
                     var updated = _productsViewModelFactory(new ProductDataViewModelDTO
@@ -171,10 +163,23 @@ namespace Mhyrenz_Interface.State
                         Product = updated
                     });
 
-                        Products.RemoveAt(index);
-                        Products.Insert(index, updated);
+                    Products.RemoveAt(index);
+                    Products.Insert(index, updated);
 
                 });
+            });
+            method = (tracker, args, oldValue, newValue) =>
+            {
+                void handlePropChange() => purchaseHandlePropChange(tracker, args);
+
+                _undoRedoManager.Execute(new ProductVMCommandPurchase(
+                    viewModel,
+                    args.PropertyOf,
+                    oldValue,
+                    newValue,
+                    command: PurchaseProductCommand,
+                    propertyChangeHandler: handlePropChange
+                ));
             };
             _tracker
                 .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), viewModel.PurchaseDefaultEdit, method)
@@ -234,18 +239,16 @@ namespace Mhyrenz_Interface.State
         public event EventHandler<ProductDataViewModel> AddProductEvent;
         public event Action Loaded;
 
-        protected async Task InitializeAsync()
+        public async Task InitializeAsync()
         {
             var products = await _productService.GetAll();
             LoadProducts(products);
         }
 
-        public static async Task<InventoryStore> LoadInventoryStore(IServiceProvider serviceProvider)
+        public static async Task LoadInventoryStore(IServiceProvider serviceProvider)
         {
-            var inventoryStore = ActivatorUtilities.CreateInstance<InventoryStore>(serviceProvider);
+            var inventoryStore = serviceProvider.GetRequiredService<IInventoryStore>();
             await inventoryStore.InitializeAsync();
-
-            return inventoryStore;
         }
     }
 

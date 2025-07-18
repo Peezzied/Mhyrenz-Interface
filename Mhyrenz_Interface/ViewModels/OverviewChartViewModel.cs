@@ -77,8 +77,11 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
             _inventoryStore.Loaded += InventoryStore_Loaded;
 
-            LoadChart(Categories);
-
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LoadChart(Categories);
+            SetColors();
+            }));
         }
 
         private void InventoryStore_Loaded()
@@ -152,7 +155,6 @@ namespace Mhyrenz_Interface.ViewModels
             });
 
             SalesByCategory.AddRange(pieSeries);
-            SetColors();
         }
 
         private void SetColors()
@@ -170,7 +172,7 @@ namespace Mhyrenz_Interface.ViewModels
                     _categoryStore.Colors[item.Tag.CastTo<int>()] = 
                         new BrushConverter().ConvertFromString(item.Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>();
                 }
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
     }
 }

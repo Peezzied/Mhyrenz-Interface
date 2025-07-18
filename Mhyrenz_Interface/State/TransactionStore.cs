@@ -146,12 +146,10 @@ namespace Mhyrenz_Interface.State
             }
         }
 
-        public static async Task<TransactionStore> LoadTransactionStore(IServiceProvider serviceProvider)
+        public static async Task LoadTransactionStore(IServiceProvider serviceProvider)
         {
-            var store = ActivatorUtilities.CreateInstance<TransactionStore>(serviceProvider);
+            var store = serviceProvider.GetRequiredService<ITransactionStore>();
             await store.InitializeAsync();
-
-            return store;
         }
     }
 }

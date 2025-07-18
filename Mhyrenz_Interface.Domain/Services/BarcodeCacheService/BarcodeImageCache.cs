@@ -81,16 +81,12 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
             _cacheDir = cachePath.Dir;
         }
 
-        public static async Task<BarcodeImageCache> LoadBarcodeImageCache(IEnumerable<Product> products, ICachePath cachePath)
+        public static async Task LoadBarcodeImageCache(IEnumerable<Product> products, IBarcodeImageCache instance)
         {
             var preCache = products
                     .Where(p => !string.IsNullOrEmpty(p.Barcode))
                     .Select(p => p.Barcode);
-
-            var instance = new BarcodeImageCache(cachePath);
             await instance.Preload(preCache);
-
-            return instance;
         }
 
         public BitmapImage GetOrCreate(string code)

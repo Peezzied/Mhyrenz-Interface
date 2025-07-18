@@ -23,5 +23,6 @@ namespace Mhyrenz_Interface.State
         Task Register(IEnumerable<Product> transactions);
         void LoadProducts(IEnumerable<Product> products);
         ProductDataViewModel AddProduct(Product product);
+        Task InitializeAsync();
     }
 }

@@ -46,18 +46,18 @@
                 <hc:SplitButton Style="{StaticResource SplitButtonPrimary}" hc:IconElement.Geometry="{StaticResource AddGeometry}" hc:IconElement.Width="12" Content="Add Product" Command="{Binding AddProductCommand}" CommandParameter="{Binding ElementName=DrawerRight}"/>
             </hc:UniformSpacingPanel>
         </Grid>
-        <mah:MetroAnimatedSingleRowTabControl
+        <TabControl
                 Grid.Row="1"
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding TabItems}"
                 mah:TabControlHelper.Underlined="TabPanel"
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
-            <mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
+            <TabControl.ContentTemplate>
                 <DataTemplate>
                     <ContentControl Loaded="ContentControl_Loaded" Unloaded="ContentControl_Unloaded" Content="{Binding ControlInstance}"/>
                 </DataTemplate>
-            </mah:MetroAnimatedSingleRowTabControl.ContentTemplate>
-        </mah:MetroAnimatedSingleRowTabControl>
+            </TabControl.ContentTemplate>
+        </TabControl>
     </Grid>
 
 </UserControl>

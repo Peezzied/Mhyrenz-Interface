@@ -110,6 +110,7 @@
         </DataGridTemplateColumn.CellTemplate>
     </DataGridTemplateColumn>
     
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
     <Style x:Key="DataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
@@ -122,13 +123,8 @@
                 </MultiDataTrigger.Conditions>
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent2}" />
             </MultiDataTrigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="DataGridRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow.Azure}">
-        <Style.Triggers>
             <DataTrigger Binding="{Binding Purchase, Converter={StaticResource PurchaseToGreenConverter}}" Value="True">
-                <Setter Property="Background" Value="LawnGreen"/>
+                <Setter Property="Background" Value="#807CFC00"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
@@ -210,7 +206,6 @@
         <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
 
         <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
-        <Setter Property="RowStyle" Value="{StaticResource DataGridRowStyle}"/>
         <Setter Property="CellStyle" Value="{StaticResource DataGridCellStyle}"/>
         <Setter Property="ColumnHeaderStyle">
             <Setter.Value>

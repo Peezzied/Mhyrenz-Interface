@@ -14,7 +14,7 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
-        mc:Ignorable="d"
+        mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         Title="MainWindow" MinHeight="800" MinWidth="1280">
     <mah:MetroWindow.Resources>
 

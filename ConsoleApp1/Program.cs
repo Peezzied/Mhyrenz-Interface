@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
+using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
@@ -26,15 +27,23 @@ namespace ConsoleApp1
                 options.UseSqlite("Data Source=dev_inventory.db");
             });
 
-            var categoryService = new CategoryDataService(contextFactory);
-            var productService = new ProductDataService(contextFactory);
-            var transactionsService = new TransactionsDataService(contextFactory);
+            //var categoryService = new CategoryDataService(contextFactory);
+            //var productService = new ProductDataService(contextFactory);
+            //var transactionsService = new TransactionsDataService(contextFactory);
 
-            var pathService = new CachePath();
-            var exportService = new ReportService(pathService);
+            var serialService= new SerialBarcodeService();
 
-            var products = productService.GetAll().GetAwaiter().GetResult();
+            while (true)
+            {
+                
+            }
 
+            #region "Report Service test"
+            //var pathService = new CachePath();
+            //var exportService = new ReportService(pathService);
+
+            //var products = productService.GetAll().GetAwaiter().GetResult();
+            #endregion
 
             #region "Database test"
             //productService.Update(1, new Product()

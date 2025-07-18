@@ -32,15 +32,15 @@ namespace Mhyrenz_Interface
             _serviceCollection = services;
             _dispatcher = dispatcher;
 
-            StartupManager.Register(new StartupAction("Inventory Store", "Fetching data from database", async (sp, sc) => _serviceCollection.AddSingleton<IInventoryStore>(await InventoryStore.LoadInventoryStore(sp))));
-            StartupManager.Register(new StartupAction("Transactions Store", "Loading transactions from cache", async (sp, sc) => _serviceCollection.AddSingleton<ITransactionStore>(await TransactionStore.LoadTransactionStore(sp))));
-            StartupManager.Register(new StartupAction("Categories Store", "Categorizing inventory from cache", async (sp, sc) => _serviceCollection.AddSingleton<ICategoryStore>(await CategoryStore.LoadCategoryStore(sp))));
+            StartupManager.Register(new StartupAction("Inventory Store", "Fetching data from database", async (sp) => await InventoryStore.LoadInventoryStore(sp)));
+            StartupManager.Register(new StartupAction("Transactions Store", "Loading transactions from cache", async (sp) => await TransactionStore.LoadTransactionStore(sp)));
+            StartupManager.Register(new StartupAction("Categories Store", "Categorizing inventory from cache", async (sp) => await CategoryStore.LoadCategoryStore(sp)));
             StartupManager.Register(new StartupAction("Barcode Image Caching", "Caching barcodes",
-                async (sp, sc) =>
+                async (sp) =>
                 {
                     var products = sp.GetRequiredService<IInventoryStore>().Products.Select(p => p.Item);
-                    var cachePath = sp.GetRequiredService<ICachePath>();
-                    _serviceCollection.AddSingleton<IBarcodeImageCache>(await BarcodeImageCache.LoadBarcodeImageCache(products, cachePath));
+                    var barcodeCache = sp.GetRequiredService<IBarcodeImageCache>();
+                    await BarcodeImageCache.LoadBarcodeImageCache(products, barcodeCache);
                 }));
         }
 
@@ -73,10 +73,8 @@ namespace Mhyrenz_Interface
                 return splash;
             });
 
-            var newProvider = await StartupManager.Init(_serviceCollection, _serviceProvider, SplashWindow.Instance);
-            _serviceProvider = newProvider;
-
-            return newProvider;
+            var provider = await StartupManager.Init(_serviceProvider, SplashWindow.Instance);
+            return provider;
         }
     }
 }

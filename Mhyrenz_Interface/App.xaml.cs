@@ -11,6 +11,7 @@ using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Domain.State;
@@ -49,46 +50,23 @@ namespace Mhyrenz_Interface
         protected override async void OnStartup(StartupEventArgs e)
         {
             var services = CreateServiceCollection();
-            var initialProvider = services.BuildServiceProvider();
+            ServiceProvider = services.BuildServiceProvider();
 
-            Presenter = new AppPresenter(services, initialProvider, Dispatcher);
+            Presenter = new AppPresenter(services, ServiceProvider, Dispatcher);
 
-            ServiceProvider = await Presenter.AppInit();
+            await Presenter.AppInit();
 
             //IServiceProvider serviceProvider = ServiceProvider;
 
             await Presenter.ShowStartUpAsync();
             SplashWindow.Instance.LoadComplete();
+
+            //ServiceProvider.GetRequiredService<ISerialBarcodeService>();
             //InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
             //using (InventoryDbContext context = contextFactory.CreateDbContext())
             //{
             //    context.Database.Migrate();
             //}
-
-
-
-            //await WindowStart(serviceProvider);
-
-            //var products = await serviceProvider.GetRequiredService<IProductService>().GetAll();
-            ////var transactions = await serviceProvider.GetRequiredService<ITransactionsService>().GetLatests();
-            ////serviceProvider.GetRequiredService<ITransactionStore>().LoadTransactions(transactions);
-            //serviceProvider.GetRequiredService<IInventoryStore>().LoadProducts(products);
-            //_ = serviceProvider.GetRequiredService<IBarcodeImageCache>();
-
-            //var sessionStore = serviceProvider.GetRequiredService<ISessionStore>();
-            //var sessionService = serviceProvider.GetRequiredService<ISessionService>();
-
-            //var session = await sessionService.GetSession();
-
-            //if (session != null)
-            //{
-            //    sessionStore.CurrentSession = session;
-            //}
-            //else
-            //{
-            //    sessionStore.CurrentSession = sessionService.GenerateSession(new Session { Period = DateTime.Now }).GetAwaiter().GetResult();
-            //}
-
             base.OnStartup(e);  
         }
 
@@ -106,9 +84,15 @@ namespace Mhyrenz_Interface
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
 
                 .AddSingleton<UndoRedoManager>()
+                .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()
                 .AddSingleton<ISessionStore, SessionStore>()
+                .AddSingleton<ISessionStore, SessionStore>()
+                .AddSingleton<IInventoryStore, InventoryStore>()
+                .AddSingleton<ITransactionStore, TransactionStore>()
+                .AddSingleton<ICategoryStore, CategoryStore>()
 
                 .AddSingleton<ICachePath, CachePath>()
+                .AddSingleton<IBarcodeImageCache, BarcodeImageCache>()
                 .AddSingleton<IReportService, ReportService>()
 
                 .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG

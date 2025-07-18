@@ -62,6 +62,8 @@ namespace Mhyrenz_Interface.ViewModels
         public ICommand ExportInventoryCommand { get; set; }
 
         private string _searchBar = string.Empty;
+        private bool _neglectSearch = false;
+
         public string SearchBar
         {
             get => _searchBar;
@@ -124,7 +126,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public ObservableCollection<TabItems> TabItems { get; private set; }
+        public ObservableCollection<TabItems> TabItems { get; private set; } = new ObservableCollection<TabItems>();
         public ICommand DeleteProductCommand { get; set; }
 
         public InventoryViewModel(
@@ -151,8 +153,7 @@ namespace Mhyrenz_Interface.ViewModels
             DeleteProductCommand = new RelayCommand(DeleteCommand);
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
-            TabItems = new ObservableCollection<TabItems>();
-            App.Current.Dispatcher.Invoke(new Action(() =>
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 LoadTabItems();
             }));
@@ -290,11 +291,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory();
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new TabItems(
-                vm,
-                category.Key,
-                category.Value,
-                filter => {  },
+            var tab = new TabItems(vm, category.Key, category.Value,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 
@@ -337,8 +334,6 @@ namespace Mhyrenz_Interface.ViewModels
         public string Name => _category;
         public int Id => _categoryId;
 
-        private ICollectionView Inventory;
-
         private ContentControl _controlInstance;
         private Predicate<object> _originalFilter;
 
@@ -362,20 +357,17 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly string _category;
         private readonly int _categoryId;
         private readonly Func<ProductDataViewModel, bool> _searchFilter;
-        private readonly Action<Predicate<object>> _resetFilter;
 
         public TabItems(
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
-            Action<Predicate<object>> resetFilter,
             Func<ProductDataViewModel, bool> searchFilter)
         {
             _category = category.Name;
             _categoryId = category.Id;
             _allProducts = allProducts;
             _searchFilter = searchFilter;
-            _resetFilter = resetFilter;
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel; // REFACTOR WITH FACTORY
 
@@ -383,13 +375,13 @@ namespace Mhyrenz_Interface.ViewModels
             DeferInventoryInitialization();
         }
 
-        private async void DeferInventoryInitialization()
+        private void DeferInventoryInitialization()
         {
-            await App.Current.Dispatcher.InvokeAsync(() =>
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 _originalFilter = _allProducts.Filter;
 
-                _allProducts.Filter = item =>
+                _allProducts.Filter += item =>
                 {
                     if (_originalFilter != null && !_originalFilter(item))
                         return false;
@@ -397,29 +389,15 @@ namespace Mhyrenz_Interface.ViewModels
                     return _searchFilter(item as ProductDataViewModel);
                 };
 
-                Inventory = _allProducts;
-
-                _inventoryDataGridViewModel.Inventory = Inventory;
-            }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                _inventoryDataGridViewModel.Inventory = _allProducts;
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
-        private bool FilterByCategory(object item)
-        {
-            return item is ProductDataViewModel product &&
-                   product.Item.Category.Name == _category &&
-                   _searchFilter(product);
-        }
-
-        public override void Dispose()
-        {
-            _resetFilter(_originalFilter);
-        }
-
-        public void Refresh() => Inventory?.Refresh();
+        public void Refresh() => _inventoryDataGridViewModel.Inventory?.Refresh();
 
         public int ProductIndexOf(ProductDataViewModel addedProduct)
         {
-            var inventory = Inventory.Cast<ProductDataViewModel>();
+            var inventory = _inventoryDataGridViewModel.Inventory.Cast<ProductDataViewModel>();
 
             return inventory.IndexOf(addedProduct);
         }
