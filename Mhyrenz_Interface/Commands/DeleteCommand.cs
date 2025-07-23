@@ -47,8 +47,9 @@ namespace Mhyrenz_Interface.Commands
 
                 //_inventoryStore.LastProductChanged = (_inventoryStore.Products.IndexOf(items.First()), items.First());
 
-                await _productService.RemoveMany(_products);
-                dto.RemoveItemsHandler();
+                await _productService.EditPropertyRange(_products, nameof(Product.IsDeleted), true);
+                _inventoryStore.RemoveProduct(dto.ProductData);
+                //dto.RemoveItemsHandler();
             }
         }
 
@@ -61,21 +62,19 @@ namespace Mhyrenz_Interface.Commands
         {
             var productsMap = new HashSet<int>(_products.Select(p => p.Id));
             var products = _inventoryStore.Products.Where(p => productsMap.Contains(p.Item.Id));
-            ExecuteRaw(new InventoryDataGridVmDTO {
-                ProductData = products,
-                RemoveItemsHandler = () =>
-                {
-                    _inventoryStore.RemoveProduct(products);
-                }
+            ExecuteRaw(new InventoryDataGridVmDTO
+            {
+                ProductData = products
             });
         }
 
         public async void Undo(object parameter = null)
         {
-            var products = await _productService.AddMany(_products.Select(i => i.Clone()));
-            _products = (await _productService.GetAll()).Where(i => products.Any(x => x.Id == i.Id));
+            var products = await _productService.EditPropertyRange(_products.Select(i => i), nameof(Product.IsDeleted), false);
+            //_products = (await _productService.GetAll()).Where(i => products.Any(x => x.Id == i.Id));
+            _products = products;
 
-            _inventoryStore.AddProduct(_products);
+            _inventoryStore.AddProduct(products);
         }
     }
 }

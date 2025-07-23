@@ -23,5 +23,6 @@ namespace Mhyrenz_Interface.Domain.Services
         Task<T> UpdateProperty(int id, string propertyName, object newValue);
 
         Task<bool> Delete(int id);
+        Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue);
     }
 }

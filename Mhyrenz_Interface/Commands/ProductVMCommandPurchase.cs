@@ -31,7 +31,8 @@ namespace Mhyrenz_Interface.Commands
         private readonly object _oldValue;
         private readonly object _newValue;
         private readonly ICommand _command;
-ProductVMCommandPurchase(ProductDataViewModel target,
+
+        public ProductVMCommandPurchase(ProductDataViewModel target,
             string propertyName,
             object oldValue,
             object newValue,

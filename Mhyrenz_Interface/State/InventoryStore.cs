@@ -11,6 +11,7 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,7 +83,8 @@ namespace Mhyrenz_Interface.State
         {
             var productsMap = products.ToHashSet();
             var product = products.First();
-            LastProductChanged = (Products.IndexOf(product), product);
+
+            WithFilterSuspended(() => LastProductChanged = (ProductsCollectionView.Cast<ProductDataViewModel>().IndexOf(product), product));
 
             foreach (var item in products.ToList())
             {
@@ -129,7 +131,7 @@ namespace Mhyrenz_Interface.State
 
             AddProductEvent?.Invoke(this, productVm);
 
-            LastProductChanged = (Products.IndexOf(productVm), productVm);
+            WithFilterSuspended(() => LastProductChanged = (ProductsCollectionView.Cast<ProductDataViewModel>().IndexOf(productVm), productVm));
         }
 
         public void LoadProducts(IEnumerable<Product> products)
@@ -156,7 +158,20 @@ namespace Mhyrenz_Interface.State
             });
         }
 
+        public ProductDataViewModel GetProductByIndex(int index)
+        {
+            return ProductsCollectionView.Cast<ProductDataViewModel>().ElementAt(index);
+        }
+
         #region "Helper"
+
+        private void WithFilterSuspended(Action action)
+        {
+            var prevFilter = ProductsCollectionView.Filter;
+            ProductsCollectionView.Filter = null;
+            action();
+            ProductsCollectionView.Filter = prevFilter;
+        }
 
         private PropertyChangeTracker<ProductDataViewModel> TrackProduct(ProductDataViewModel viewModel)
         {
@@ -275,7 +290,7 @@ namespace Mhyrenz_Interface.State
             // SLOW TIME COMPLEXITY - RESOLVE LATER
 
             var tasks = transactions.Select(item =>
-                _productService.Edit(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
+                _productService.EditProperty(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
             );
 
             await Task.WhenAll(tasks);

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20250623061003_stringedbarcode")]
-    partial class stringedbarcode
+    [Migration("20250723063600_migration-with-query-filter")]
+    partial class migrationwithqueryfilter
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -49,6 +49,9 @@ namespace Mhyrenz_Interface.Database.Migrations
 
                     b.Property<DateTime?>("Expiry")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("ListPrice")
                         .HasColumnType("TEXT");

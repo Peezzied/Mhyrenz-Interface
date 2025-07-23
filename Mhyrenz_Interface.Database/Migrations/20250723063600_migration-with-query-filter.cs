@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class stringedbarcode : Migration
+    public partial class migrationwithqueryfilter : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,6 +45,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     Barcode = table.Column<string>(nullable: true),
                     Expiry = table.Column<DateTime>(nullable: true),
                     Batch = table.Column<string>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
                     CategoryId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

@@ -78,19 +78,12 @@ namespace Mhyrenz_Interface.ViewModels
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ProductDataViewModel product;
-                    int tabSelect = -1;
-                    bool canSelect = true;
 
-                    try
-                    {
-                        product = _inventoryStore.Products[_inventoryStore.LastProductChanged.Index];
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        product = _inventoryStore.Products[_inventoryStore.LastProductChanged.Index - 1];
-                        tabSelect = _inventoryStore.LastProductChanged.Product.CategoryId;
-                        canSelect = false;
-                    }
+
+                        product = _inventoryStore.GetProductByIndex(_inventoryStore.LastProductChanged.Index);
+                    bool canSelect = product.Item.Id == _inventoryStore.LastProductChanged.Product.Item.Id;
+                    int tabSelect = _inventoryStore.LastProductChanged.Product.CategoryId;
+
 
                     inventoryGridHost.RowIntoView(product, (tabSelect, canSelect));
                     UndoRedoEvent?.Invoke(obj);

@@ -48,9 +48,9 @@
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20250623061003_stringedbarcode.cs" />
-    <Compile Include="Migrations\20250623061003_stringedbarcode.Designer.cs">
-      <DependentUpon>20250623061003_stringedbarcode.cs</DependentUpon>
+    <Compile Include="Migrations\20250723063600_migration-with-query-filter.cs" />
+    <Compile Include="Migrations\20250723063600_migration-with-query-filter.Designer.cs">
+      <DependentUpon>20250723063600_migration-with-query-filter.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -71,6 +71,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="EFCore.BulkExtensions">
+      <Version>3.1.6</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite">
       <Version>3.1.32</Version>
     </PackageReference>

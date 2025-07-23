@@ -257,7 +257,6 @@ namespace Mhyrenz_Interface.ViewModels
             cmd.Execute(new InventoryDataGridVmDTO
             {
                 ProductData = vm.SelectedItems,
-                RemoveItemsHandler = vm.RemoveItems
             });
         }
 

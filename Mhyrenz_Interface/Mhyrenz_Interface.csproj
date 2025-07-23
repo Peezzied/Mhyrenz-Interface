@@ -464,6 +464,7 @@
     <Compile Include="Controls\MenuItem.cs" />
     <Compile Include="ViewModels\OverviewChartViewModel.cs" />
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
+    <Compile Include="ViewModels\SessionBoxContext.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />

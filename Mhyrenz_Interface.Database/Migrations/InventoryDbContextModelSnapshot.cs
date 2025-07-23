@@ -48,6 +48,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<DateTime?>("Expiry")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("ListPrice")
                         .HasColumnType("TEXT");
 

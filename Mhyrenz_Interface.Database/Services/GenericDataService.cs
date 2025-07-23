@@ -1,9 +1,12 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using EFCore.BulkExtensions;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Metadata;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,8 +76,7 @@ namespace Mhyrenz_Interface.Database.Services
                     return (T)stub;
                 }).ToList();
 
-                context.Set<T>().RemoveRange(stubs);
-                await context.SaveChangesAsync();
+                await context.BulkDeleteAsync(stubs);
             }
         }
 
@@ -110,22 +112,12 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<T> UpdateProperty(
-            int id, string propertyName, object newValue)
+        public async Task<T> UpdateProperty(int id, string propertyName, object newValue)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
                 var entity = await context.Set<T>().FindAsync(id);
-                if (entity == null)
-                    return null;
-
-                var property = typeof(T).GetProperty(propertyName);
-                if (property == null || !property.CanWrite)
-                    throw new InvalidOperationException($"'{propertyName}' is not a valid property of {typeof(T).Name}");
-
-                Type targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-                var convertedValue = Convert.ChangeType(newValue, targetType);
-                property.SetValue(entity, convertedValue);
+                UpdateEntityProperty(entity, propertyName, newValue);
 
                 await context.SaveChangesAsync();
                 return entity;
@@ -133,6 +125,34 @@ namespace Mhyrenz_Interface.Database.Services
 
         }
 
+        public async Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                foreach (var item in entities)
+                {
+                    UpdateEntityProperty(item, propertyName, newValue);
+                }
 
+                await context.BulkUpdateAsync(entities.ToList());
+                return entities;
+            }
+        }
+
+        private T UpdateEntityProperty(T entity, string propertyName, object newValue)
+        {
+            if (entity == null)
+                return null;
+
+            var property = typeof(T).GetProperty(propertyName);
+            if (property == null || !property.CanWrite)
+                throw new InvalidOperationException($"'{propertyName}' is not a valid property of {typeof(T).Name}");
+
+            Type targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+            var convertedValue = Convert.ChangeType(newValue, targetType);
+            property.SetValue(entity, convertedValue);
+
+            return entity;
+        }
     }
 }

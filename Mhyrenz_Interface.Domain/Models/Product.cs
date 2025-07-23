@@ -27,6 +27,8 @@ namespace Mhyrenz_Interface.Domain.Models
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         // Category
         public int CategoryId { get; set; }
         public Category Category { get; set; }

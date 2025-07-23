@@ -50,10 +50,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 Command.Execute(new InventoryDataGridVmDTO 
                 { 
                     ProductData = selectedItems,
-                    RemoveItemsHandler = () =>
-                    {
-                        _inventoryStore.RemoveProduct(selectedItems);
-                    }
                 });
             }
         }

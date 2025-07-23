@@ -29,5 +29,6 @@ namespace Mhyrenz_Interface.State
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);
         void RemoveProduct(ProductDataViewModel product);
         void AddProduct(IEnumerable<Product> products);
+        ProductDataViewModel GetProductByIndex(int index);
     }
 }

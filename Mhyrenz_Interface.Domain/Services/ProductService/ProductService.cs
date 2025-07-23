@@ -28,10 +28,15 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return await _productDataService.CreateMany(entities);
         }
 
-        public async Task<Product> Edit(int id, string propertyName, object value)
+        public async Task<Product> EditProperty(int id, string propertyName, object value)
         {
             var newEntity = await _productDataService.UpdateProperty(id, propertyName, value) ?? throw new DataException($"Product with ID {id} not found.");
             return newEntity;
+        }
+        public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, string propertyName, object value)
+        {
+            var newEntities = await _productDataService.UpdatePropertyRange(products, propertyName, value);
+            return newEntities;
         }
 
         public async Task<Product> Get(int id)
@@ -52,22 +57,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         public async Task RemoveMany(IEnumerable<Product> products)
         {
             await _productDataService.DeleteMany(products);
-        }
-
-        private bool IsInvalidNumeric(object value)
-        {
-            if (value is int v4)
-                return v4 <= 0;
-            else if (value is long v)
-                return v <= 0;
-            else if (value is float v1)
-                return v1 <= 0;
-            else if (value is double v2)
-                return v2 <= 0;
-            else if (value is decimal v3)
-                return v3 <= 0;
-
-            return false;
         }
     }
 }
