@@ -31,15 +31,17 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private Category _category;
         private readonly ICategoryStore _categoryStore;
+        private readonly IInventoryStore _inventoryStore;
 
-        public AddProductViewModel(ICategoryStore categoryStore, IProductService productService, IInventoryStore inventoryStore)
+        public AddProductViewModel(ICategoryStore categoryStore, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager)
         {
             ClearValidations = InvokeClearValidations;
             _categoryStore = categoryStore;
+            _inventoryStore = inventoryStore;
 
             Categories.AddRange(_categoryStore.Categories.Select(c => c.Key));
 
-            base.SubmitActionCommand = new AddCommand(this, productService, inventoryStore);
+            base.SubmitActionCommand = new AddCommand(this, productService, inventoryStore, undoRedoManager);
         }
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
@@ -59,7 +61,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        private bool _isGeneric;    
+        private bool _isGeneric;
         public bool IsGeneric
         {
             get => _isGeneric;
@@ -171,7 +173,7 @@ namespace Mhyrenz_Interface.ViewModels
                 _supplier = value;
                 OnPropertyChanged(nameof(Supplier));
             }
-        }   
+        }
 
         private string _barcode;
 
@@ -190,11 +192,24 @@ namespace Mhyrenz_Interface.ViewModels
         public DateTime MinDate => DateTime.Now;
         #endregion
 
+        public override void Dispose()
+        {
+            ClearValidations?.Invoke();
+            DrawerClose = null;
+            RowIntoView = null;
+        }
+
         public event Action DrawerClose;
+        public event Action<ProductDataViewModel> RowIntoView;
         public override void InvokeClearValidations()
         {
             DrawerClose?.Invoke();
             base.InvokeClearValidations();
+        }
+
+        public void RaiseRowIntoView(ProductDataViewModel item)
+        {
+            RowIntoView?.Invoke(item);
         }
     }
 }

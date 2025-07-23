@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class InventoryDataGridSelect: Behavior<DataGrid>
+    public class InventoryDataGridSelect : Behavior<DataGrid>
     {
         private int SelectInto;
         private bool CanSelectInto;
@@ -34,34 +34,49 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem;
+            //AssociatedObject.Loaded -= AssociatedObject_Loaded;
         }
 
         private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                SelectRow(() => AssociatedObject.LoadingRow -= AssociatedObject_LoadingRow);
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
-        private void InventoryDataGridSelect_SwitchSelectedItem()
+        private void InventoryDataGridSelect_SwitchSelectedItem(bool canSelect)
         {
-            SelectRow(() => AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem);
+            SelectRow(() => AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem, 
+                canSelect: canSelect);
         }
 
         private void AssociatedObject_LoadingRow(object sender, EventArgs e)
         {
-            SelectRow(() => AssociatedObject.LoadingRow -= AssociatedObject_LoadingRow);
         }
 
-        private void SelectRow(Action dispose)
+        private async void SelectRow(Action dispose, bool canSelect = true)
         {
-            var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
-            if (vm.SwitchSelectItem < 0 && !vm.IsDiff) return;
+            await App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+                if (vm.SwitchSelectItem < 0 && !vm.IsDiff)
+                    return;
 
-            AssociatedObject.SelectedIndex = vm.SwitchSelectItem;
-            AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
+                AssociatedObject.SelectedIndex = vm.SwitchSelectItem;
+                AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
+                if (!canSelect)
+                    AssociatedObject.SelectedIndex = -1;
 
-            vm.SwitchSelectItem = -1;
+                if (!vm.IsDiff)
+                    vm.SwitchSelectItem = -1;
+                if (vm.IsDiff)
+                {
+                    dispose();
+                }
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
 
-            dispose();
         }
 
         protected override void OnDetaching()
@@ -78,7 +93,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             var vm = (InventoryDataGridViewModel)AssociatedObject.DataContext;
 
             vm.SelectedItems = AssociatedObject.SelectedItems.Cast<ProductDataViewModel>();
-            
+
             //Debug.WriteLine($"{vm.SelectedItems.ElementAt(0).Name} SELECTED!");
             vm.RemoveItems = () =>
             {

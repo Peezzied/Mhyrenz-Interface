@@ -14,7 +14,7 @@ namespace Mhyrenz_Interface.Domain.Services
 
         Task<T> Create(T entity);
 
-        Task CreateMany(IEnumerable<T> entities);
+        Task<IEnumerable<T>> CreateMany(IEnumerable<T> entities);
 
         Task DeleteMany(IEnumerable<T> entities);
 

@@ -19,14 +19,15 @@ namespace Mhyrenz_Interface.ViewModels
     public class ProductDataViewModel: BaseViewModel
     {
         private readonly ISessionStore _sessionStore;
+        private readonly ICategoryStore _categoryStore;
         private readonly Action _requireSession;
         public Product Item { get; set; }
 
-        public ProductDataViewModel(ProductDataViewModelDTO dto)
+        public ProductDataViewModel(ISessionStore sessionStore, ICategoryStore categoryStore, Product product)
         {
-            Item = dto.Product;
-            _sessionStore = dto.SessionStore;
-            _requireSession = dto.OnSessionNull;
+            Item = product;
+            _sessionStore = sessionStore;
+            _categoryStore = categoryStore;
         }
 
         public int NetQty { 
@@ -200,7 +201,7 @@ namespace Mhyrenz_Interface.ViewModels
         private Brush _categoryColor;
         public Brush CategoryColor
         {
-            get => _categoryColor;
+            get => _categoryColor ?? _categoryStore.Colors[CategoryId];
             set
             {
                 _categoryColor = value;
@@ -219,12 +220,6 @@ namespace Mhyrenz_Interface.ViewModels
                 _requireSession?.Invoke();
                 return false;
             }
-        }
-
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            ChangeTracking.IsInventoryLoaded = false;
-            base.OnPropertyChanged(propertyName);
         }
 
     }

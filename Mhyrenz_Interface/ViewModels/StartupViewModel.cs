@@ -29,6 +29,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionsService _transactionService;
         private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
+        private readonly IUndoRedoManager _undoRedoManager;
 
         public SessionBoxContext SessionBoxContext { get; set; }
         public ICommand NewButtonCommand { get; set; }
@@ -88,6 +89,7 @@ namespace Mhyrenz_Interface.ViewModels
             set
             {
                 _showCalendar = value;
+                EditCalendarDate = _sessionStore.CurrentSession.Period;
                 OnPropertyChanged(nameof(ShowCalendar));
             }
         }
@@ -109,13 +111,15 @@ namespace Mhyrenz_Interface.ViewModels
             ITransactionStore transactionStore,
             ITransactionsService transactionsService,
             ISessionStore sessionStore,
-            IInventoryStore inventoryStore)
+            IInventoryStore inventoryStore,
+            IUndoRedoManager undoRedoManager)
         {
             _sessionService = sessionService;
             _sessionStore = sessionStore;
             _transactionService = transactionsService;
             _inventoryStore = inventoryStore;
             _transactionStore = transactionStore;
+            _undoRedoManager = undoRedoManager;
 
             HasTransactions = false;
             CanCreateSession = true;
@@ -164,6 +168,25 @@ namespace Mhyrenz_Interface.ViewModels
         private async Task DeleteSessionActionCommand(object arg)
         {
             var deletedSession = _sessionStore.CurrentSession;
+            var prompt = MessageBox.Show($"You're about to delete an existing session: {deletedSession.Period:D}, would you like to proceed?",
+                "Delete Session",
+                System.Windows.MessageBoxButton.YesNoCancel,
+                System.Windows.MessageBoxImage.Question);
+
+            var transactions = await _transactionService.GetLatests();
+            if (transactions.Any() && prompt == System.Windows.MessageBoxResult.Yes)
+            {
+                prompt = MessageBox.Show("Existing transactions has been found in the current session. If you wish to continue, the delete action cannot be reverted.",
+                    "Delete Session - Transactions detected",
+                    System.Windows.MessageBoxButton.OKCancel,
+                    System.Windows.MessageBoxImage.Warning);
+            }
+
+            if (prompt == System.Windows.MessageBoxResult.Cancel || prompt == System.Windows.MessageBoxResult.No)
+                return;
+
+            _undoRedoManager.Clear();
+
             await _sessionService.DeleteSession(_sessionStore.CurrentSession.UniqueId);
             await _sessionStore.UpdateSession();
 
@@ -188,6 +211,14 @@ namespace Mhyrenz_Interface.ViewModels
 
         private async Task SaveEditActionCommand(object obj)
         {
+            var prompt = MessageBox.Show($"Would you like to change the existing session's period from {_sessionStore.CurrentSession.Period:D} to {EditCalendarDate:D}?",
+                "Save Changes",
+                System.Windows.MessageBoxButton.YesNoCancel,
+                System.Windows.MessageBoxImage.Question);
+
+            if (prompt == System.Windows.MessageBoxResult.Cancel || prompt == System.Windows.MessageBoxResult.No)
+                return;
+
             ShowCalendar = false;
 
             var products = await _transactionService.GetLatests();

@@ -10,8 +10,9 @@
         xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
         xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
         xmlns:attach="clr-namespace:Mhyrenz_Interface.Controls.Attached"
-        mc:Ignorable="d"
-        Title="Startup" Height="450" Width="800">
+        mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
+        MinHeight="500"
+        Title="Startup" Width="800">
     <Window.Resources>
         <DataTemplate x:Key="SessionBox">
             <hc:TransitioningContentControl TransitionMode="Fade">
@@ -112,18 +113,18 @@
 
     </Window.Resources>
     <Grid>
-        <ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right">
+        <hc:ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" IsInertiaEnabled="True" IsPenetrating="True">
             <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" />
-        </ScrollViewer>
+        </hc:ScrollViewer>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="70">
-                    <TextBlock Text="Mhyrenz Interface" FontSize="40"/>
-                    <hc:UniformSpacingPanel Orientation="Vertical" Spacing="10">
+            <Grid Margin="50,50,50,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="60">
+                    <Image Source="/Resources/Images/MHYRENZ.png" MaxWidth="390"/>
+                    <hc:UniformSpacingPanel Orientation="Vertical" Spacing="10" MaxWidth="310">
                         <hc:ElementGroup IsEnabled="{Binding CanStartSession}" >
                             <hc:ElementGroup.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -136,7 +137,7 @@
                                     </Grid>
                                 </ItemsPanelTemplate>
                             </hc:ElementGroup.ItemsPanel>
-                            <hc:ElementGroup x:Name="root" >
+                            <hc:ElementGroup Background="Transparent" x:Name="root" >
                                 <hc:ElementGroup.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <Grid HorizontalAlignment="Stretch">
@@ -168,9 +169,9 @@
                                 </hc:Badge>
                             </hc:ElementGroup>
                             <Grid Grid.Column="1" >
-                                <controls:IconButtonWithTip Command="{Binding EditCommand}" x:Name="EditButton" Tiptext="Edit Session" Margin="3,0,0,0">
+                                <controls:IconButtonWithTip Command="{Binding EditCommand}" x:Name="EditButton" Tiptext="Edit Session" Margin="6,0,0,0">
                                     <controls:IconButtonWithTip.IconContent>
-                                        <iconPacks:PackIconMaterial Kind="Pencil" Margin="4,0"/>
+                                        <iconPacks:PackIconMaterial Kind="Pencil" Margin="3,0"/>
                                     </controls:IconButtonWithTip.IconContent>
                                 </controls:IconButtonWithTip>
                                 <Popup PlacementTarget="{Binding ElementName=EditButton}" 
@@ -194,7 +195,7 @@
                             </Grid>
                             <controls:IconButtonWithTip Command="{Binding RegisterCommand}" Grid.Column="2" Tiptext="Register Session">
                                 <controls:IconButtonWithTip.IconContent>
-                                    <iconPacks:PackIconMaterial Kind="ContentSave" Margin="4,0"/>
+                                    <iconPacks:PackIconMaterial Kind="ContentSave" Margin="3,0"/>
                                 </controls:IconButtonWithTip.IconContent>
                             </controls:IconButtonWithTip>
                         </hc:ElementGroup>

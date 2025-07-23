@@ -19,8 +19,8 @@ namespace Mhyrenz_Interface.State
 {
     public class TransactionStore : ITransactionStore
     {
-        private readonly UndoRedoManager _undoRedoManager;
-        private readonly IViewModelFactory<TransactionDataViewModel> _transactionsViewModelFactory;
+        private readonly IUndoRedoManager _undoRedoManager;
+        private readonly CreateViewModel<TransactionDataViewModel> _transactionsViewModelFactory;
         private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionsService _transactionService;
         private List<PropertyChangeTracker<TransactionDataViewModel>> _trackers = new List<PropertyChangeTracker<TransactionDataViewModel>>();
@@ -28,9 +28,9 @@ namespace Mhyrenz_Interface.State
         public event EventHandler RequestTransactionsUpdate;
 
         public TransactionStore(
-            UndoRedoManager undoRedoManager,
+            IUndoRedoManager undoRedoManager,
             IEnumerable<Product> products,
-            IViewModelFactory<TransactionDataViewModel> productsViewModelFactory,
+            CreateViewModel<TransactionDataViewModel> productsViewModelFactory,
             IInventoryStore inventoryStore,
             ITransactionsService transactionsService)
         {
@@ -90,7 +90,7 @@ namespace Mhyrenz_Interface.State
 
                 var displayTransaction = transactions
                     .GroupBy(transaction => transaction.UniqueId)
-                    .Select(group => _transactionsViewModelFactory.CreateViewModel(new TransactionDataViewModelDTO()
+                    .Select(group => _transactionsViewModelFactory(new TransactionDataViewModelDTO()
                     {
                         Id = group.Key,
                         Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),

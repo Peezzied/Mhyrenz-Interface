@@ -31,13 +31,17 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task CreateMany(IEnumerable<T> entities)
+        public async Task<IEnumerable<T>> CreateMany(IEnumerable<T> entities)
         {
+            var result = entities.ToList();
+
             using (var context = _contextFactory.CreateDbContext())
             {
-                context.Set<T>().AddRange(entities);
+                await context.Set<T>().AddRangeAsync(result);
                 await context.SaveChangesAsync();
             }
+
+            return result;
         }
 
 
@@ -57,7 +61,19 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (var context = _contextFactory.CreateDbContext())
             {
-                context.Set<T>().RemoveRange(entities);
+                var entityType = context.Model.FindEntityType(typeof(T));
+                var key = entityType.FindPrimaryKey();
+                var keyProperty = key.Properties.First();
+
+                var stubs = entities.Select(entity =>
+                {
+                    var id = keyProperty.PropertyInfo.GetValue(entity);
+                    var stub = Activator.CreateInstance(typeof(T));
+                    keyProperty.PropertyInfo.SetValue(stub, id);
+                    return (T)stub;
+                }).ToList();
+
+                context.Set<T>().RemoveRange(stubs);
                 await context.SaveChangesAsync();
             }
         }

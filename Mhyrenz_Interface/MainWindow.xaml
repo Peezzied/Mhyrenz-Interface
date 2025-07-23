@@ -11,13 +11,14 @@
         xmlns:viewModels="clr-namespace:Mhyrenz_Interface.ViewModels"
         xmlns:views="clr-namespace:Mhyrenz_Interface.Views"
         xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:core="clr-namespace:Mhyrenz_Interface.Core"
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
         d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
-        Title="MainWindow" MinHeight="800" MinWidth="1280">
+        Title="MainWindow" MinHeight="500">
     <mah:MetroWindow.Resources>
-
         <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type controls:MenuItem}">
             <Grid Height="48">
                 <Grid.ColumnDefinitions>
@@ -83,8 +84,10 @@
                                 <RowDefinition Height="50"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <StackPanel Background="Black" Grid.Row="0" Orientation="Vertical">
+                            <StackPanel Background="Black" Grid.Row="0" Orientation="Horizontal">
                                 <TextBlock Foreground="White" Text="{Binding CurrentViewModel}"/>
+                                <Button Content="Undo" Command="{Binding UndoCommand}" CommandParameter="{x:Static core:ActionType.Undo}"/>
+                                <Button Content="Redo" Command="{Binding RedoCommand}" CommandParameter="{x:Static core:ActionType.Redo}"/>
                             </StackPanel>
                             <ContentPresenter 
                             Grid.Row="1"

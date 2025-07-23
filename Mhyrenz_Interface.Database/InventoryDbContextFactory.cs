@@ -22,6 +22,8 @@ namespace Mhyrenz_Interface.Database
         {
             DbContextOptionsBuilder<InventoryDbContext> options = new DbContextOptionsBuilder<InventoryDbContext>();
 
+            options.EnableSensitiveDataLogging().EnableDetailedErrors();
+
             _configureDbContext(options);
 
             return new InventoryDbContext(options.Options);

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Diagnostics;
 using System.Web.UI.WebControls;
@@ -10,8 +11,8 @@ namespace Mhyrenz_Interface.Navigation
 {
     public class NavigationServiceEx: INavigationServiceEx
     {
-        private BaseViewModel _currentViewModel;
-        public BaseViewModel CurrentViewModel
+        private NavigationViewModel _currentViewModel;
+        public NavigationViewModel CurrentViewModel
         {
             get
             {
@@ -89,6 +90,8 @@ namespace Mhyrenz_Interface.Navigation
 
                 if (result)
                     this.Frame.Navigated += SetDataContextAfterNavigation;
+
+                return result;
             }
 
             return false;

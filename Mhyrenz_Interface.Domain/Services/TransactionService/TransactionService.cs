@@ -78,9 +78,6 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
 
         public async Task<IEnumerable<Transaction>> Remove(Product product, int amount = 1)
         {
-            if (amount <= 0)
-                throw new NegativeException(amount, product);
-
             var transactions = await _transactionsDataService.GetLatestsByProduct(product.Id);
 
             var matching = transactions

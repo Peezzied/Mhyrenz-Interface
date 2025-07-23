@@ -23,11 +23,13 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return await _productDataService.Create(entity);
         }
 
+        public async Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities)
+        {
+            return await _productDataService.CreateMany(entities);
+        }
+
         public async Task<Product> Edit(int id, string propertyName, object value)
         {
-            if (value is null)
-                throw new ArgumentNullException(nameof(value), "Value cannot be null.");
-
             var newEntity = await _productDataService.UpdateProperty(id, propertyName, value) ?? throw new DataException($"Product with ID {id} not found.");
             return newEntity;
         }

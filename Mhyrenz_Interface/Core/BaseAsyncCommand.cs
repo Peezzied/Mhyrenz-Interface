@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Core
 {
-    public abstract class BaseAsyncCommand : ICommand
+    public abstract class BaseAsyncCommand : ICommandAsync, IRaiseCanExecuteChanged
     {
         private bool _isExecuting;
         public bool IsExecuting
@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.Core
             return !IsExecuting;
         }
 
-        public async void Execute(object parameter)
+        public virtual async void Execute(object parameter)
         {
             IsExecuting = true;
 
@@ -45,5 +45,15 @@ namespace Mhyrenz_Interface.Core
         {
             CanExecuteChanged?.Invoke(this, new EventArgs());
         }
+    }
+
+    public interface IRaiseCanExecuteChanged
+    {
+        void OnCanExecuteChanged();
+    }
+
+    public interface ICommandAsync: ICommand
+    {
+        Task ExecuteAsync(object parameter);
     }
 }

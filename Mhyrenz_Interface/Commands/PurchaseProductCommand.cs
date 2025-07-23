@@ -26,37 +26,20 @@ namespace Mhyrenz_Interface.Commands
         public override async Task ExecuteAsync(object parameter)
         {
             var DTO = parameter as PurchaseProductDTO;
-            var intent = DTO.Intent;
             var method = DTO.Method;
 
             _dateTime = DateTime.Now;
 
             try
             {
-
-                if (intent == PropertyChangeCommand<ProductDataViewModel>.ActionType.Undo)
+                switch (method)
                 {
-                    switch (method)
-                    {
-                        case PurchaseProductDTO.Type.Add:
-                            await _transactionsService.Remove(DTO.Product, DTO.Amount);
-                            break;
-                        case PurchaseProductDTO.Type.Remove:
-                            await _transactionsService.Add(DTO.Product, _dateTime, DTO.Amount);
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (method)
-                    {
-                        case PurchaseProductDTO.Type.Add:
-                            await _transactionsService.Add(DTO.Product, _dateTime, DTO.Amount);
-                            break;
-                        case PurchaseProductDTO.Type.Remove:
-                            await _transactionsService.Remove(DTO.Product, DTO.Amount);
-                            break;
-                    }
+                    case PurchaseProductDTO.Type.Add:
+                        await _transactionsService.Add(DTO.Product, _dateTime, DTO.Amount);
+                        break;
+                    case PurchaseProductDTO.Type.Remove:
+                        await _transactionsService.Remove(DTO.Product, DTO.Amount);
+                        break;
                 }
             }
             catch (InsufficientQuantityException)

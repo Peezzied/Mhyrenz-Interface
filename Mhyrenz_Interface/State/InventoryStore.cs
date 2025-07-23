@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
@@ -6,8 +7,10 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.State;
+using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Mhyrenz_Interface.Views;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,51 +33,103 @@ namespace Mhyrenz_Interface.State
 {
     public class InventoryStore : IInventoryStore
     {
-        private readonly UndoRedoManager _undoRedoManager;
+        private readonly IUndoRedoManager _undoRedoManager;
         private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
-        private readonly List<PropertyChangeTracker<ProductDataViewModel>> _trackers = new List<PropertyChangeTracker<ProductDataViewModel>>();
+        private readonly INavigationServiceEx _navigationService;
+        private readonly NavigationViewModelFactory _navigationViewModelFactory;
+        private readonly Dictionary<ProductDataViewModel, PropertyChangeTracker<ProductDataViewModel>> _trackers =
+            new Dictionary<ProductDataViewModel, PropertyChangeTracker<ProductDataViewModel>>();
 
-        public ObservableCollection<ProductDataViewModel> Products { get; } = new ObservableCollection<ProductDataViewModel>();
+        public ObservableCollection<ProductDataViewModel> Products { get; } = new SmartObservableCollection<ProductDataViewModel>();
         public ICollectionView ProductsCollectionView { get; set; }
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
+        public (int Index, ProductDataViewModel Product) LastProductChanged { get; set; }
+
         public InventoryStore(
-            UndoRedoManager undoRedoManager,
+            IUndoRedoManager undoRedoManager,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
             ITransactionsService transactionsService,
-            ISessionStore sessionStore)
+            ISessionStore sessionStore,
+            INavigationServiceEx navigationServiceEx,
+            NavigationViewModelFactory navigationViewModelFactory)
         {
             _undoRedoManager = undoRedoManager;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
             _transactionService = transactionsService;
             _sessionStore = sessionStore;
+            _navigationService = navigationServiceEx;
+            _navigationViewModelFactory = navigationViewModelFactory;
             //_categoryStore = categoryStore;
 
             UpdateProductCommand = new UpdateProductCommand(_productService, this);
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
         }
+        public void RemoveProduct(ProductDataViewModel product)
+        {
+            LastProductChanged = (Products.IndexOf(product), product);
+
+            _trackers.Remove(product);
+            Products.Remove(product);
+        }
+        public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
+        {
+            var productsMap = products.ToHashSet();
+            var product = products.First();
+            LastProductChanged = (Products.IndexOf(product), product);
+
+            foreach (var item in products.ToList())
+            {
+                _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == item.Item.Id).Key);
+                Products.Remove(item);
+            }
+        }
 
         public ProductDataViewModel AddProduct(Product product)
         {
-            var productVm = _productsViewModelFactory(new ProductDataViewModelDTO
-            {
-                Product = product,
-                SessionStore = _sessionStore,
-                OnSessionNull = PromptSession
-            });
+            var productVm = _productsViewModelFactory(product);
 
-            _trackers.Add(TrackProducts(productVm));
+            _trackers[productVm] = TrackProduct(productVm);
             Products.Add(productVm);
 
             AddProductEvent?.Invoke(this, productVm);
 
+            LastProductChanged = (Products.IndexOf(productVm), productVm);
+
             return productVm;
+        }
+
+        public void AddProduct(IEnumerable<Product> products)
+        {
+            var displayProducts = products.Select(product => _productsViewModelFactory(product));
+
+            ProductDataViewModel productVm = default;
+            var isFirst = true;
+            foreach (var item in displayProducts)
+            {
+                _trackers[item] = TrackProduct(item);
+
+                if (isFirst)
+                {
+                    productVm = item;
+                    Products.Add(productVm);
+                    isFirst = false;
+                }
+                else
+                    Products.Add(item);
+
+            }
+
+
+            AddProductEvent?.Invoke(this, productVm);
+
+            LastProductChanged = (Products.IndexOf(productVm), productVm);
         }
 
         public void LoadProducts(IEnumerable<Product> products)
@@ -86,16 +141,11 @@ namespace Mhyrenz_Interface.State
                 _trackers.Clear();
                 ChangeTracking.IsInventoryLoaded = true;
 
-                var displayProducts = products.Select(product => _productsViewModelFactory(new ProductDataViewModelDTO
-                {
-                    Product = product,
-                    SessionStore = _sessionStore,
-                    OnSessionNull = PromptSession
-                }));
+                var displayProducts = products.Select(product => _productsViewModelFactory(product));
 
                 foreach (var item in displayProducts)
                 {
-                    _trackers.Add(TrackProducts(item));
+                    _trackers[item] = TrackProduct(item);
                     Products.Add(item);
                 }
 
@@ -107,36 +157,40 @@ namespace Mhyrenz_Interface.State
         }
 
         #region "Helper"
-        private void PromptSession()
-        {
-            PromptSessionEvent?.Invoke();
-        }
 
-        private PropertyChangeTracker<ProductDataViewModel> TrackProducts(ProductDataViewModel viewModel)
+        private PropertyChangeTracker<ProductDataViewModel> TrackProduct(ProductDataViewModel viewModel)
         {
             var _tracker = new PropertyChangeTracker<ProductDataViewModel>(viewModel);
             Action<PropertyChangeTracker<ProductDataViewModel>, TargetChangedEventArgs, object, object> method;
+            Action<object, TargetChangedEventArgs> propChangedHandler;
 
 
             // Track changes to properties and execute commands on change
             // * Commons
-            method = (tracker, args, oldValue, newValue) =>
+            propChangedHandler = new Action<object, TargetChangedEventArgs>((tracker, args) =>
             {
-                _undoRedoManager.Execute(new ProductVMCommandCommon(
-                    viewModel,
-                    args.PropertyOf,
-                    oldValue,
-                    newValue,
-                    UpdateProductCommand
-                ));
-
-                HandlePropertyChanged(tracker, args, (vm, product, _) =>
+                HandlePropertyChanged(tracker, args, (vm, product, index) =>
                 {
                     PropertyChanged?.Invoke(vm, new InventoryStoreEventArgs()
                     {
                         ProductId = product.Id
                     });
+                    LastProductChanged = (index, Products[index]);
                 });
+            });
+            method = (tracker, args, oldValue, newValue) =>
+            {
+                void handlePropChange() => propChangedHandler(tracker, args);
+
+                _undoRedoManager.Execute(new ProductVMCommandCommon(
+                    viewModel,
+                    args.PropertyOf,
+                    oldValue,
+                    newValue,
+                    UpdateProductCommand,
+                    handlePropChange,
+                    currentViewIn: _navigationViewModelFactory.GetViewByViewModel(_navigationService.CurrentViewModel)
+                ));
             };
             _tracker
                 .Track(nameof(ProductDataViewModel.Qty), viewModel.Qty, method)
@@ -147,30 +201,34 @@ namespace Mhyrenz_Interface.State
 
             // * EditPurchase
 
-            Action<object, TargetChangedEventArgs> purchaseHandlePropChange = new Action<object, TargetChangedEventArgs>((tracker, args) =>
+            propChangedHandler = new Action<object, TargetChangedEventArgs>((tracker, args) =>
             {
-                HandlePropertyChanged(tracker, args, (vm, product, index) =>
+                HandlePropertyChanged(tracker, args, async (vm, product, index) =>
                 {
-                    var updated = _productsViewModelFactory(new ProductDataViewModelDTO
+                    await App.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        Product = product,
-                        SessionStore = _sessionStore,
-                        OnSessionNull = PromptSession
-                    });
-                    PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
-                    {
-                        ProductId = product.Id,
-                        Product = updated
-                    });
+                        _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == product.Id).Key);
 
-                    Products.RemoveAt(index);
-                    Products.Insert(index, updated);
+                        var updated = _productsViewModelFactory(product);
+                        PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
+                        {
+                            ProductId = product.Id,
+                            Product = updated
+                        });
 
+                        Products.RemoveAt(index);
+                        Products.Insert(index, updated);
+
+
+                        _trackers[Products[index]] = TrackProduct(Products[index]);
+                    }), System.Windows.Threading.DispatcherPriority.Input);
+
+                    LastProductChanged = (index, Products[index]);
                 });
             });
             method = (tracker, args, oldValue, newValue) =>
             {
-                void handlePropChange() => purchaseHandlePropChange(tracker, args);
+                void handlePropChange() => propChangedHandler(tracker, args);
 
                 _undoRedoManager.Execute(new ProductVMCommandPurchase(
                     viewModel,
@@ -178,7 +236,8 @@ namespace Mhyrenz_Interface.State
                     oldValue,
                     newValue,
                     command: PurchaseProductCommand,
-                    propertyChangeHandler: handlePropChange
+                    propertyChangeHandler: handlePropChange,
+                    currentViewIn: typeof(InventoryView)
                 ));
             };
             _tracker
@@ -200,20 +259,13 @@ namespace Mhyrenz_Interface.State
             if (!!!tracker.PreviousValues.TryGetValue(propertyOf, out var previousValue) && previousValue is null)
                 return;
 
-            int index = Products.IndexOf(Products.FirstOrDefault(x => ReferenceEquals(x, target)));
+            int index = Products.IndexOf(Products.FirstOrDefault(x => x.Item.Id == target.Item.Id));
 
             if (index >= 0)
             {
                 var product = await _productService.Get(target.Item.Id);
 
-                await App.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    _trackers.Remove(tracker);
-
-                    propChanged?.Invoke(Products[index], product, index);
-
-                    _trackers.Add(TrackProducts(Products[index]));
-                }), System.Windows.Threading.DispatcherPriority.Input);
+                propChanged?.Invoke(Products[index], product, index);
             }
         }
         #endregion

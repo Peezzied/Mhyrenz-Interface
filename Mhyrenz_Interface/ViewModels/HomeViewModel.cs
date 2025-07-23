@@ -115,7 +115,7 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionService = transactionsService;
 
             _inventoryDataGridViewModelFactory = inventoryDataGridViewModelFactory;
-            InventoryDataGridContext = _inventoryDataGridViewModelFactory();
+            InventoryDataGridContext = _inventoryDataGridViewModelFactory(this);
 
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
@@ -156,6 +156,7 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore.PromptSessionEvent -= OnPromptSessionRequest;
             _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
 
+            InventoryDataGridContext.Dispose();
             _overviewChartViewModel.Dispose();
             _infoPanelViewModel.Dispose();
         }

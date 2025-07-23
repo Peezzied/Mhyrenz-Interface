@@ -47,6 +47,10 @@ namespace Mhyrenz_Interface.ViewModels
             return ValidationResult.ValidResult;
         }
     }
+    public interface InventoryGridHost
+    {
+        void RowIntoView(ProductDataViewModel product, (int tabSelect, bool canSelect) select = default);
+    }
 
     public class InventoryViewModel : NavigationViewModel, InventoryGridHost
     {
@@ -57,6 +61,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ISessionStore _sessionStore;
         private readonly IProductService _productService;
         private readonly IReportService _reportService;
+        private readonly IUndoRedoManager _undoRedoManager;
 
         public ICommand AddProductCommand { get; set; }
         public ICommand ExportInventoryCommand { get; set; }
@@ -71,19 +76,20 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
-                ((TabItems)SelectedItem).Refresh();
+                ((InventoryTabItem)SelectedItem).Refresh();
+
             }
         }
 
         private object _selectedItem;
-        public object SelectedItem 
+        public object SelectedItem
         {
             get => _selectedItem;
             set
             {
                 _selectedItem = value;
 
-                var tabItem = ((TabItems)SelectedItem);
+                var tabItem = ((InventoryTabItem)SelectedItem);
 
                 tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
@@ -117,25 +123,22 @@ namespace Mhyrenz_Interface.ViewModels
                 _drawerIsOpen = value;
 
                 if (!_drawerIsOpen)
-                {
-                    DrawerViewModel.SubmitSuccess -= Vm_SubmitSuccess;
-                    DrawerViewModel.ClearValidations?.Invoke();
-                }
+                    DrawerViewModel.Dispose();
 
                 OnPropertyChanged(nameof(DrawerIsOpen));
             }
         }
 
-        public ObservableCollection<TabItems> TabItems { get; private set; } = new ObservableCollection<TabItems>();
+        public ObservableCollection<InventoryTabItem> TabItems { get; private set; } = new ObservableCollection<InventoryTabItem>();
         public ICommand DeleteProductCommand { get; set; }
 
-        public InventoryViewModel(
-            INavigationServiceEx navigationServiceEx,
+        public InventoryViewModel(INavigationServiceEx navigationServiceEx,
             ICategoryStore categoryStore,
             IInventoryStore inventoryStore,
             ISessionStore sessionStore,
             IProductService productService,
             IReportService reportService,
+            IUndoRedoManager undoRedoManager,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
@@ -146,10 +149,10 @@ namespace Mhyrenz_Interface.ViewModels
             _addProductViewModelFactory = addProductViewModelFactory;
             _productService = productService;
             _reportService = reportService;
-
+            _undoRedoManager = undoRedoManager;
             _categorystore.Updated += CategoryStore_Updated;
 
-            AddProductCommand = new RelayCommand(AddProduct);
+            AddProductCommand = new RelayCommand(ShowProductAdd);
             DeleteProductCommand = new RelayCommand(DeleteCommand);
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
@@ -165,7 +168,7 @@ namespace Mhyrenz_Interface.ViewModels
             var items = TabItems.ToDictionary(i => i.Id, i => i);
             foreach (var item in _categorystore.Categories)
             {
-                if (items.ContainsKey(item.Key.Id)) 
+                if (items.ContainsKey(item.Key.Id))
                     return;
                 AddTabItem(item);
             }
@@ -192,6 +195,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _addProductViewModelFactory();
             vm.SubmitSuccess += Vm_SubmitSuccess;
+            vm.RowIntoView += Vm_RowIntoView;
 
             DrawerContent = new AddProductDrawer
             {
@@ -200,6 +204,11 @@ namespace Mhyrenz_Interface.ViewModels
 
             DrawerViewModel = DrawerContent.DataContext as AddProductViewModel;
 
+        }
+
+        private void Vm_RowIntoView(ProductDataViewModel item)
+        {
+            RowIntoView(item);
         }
 
         private void Vm_SubmitSuccess(object sender, ProductDataViewModel vm)
@@ -212,8 +221,7 @@ namespace Mhyrenz_Interface.ViewModels
         // DO PROPER DISPOSE
         public override void Dispose()
         {
-            if (DrawerViewModel != null)
-                DrawerViewModel.SubmitSuccess -= Vm_SubmitSuccess;
+            DrawerViewModel?.Dispose();
 
             if (DrawerInstance != null)
                 DrawerInstance.Closed -= DrawerInstance_Closed;
@@ -243,17 +251,17 @@ namespace Mhyrenz_Interface.ViewModels
         }
         private void DeleteCommand(object parameter)
         {
-            var cmd = new DeleteCommand(_productService);
-            var vm = SelectedItem.CastTo<TabItems>().ControlInstance.Content.CastTo<InventoryDataGridViewModel>();
+            var cmd = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
+            var vm = SelectedItem.CastTo<InventoryTabItem>().ControlInstance.Content.CastTo<InventoryDataGridViewModel>();
 
             cmd.Execute(new InventoryDataGridVmDTO
             {
                 ProductData = vm.SelectedItems,
-                RemoveItems = vm.RemoveItems
+                RemoveItemsHandler = vm.RemoveItems
             });
         }
 
-        private void AddProduct(object parameter)
+        private void ShowProductAdd(object parameter)
         {
             if (DrawerInstance == null)
             {
@@ -289,9 +297,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void AddTabItem(KeyValuePair<Category, ICollectionView> category)
         {
-            var vm = _inventoryDataGridViewModelFactory();
+            var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new TabItems(vm, category.Key, category.Value,
+            var tab = new InventoryTabItem(vm, category.Key, category.Value,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 
@@ -303,12 +311,12 @@ namespace Mhyrenz_Interface.ViewModels
             CanDelete = state;
         }
 
-        public void RowIntoView(ProductDataViewModel product)
+        public void RowIntoView(ProductDataViewModel product, (int tabSelect, bool canSelect) select = default)
         {
             var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
-            var categoryId = product.CategoryId;
+            var categoryId = select.tabSelect > 0 ? select.tabSelect : product.CategoryId;
 
-            TabItems newTab = tabItems[categoryId];
+            InventoryTabItem newTab = tabItems[categoryId];
             var vm = newTab.ControlInstance.Content.CastTo<InventoryDataGridViewModel>();
             bool isDiff = false;
             if (newTab != SelectedItem)
@@ -317,92 +325,12 @@ namespace Mhyrenz_Interface.ViewModels
                 isDiff = true;
             }
 
-            SearchBar = string.Empty;
-            vm.SelectItem(isDiff, newTab.ProductIndexOf(product));
+            if (SearchBar != string.Empty)
+                SearchBar = string.Empty;
+
+            var index = newTab.ProductIndexOf(product);
+            vm.SelectItem(isDiff, index, select.canSelect);
         }
     }
-
-    public interface InventoryGridHost
-    {
-        void RowIntoView(ProductDataViewModel product);
-    }
-
-    public class TabItems : BaseViewModel
-    {
-        private readonly InventoryDataGridViewModel _inventoryDataGridViewModel;
-
-        public string Name => _category;
-        public int Id => _categoryId;
-
-        private ContentControl _controlInstance;
-        private Predicate<object> _originalFilter;
-
-        public ContentControl ControlInstance
-        {
-            get
-            {
-                if (_controlInstance == null)
-                {
-                    _controlInstance = new ContentControl
-                    {
-                        Content = _inventoryDataGridViewModel,
-                        ContentTemplate = (DataTemplate)App.Current.FindResource("DataGridDetailedLayout")
-                    };
-                }
-                return _controlInstance;
-            }
-        }
-
-        private readonly ICollectionView _allProducts;
-        private readonly string _category;
-        private readonly int _categoryId;
-        private readonly Func<ProductDataViewModel, bool> _searchFilter;
-
-        public TabItems(
-            InventoryDataGridViewModel inventoryDataGridViewModel,
-            Category category,
-            ICollectionView allProducts,
-            Func<ProductDataViewModel, bool> searchFilter)
-        {
-            _category = category.Name;
-            _categoryId = category.Id;
-            _allProducts = allProducts;
-            _searchFilter = searchFilter;
-
-            _inventoryDataGridViewModel = inventoryDataGridViewModel; // REFACTOR WITH FACTORY
-
-            // Kick off deferred loading (non-blocking)
-            DeferInventoryInitialization();
-        }
-
-        private void DeferInventoryInitialization()
-        {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _originalFilter = _allProducts.Filter;
-
-                _allProducts.Filter += item =>
-                {
-                    if (_originalFilter != null && !_originalFilter(item))
-                        return false;
-
-                    return _searchFilter(item as ProductDataViewModel);
-                };
-
-                _inventoryDataGridViewModel.Inventory = _allProducts;
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-        }
-
-        public void Refresh() => _inventoryDataGridViewModel.Inventory?.Refresh();
-
-        public int ProductIndexOf(ProductDataViewModel addedProduct)
-        {
-            var inventory = _inventoryDataGridViewModel.Inventory.Cast<ProductDataViewModel>();
-
-            return inventory.IndexOf(addedProduct);
-        }
-    }
-
-
 
 }

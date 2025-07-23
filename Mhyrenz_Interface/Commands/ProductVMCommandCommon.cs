@@ -1,5 +1,7 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.ViewModels.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,18 +16,21 @@ namespace Mhyrenz_Interface.Commands
     {
         private readonly ProductDataViewModel _target;
         private readonly string _propertyName;
-        //private readonly object _oldValue;
-        //private readonly object _newValue;
+        private readonly object _oldValue;
+        private readonly object _newValue;
         private readonly ICommand _command;
 
-        public ProductVMCommandCommon(
-            ProductDataViewModel target,
+        public ProductVMCommandCommon(ProductDataViewModel target,
             string propertyName,
             object oldValue,
             object newValue,
-            ICommand command) : base(target, propertyName, oldValue, newValue)
+            ICommand command,
+            Action propertyChangeHandler,
+            Type currentViewIn) : base(target, propertyName, oldValue, newValue, propertyChangeHandler, currentViewIn)
         {
             _target = target;
+            _oldValue = oldValue;
+            _newValue = newValue;
             _propertyName = propertyName;
             _command = command;
         }
@@ -36,7 +41,7 @@ namespace Mhyrenz_Interface.Commands
             {
                 Id = _target.Item.Id,
                 PropertyName = _propertyName,
-                Value = parameter
+                Value = intent == ActionType.Undo ? _oldValue : _newValue
             });
 
             return true;

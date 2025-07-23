@@ -1,7 +1,10 @@
-﻿using Mhyrenz_Interface.Navigation;
+﻿using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Views;
 using Microsoft.Xaml.Behaviors.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Navigation;
 
 namespace Mhyrenz_Interface.ViewModels.Factory
@@ -32,6 +35,7 @@ namespace Mhyrenz_Interface.ViewModels.Factory
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
         private readonly CreateViewModel<TransactionViewModel> _createTransactionsViewModel;
         private readonly CreateViewModel<SettingsViewModel> _createSettingsViewModel;
+        private readonly Dictionary<Type, (Type viewModelType, Delegate factory)> _viewsSet = new Dictionary<Type, (Type, Delegate)>();
 
         public NavigationViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
             CreateViewModel<InventoryViewModel> createInventoryViewModel,
@@ -42,24 +46,36 @@ namespace Mhyrenz_Interface.ViewModels.Factory
             _createInventoryViewModel = createInventoryViewModel;
             _createTransactionsViewModel = createTransactionsViewModel;
             _createSettingsViewModel = createSettingsViewModel;
+
+            _viewsSet[typeof(HomeView)] = (typeof(HomeViewModel), _createHomeViewModel);
+            _viewsSet[typeof(InventoryView)] = (typeof(InventoryViewModel), _createInventoryViewModel);
+            _viewsSet[typeof(TransactionsView)] = (typeof(TransactionViewModel), _createTransactionsViewModel);
+            _viewsSet[typeof(SettingsView)] = (typeof(SettingsViewModel), _createSettingsViewModel);
         }
 
         public NavigationViewModel CreateViewModel(object parameter)
         {
             var viewType = parameter as Type;
-            switch (viewType.Name)
+            if (_viewsSet.TryGetValue(viewType, out var viewModel))
             {
-                case nameof(HomeView):
-                    return _createHomeViewModel();
-                case nameof(InventoryView):
-                    return _createInventoryViewModel();
-                case nameof(TransactionsView):
-                    return _createTransactionsViewModel();
-                case nameof(SettingsView):
-                    return _createSettingsViewModel();
-                default:
-                    throw new ArgumentException($"No view model found for type {viewType.Name}");
+                
+                return viewModel.factory.CastTo<CreateViewModel<NavigationViewModel>>().Invoke();
             }
+
+            throw new ArgumentException($"No view model found for type {viewType.Name}");
+        }
+
+        public Type GetViewByViewModel(NavigationViewModel viewModel)
+        {
+            var derivedSetToViewModels = _viewsSet.ToDictionary(v => v.Value.viewModelType, v => v.Key);
+            var viewModelType = viewModel.GetType();
+
+            if (derivedSetToViewModels.TryGetValue(viewModelType, out var viewType))
+            {
+                return viewType;
+            }
+
+            throw new ArgumentException($"No view found for type {viewModelType.Name}");
         }
     }
 }

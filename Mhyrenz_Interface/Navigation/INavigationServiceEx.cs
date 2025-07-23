@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mhyrenz_Interface.ViewModels.Factory;
+using System;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
@@ -6,7 +7,7 @@ namespace Mhyrenz_Interface.Navigation
 {
     public interface INavigationServiceEx
     {
-        BaseViewModel CurrentViewModel { get; set; }
+        NavigationViewModel CurrentViewModel { get; set; }
 
         event EventHandler Navigating;
         event NavigatedEventHandler Navigated;

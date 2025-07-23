@@ -79,6 +79,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
@@ -387,6 +390,7 @@
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
+    <Compile Include="Commands\UndoRedoBoundCommand.cs" />
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
@@ -427,6 +431,7 @@
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
+    <Compile Include="State\IUndoManager.cs" />
     <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
@@ -454,6 +459,7 @@
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InfoPanelViewModel.cs" />
     <Compile Include="ViewModels\InventoryDataGridViewModel.cs" />
+    <Compile Include="ViewModels\InventoryTabItem.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
     <Compile Include="ViewModels\OverviewChartViewModel.cs" />
@@ -595,7 +601,12 @@
       <Name>Mhyrenz_Interface.Domain</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\Images\MHYRENZ.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icon.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

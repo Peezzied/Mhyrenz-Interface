@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Converters;
@@ -36,6 +37,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
         private readonly ITransactionsService _transactionService;
+        private readonly IUndoRedoManager _undoRedoManger;
         private readonly IDialogCoordinator _dialogCoordinator;
 
         public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
@@ -60,6 +62,8 @@ namespace Mhyrenz_Interface.ViewModels
             get => _selectedOptionsMenuItem;
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
+        public ICommand UndoCommand { get; set; }
+        public ICommand RedoCommand { get; private set; }
 
         public ShellViewModel(
             IInventoryStore inventroyStore,
@@ -67,15 +71,19 @@ namespace Mhyrenz_Interface.ViewModels
             ITransactionsService transactionService,
             ITransactionStore transactionStore,
             INavigationServiceEx navigationServiceEx,
-            IViewModelFactory<NavigationViewModel> viewModelFactory,
-            IDialogCoordinator dialogCoordinator)
+            NavigationViewModelFactory viewModelFactory,
+            IDialogCoordinator dialogCoordinator,
+            IUndoRedoManager undoRedoManager)
         {
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
+            _undoRedoManger = undoRedoManager;
+
+            UndoCommand = new RelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo);
+            RedoCommand = new RelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo);
 
             _dialogCoordinator = dialogCoordinator;
 
-            _navigationServiceEx.Navigate(new Uri("Views/HomeView.xaml", UriKind.RelativeOrAbsolute));
 
             NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
             GoBackCommand = new RelayCommand(execute: GoBack, canExecute: _ => _navigationServiceEx.CanGoBack);
@@ -112,6 +120,7 @@ namespace Mhyrenz_Interface.ViewModels
                 NavigationDestination = new Uri("Views/SettingsView.xaml", UriKind.RelativeOrAbsolute)
             });
 
+            _navigationServiceEx.Navigate(typeof(HomeView));
             _inventoryStore = inventroyStore;
             _transactionStore = transactionStore;
             _productService = productService;
@@ -119,6 +128,19 @@ namespace Mhyrenz_Interface.ViewModels
 
             _transactionStore.RequestTransactionsUpdate += OnRequestTransactionsUpdate;
 
+        }
+
+        private void UndoRedoActionCommand(object parameter)
+        {
+            switch (parameter.CastTo<ActionType>())
+            {
+                case ActionType.Undo:
+                    _undoRedoManger.Undo(); 
+                      break;
+                case ActionType.Redo:
+                    _undoRedoManger.Redo();
+                    break;
+            }
         }
 
         public void OnTransitionComplete()
@@ -156,9 +178,9 @@ namespace Mhyrenz_Interface.ViewModels
                 ? parameters.Menu.SelectedItem
                 : parameters.Menu.SelectedOptionsItem;
 
-            if (selectedItem is MenuItem menuItem && menuItem.NavigationDestination != null && menuItem.IsNavigation)
+            if (selectedItem is MenuItem menuItem && menuItem.NavigationType != null && menuItem.IsNavigation)
             {
-                _navigationServiceEx.Navigate(menuItem.NavigationDestination);
+                _navigationServiceEx.Navigate(menuItem.NavigationType);
             }
         }
 

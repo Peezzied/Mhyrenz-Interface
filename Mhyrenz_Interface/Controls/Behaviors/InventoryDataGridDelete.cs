@@ -1,4 +1,6 @@
-﻿using Mhyrenz_Interface.ViewModels;
+﻿using Mhyrenz_Interface.State;
+using Mhyrenz_Interface.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xaml.Behaviors;
 using System;
 using System.Collections.Generic;
@@ -15,11 +17,17 @@ namespace Mhyrenz_Interface.Controls.Behaviors
     {
         public static readonly DependencyProperty CommandProperty =
             DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(InventoryDataGridDelete));
+        private readonly IInventoryStore _inventoryStore;
 
         public ICommand Command
         {
             get => (ICommand)GetValue(CommandProperty);
             set => SetValue(CommandProperty, value);
+        }
+
+        public InventoryDataGridDelete()
+        {
+            _inventoryStore = App.ServiceProvider.GetRequiredService<IInventoryStore>();
         }
 
         protected override void OnAttached()
@@ -36,14 +44,15 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             if (e.Command.Equals(DataGrid.DeleteCommand) && Command?.CanExecute(null) == true)
             {
+                e.Handled = true;
                 List<ProductDataViewModel> selectedItems = AssociatedObject.SelectedItems.Cast<ProductDataViewModel>().ToList();
 
                 Command.Execute(new InventoryDataGridVmDTO 
                 { 
                     ProductData = selectedItems,
-                    DeleteHandle = () =>
+                    RemoveItemsHandler = () =>
                     {
-                        e.Handled = true;
+                        _inventoryStore.RemoveProduct(selectedItems);
                     }
                 });
             }

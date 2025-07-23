@@ -83,7 +83,7 @@ namespace Mhyrenz_Interface
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
 
-                .AddSingleton<UndoRedoManager>()
+                .AddSingleton<IUndoRedoManager, UndoRedoManager>()
                 .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()
                 .AddSingleton<ISessionStore, SessionStore>()
                 .AddSingleton<ISessionStore, SessionStore>()
@@ -98,16 +98,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG
 
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
-                .AddSingleton<IViewModelFactory<NavigationViewModel>, NavigationViewModelFactory>()
-
-                .AddSingleton<IViewModelFactory<ProductDataViewModel>, ViewModelFactory<ProductDataViewModel>>()
-                .AddSingleton<IViewModelFactory<TransactionDataViewModel>, ViewModelFactory<TransactionDataViewModel>>()
-
-                .AddSingleton<IViewModelFactory<InventoryDataGridViewModel>, ViewModelFactory<InventoryDataGridViewModel>>()
-
-                .AddSingleton<IViewModelFactory<AddProductViewModel>, ViewModelFactory<AddProductViewModel>>()
-
-                .AddSingleton<IViewModelFactory<SessionBoxContext>, ViewModelFactory<SessionBoxContext>>()
+                .AddSingleton<NavigationViewModelFactory>()
 
                 .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ISessionService, SessionService>()
@@ -134,8 +125,8 @@ namespace Mhyrenz_Interface
                 {
                     return (object parameter) =>
                     {
-                        if (parameter is ProductDataViewModelDTO dto)
-                            return ActivatorUtilities.CreateInstance<ProductDataViewModel>(s, dto);
+                        if (parameter is Product product)
+                            return ActivatorUtilities.CreateInstance<ProductDataViewModel>(s, product);
                         throw new ArgumentException("Invalid parameter type for ProductDataViewModel creation.");
                     };
                 })
@@ -159,7 +150,12 @@ namespace Mhyrenz_Interface
                 })
                 .AddSingleton<CreateViewModel<InventoryDataGridViewModel>>(s =>
                 {
-                    return _ => ActivatorUtilities.CreateInstance<InventoryDataGridViewModel>(s);
+                    return (object parameter) =>
+                    {
+                        if (parameter is BaseViewModel vm)
+                            return ActivatorUtilities.CreateInstance<InventoryDataGridViewModel>(s, vm);
+                        throw new ArgumentException("Invalid parameter type for InventoryDataGridViewModel creation.");
+                    };
                 })
                 .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
                 {

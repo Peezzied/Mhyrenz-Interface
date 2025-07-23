@@ -15,7 +15,7 @@ namespace Mhyrenz_Interface.Core
     {
         private readonly Dictionary<string, List<string>> _propertyErrors = new Dictionary<string, List<string>>();
 
-        public BaseAsyncCommand SubmitActionCommand { get; set; }
+        public IRaiseCanExecuteChanged SubmitActionCommand { get; set; }
 
         public Dictionary<string, List<string>> PropertyErrors => _propertyErrors;
 
