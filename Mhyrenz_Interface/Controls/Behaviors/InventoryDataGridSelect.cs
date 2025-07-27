@@ -46,35 +46,50 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
-        private void InventoryDataGridSelect_SwitchSelectedItem(bool canSelect)
+        private void InventoryDataGridSelect_SwitchSelectedItem()
         {
-            SelectRow(() => AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem, 
-                canSelect: canSelect);
+            SelectRow(() => AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem,
+                isFromSwitch: true);
         }
 
         private void AssociatedObject_LoadingRow(object sender, EventArgs e)
         {
         }
 
-        private async void SelectRow(Action dispose, bool canSelect = true)
+        private async void SelectRow(Action dispose, bool isFromSwitch = false)
         {
             await App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
-                if (vm.SwitchSelectItem < 0 && !vm.IsDiff)
+                if (vm.SelectionInfo is null)
+                    return;
+                if (!isFromSwitch && !vm.SelectionInfo.CanSelect)
                     return;
 
-                AssociatedObject.SelectedIndex = vm.SwitchSelectItem;
-                AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
-                if (!canSelect)
-                    AssociatedObject.SelectedIndex = -1;
-
-                if (!vm.IsDiff)
-                    vm.SwitchSelectItem = -1;
-                if (vm.IsDiff)
+                var selectionMap = vm.SelectionInfo.Items.Select(i => i.Item.Id).ToHashSet();
+                AssociatedObject.SelectedItems.Clear();
+                foreach (var item in AssociatedObject.Items.Cast<ProductDataViewModel>())
                 {
-                    dispose();
+                    if (selectionMap.Contains(item.Item.Id))
+                        AssociatedObject.SelectedItems.Add(item);
                 }
+
+                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (AssociatedObject.SelectedItem is null)
+                    {
+                        AssociatedObject.SelectedIndex = vm.SelectionInfo.Index;
+                        AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
+                        AssociatedObject.SelectedIndex = -1;
+                        return;
+                    }
+                    AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
+                }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+
+                vm.SelectionInfo.CanSelect = false;
+
+                //if (!canSelect)
+                //    AssociatedObject.SelectedIndex = -1;
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
 
         }
@@ -95,15 +110,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             vm.SelectedItems = AssociatedObject.SelectedItems.Cast<ProductDataViewModel>();
 
             //Debug.WriteLine($"{vm.SelectedItems.ElementAt(0).Name} SELECTED!");
-            vm.RemoveItems = () =>
-            {
-                var collection = (ListCollectionView)AssociatedObject.ItemsSource;
-                var sourceCollection = (ObservableCollection<ProductDataViewModel>)collection.SourceCollection;
-                foreach (var item in AssociatedObject.SelectedItems.Cast<ProductDataViewModel>().ToList())
-                {
-                    sourceCollection.Remove(item);
-                }
-            };
         }
     }
 }

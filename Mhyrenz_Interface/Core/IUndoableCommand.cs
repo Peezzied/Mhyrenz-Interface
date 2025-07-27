@@ -13,7 +13,7 @@ namespace Mhyrenz_Interface.Core
     {
         Type CurrentViewIn { get; }
         void Execute();
-        void Undo();
-        void Redo();
+        bool Undo();
+        bool Redo();
     }
 }

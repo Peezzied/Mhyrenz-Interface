@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
         public async Task<Product> EditProperty(int id, string propertyName, object value)
         {
-            var newEntity = await _productDataService.UpdateProperty(id, propertyName, value) ?? throw new DataException($"Product with ID {id} not found.");
+            var newEntity = await _productDataService.UpdateProperty(id, propertyName, value);
             return newEntity;
         }
         public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, string propertyName, object value)

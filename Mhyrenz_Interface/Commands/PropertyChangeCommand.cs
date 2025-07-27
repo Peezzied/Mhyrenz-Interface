@@ -36,16 +36,18 @@ namespace Mhyrenz_Interface.Commands
             CommandHandler(_newValue, ActionType.Normal);
         }
 
-        public void Undo()
+        public bool Undo()
         {
             SetProperty(_oldValue);
             CommandHandler(_oldValue, ActionType.Undo);
+            return true;
         }
 
-        public void Redo()
+        public bool Redo()
         {
             SetProperty(_newValue);
             CommandHandler(_newValue, ActionType.Redo);
+            return true;
         }
 
         private void CommandHandler(object parameter, ActionType intent)

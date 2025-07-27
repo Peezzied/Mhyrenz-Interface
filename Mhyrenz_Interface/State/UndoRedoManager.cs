@@ -1,4 +1,6 @@
-﻿using Mhyrenz_Interface.Commands;
+﻿using HandyControl.Controls;
+using HandyControl.Data;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -16,7 +18,7 @@ namespace Mhyrenz_Interface.State
         public NavigationViewModel CurrentView { get; set; }
     }
 
-    public class UndoRedoManager: IUndoRedoManager
+    public class UndoRedoManager : IUndoRedoManager
     {
 
         private readonly Stack<IUndoableCommand> _undoStack = new Stack<IUndoableCommand>();
@@ -30,25 +32,28 @@ namespace Mhyrenz_Interface.State
 
         public void Execute(IUndoableCommand command)
         {
-            command.Execute();
-            _undoStack.Push(command);
-            _redoStack.Clear(); // Clear redo stack after new action
+            if (Push(command))
+                command.Execute();
         }
 
-        public void Push(IUndoableCommand command)
+        public bool Push(IUndoableCommand command)
         {
             _undoStack.Push(command);
             _redoStack.Clear();
+            return true;
         }
 
         public void Undo()
         {
             if (_undoStack.Count > 0)
             {
-                var command = _undoStack.Pop();
-                command.Undo();
-                _redoStack.Push(command);
-                RaiseUndoRedoEvent(ActionType.Undo, command);
+                var command = _undoStack.Peek();
+                if (command.Undo())
+                {
+                    command = _undoStack.Pop();
+                    _redoStack.Push(command);
+                    RaiseUndoRedoEvent(ActionType.Undo, command);
+                }
             }
         }
 
@@ -57,10 +62,13 @@ namespace Mhyrenz_Interface.State
         {
             if (_redoStack.Count > 0)
             {
-                var command = _redoStack.Pop();
-                command.Redo();
-                _undoStack.Push(command);
-                RaiseUndoRedoEvent(ActionType.Redo, command);
+                var command = _redoStack.Peek();
+                if (command.Redo())
+                {
+                    command = _redoStack.Pop();
+                    _undoStack.Push(command);
+                    RaiseUndoRedoEvent(ActionType.Redo, command);
+                }
             }
         }
         private void RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)

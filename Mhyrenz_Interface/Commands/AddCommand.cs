@@ -23,7 +23,7 @@ namespace Mhyrenz_Interface.Commands
         private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
         private bool CanSubmit = true;
-        private ProductDataViewModel _product;
+        private IEnumerable<ProductDataViewModel> _products;
 
         public AddCommand(AddProductViewModel vm, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager)
         {
@@ -35,6 +35,8 @@ namespace Mhyrenz_Interface.Commands
 
         public Type CurrentViewIn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public bool AllowBack { get; private set; } = true;
+
         public override bool CanExecute(object parameter)
         {
             return base.CanExecute(parameter) 
@@ -44,14 +46,13 @@ namespace Mhyrenz_Interface.Commands
 
         public override void Execute(object parameter)
         {
-            _undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter));
-
-            base.Execute(parameter);
+            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter)))
+                base.Execute(parameter);
         }
 
         public override async Task ExecuteAsync(object parameter)
         {
-            CanSubmit = false;
+            CanSubmit = false; 
             var product = await _productService.Add(new Product
             {
                 Name = _viewModel.Name,
@@ -62,14 +63,14 @@ namespace Mhyrenz_Interface.Commands
                 Batch = _viewModel.Batch,
             });
 
-            _product = _inventoryStore.AddProduct(await _productService.Get(product.Id));
+            _products = _inventoryStore.AddProduct(new[] { await _productService.Get(product.Id) });
 
             Growl.Success(new GrowlInfo
             {
                 Message = $"Product \"{product.Name}\" has been added successfully!" ,
                 ShowDateTime = false,
             });
-            _viewModel.RaiseSubmitSuccess(_product);
+            _viewModel.RaiseSubmitSuccess(_products.First());
         }
 
         public void ExecuteRaw(object parameter)
@@ -77,41 +78,35 @@ namespace Mhyrenz_Interface.Commands
             base.Execute(parameter);
         }
 
-        public void Redo(object parameter = null)
+        public async void Redo(object parameter = null)
         {
-            ExecuteRaw(parameter);
+            var product = (await _productService.EditPropertyRange(_products.Select(i => i.Item), nameof(Product.IsDeleted), false)).First();
+
+            _products = _inventoryStore.AddProduct(new[] { product });
+
+            Growl.Success(new GrowlInfo
+            {
+                Message = $"Product \"{product.Name}\" has been added successfully!",
+                ShowDateTime = false,
+            });
+
+            _viewModel.RaiseSubmitSuccess(_products.First());
         }
 
         public void Undo(object parameter = null)
         {
             var deleteCmd = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
 
-            void removeItems()
-            {
-                _inventoryStore.RemoveProduct(_product);
-            }
+            deleteCmd.ExecuteRaw(_products);
 
-            deleteCmd.ExecuteRaw(new InventoryDataGridVmDTO
-            {
-                ProductData = new[] { _product },
-                RemoveItemsHandler = removeItems
-            });
-
-            //await _productService.Remove(_product.Item);
-
-            //_inventoryStore.RemoveProduct(_product);
-
-            //Growl.Success(new GrowlInfo
-            //{
-            //    Message = $"Removed product \"{_product.Name}\" successfully.",
-            //    ShowDateTime = false,
-            //});
-            //_viewModel.RaiseRowIntoView(_product);
+            AllowBack = deleteCmd.AllowBack;
         }
     }
 
     public interface IUndoRedoBound: ICommandAsync, ICommand
     {
+        bool AllowBack { get; }
+
         void Undo(object parameter);
         void Redo(object parameter);
         void ExecuteRaw(object parameter);

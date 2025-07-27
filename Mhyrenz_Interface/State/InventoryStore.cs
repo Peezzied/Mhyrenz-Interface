@@ -49,7 +49,13 @@ namespace Mhyrenz_Interface.State
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
         public ICommand UpdateProductCommand { get; set; }
         public ICommand PurchaseProductCommand { get; set; }
-        public (int Index, ProductDataViewModel Product) LastProductChanged { get; set; }
+        public (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set; }
+
+        public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
+        public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
+        public event Action PromptSessionEvent;
+        public event EventHandler<ProductDataViewModel> AddProductEvent;
+        public event Action Loaded;
 
         public InventoryStore(
             IUndoRedoManager undoRedoManager,
@@ -72,68 +78,19 @@ namespace Mhyrenz_Interface.State
             UpdateProductCommand = new UpdateProductCommand(_productService, this);
             PurchaseProductCommand = new PurchaseProductCommand(_transactionService, this);
         }
-        public void RemoveProduct(ProductDataViewModel product)
+
+        #region "Lifecycle and Instantiation"
+        public async Task InitializeAsync()
         {
-            LastProductChanged = (Products.IndexOf(product), product);
-
-            _trackers.Remove(product);
-            Products.Remove(product);
-        }
-        public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
-        {
-            var productsMap = products.ToHashSet();
-            var product = products.First();
-
-            WithFilterSuspended(() => LastProductChanged = (ProductsCollectionView.Cast<ProductDataViewModel>().IndexOf(product), product));
-
-            foreach (var item in products.ToList())
-            {
-                _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == item.Item.Id).Key);
-                Products.Remove(item);
-            }
+            var products = await _productService.GetAll();
+            LoadProducts(products);
         }
 
-        public ProductDataViewModel AddProduct(Product product)
+        public static async Task LoadInventoryStore(IServiceProvider serviceProvider)
         {
-            var productVm = _productsViewModelFactory(product);
-
-            _trackers[productVm] = TrackProduct(productVm);
-            Products.Add(productVm);
-
-            AddProductEvent?.Invoke(this, productVm);
-
-            LastProductChanged = (Products.IndexOf(productVm), productVm);
-
-            return productVm;
+            var inventoryStore = serviceProvider.GetRequiredService<IInventoryStore>();
+            await inventoryStore.InitializeAsync();
         }
-
-        public void AddProduct(IEnumerable<Product> products)
-        {
-            var displayProducts = products.Select(product => _productsViewModelFactory(product));
-
-            ProductDataViewModel productVm = default;
-            var isFirst = true;
-            foreach (var item in displayProducts)
-            {
-                _trackers[item] = TrackProduct(item);
-
-                if (isFirst)
-                {
-                    productVm = item;
-                    Products.Add(productVm);
-                    isFirst = false;
-                }
-                else
-                    Products.Add(item);
-
-            }
-
-
-            AddProductEvent?.Invoke(this, productVm);
-
-            WithFilterSuspended(() => LastProductChanged = (ProductsCollectionView.Cast<ProductDataViewModel>().IndexOf(productVm), productVm));
-        }
-
         public void LoadProducts(IEnumerable<Product> products)
         {
 
@@ -157,20 +114,102 @@ namespace Mhyrenz_Interface.State
 
             });
         }
+        #endregion
+
+        public async Task Register(IEnumerable<Product> transactions)
+        {
+            // SLOW TIME COMPLEXITY - RESOLVE LATER
+
+            var tasks = transactions.Select(item =>
+                _productService.EditProperty(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
+            );
+
+            await Task.WhenAll(tasks);
+
+            var products = await _productService.GetAll();
+
+            LoadProducts(products);
+        }
+
+        public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
+        {
+            //var productsMap = products.ToHashSet();
+            var product = products.First();
+
+            var relativeInventory = ProductsCollectionView.Cast<ProductDataViewModel>()
+                .AsParallel()
+                .AsOrdered()
+                .OrderBy(i => i.Name)
+                .Where(i => i.CategoryId == products.First().CategoryId);
+            RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(product, relativeInventory) - 1, products.ToList()));
+
+            foreach (var item in LastProductChanged.Products)
+            {
+                var productVm = _trackers.FirstOrDefault(t => t.Key.Item.Id == item.Item.Id).Key;
+                _trackers.Remove(productVm);
+                Products.Remove(productVm);
+            }
+        }
+
+        public IEnumerable<ProductDataViewModel> AddProduct(IEnumerable<Product> products)
+        {
+            var displayProducts = products.Select(product => _productsViewModelFactory(product));
+
+            ProductDataViewModel productVm = default;
+            var isFirst = true;
+            foreach (var item in displayProducts)
+            {
+                _trackers[item] = TrackProduct(item);
+
+                if (isFirst)
+                {
+                    productVm = item;
+                    Products.Add(productVm);
+                    isFirst = false;
+                }
+                else
+                    Products.Add(item);
+
+            }
+
+
+            AddProductEvent?.Invoke(this, productVm);
+
+            RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(productVm), displayProducts));
+
+            return displayProducts;
+        }
 
         public ProductDataViewModel GetProductByIndex(int index)
         {
-            return ProductsCollectionView.Cast<ProductDataViewModel>().ElementAt(index);
+            return RunFilterSuspended(() => ProductsCollectionView.Cast<ProductDataViewModel>().ElementAt(index));
         }
 
-        #region "Helper"
+        public int GetIndexByProduct(ProductDataViewModel product, IEnumerable<ProductDataViewModel> collection = null)
+        {
+            var map = (collection ?? ProductsCollectionView
+                .Cast<ProductDataViewModel>())
+                .Select((p, index) => new { p.Item.Id, Index = index })
+                .ToDictionary(x => x.Id, x => x.Index);
 
-        private void WithFilterSuspended(Action action)
+            return map[product.Item.Id];
+        }
+
+        #region "Helpers"
+
+        private T RunFilterSuspended<T>(Func<T> action)
         {
             var prevFilter = ProductsCollectionView.Filter;
             ProductsCollectionView.Filter = null;
-            action();
-            ProductsCollectionView.Filter = prevFilter;
+
+            try
+            {
+                return action(); 
+            }
+            finally
+            {
+                ProductsCollectionView.Filter = prevFilter;
+            }
         }
 
         private PropertyChangeTracker<ProductDataViewModel> TrackProduct(ProductDataViewModel viewModel)
@@ -190,7 +229,7 @@ namespace Mhyrenz_Interface.State
                     {
                         ProductId = product.Id
                     });
-                    LastProductChanged = (index, Products[index]);
+                    LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });
                 });
             });
             method = (tracker, args, oldValue, newValue) =>
@@ -238,7 +277,7 @@ namespace Mhyrenz_Interface.State
                         _trackers[Products[index]] = TrackProduct(Products[index]);
                     }), System.Windows.Threading.DispatcherPriority.Input);
 
-                    LastProductChanged = (index, Products[index]);
+                    LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });
                 });
             });
             method = (tracker, args, oldValue, newValue) =>
@@ -285,38 +324,6 @@ namespace Mhyrenz_Interface.State
         }
         #endregion
 
-        public async Task Register(IEnumerable<Product> transactions)
-        {
-            // SLOW TIME COMPLEXITY - RESOLVE LATER
-
-            var tasks = transactions.Select(item =>
-                _productService.EditProperty(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
-            );
-
-            await Task.WhenAll(tasks);
-
-            var products = await _productService.GetAll();
-
-            LoadProducts(products);
-        }
-
-        public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
-        public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
-        public event Action PromptSessionEvent;
-        public event EventHandler<ProductDataViewModel> AddProductEvent;
-        public event Action Loaded;
-
-        public async Task InitializeAsync()
-        {
-            var products = await _productService.GetAll();
-            LoadProducts(products);
-        }
-
-        public static async Task LoadInventoryStore(IServiceProvider serviceProvider)
-        {
-            var inventoryStore = serviceProvider.GetRequiredService<IInventoryStore>();
-            await inventoryStore.InitializeAsync();
-        }
     }
 
     public class InventoryStoreEventArgs

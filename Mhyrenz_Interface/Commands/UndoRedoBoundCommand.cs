@@ -28,14 +28,16 @@ namespace Mhyrenz_Interface.Commands
             _command.Execute(_commandParameter);
         }
 
-        public void Redo()
+        public bool Redo()
         {
             _command.Redo(_commandParameter);
+            return _command.AllowBack;
         }
 
-        public void Undo()
+        public bool Undo()
         {
             _command.Undo(_commandParameter);
+            return _command.AllowBack;
         }
     }
 }

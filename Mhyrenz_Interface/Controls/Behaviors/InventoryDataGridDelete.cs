@@ -47,10 +47,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 e.Handled = true;
                 List<ProductDataViewModel> selectedItems = AssociatedObject.SelectedItems.Cast<ProductDataViewModel>().ToList();
 
-                Command.Execute(new InventoryDataGridVmDTO 
-                { 
-                    ProductData = selectedItems,
-                });
+                Command.Execute(selectedItems);
             }
         }
 

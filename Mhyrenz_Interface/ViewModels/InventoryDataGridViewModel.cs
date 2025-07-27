@@ -21,35 +21,8 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class InventoryDataGridVmDTO
-    {
-        public IEnumerable<ProductDataViewModel> ProductData { get; set; }
-        public Action DeleteHandle { get; set; }
-        public Action RemoveItemsHandler { get; set; }
-    }
-
     public class InventoryDataGridViewModel : BaseViewModel
     {
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost)
-        {
-            _undoRedoManager = undoRedoManager;
-            _inventoryStore = inventoryStore;
-            _viewHost = viewHost;
-            _productService = productService;
-            _inventoryStore = inventoryStore;
-
-            _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
-            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
-
-            DeleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
-        }
-
-
-        public override void Dispose()
-        {
-            _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
-        }
-
         private ICollectionView _inventory;
         public ICollectionView Inventory
         {
@@ -65,32 +38,6 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
-            
-        private readonly IProductService _productService;
-        private readonly IInventoryStore _inventoryStore;
-        private readonly NavigationViewModel _viewHost;
-        private readonly IUndoRedoManager _undoRedoManager;
-
-        private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
-        {
-            if (e.CurrentView is InventoryGridHost inventoryGridHost)
-            {
-                App.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    ProductDataViewModel product;
-
-
-                        product = _inventoryStore.GetProductByIndex(_inventoryStore.LastProductChanged.Index);
-                    bool canSelect = product.Item.Id == _inventoryStore.LastProductChanged.Product.Item.Id;
-                    int tabSelect = _inventoryStore.LastProductChanged.Product.CategoryId;
-
-
-                    inventoryGridHost.RowIntoView(product, (tabSelect, canSelect));
-                    UndoRedoEvent?.Invoke(obj);
-                }), System.Windows.Threading.DispatcherPriority.Input);
-            }
-        }
-
         public event Action<ActionType> UndoRedoEvent;
         public ICommand DeleteCommand { get; set; }
 
@@ -121,11 +68,85 @@ namespace Mhyrenz_Interface.ViewModels
                 OnPropertyChanged(nameof(SelectedItem));
             }
         }
+        public bool IsDiff { get; set; }
+        public SelectionRowsInfo SelectionInfo { get; set; }
+
+        public Func<DataGridCell> GetCell { get; set; }
 
         public event Action<ProductDataViewModel> Purchased;
         public event Action<bool> SelectedItemsChanged;
-        public event Action<bool> SwitchSelectedItem;
-        public Action RemoveItems { get; internal set; }
+        public event Action SwitchSelectedItem;
+
+        private readonly IProductService _productService;
+        private readonly IInventoryStore _inventoryStore;
+        private readonly NavigationViewModel _viewHost;
+        private readonly IUndoRedoManager _undoRedoManager;
+
+        public class SelectionRowsInfo
+        {
+            public SelectionRowsInfo(int index, IEnumerable<ProductDataViewModel> items, bool isDifferent, bool canSelect = true)
+            {
+                Index = index;
+                Items = items;
+                IsDifferent = isDifferent;
+                CanSelect = canSelect;
+            }
+
+            public int Index { get; set; }
+            public IEnumerable<ProductDataViewModel> Items { get; set; }
+            public bool IsDifferent { get; set; }
+            public bool CanSelect { get; set; }
+        }
+
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost)
+        {
+            _undoRedoManager = undoRedoManager;
+            _inventoryStore = inventoryStore;
+            _viewHost = viewHost;
+            _productService = productService;
+            _inventoryStore = inventoryStore;
+
+
+            DeleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
+        }
+
+        public void Load()
+        {
+            _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
+            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
+
+        }
+
+        public override void Dispose()
+        {
+            _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
+        }
+
+        public void SelectItem(bool isDiff, int index, IEnumerable<ProductDataViewModel> selection)
+        {
+            SelectionInfo = new SelectionRowsInfo(index, selection, isDiff);
+
+            SwitchSelectedItem?.Invoke();
+        }
+
+        #region "Event handlers"
+        private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
+        {
+            if (e.CurrentView is InventoryGridHost inventoryGridHost)
+            {
+                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    //product = SelectedItems.First();
+                    //bool canSelect = product.Item.Id == _inventoryStore.LastProductChanged.Products.First().Item.Id;
+                    int tabSelect = _inventoryStore.LastProductChanged.Products.First().CategoryId;
+                    int index = _inventoryStore.LastProductChanged.Index;
+
+
+                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Products, tabSelect);
+                    UndoRedoEvent?.Invoke(obj);
+                }), System.Windows.Threading.DispatcherPriority.Input);
+            }
+        }
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
         {
@@ -134,19 +155,6 @@ namespace Mhyrenz_Interface.ViewModels
                 Purchased?.Invoke(e.Product);
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
-
-        public bool IsDiff { get; set; }
-        public int SwitchSelectItem { get; set; } = -1;
-
-        public Func<DataGridCell> GetCell { get; set; }
-
-        public void SelectItem(bool isDiff, int index, bool canSelect)
-        {
-            IsDiff = isDiff;
-            SwitchSelectItem = index;
-
-            SwitchSelectedItem?.Invoke(canSelect);
-        }
-
+        #endregion
     }
 }

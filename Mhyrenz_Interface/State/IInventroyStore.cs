@@ -14,7 +14,7 @@ namespace Mhyrenz_Interface.State
         ObservableCollection<ProductDataViewModel> Products { get; }
         ICollectionView ProductsCollectionView { get; set; }
         ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
-        (int Index, ProductDataViewModel Product) LastProductChanged { get; set;  }
+        (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set;  }
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
@@ -24,11 +24,9 @@ namespace Mhyrenz_Interface.State
 
         Task Register(IEnumerable<Product> transactions);
         void LoadProducts(IEnumerable<Product> products);
-        ProductDataViewModel AddProduct(Product product);
         Task InitializeAsync();
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);
-        void RemoveProduct(ProductDataViewModel product);
-        void AddProduct(IEnumerable<Product> products);
+        IEnumerable<ProductDataViewModel> AddProduct(IEnumerable<Product> products);
         ProductDataViewModel GetProductByIndex(int index);
     }
 }

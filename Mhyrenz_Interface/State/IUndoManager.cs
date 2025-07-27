@@ -12,7 +12,7 @@ namespace Mhyrenz_Interface.State
 
         void Clear();
         void Execute(IUndoableCommand command);
-        void Push(IUndoableCommand command);
+        bool Push(IUndoableCommand command);
         void Redo();
         void Undo();
     }

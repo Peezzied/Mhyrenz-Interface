@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.Core;
+﻿using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
@@ -21,6 +22,8 @@ namespace Mhyrenz_Interface.Commands
         private readonly IUndoRedoManager _undoRedoManager;
         private IEnumerable<Product> _products;
 
+        public bool AllowBack { get; private set; } = true;
+
         public DeleteCommand(IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager)
         {
             _productService = productService;
@@ -30,27 +33,32 @@ namespace Mhyrenz_Interface.Commands
 
         public override void Execute(object parameter)
         {
-            _undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter));
-
             base.Execute(parameter);
+
+            if (_products != null)
+                _undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter));
         }
 
         public override async Task ExecuteAsync(object parameter)
         {
-            if (parameter is InventoryDataGridVmDTO dto)
+            AllowBack = true;
+
+            var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
+            var prompt = MessageBox.Show($"Do you really want to remove {products.Count()} items?", "Remove Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (prompt == MessageBoxResult.No)
             {
-                _products = dto.ProductData.Select(i => i.Item).ToList();
-                var prompt = MessageBox.Show($"Do you really want to remove {_products.Count()} items?", "Remove Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if (prompt == MessageBoxResult.No)
-                    return;
-
-                //_inventoryStore.LastProductChanged = (_inventoryStore.Products.IndexOf(items.First()), items.First());
-
-                await _productService.EditPropertyRange(_products, nameof(Product.IsDeleted), true);
-                _inventoryStore.RemoveProduct(dto.ProductData);
-                //dto.RemoveItemsHandler();
+                AllowBack = false;
+                return;
             }
+
+
+            //var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
+            _products = products.Select(i => i.Item).ToList();
+
+            await _productService.EditPropertyRange(_products, nameof(Product.IsDeleted), true);
+            _inventoryStore.RemoveProduct(products);
+
         }
 
         public void ExecuteRaw(object parameter)
@@ -62,19 +70,13 @@ namespace Mhyrenz_Interface.Commands
         {
             var productsMap = new HashSet<int>(_products.Select(p => p.Id));
             var products = _inventoryStore.Products.Where(p => productsMap.Contains(p.Item.Id));
-            ExecuteRaw(new InventoryDataGridVmDTO
-            {
-                ProductData = products
-            });
+            ExecuteRaw(products);
         }
 
         public async void Undo(object parameter = null)
         {
-            var products = await _productService.EditPropertyRange(_products.Select(i => i), nameof(Product.IsDeleted), false);
-            //_products = (await _productService.GetAll()).Where(i => products.Any(x => x.Id == i.Id));
-            _products = products;
-
-            _inventoryStore.AddProduct(products);
+            _products = await _productService.EditPropertyRange(_products.Select(i => i), nameof(Product.IsDeleted), false);
+            _inventoryStore.AddProduct(_products);
         }
     }
 }
