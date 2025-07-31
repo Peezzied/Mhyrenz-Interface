@@ -28,7 +28,7 @@ namespace Mhyrenz_Interface.Commands
             var DTO = parameter as PurchaseProductDTO;
             var method = DTO.Method;
 
-            _dateTime = DateTime.Now;
+            _dateTime = _dateTime == default ? DateTime.Now : _dateTime;
 
             try
             {

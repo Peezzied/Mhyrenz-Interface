@@ -73,20 +73,19 @@ namespace Mhyrenz_Interface.State
         }
         private void RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)
         {
-            void UndoRedoInvoke()
+
+            if (command.SideEffect is null)
             {
-                App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoEvent?.Invoke(intent, new UndoRedoEventArgs
-                {
-                    CurrentView = _navigationService.CurrentViewModel,
-                })), System.Windows.Threading.DispatcherPriority.ContextIdle);
+                _navigationService.Navigate(command.CurrentViewIn);
+            } else
+            {
+                _navigationService.Navigate(command.CurrentViewIn, vm => command.SideEffect(vm));
             }
 
-            if (_navigationService.Navigate(command.CurrentViewIn))
+            App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoEvent?.Invoke(intent, new UndoRedoEventArgs
             {
-                App.Current.Dispatcher.BeginInvoke(new Action(UndoRedoInvoke), System.Windows.Threading.DispatcherPriority.ContextIdle);
-                return;
-            }
-            UndoRedoInvoke();
+                CurrentView = _navigationService.CurrentViewModel,
+            })));
 
         }
 

@@ -11,6 +11,7 @@ namespace Mhyrenz_Interface.Core
 
     public interface IUndoableCommand
     {
+        Action<NavigationViewModel> SideEffect { get; }
         Type CurrentViewIn { get; }
         void Execute();
         bool Undo();

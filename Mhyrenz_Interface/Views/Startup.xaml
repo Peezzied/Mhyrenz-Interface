@@ -12,6 +12,7 @@
         xmlns:attach="clr-namespace:Mhyrenz_Interface.Controls.Attached"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         MinHeight="500"
+        WindowStartupLocation="CenterScreen "
         Title="Startup" Width="800">
     <Window.Resources>
         <DataTemplate x:Key="SessionBox">

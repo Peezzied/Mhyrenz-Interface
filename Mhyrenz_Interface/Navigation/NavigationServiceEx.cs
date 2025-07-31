@@ -33,6 +33,7 @@ namespace Mhyrenz_Interface.Navigation
         public event Action TransitionCompleted;
 
         private Frame _frame;
+        private Action<NavigationViewModel> _navigationCallBack;
 
         public Frame Frame
         {
@@ -65,28 +66,13 @@ namespace Mhyrenz_Interface.Navigation
             this.Frame.GoBack();
         }
 
-        public bool Navigate(Uri sourcePageUri, object extraData = null)
-        {
-            if (this.Frame.CurrentSource != sourcePageUri)
-            {
-                //Debug.WriteLine($"Navigating to {sourcePageUri} with extra data: {extraData}");
-                var result = this.Frame.Navigate(sourcePageUri, extraData);
-
-                if (result)
-                    this.Frame.Navigated += SetDataContextAfterNavigation;
-
-                return result;
-            }
-
-            return false;
-        }
-
-        public bool Navigate(Type sourceType)
+        public bool Navigate(Type sourceType, Action<NavigationViewModel> callBack = null)
         {
             if (this.Frame.NavigationService?.Content?.GetType() != sourceType)
             {
                 //Debug.WriteLine($"Navigating to {sourceType}");
                 var result = this.Frame.Navigate(Activator.CreateInstance(sourceType));
+                _navigationCallBack = callBack;
 
                 if (result)
                     this.Frame.Navigated += SetDataContextAfterNavigation;
@@ -122,6 +108,7 @@ namespace Mhyrenz_Interface.Navigation
             if (e.Content is FrameworkElement element && CurrentViewModel != null)
             {
                 element.DataContext = CurrentViewModel;
+                App.Current.Dispatcher.BeginInvoke(new Action(() => _navigationCallBack?.Invoke(CurrentViewModel)));
             }
              
             Frame.Navigated -= SetDataContextAfterNavigation;

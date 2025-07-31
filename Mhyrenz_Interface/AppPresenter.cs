@@ -1,4 +1,5 @@
 ﻿using HandyControl.Controls;
+using HandyControl.Tools;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
@@ -20,18 +21,11 @@ namespace Mhyrenz_Interface
     public class AppPresenter
     {
         private Window _currentWindow;
-        private SplashWindow _splash;
-        private IServiceProvider _serviceProvider;
-        private readonly IServiceCollection _serviceCollection;
-        private readonly Dispatcher _dispatcher;
-        private readonly StartupManager _startupManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public AppPresenter(IServiceCollection services, IServiceProvider serviceProvider, Dispatcher dispatcher)
+        public AppPresenter(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _serviceCollection = services;
-            _dispatcher = dispatcher;
-
             StartupManager.Register(new StartupAction("Inventory Store", "Fetching data from database", async (sp) => await InventoryStore.LoadInventoryStore(sp)));
             StartupManager.Register(new StartupAction("Transactions Store", "Loading transactions from cache", async (sp) => await TransactionStore.LoadTransactionStore(sp)));
             StartupManager.Register(new StartupAction("Categories Store", "Categorizing inventory from cache", async (sp) => await CategoryStore.LoadCategoryStore(sp)));
@@ -51,9 +45,9 @@ namespace Mhyrenz_Interface
             ShowWindow(startUp);
         }
 
-        public async Task ShowMainWindowAsync()
+        public void ShowMainWindowAsync()
         {
-            var vm = await ShellViewModel.LoadMainViewModel(_serviceProvider);
+            var vm = _serviceProvider.GetRequiredService<ShellViewModel>();
             var mainWindow = _serviceProvider.GetRequiredService<CreateWindow<MainWindow>>().Invoke(vm);
             ShowWindow(mainWindow);
         }
@@ -75,6 +69,12 @@ namespace Mhyrenz_Interface
 
             var provider = await StartupManager.Init(_serviceProvider, SplashWindow.Instance);
             return provider;
+        }
+
+        internal void SplashComplete()
+        {
+            SplashWindow.Instance.RunOnUIThread(() => SplashWindow.Instance.Close());
+            SplashWindow.Instance.LoadComplete();
         }
     }
 }

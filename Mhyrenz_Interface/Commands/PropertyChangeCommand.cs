@@ -1,7 +1,9 @@
 ﻿using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.DTO;
 using Mhyrenz_Interface.State;
+using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +21,8 @@ namespace Mhyrenz_Interface.Commands
         private readonly object _newValue;
         private readonly Action _propertyChangeHandler;
 
-        public Type CurrentViewIn { get; private set; }
+        public Action<NavigationViewModel> SideEffect { get; set; }
+        public Type CurrentViewIn { get; }
 
         public PropertyChangeCommand(T target, string propertyName, object oldValue, object newValue, Action propertyChangeHandler, Type currentViewIn)
         {
@@ -28,8 +31,18 @@ namespace Mhyrenz_Interface.Commands
             _oldValue = oldValue;
             _newValue = newValue;
             _propertyChangeHandler = propertyChangeHandler;
+
             CurrentViewIn = currentViewIn;
+            SideEffect = SideEffectAction;
         }
+
+        private void SideEffectAction(NavigationViewModel vm)
+        {
+            var view = vm as InventoryViewModel;
+
+            view.RowIntoView(App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged.Products);
+        }
+
         public void Execute()
         {
             //SetProperty(_newValue);
@@ -63,9 +76,9 @@ namespace Mhyrenz_Interface.Commands
             var prop = typeof(T).GetProperty(_propertyName);
             if (prop != null && prop.CanWrite)
             {
-                ChangeTracking.Suppress = true;
+                PropertyChangeTracker.Suppress = true;
                 prop.SetValue(_target, value);
-                ChangeTracking.Suppress = false;
+                PropertyChangeTracker.Suppress = false;
             }
         }
 

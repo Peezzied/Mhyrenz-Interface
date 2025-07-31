@@ -18,10 +18,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class InventoryDataGridSelect : Behavior<DataGrid>
     {
-        private int SelectInto;
-        private bool CanSelectInto;
-        private bool _overrideCurrentCell;
-
         protected override void OnAttached()
         {
             AssociatedObject.SelectionChanged += DataGrid_SelectionChanged;

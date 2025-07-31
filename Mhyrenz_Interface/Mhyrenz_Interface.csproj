@@ -395,6 +395,7 @@
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Attached\ValidationHelper.cs" />
+    <Compile Include="Controls\Behaviors\BarcodeCellBehavior.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridCompact.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridSelect.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
@@ -427,7 +428,6 @@
     <Compile Include="Core\ValidationViewModel.cs" />
     <Compile Include="StartupManager.cs" />
     <Compile Include="State\CategoryStore.cs" />
-    <Compile Include="State\ChangeTracking.cs" />
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
@@ -456,6 +456,7 @@
     <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
     <Compile Include="ViewModels\Fake\FakeInfoPanelViewModel.cs" />
+    <Compile Include="ViewModels\Fake\FakeTransactionDataGridViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InfoPanelViewModel.cs" />
     <Compile Include="ViewModels\InventoryDataGridViewModel.cs" />
@@ -607,6 +608,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\Splash.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />

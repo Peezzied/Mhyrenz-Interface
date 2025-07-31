@@ -21,6 +21,8 @@ namespace Mhyrenz_Interface.Database
         {
             modelBuilder.Entity<Product>()
                 .HasQueryFilter(i => !i.IsDeleted);
+            modelBuilder.Entity<Transaction>()
+                .HasQueryFilter(i => !i.Item.IsDeleted);
         }
     }
 }

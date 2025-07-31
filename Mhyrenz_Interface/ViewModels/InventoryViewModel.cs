@@ -49,10 +49,10 @@ namespace Mhyrenz_Interface.ViewModels
     }
     public interface InventoryGridHost
     {
-        void RowIntoView(IEnumerable<ProductDataViewModel> products, int tabSelect = default);
+        void RowIntoView(IEnumerable<ProductDataViewModel> products);
     }
 
-    public class InventoryViewModel : NavigationViewModel, InventoryGridHost
+    public class InventoryViewModel : NavigationViewModel
     {
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
@@ -146,8 +146,6 @@ namespace Mhyrenz_Interface.ViewModels
         private bool IsSwitchReady = false;
         private ProductDataViewModel AddedProduct;
 
-        public event EventHandler<int> AddItem;
-
         public InventoryViewModel(INavigationServiceEx navigationServiceEx,
             ICategoryStore categoryStore,
             IInventoryStore inventoryStore,
@@ -172,10 +170,7 @@ namespace Mhyrenz_Interface.ViewModels
             DeleteProductCommand = new RelayCommand(DeleteCommand);
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                LoadTabItems();
-            }));
+            LoadTabItems();
         }
 
         #region "Lifecycle and instantiation"
@@ -207,10 +202,10 @@ namespace Mhyrenz_Interface.ViewModels
         }
         #endregion
 
-        public void RowIntoView(IEnumerable<ProductDataViewModel> products, int tabSelect = default)
+        public void RowIntoView(IEnumerable<ProductDataViewModel> products)
         {
             var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
-            var categoryId = tabSelect > 0 ? tabSelect : products.First().CategoryId;
+            var categoryId = products.First().CategoryId;
 
             InventoryTabItem newTab = tabItems[categoryId];
             var vm = newTab.ControlInstance.Content.CastTo<InventoryDataGridViewModel>();
@@ -224,13 +219,19 @@ namespace Mhyrenz_Interface.ViewModels
             if (SearchBar != string.Empty)
                 SearchBar = string.Empty;
 
-            var selectIndex = newTab.ProductIndexOf(_inventoryStore.GetProductByIndex(_inventoryStore.LastProductChanged.Index)); 
+            var selectIndex = newTab.ProductIndexOf(_inventoryStore.GetProductByIndex(_inventoryStore.LastProductChanged.Index));
             if (selectIndex < 0)
             {
                 selectIndex = _inventoryStore.LastProductChanged.Index;
             }
 
             vm.SelectItem(isDiff, selectIndex, products);
+        }
+
+        public void SelectTab(int categoryId)
+        {
+            var map = TabItems.ToDictionary(t => t.Id, t => t);
+            SelectedItem = map[categoryId];
         }
 
         #region "Helpers"
@@ -253,7 +254,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new InventoryTabItem(vm, category.Key, category.Value, 
+            var tab = new InventoryTabItem(vm, category.Key, category.Value,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 
@@ -284,7 +285,7 @@ namespace Mhyrenz_Interface.ViewModels
             int index = _inventoryStore.LastProductChanged.Index;
 
 
-            RowIntoView(new[] { AddedProduct }, tabSelect);
+            RowIntoView(new[] { AddedProduct });
         }
 
         private void Vm_SelectedItemsChanged(bool state)

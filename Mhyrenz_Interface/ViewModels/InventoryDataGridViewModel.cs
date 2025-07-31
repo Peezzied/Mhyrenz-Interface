@@ -132,18 +132,11 @@ namespace Mhyrenz_Interface.ViewModels
         #region "Event handlers"
         private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
         {
-            if (e.CurrentView is InventoryGridHost inventoryGridHost)
+            if (e.CurrentView is InventoryViewModel inventoryGridHost)
             {
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    //product = SelectedItems.First();
-                    //bool canSelect = product.Item.Id == _inventoryStore.LastProductChanged.Products.First().Item.Id;
-                    int tabSelect = _inventoryStore.LastProductChanged.Products.First().CategoryId;
-                    int index = _inventoryStore.LastProductChanged.Index;
-
-
-                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Products, tabSelect);
-                    UndoRedoEvent?.Invoke(obj);
+                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Products);
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }

@@ -18,8 +18,8 @@ namespace Mhyrenz_Interface.State
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
-        event Action PromptSessionEvent;
-        event EventHandler<ProductDataViewModel> AddProductEvent;
+        event EventHandler<IEnumerable<ProductDataViewModel>> AddProductEvent;
+        event EventHandler<IEnumerable<ProductDataViewModel>> RemoveProductEvent;
         event Action Loaded;
 
         Task Register(IEnumerable<Product> transactions);

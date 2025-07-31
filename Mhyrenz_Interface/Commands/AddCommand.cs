@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
 using System;
 using System.Collections.Generic;
@@ -44,9 +45,16 @@ namespace Mhyrenz_Interface.Commands
                 && CanSubmit;
         }
 
+        private void SideEffect(NavigationViewModel vm)
+        {
+            var view = vm as InventoryViewModel;
+
+            view.RowIntoView(_inventoryStore.LastProductChanged.Products);
+        }
+
         public override void Execute(object parameter)
         {
-            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter)))
+            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, SideEffect, typeof(InventoryView), parameter)))
                 base.Execute(parameter);
         }
 
@@ -61,6 +69,7 @@ namespace Mhyrenz_Interface.Commands
                 CategoryId = _viewModel.SelectedCategory.Id,
                 Expiry = _viewModel.Expiry,
                 Batch = _viewModel.Batch,
+                Barcode = _viewModel.Barcode 
             });
 
             _products = _inventoryStore.AddProduct(new[] { await _productService.Get(product.Id) });

@@ -53,8 +53,8 @@ namespace Mhyrenz_Interface.State
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
-        public event Action PromptSessionEvent;
-        public event EventHandler<ProductDataViewModel> AddProductEvent;
+        public event EventHandler<IEnumerable<ProductDataViewModel>> AddProductEvent;
+        public event EventHandler<IEnumerable<ProductDataViewModel>> RemoveProductEvent;
         public event Action Loaded;
 
         public InventoryStore(
@@ -98,7 +98,6 @@ namespace Mhyrenz_Interface.State
             {
                 Products.Clear();
                 _trackers.Clear();
-                ChangeTracking.IsInventoryLoaded = true;
 
                 var displayProducts = products.Select(product => _productsViewModelFactory(product));
 
@@ -141,6 +140,9 @@ namespace Mhyrenz_Interface.State
                 .AsOrdered()
                 .OrderBy(i => i.Name)
                 .Where(i => i.CategoryId == products.First().CategoryId);
+
+            RemoveProductEvent?.Invoke(this, products);
+
             RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(product, relativeInventory) - 1, products.ToList()));
 
             foreach (var item in LastProductChanged.Products)
@@ -173,7 +175,7 @@ namespace Mhyrenz_Interface.State
             }
 
 
-            AddProductEvent?.Invoke(this, productVm);
+            AddProductEvent?.Invoke(this, displayProducts);
 
             RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(productVm), displayProducts));
 
@@ -187,10 +189,10 @@ namespace Mhyrenz_Interface.State
 
         public int GetIndexByProduct(ProductDataViewModel product, IEnumerable<ProductDataViewModel> collection = null)
         {
-            var map = (collection ?? ProductsCollectionView
+            var map = RunFilterSuspended(() => (collection ?? ProductsCollectionView
                 .Cast<ProductDataViewModel>())
                 .Select((p, index) => new { p.Item.Id, Index = index })
-                .ToDictionary(x => x.Id, x => x.Index);
+                .ToDictionary(x => x.Id, x => x.Index));
 
             return map[product.Item.Id];
         }

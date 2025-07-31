@@ -62,7 +62,6 @@ namespace Mhyrenz_Interface.Core
     public class AsyncRelayCommand : BaseAsyncCommand
     {
         private readonly Func<object, Task> _execute;
-        private readonly Func<object, bool> _canExecute;
 
         public AsyncRelayCommand(Func<object, Task> execute)
         {

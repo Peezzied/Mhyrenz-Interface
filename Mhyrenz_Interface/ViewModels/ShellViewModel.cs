@@ -46,7 +46,6 @@ namespace Mhyrenz_Interface.ViewModels
 
         public ObservableCollection<MenuItem> OptionsMenu => AppOptionsMenu;
 
-        public ICommand GoBackCommand { get; }
         public ICommand NavigateCommand { get; }
 
         private MenuItem _selectedMenuItem;
@@ -86,7 +85,6 @@ namespace Mhyrenz_Interface.ViewModels
 
 
             NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
-            GoBackCommand = new RelayCommand(execute: GoBack, canExecute: _ => _navigationServiceEx.CanGoBack);
 
             _viewModelFactory = viewModelFactory;
 
@@ -125,9 +123,6 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionStore = transactionStore;
             _productService = productService;
             _transactionService = transactionService;
-
-            _transactionStore.RequestTransactionsUpdate += OnRequestTransactionsUpdate;
-
         }
 
         private void UndoRedoActionCommand(object parameter)
@@ -148,30 +143,6 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationServiceEx.TransitionComplete();
         }
 
-        private async Task TransactionsLoad()
-        {
-            await _transactionService.GetLatests().ContinueWith(task =>
-            {
-                if (task.IsCompleted)
-                {
-                    var products = task.Result;
-                    _transactionStore.LoadTransactions(products);
-
-                    //Debug.WriteLine("Loaded transactions: " + products);
-                }
-                else
-                {
-                    // Handle error
-                    //Debug.WriteLine("Failed to load transactions: " + task.Exception?.Message);
-                }
-            });
-        }
-
-        private async void OnRequestTransactionsUpdate(object sender, EventArgs e)
-        {
-            await TransactionsLoad();
-        }
-
         private void Navigate(NavigationCommandParams parameters)
         {
             var selectedItem = ReferenceEquals(parameters.MenuItem, Menu)
@@ -182,11 +153,6 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _navigationServiceEx.Navigate(menuItem.NavigationType);
             }
-        }
-
-        private void GoBack(object parameter)
-        {
-            _navigationServiceEx.GoBack();
         }
 
         private void OnNavigated(object sender, NavigationEventArgs e)
@@ -212,12 +178,11 @@ namespace Mhyrenz_Interface.ViewModels
             //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
-        internal static async Task<ShellViewModel> LoadMainViewModel(IServiceProvider sp)
-        {
-            var vm = sp.GetRequiredService<ShellViewModel>();
-            await vm.TransactionsLoad();
+        //internal static async Task<ShellViewModel> LoadMainViewModel(IServiceProvider sp)
+        //{
+        //    var vm = ActivatorUtilities.CreateInstance<ShellViewModel>(sp);
 
-            return vm;
-        }
+        //    return vm;
+        //}
     }
 }

@@ -52,21 +52,17 @@ namespace Mhyrenz_Interface
             var services = CreateServiceCollection();
             ServiceProvider = services.BuildServiceProvider();
 
-            Presenter = new AppPresenter(services, ServiceProvider, Dispatcher);
+            Presenter = new AppPresenter(ServiceProvider);
 
             await Presenter.AppInit();
 
             //IServiceProvider serviceProvider = ServiceProvider;
 
             await Presenter.ShowStartUpAsync();
-            SplashWindow.Instance.LoadComplete();
+            Presenter.SplashComplete();
 
             //ServiceProvider.GetRequiredService<ISerialBarcodeService>();
-            //InventoryDbContextFactory contextFactory = serviceProvider.GetRequiredService<InventoryDbContextFactory>();
-            //using (InventoryDbContext context = contextFactory.CreateDbContext())
-            //{
-            //    context.Database.Migrate();
-            //}
+
             base.OnStartup(e);  
         }
 

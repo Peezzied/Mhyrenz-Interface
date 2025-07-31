@@ -23,27 +23,9 @@ namespace Mhyrenz_Interface.Views
 {
     public partial class InventoryView : UserControl
     {
-        private ContentControl DataGridPresenter;
-
         public InventoryView()
         {
             InitializeComponent(); 
-        }
-
-        private void ContentControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            DataGridPresenter = sender.CastTo<ContentControl>();
-            DataContext.CastTo<InventoryViewModel>().AddItem += InventoryView_AddItem;
-        }
-
-        private async void InventoryView_AddItem(object sender, int index)
-        {
-            
-        }
-
-        private void ContentControl_Unloaded(object sender, RoutedEventArgs e)
-        {
-            DataContext.CastTo<InventoryViewModel>().AddItem -= InventoryView_AddItem;
         }
 
     }

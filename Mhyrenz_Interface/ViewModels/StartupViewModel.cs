@@ -20,7 +20,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class StartupViewModel : BaseViewModel, SalesRegisterHost
+    public class StartupViewModel : BaseViewModel, ISalesRegisterHost
     {
         private readonly ISessionService _sessionService;
         private readonly ISessionStore _sessionStore;
@@ -132,12 +132,12 @@ namespace Mhyrenz_Interface.ViewModels
             EditCommand = new RelayCommand(EditSessionActionCommand);
             SaveEditCommand = new AsyncRelayCommand(SaveEditActionCommand);
             DeleteSessionCommand = new AsyncRelayCommand(DeleteSessionActionCommand);
-            StartSessionCommand = new AsyncRelayCommand(StartSessionActionCommand);
+            StartSessionCommand = new RelayCommand(StartSessionActionCommand);
         }
 
-        private async Task StartSessionActionCommand(object obj)
+        private void StartSessionActionCommand(object obj)
         {
-            await App.Presenter.ShowMainWindowAsync();
+            App.Presenter.ShowMainWindowAsync();
         }
 
         public override void Dispose()

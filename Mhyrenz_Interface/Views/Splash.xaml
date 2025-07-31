@@ -4,12 +4,24 @@
            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:hc="https://handyorg.github.io/handycontrol"
-           mc:Ignorable="d" WindowStyle="None"
+           mc:Ignorable="d"
+           ResizeMode="NoResize"
+           BorderThickness="0"
+           hc:WindowAttach.IgnoreAltF4="True"
+           hc:WindowAttach.IsDragElement="True"
            WindowStartupLocation="CenterScreen"
-           Title="Splash Window" 
-           Height="450" 
+           ShowNonClientArea="False"
+           Height="450"
            Width="800">
     <Grid>
-        <TextBlock FontSize="16" Text="{Binding Message, RelativeSource={RelativeSource AncestorType=hc:SplashWindow}}"/>
+        <Image Source="/Resources/Images/Splash.jpg" />
+        <hc:SimpleStackPanel VerticalAlignment="Bottom">
+            
+            <TextBlock FontSize="12" d:Text="Lorem Ipsum" Margin="10" Text="{Binding Message, RelativeSource={RelativeSource AncestorType=hc:SplashWindow}}"/>
+            <ProgressBar 
+                Height="10"
+                Style="{StaticResource ProgressBarFlat}" 
+                IsIndeterminate="True" Orientation="Horizontal"/>
+        </hc:SimpleStackPanel>
     </Grid>
 </hc:SplashWindow>

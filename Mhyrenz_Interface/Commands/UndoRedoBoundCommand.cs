@@ -1,4 +1,5 @@
 ﻿using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.ViewModels.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +13,19 @@ namespace Mhyrenz_Interface.Commands
     {
         private readonly IUndoRedoBound _command;
 
-        public Type CurrentViewIn { get; private set; }
+        public Action<NavigationViewModel> SideEffect { get; }
+        public Type CurrentViewIn { get; }
 
         private readonly object _commandParameter;
 
-        public UndoRedoBoundCommand(IUndoRedoBound command, Type currentViewIn, object commandParameter = null)
+        public UndoRedoBoundCommand(IUndoRedoBound command, Action<NavigationViewModel> sideEffect, Type view, object commandParameter = null)
         {
             _command = command;
-            CurrentViewIn = currentViewIn;
+            SideEffect = sideEffect;
+            CurrentViewIn = view;
             _commandParameter = commandParameter;
         }
+
 
         public void Execute()
         {

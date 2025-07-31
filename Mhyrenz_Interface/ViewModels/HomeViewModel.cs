@@ -27,7 +27,7 @@ using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class HomeViewModel: NavigationViewModel, SalesRegisterHost
+    public class HomeViewModel: NavigationViewModel, ISalesRegisterHost
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
@@ -120,12 +120,10 @@ namespace Mhyrenz_Interface.ViewModels
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
             _sessionStore = sessionStore;
-            _sessionStore.StateChanged += _sessionStore_StateChanged;
+            _sessionStore.StateChanged += SessionStore_StateChanged;
             Bindtest = _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
-            //_inventoryStore.ProductsCollectionView.Filter += FilterProducts;
 
             base.TransitionCompleted += OnTransitionComplete;
-            _inventoryStore.PromptSessionEvent += OnPromptSessionRequest;
 
             _dialogCoordinator = dialogCoordinator;
 
@@ -135,7 +133,7 @@ namespace Mhyrenz_Interface.ViewModels
             RegisterCommand = new SalesRegisterCommand(this, _salesRecordService, _transactionStore, _transactionService, _sessionStore, inventroyStore);
         }
 
-        private void _sessionStore_StateChanged(Session obj)
+        private void SessionStore_StateChanged(Session obj)
         {
             
         }
@@ -153,7 +151,6 @@ namespace Mhyrenz_Interface.ViewModels
         public override void Dispose()
         {
             base.TransitionCompleted -= OnTransitionComplete;
-            _inventoryStore.PromptSessionEvent -= OnPromptSessionRequest;
             _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
 
             InventoryDataGridContext.Dispose();
@@ -212,7 +209,7 @@ namespace Mhyrenz_Interface.ViewModels
 
     }
 
-    public interface SalesRegisterHost
+    public interface ISalesRegisterHost
     {
         bool IsRegistering { get; set; }
     }

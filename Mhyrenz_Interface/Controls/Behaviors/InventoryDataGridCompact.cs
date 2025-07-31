@@ -13,9 +13,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class InventoryDataGridCompact: Behavior<DataGrid>
     {
-        private Predicate<object> _originalFilter;
-        private ItemCollection _collection;
-
         protected override void OnAttached()
         {
             AssociatedObject.Loaded += AssociatedObject_Loaded;

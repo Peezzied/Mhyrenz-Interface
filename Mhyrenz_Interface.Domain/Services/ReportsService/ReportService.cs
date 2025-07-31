@@ -15,7 +15,7 @@ using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.Domain.Services.ReportsService
 {
-    public class ReportService: IReportService
+    public class ReportService : IReportService
     {
         private readonly ICachePath _cachePath;
 
@@ -32,6 +32,10 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
 
             var path = Path.Combine(_cachePath.Dir, "Inventory template.xlsx");
             var templateBytes = File.ReadAllBytes(path);
+
+            var tasks = new List<Task<(string SheetName, IXLWorksheet Sheet)>>();
+
+            using (var templateStream = new MemoryStream(templateBytes))
             using (var finalWorkbook = new XLWorkbook())
             {
                 foreach (var entry in grouped)
@@ -39,7 +43,7 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
                     var category = entry.Key;
                     var products = entry.Value;
 
-                    using (var templateStream = new MemoryStream(templateBytes))
+                    tasks.Add(Task.Run(() =>
                     {
                         var template = new XLTemplate(templateStream);
 
@@ -47,10 +51,21 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
                         template.Generate();
 
                         var sheet = template.Workbook.Worksheets.First();
-                        var copiedSheet = sheet.CopyTo(category.Name);
 
-                        finalWorkbook.AddWorksheet(copiedSheet);
-                    }
+                        using (var tempWorkbook = new XLWorkbook())
+                        {
+                            var copiedSheet = sheet.CopyTo(category.Name);
+                            return (category.Name, copiedSheet);
+                        }
+                    }));
+
+                }
+
+                Task.WhenAll(tasks).Wait();
+
+                foreach (var result in tasks.Select(t => t.Result))
+                {
+                    finalWorkbook.AddWorksheet(result.Sheet);
                 }
 
 
@@ -69,8 +84,8 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
                         finalWorkbook.SaveAs(dialog.FileName);
                     }
                 }, DispatcherPriority.Background);
-            };
-
+            }
+            ;
         }
 
     }

@@ -4,6 +4,7 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
@@ -31,12 +32,19 @@ namespace Mhyrenz_Interface.Commands
             _undoRedoManager = undoRedoManager;
         }
 
+        private void SideEffect(NavigationViewModel vm)
+        {
+            var view = vm as InventoryViewModel;
+
+            view.RowIntoView(_inventoryStore.LastProductChanged.Products);
+        }
+
         public override void Execute(object parameter)
         {
             base.Execute(parameter);
 
             if (_products != null)
-                _undoRedoManager.Push(new UndoRedoBoundCommand(this, typeof(InventoryView), parameter));
+                _undoRedoManager.Push(new UndoRedoBoundCommand(this, SideEffect, typeof(InventoryView), parameter));
         }
 
         public override async Task ExecuteAsync(object parameter)

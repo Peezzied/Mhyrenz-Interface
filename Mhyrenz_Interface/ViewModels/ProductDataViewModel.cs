@@ -1,11 +1,18 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using HandyControl.Tools.Command;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.State;
+using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Mhyrenz_Interface.Views;
 using System;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
+using ZXing.QrCode.Internal;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -16,19 +23,65 @@ namespace Mhyrenz_Interface.ViewModels
         public Action OnSessionNull { get; set; }
     }
 
-    public class ProductDataViewModel: BaseViewModel
+    public interface IBarcodeBound
+    {
+        string Barcode { get; set; }
+
+        event Action BarcodeReceived;
+        void Load();
+    }
+
+    public class ProductDataViewModel: BaseViewModel, IBarcodeBound
     {
         private readonly ISessionStore _sessionStore;
         private readonly ICategoryStore _categoryStore;
+        private readonly ISerialBarcodeService _serialBarcodeService;
+        private readonly INavigationServiceEx _navigationService;
         private readonly Action _requireSession;
         public Product Item { get; set; }
 
-        public ProductDataViewModel(ISessionStore sessionStore, ICategoryStore categoryStore, Product product)
+        public ProductDataViewModel(ISessionStore sessionStore,
+            ICategoryStore categoryStore,
+            Product product,
+            ISerialBarcodeService serialBarcodeService,
+            INavigationServiceEx navigationServiceEx)
         {
             Item = product;
             _sessionStore = sessionStore;
             _categoryStore = categoryStore;
+            _serialBarcodeService = serialBarcodeService;
+            _navigationService = navigationServiceEx;
+
+            GoToItemCommand = new RelayCommand(GoToItemActionCommand);
         }
+        public void Load()
+        {
+            _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+        }
+
+        private void GoToItemActionCommand(object obj)
+        {
+            _navigationService.Navigate(typeof(InventoryView), vm =>
+            {
+                var view = vm as InventoryViewModel;
+                view.SelectTab(CategoryId);
+                view.RowIntoView(new[] { this });
+            });
+        }
+
+        private void SerialBarcodeService_OnBarcodeReceived(string obj)
+        {
+            Barcode = obj;
+            BarcodeReceived?.Invoke();
+        }
+
+        public override void Dispose()
+        {
+            _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
+            BarcodeReceived = null;
+        }
+
+        public event Action BarcodeReceived;
 
         public int NetQty { 
             get => Item.NetQty;
@@ -198,10 +251,16 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private Brush GetColor()
+        {
+            if (_categoryStore.Colors.TryGetValue(CategoryId, out var color)) return color;
+            return null;
+        }
+
         private Brush _categoryColor;
         public Brush CategoryColor
         {
-            get => _categoryColor ?? _categoryStore.Colors[CategoryId];
+            get => _categoryColor ?? GetColor() ?? Brushes.Red;
             set
             {
                 _categoryColor = value;
@@ -210,6 +269,8 @@ namespace Mhyrenz_Interface.ViewModels
         }
         public int CategoryId => Item.CategoryId;
         public string CategoryName => Item.Category.Name;
+
+        public ICommand GoToItemCommand { get; }
 
         private bool SessionRequire()
         {

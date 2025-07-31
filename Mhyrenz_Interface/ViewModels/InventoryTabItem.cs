@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public int ProductIndexOf(ProductDataViewModel product)
         {
-            var relativeInventoryMap = _inventoryDataGridViewModel.Inventory.Cast<ProductDataViewModel>()
+            var relativeInventoryMap = _allProducts.Cast<ProductDataViewModel>()
                 .Select((p, index) => new { p.Item.Id, Index = index })
                 .ToDictionary(i => i.Id, i => i.Index);
 

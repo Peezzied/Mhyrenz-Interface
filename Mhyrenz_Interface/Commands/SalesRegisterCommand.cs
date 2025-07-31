@@ -23,10 +23,10 @@ namespace Mhyrenz_Interface.Commands
         private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
         private readonly IInventoryStore _inventoryStore;
-        private readonly SalesRegisterHost _salesRegisterHost;
+        private readonly ISalesRegisterHost _salesRegisterHost;
 
         public SalesRegisterCommand(
-            SalesRegisterHost salesRegisterHost,
+            ISalesRegisterHost salesRegisterHost,
             ISalesRecordService salesRecordService,
             ITransactionStore transactionStore,
             ITransactionsService transactionsService,

@@ -21,6 +21,10 @@ namespace Mhyrenz_Interface.Core
         }
     }
 
+    public class PropertyChangeTracker
+    {
+        public static bool Suppress { get; set; }
+    }
 
     public class PropertyChangeTracker<T> where T : BaseViewModel
     {
@@ -43,7 +47,7 @@ namespace Mhyrenz_Interface.Core
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if ( ChangeTracking.Suppress ) return;
+            if ( PropertyChangeTracker.Suppress ) return;
             if (!(sender is T target)) return;
 
             var propertyName = e.PropertyName;

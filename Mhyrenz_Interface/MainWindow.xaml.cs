@@ -3,9 +3,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using HandyControl.Controls;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
+using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface
 {
@@ -15,61 +18,42 @@ namespace Mhyrenz_Interface
     public partial class MainWindow : MetroWindow
     {
         private readonly INavigationServiceEx _navigationServiceEx;
+        private readonly IUndoRedoManager _undoRedoManager;
+
         public Frame NavigationFrame => _navigationServiceEx.Frame;
 
-        public MainWindow(BaseViewModel dataContext, INavigationServiceEx navigationServiceEx)
+        public MainWindow(BaseViewModel dataContext, INavigationServiceEx navigationServiceEx, IUndoRedoManager undoRedoManager)
         {
             DataContext = dataContext;
             _navigationServiceEx = navigationServiceEx;
+            _undoRedoManager = undoRedoManager;
 
+            Closing += MainWindow_Closing;
             InitializeComponent();
+
+
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_undoRedoManager.CanUndo)
+            {
+                var prompt = MessageBox.Show("Are you sure you want to exit after the changes you've made?",
+                    "Inventory Changes",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Warning);
+
+                if (prompt == MessageBoxResult.Cancel || prompt == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
         }
 
         private void TransitioningContentControl_TransitionCompleted(object sender, RoutedEventArgs e)
         {
             ((ShellViewModel)DataContext).OnTransitionComplete();
         }
-
-        private void HomeView_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        //private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
-        //{
-        //    if (e.InvokedItem is MenuItem menuItem && menuItem.IsNavigation)
-        //    {
-        //        this.navigationServiceEx.Navigate(menuItem.NavigationDestination);
-        //    }
-        //}
-
-        //private void NavigationServiceEx_OnNavigated(object sender, NavigationEventArgs e)
-        //{
-        //    // select the menu item
-        //    //this.HamburgerMenuControl.SelectedItem = this.HamburgerMenuControl
-        //    //                                             .Items
-        //    //                                             .OfType<MenuItem>()
-        //    //                                             .FirstOrDefault(x => x.NavigationDestination == e.Uri);
-        //    //this.HamburgerMenuControl.SelectedOptionsItem = this.HamburgerMenuControl
-        //    //                                                    .OptionsItems
-        //    //                                                    .OfType<MenuItem>()
-        //    //                                                    .FirstOrDefault(x => x.NavigationDestination == e.Uri);
-
-        //    // or when using the NavigationType on menu item
-        //    this.HamburgerMenuControl.SelectedItem = this.HamburgerMenuControl
-        //                                                 .Items
-        //                                                 .OfType<MenuItem>()
-        //                                                 .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
-        //    this.HamburgerMenuControl.SelectedOptionsItem = this.HamburgerMenuControl
-        //                                                        .OptionsItems
-        //                                                        .OfType<MenuItem>()
-        //                                                        .FirstOrDefault(x => x.NavigationType == e.Content?.GetType());
-
-        //}
-
-        //private void GoBack_OnClick(object sender, RoutedEventArgs e)
-        //{
-        //    if (this.navigationServiceEx.CanGoBack) this.navigationServiceEx.GoBack();
-        //}
     }
 }

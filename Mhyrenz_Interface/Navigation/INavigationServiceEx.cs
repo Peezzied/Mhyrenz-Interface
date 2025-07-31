@@ -22,8 +22,7 @@ namespace Mhyrenz_Interface.Navigation
         void GoBack();
         void GoForward();
 
-        bool Navigate(Uri sourcePageUri, object extraData = null);
-        bool Navigate(Type sourceType);
+        bool Navigate(Type sourceType, Action<NavigationViewModel> callBack = null);
         void TransitionComplete();
     }
 }

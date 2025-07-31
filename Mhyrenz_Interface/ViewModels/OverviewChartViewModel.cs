@@ -33,7 +33,7 @@ using System.Windows.Media;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class CategoryChartViewModel: INotifyPropertyChanged
+    public class CategoryChartViewModel : INotifyPropertyChanged
     {
         public Category Category { get; set; }
         public string Name { get; set; }
@@ -58,7 +58,7 @@ namespace Mhyrenz_Interface.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-    public class OverviewChartViewModel: BaseViewModel
+    public class OverviewChartViewModel : BaseViewModel
     {
         private readonly ICategoryStore _categoryStore;
         private readonly IInventoryStore _inventoryStore;
@@ -80,8 +80,12 @@ namespace Mhyrenz_Interface.ViewModels
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 LoadChart(Categories);
-            SetColors();
             }));
+        }
+
+        private void Item_PointCreated(ChartPoint<ObservableValue, LiveChartsCore.SkiaSharpView.Drawing.Geometries.DoughnutGeometry, LiveChartsCore.SkiaSharpView.Drawing.Geometries.LabelGeometry> obj)
+        {
+            _categoryStore.Colors[obj.Context.Series.Tag.CastTo<int>()] = new BrushConverter().ConvertFromString((obj.Context.Series as PieSeries<ObservableValue>).Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>(); 
         }
 
         private void InventoryStore_Loaded()
@@ -140,7 +144,7 @@ namespace Mhyrenz_Interface.ViewModels
                     InnerRadius = 50,
                     ToolTipLabelFormatter = point => $"{point.Label.Text} {point.Model.Value:C}",
                     DataLabelsPaint = new SolidColorPaint(SKColors.Black),
-                    DataLabelsSize = 14,
+                    DataLabelsSize = !(c.Sales.Value <= 0) ? 14 : 0,
                     DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
                     DataLabelsFormatter =
                         point =>
@@ -155,24 +159,11 @@ namespace Mhyrenz_Interface.ViewModels
             });
 
             SalesByCategory.AddRange(pieSeries);
-        }
 
-        private void SetColors()
-        {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            foreach (var item in SalesByCategory)
             {
-                if (SalesByCategory.Count == _categoryStore.Colors.Count)
-                    return;
-
-                foreach (var item in SalesByCategory)
-                {
-                    if (item.Fill is null)
-                        return;
-
-                    _categoryStore.Colors[item.Tag.CastTo<int>()] = 
-                        new BrushConverter().ConvertFromString(item.Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>();
-                }
-            }), System.Windows.Threading.DispatcherPriority.Background);
+                item.PointCreated += Item_PointCreated;
+            }
         }
     }
 }

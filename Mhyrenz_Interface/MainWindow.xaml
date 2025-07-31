@@ -13,9 +13,7 @@
         xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:core="clr-namespace:Mhyrenz_Interface.Core"
-        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-        Dialog:DialogParticipation.Register="{Binding}"
-        d:DataContext="{d:DesignInstance Type=viewModels:ShellViewModel, IsDesignTimeCreatable=True}"
+        WindowStartupLocation="CenterScreen"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         Title="MainWindow" MinHeight="500">
     <mah:MetroWindow.Resources>
@@ -95,7 +93,7 @@
                             Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
                             <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />
 
-                            <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible" Loaded="HomeView_Loaded"/>
+                            <views:HomeView Grid.Row="1" Visibility="Hidden" d:Visibility="Visible"/>
                         </Grid>
                     </hc:SimplePanel>
                 </mah:HamburgerMenu.Content>

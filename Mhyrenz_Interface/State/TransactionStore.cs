@@ -39,18 +39,15 @@ namespace Mhyrenz_Interface.State
             _inventoryStore = inventoryStore;
             _transactionService = transactionsService;
 
-            _inventoryStore.PurchaseEvent += OnPurchase;
+            _inventoryStore.PurchaseEvent += async (s, e) => await InitializeAsync();
+            _inventoryStore.AddProductEvent += async (s, e) => await InitializeAsync();
+            _inventoryStore.RemoveProductEvent += async (s, e) => await InitializeAsync();
         }
 
 
         private ObservableCollection<ProductDataViewModel> _products => _inventoryStore.Products;
 
         public ObservableCollection<TransactionDataViewModel> Transactions { get; } = new ObservableCollection<TransactionDataViewModel>();
-
-        private void OnPurchase(object sender, InventoryStoreEventArgs e)
-        {
-            RequestTransactionsUpdate?.Invoke(e.Product, EventArgs.Empty);
-        }
 
         public async Task InitializeAsync()
         {
@@ -115,7 +112,7 @@ namespace Mhyrenz_Interface.State
 
             method = (tracker, args, oldValue, newValue) =>
             {
-                HandleBarcodeChange(tracker, args);
+                HandleBarcodeChange(args);
             };
 
             var _tracker = new PropertyChangeTracker<TransactionDataViewModel>(viewModel);
@@ -126,9 +123,7 @@ namespace Mhyrenz_Interface.State
             return _tracker;
         }
 
-        private void HandleBarcodeChange(
-            PropertyChangeTracker<TransactionDataViewModel> tracker,
-            TargetChangedEventArgs args)
+        private void HandleBarcodeChange(TargetChangedEventArgs args)
         {
             var target = (TransactionDataViewModel)args.Target;
             var propertyName = args.PropertyOf;

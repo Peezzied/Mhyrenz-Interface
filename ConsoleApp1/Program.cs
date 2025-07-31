@@ -33,6 +33,9 @@ namespace ConsoleApp1
 
             var serialService= new SerialBarcodeService();
 
+            //serialService.TargetPortName = "COM4";
+            serialService.Start();
+
             while (true)
             {
                 

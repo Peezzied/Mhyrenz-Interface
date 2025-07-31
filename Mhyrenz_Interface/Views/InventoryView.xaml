@@ -54,7 +54,7 @@
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <ContentControl Loaded="ContentControl_Loaded" Unloaded="ContentControl_Unloaded" Content="{Binding ControlInstance}"/>
+                    <ContentControl Content="{Binding ControlInstance}"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

@@ -172,7 +172,7 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
                     Format = GuessFormat(code),
                     Options = new ZXing.Common.EncodingOptions
                     {
-                        Width = 150,
+                        Width = 120,
                         Height = 30,
                         Margin = 4
                     }
