@@ -48,9 +48,9 @@
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20250723063600_migration-with-query-filter.cs" />
-    <Compile Include="Migrations\20250723063600_migration-with-query-filter.Designer.cs">
-      <DependentUpon>20250723063600_migration-with-query-filter.cs</DependentUpon>
+    <Compile Include="Migrations\20250801154032_supplier.cs" />
+    <Compile Include="Migrations\20250801154032_supplier.Designer.cs">
+      <DependentUpon>20250801154032_supplier.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

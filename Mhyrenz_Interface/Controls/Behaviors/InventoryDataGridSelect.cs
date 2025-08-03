@@ -21,7 +21,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         protected override void OnAttached()
         {
             AssociatedObject.SelectionChanged += DataGrid_SelectionChanged;
-            AssociatedObject.LoadingRow += AssociatedObject_LoadingRow;
             AssociatedObject.Loaded += AssociatedObject_Loaded;
             AssociatedObject.Unloaded += AssociatedObject_Unloaded;
             base.OnAttached();
@@ -36,23 +35,15 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                SelectRow(() => AssociatedObject.LoadingRow -= AssociatedObject_LoadingRow);
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+            App.Current.Dispatcher.BeginInvoke(new Action(() => SelectRow()), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void InventoryDataGridSelect_SwitchSelectedItem()
         {
-            SelectRow(() => AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem,
-                isFromSwitch: true);
+            SelectRow(isFromSwitch: true);
         }
 
-        private void AssociatedObject_LoadingRow(object sender, EventArgs e)
-        {
-        }
-
-        private async void SelectRow(Action dispose, bool isFromSwitch = false)
+        private async void SelectRow(bool isFromSwitch = false)
         {
             await App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -88,15 +79,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 //    AssociatedObject.SelectedIndex = -1;
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
 
-        }
-
-        protected override void OnDetaching()
-        {
-            AssociatedObject.SelectionChanged -= DataGrid_SelectionChanged;
-            AssociatedObject.LoadingRow -= AssociatedObject_LoadingRow;
-            AssociatedObject.Loaded -= AssociatedObject_Loaded;
-            AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
-            base.OnDetaching();
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

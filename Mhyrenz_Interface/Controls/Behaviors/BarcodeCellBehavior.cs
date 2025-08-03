@@ -15,6 +15,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class BarcodeCellBehavior: Behavior<TextBox>
     {
+        private IBarcodeBound _viewModel;
+
         protected override void OnAttached()
         {
             AssociatedObject.Loaded += AssociatedObject_Loaded;
@@ -23,28 +25,23 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
         private void BarcodeCellBehavior_BarcodeReceived()
         {
-            var vm = AssociatedObject.DataContext as BaseViewModel;
 
-            var dataGrid = TreeHelper.TryFindParent<DataGrid>(AssociatedObject);
-
-            dataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
-            dataGrid.CommitEdit(DataGridEditingUnit.Row, true); 
-
-            vm.Dispose();
         }
 
         private void AssociatedObject_Unloaded(object sender, System.Windows.RoutedEventArgs e)
         {
+            _viewModel.CastTo<BaseViewModel>().Dispose();
+
             AssociatedObject.Loaded -= AssociatedObject_Loaded;
             AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
-                }
+        }
 
         private void AssociatedObject_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<IBarcodeBound>().BarcodeReceived += BarcodeCellBehavior_BarcodeReceived;
-            var vm = AssociatedObject.DataContext.CastTo<IBarcodeBound>();
+            _viewModel = AssociatedObject.DataContext.CastTo<IBarcodeBound>();
 
-            vm.Load();
+            _viewModel.Load();
         }
     }
 }

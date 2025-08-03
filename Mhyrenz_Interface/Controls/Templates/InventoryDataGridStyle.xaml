@@ -6,6 +6,7 @@
                     xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                    xmlns:attached="clr-namespace:Mhyrenz_Interface.Controls.Attached"
                     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Style x:Key="DetailsTextStyle" TargetType="TextBlock">
@@ -25,13 +26,13 @@
 
     <DataTemplate x:Key="NumericEdit">
         <!-- MahApps NumericUpDown inside editing template -->
-        <mah:NumericUpDown Value="{Binding PurchaseDefaultEdit}" 
+        <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}" 
        Minimum="0" Maximum="{Binding PurchaseMax}" 
        NumericInputMode="Numbers" TextAlignment="Center"
        VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
     </DataTemplate>
     <DataTemplate x:Key="NormalEdit">
-        <mah:NumericUpDown Value="{Binding PurchaseNormalEdit, Mode=TwoWay, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=LostFocus}"
+        <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding PurchaseNormalEdit, Mode=TwoWay, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"
        Minimum="0" Maximum="{Binding PurchaseMaxNormal}" HideUpDownButtons="True"
        NumericInputMode="Numbers" TextAlignment="Center"
        VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
@@ -50,7 +51,7 @@
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
                 <local:MaxLinesTextBlock Text="{Binding Name}"
-                 LineHeight="16"
+                 LineHeight="16" 
                  MaxLines="3"
                  Padding="4"
                  Width="Auto"/>
@@ -58,15 +59,29 @@
         </DataGridTemplateColumn.CellTemplate>
         <DataGridTemplateColumn.CellEditingTemplate>
             <DataTemplate>
-                <TextBox Text="{Binding Name}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
-    <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="RetailColumn" x:Shared="False" IsReadOnly="True" Header="Retail" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" Width="70"  MinWidth="70" MaxWidth="100"/>
-    <DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="84"  MinWidth="84" MaxWidth="100">
+    <DataGridTemplateColumn x:Key="RetailColumn" x:Shared="False" Header="Retail" Width="100">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
-                <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
+                <TextBlock TextAlignment="Center" Text="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+        <DataGridTemplateColumn.CellEditingTemplate>
+            <DataTemplate>
+                <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding RetailPrice, UpdateSourceTrigger=Explicit}"
+                    Minimum="0" NumericInputMode="Numbers" TextAlignment="Center" StringFormat="C" Culture="en-PH"
+                    VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellEditingTemplate>
+    </DataGridTemplateColumn>
+    <!--<DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" />-->
+    <DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="85">
+        <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+                <TextBlock attached:UndoRedoAttached.UndoRedoBound="True" Text="{Binding Purchase}" HorizontalAlignment="Center" />
             </DataTemplate>
         </DataGridTemplateColumn.CellTemplate>
 
@@ -87,8 +102,8 @@
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
-    <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"  MinWidth="70" MaxWidth="100"/>
-    <DataGridTemplateColumn  x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="70"  MinWidth="70" MaxWidth="100">
+    <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"/>
+    <DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
                 <TextBlock TextAlignment="Center" Text="{Binding Qty}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
@@ -96,7 +111,7 @@
         </DataGridTemplateColumn.CellTemplate>
         <DataGridTemplateColumn.CellEditingTemplate>
             <DataTemplate>
-                <mah:NumericUpDown Value="{Binding Qty}" Minimum="{Binding QtyMin}"
+                <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"
                                    NumericInputMode="Numbers" TextAlignment="Center"
                                    VerticalAlignment="Center"/>
             </DataTemplate>
@@ -202,7 +217,7 @@
         <Setter Property="MaxHeight" Value="1080"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
-        <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="CanUserResizeColumns" Value="False"/>
         <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
 
         <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>

@@ -1,5 +1,7 @@
 ﻿using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,7 @@ namespace Mhyrenz_Interface.Commands
         public Type CurrentViewIn { get; }
 
         private readonly object _commandParameter;
+        private readonly IUndoRedoManager _undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
 
         public UndoRedoBoundCommand(IUndoRedoBound command, Action<NavigationViewModel> sideEffect, Type view, object commandParameter = null)
         {

@@ -9,7 +9,7 @@ namespace Mhyrenz_Interface.Domain.Models
     public class Category: DomainObject
     {
         public string Name { get; set; }
-
+        public ProductType Type { get; set; }
         public ICollection<Product> Products { get; set; }
     }
 }

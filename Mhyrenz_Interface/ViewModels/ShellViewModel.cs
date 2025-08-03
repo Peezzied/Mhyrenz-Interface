@@ -7,6 +7,7 @@ using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -72,8 +73,13 @@ namespace Mhyrenz_Interface.ViewModels
             INavigationServiceEx navigationServiceEx,
             NavigationViewModelFactory viewModelFactory,
             IDialogCoordinator dialogCoordinator,
-            IUndoRedoManager undoRedoManager)
+            IUndoRedoManager undoRedoManager,
+            ISerialBarcodeService serialBarcodeService)
         {
+            serialBarcodeService.Start("COM2");
+
+            serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
             _undoRedoManger = undoRedoManager;
@@ -123,6 +129,11 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionStore = transactionStore;
             _productService = productService;
             _transactionService = transactionService;
+        }
+
+        private void SerialBarcodeService_OnBarcodeReceived(string obj)
+        {
+            //throw new NotImplementedException();
         }
 
         private void UndoRedoActionCommand(object parameter)

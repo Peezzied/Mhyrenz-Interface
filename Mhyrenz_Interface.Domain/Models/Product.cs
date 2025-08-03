@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
+    public enum ProductType
+    {
+        Standard, GenericNamed
+    }
+
     public class Product: DomainObject
     {
         public Product() { }
@@ -19,7 +24,11 @@ namespace Mhyrenz_Interface.Domain.Models
         }
 
         public string Name { get; set; }
-        //public string Supplier { get; set; } // for later
+        public string GenericName { get; set; }
+
+        public int SupplierId { get; set; }
+        public Supplier Supplier { get; set; }
+
         public int Qty { get; set; } = 0;
         public decimal RetailPrice { get; set; }
         public decimal ListPrice { get; set; }

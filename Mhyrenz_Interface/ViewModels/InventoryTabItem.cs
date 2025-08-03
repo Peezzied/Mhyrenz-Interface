@@ -68,7 +68,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _originalFilter = _allProducts.Filter;
 
-                _allProducts.Filter += item =>
+                _allProducts.Filter = item =>
                 {
                     if (_originalFilter != null && !_originalFilter(item))
                         return false;

@@ -9,7 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.State
 {
@@ -77,7 +79,8 @@ namespace Mhyrenz_Interface.State
             if (command.SideEffect is null)
             {
                 _navigationService.Navigate(command.CurrentViewIn);
-            } else
+            }
+            else
             {
                 _navigationService.Navigate(command.CurrentViewIn, vm => command.SideEffect(vm));
             }
@@ -93,6 +96,22 @@ namespace Mhyrenz_Interface.State
         {
             _redoStack.Clear();
             _undoStack.Clear();
+        }
+
+        public bool ShowWarning(Action rejectEffect = null)
+        {
+            MessageBoxResult prompt = MessageBox.Show("Are you sure you want to proceed with the action after the changes you've made?",
+                        "Action warning",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Warning);
+
+            if (prompt == MessageBoxResult.Cancel || prompt == MessageBoxResult.No)
+            {
+                rejectEffect?.Invoke();
+                return false;
+            }
+
+            return true;
         }
 
         public event Action<ActionType, UndoRedoEventArgs> UndoRedoEvent;

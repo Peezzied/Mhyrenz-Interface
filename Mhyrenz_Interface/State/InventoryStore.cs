@@ -251,6 +251,7 @@ namespace Mhyrenz_Interface.State
             _tracker
                 .Track(nameof(ProductDataViewModel.Qty), viewModel.Qty, method)
                 .Track(nameof(ProductDataViewModel.Name), viewModel.Name, method)
+                .Track(nameof(ProductDataViewModel.RetailPrice), viewModel.RetailPrice, method)
                 .Track(nameof(ProductDataViewModel.Barcode), viewModel.Barcode, method)
                 .Track(nameof(ProductDataViewModel.Expiry), viewModel.Expiry, method)
                 .Track(nameof(ProductDataViewModel.Batch), viewModel.Batch, method);

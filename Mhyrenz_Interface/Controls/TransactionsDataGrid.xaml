@@ -12,6 +12,57 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:FakeTransactionDataGridViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <DataTemplate x:Key="EntryTemplate">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <hc:Tag ShowCloseButton="False"
+                                          Padding="10,0"
+                                          Margin="2"
+                                          Height="20"
+                                          Foreground="White"
+                                          Content="{Binding Product.CategoryName}"
+                                          Background="{Binding Product.CategoryColor}" />
+
+                    <local:MaxLinesTextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       FontSize="14"
+                                       LineHeight="16"
+                                       MaxLines="1"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0"/>
+                </Grid>
+                <hc:UniformSpacingPanel Grid.Row="2" Spacing="10">
+                    <hc:UniformSpacingPanel.Resources>
+                        <Style TargetType="Control" x:Key="CommonStyle">
+                            <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Gray1}"/>
+                        </Style>
+                    </hc:UniformSpacingPanel.Resources>
+                    <hc:UniformSpacingPanel Spacing="5">
+                        <iconPacks:PackIconRemixIcon Kind="PriceTag3Fill" Style="{StaticResource CommonStyle}"/>
+                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}"/>
+                    </hc:UniformSpacingPanel>
+                    <hc:UniformSpacingPanel Spacing="5">
+                        <iconPacks:PackIconMaterial Kind="HandCoin" Style="{StaticResource CommonStyle}"/>
+                        <TextBlock Text="{Binding Amount}"/>
+                    </hc:UniformSpacingPanel>
+                    <hc:UniformSpacingPanel Spacing="5">
+                        <iconPacks:PackIconMaterial Kind="Clock" Style="{StaticResource CommonStyle}"/>
+                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm tt}}"/>
+                    </hc:UniformSpacingPanel>
+                </hc:UniformSpacingPanel>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid>
         <DataGrid ItemsSource="{Binding Transactions}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserDeleteRows="False" 
                   Style="{StaticResource MahApps.Styles.DataGrid}" CanUserResizeColumns="False" CanUserSortColumns="False">
@@ -40,84 +91,52 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn IsReadOnly="True" Header="Entry" Width="*">
+                <DataGridTemplateColumn Header="Ledger" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <!--<hc:UniformSpacingPanel Orientation="Vertical" Spacing="7" Margin="4">
-                                <hc:UniformSpacingPanel Spacing="5" ItemVerticalAlignment="Center" Width="Auto">
-                                    <hc:Tag ShowCloseButton="False" Width="Auto" Padding="10,0" Margin="2" Height="20" Foreground="White" Content="{Binding Product.CategoryName}" Background="{Binding Product.CategoryColor}"/>
-                                    <local:MaxLinesTextBlock Text="{Binding Name}"
-                                         LineHeight="16" FontSize="14"
-                                         MaxLines="1" Width="Auto"/>
-                                </hc:UniformSpacingPanel>
-                                <hc:UniformSpacingPanel Spacing="10">
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconRemixIcon Kind="PriceTag3Fill"/>
-                                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}"/>
-                                    </hc:UniformSpacingPanel>
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconMaterial Kind="HandCoin"/>
-                                        <TextBlock Text="{Binding Amount}"/>
-                                    </hc:UniformSpacingPanel>
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconMaterial Kind="Clock"/>
-                                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm tt}}"/>
-                                    </hc:UniformSpacingPanel>
-                                </hc:UniformSpacingPanel>
-                            </hc:UniformSpacingPanel>-->
-                            <Grid Margin="4">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.Row="0" Margin="0,0,0,5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <hc:Tag ShowCloseButton="False"
-                                          Padding="10,0"
-                                          Margin="2"
-                                          Height="20"
-                                          Foreground="White"
-                                          Content="{Binding Product.CategoryName}"
-                                          Background="{Binding Product.CategoryColor}" />
-
-                                    <local:MaxLinesTextBlock Grid.Column="1"
-                                       Text="{Binding Name}"
-                                       FontSize="14"
-                                       LineHeight="16"
-                                       MaxLines="1"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="NoWrap"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0,0,0"/>
-                                </Grid>
-                                <hc:UniformSpacingPanel Grid.Row="2" Spacing="10">
-                                    <hc:UniformSpacingPanel.Resources>
-                                        <Style TargetType="Control" x:Key="CommonStyle">
-                                            <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Gray1}"/>
-                                        </Style>
-                                    </hc:UniformSpacingPanel.Resources>
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconRemixIcon Kind="PriceTag3Fill" Style="{StaticResource CommonStyle}"/>
-                                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}"/>
-                                    </hc:UniformSpacingPanel>
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconMaterial Kind="HandCoin" Style="{StaticResource CommonStyle}"/>
-                                        <TextBlock Text="{Binding Amount}"/>
-                                    </hc:UniformSpacingPanel>
-                                    <hc:UniformSpacingPanel Spacing="5">
-                                        <iconPacks:PackIconMaterial Kind="Clock" Style="{StaticResource CommonStyle}"/>
-                                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm tt}}"/>
-                                    </hc:UniformSpacingPanel>
-                                </hc:UniformSpacingPanel>
-                            </Grid>
+                            <ContentControl Content="{Binding}">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ContentControl Grid.Column="0" ContentTemplate="{StaticResource EntryTemplate}" Content="{Binding}"/>
+                                                        <ContentControl Width="100" Grid.Column="1" VerticalAlignment="Center" ContentTemplate="{StaticResource BarcodeContent}" Content="{Binding}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Barcode}" Value="{x:Null}">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource EntryTemplate}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Barcode}" Value="">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource EntryTemplate}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentControl Grid.Column="0" ContentTemplate="{StaticResource EntryTemplate}" Content="{Binding}"/>
+                                <ContentControl Width="121" Grid.Column="1" VerticalAlignment="Center" ContentTemplate="{StaticResource BarcodeEdit}" Content="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <StaticResource ResourceKey="BarcodeColumn"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

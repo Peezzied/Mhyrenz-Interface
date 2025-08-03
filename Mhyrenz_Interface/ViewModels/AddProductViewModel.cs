@@ -81,7 +81,7 @@ namespace Mhyrenz_Interface.ViewModels
                 _category = value;
 
                 IsGeneric = false;
-                if (_category.Name == "Generic") // HARDCODING CRITICAL SECTION
+                if (_category.Type is ProductType.GenericNamed)
                     IsGeneric = true;
 
                 Validate(nameof(SelectedCategory), value);

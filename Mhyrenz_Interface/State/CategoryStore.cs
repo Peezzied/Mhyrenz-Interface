@@ -71,7 +71,7 @@ namespace Mhyrenz_Interface.State
             foreach (var item in result)
             {
                 Categories[item] = new ListCollectionView(_inventoryStore.Products);
-                Categories[item].Filter += obj => obj is ProductDataViewModel vm
+                Categories[item].Filter = obj => obj is ProductDataViewModel vm
                     && vm.CategoryId == item.Id;
             }
         }   

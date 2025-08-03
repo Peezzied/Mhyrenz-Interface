@@ -72,7 +72,7 @@ namespace Mhyrenz_Interface.ViewModels
         private void SerialBarcodeService_OnBarcodeReceived(string obj)
         {
             Barcode = obj;
-            BarcodeReceived?.Invoke();
+            Dispose();
         }
 
         public override void Dispose()
@@ -184,6 +184,18 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
+
+        private Supplier _supplier;
+        public Supplier Supplier
+        {
+            get => _supplier;
+            set
+            {
+                _supplier = value;
+                OnPropertyChanged(nameof(Supplier));
+            }
+        }
+
         public int Qty
         {
             get => Item.Qty;
@@ -206,6 +218,16 @@ namespace Mhyrenz_Interface.ViewModels
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
+            set
+            {
+                if (Item.RetailPrice != value)
+                {
+                    if (!SessionRequire()) return;
+                    Item.RetailPrice = value;
+                    OnPropertyChanged(nameof(RetailPrice));
+                    OnPropertyChanged(nameof(NetRetailPrice));
+                }
+            }
         }
         public decimal ListPrice
         {

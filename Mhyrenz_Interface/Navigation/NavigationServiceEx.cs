@@ -108,7 +108,11 @@ namespace Mhyrenz_Interface.Navigation
             if (e.Content is FrameworkElement element && CurrentViewModel != null)
             {
                 element.DataContext = CurrentViewModel;
-                App.Current.Dispatcher.BeginInvoke(new Action(() => _navigationCallBack?.Invoke(CurrentViewModel)));
+                App.Current.Dispatcher.BeginInvoke(new Action(() => 
+                {
+                    _navigationCallBack?.Invoke(CurrentViewModel);
+                    _navigationCallBack = null;
+                }));
             }
              
             Frame.Navigated -= SetDataContextAfterNavigation;

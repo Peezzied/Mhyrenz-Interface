@@ -32,9 +32,11 @@ namespace ConsoleApp1
             //var transactionsService = new TransactionsDataService(contextFactory);
 
             var serialService= new SerialBarcodeService();
+            serialService.Start("COM4");
 
-            //serialService.TargetPortName = "COM4";
-            serialService.Start();
+            serialService.OnSerialDisconnected += SerialService_OnSerialDisconnected;
+            serialService.OnSerialReconnected += SerialService_OnSerialReconnected;
+            serialService.OnBarcodeReceived += SerialService_OnBarcodeReceived;
 
             while (true)
             {
@@ -112,6 +114,21 @@ namespace ConsoleApp1
             //    () => productService.GetAllByCategory("Generic", 1)
             //).GetAwaiter();
             #endregion
+        }
+
+        private static void SerialService_OnSerialReconnected()
+        {
+            //throw new NotImplementedException();
+        }
+
+        private static void SerialService_OnSerialDisconnected()
+        {
+            //throw new NotImplementedException();
+        }
+
+        private static void SerialService_OnBarcodeReceived(string obj)
+        {
+            //throw new NotImplementedException();
         }
 
         #region "Database test methods"

@@ -19,36 +19,34 @@
                VerticalAlignment="Center"/>
     </DataTemplate>
 
-    <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
-                            Header="Barcode" CanUserSort="False" CanUserResize="False" Width="121" >
-        <DataGridTemplateColumn.CellTemplate>
-            <DataTemplate>
-                <ContentControl x:Name="BarcodeContent" Content="{Binding}" Width="90">
-                    <ContentControl.Style>
-                        <Style TargetType="ContentControl">
-                            <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
-                            <Style.Triggers>
-                                <DataTrigger Value="Invalid">
-                                    <DataTrigger.Binding>
-                                        <Binding Path="Barcode"
+    <DataTemplate x:Key="BarcodeEdit">
+        <TextBox Text="{Binding Barcode}" mah:TextBoxHelper.Watermark="Enter Barcode" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+            <i:Interaction.Behaviors>
+                <behaviors:BarcodeCellBehavior/>
+            </i:Interaction.Behaviors>
+        </TextBox>
+    </DataTemplate>
+
+    <DataTemplate x:Key="BarcodeContent">
+        <ContentControl x:Name="BarcodeContent" Content="{Binding}" Width="90">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
+                    <Style.Triggers>
+                        <DataTrigger Value="Invalid">
+                            <DataTrigger.Binding>
+                                <Binding Path="Barcode"
                                              Converter="{StaticResource BarcodeToImageConverter}"/>
-                                    </DataTrigger.Binding>
-                                    <Setter Property="ContentTemplate" Value="{StaticResource FallbackTextTemplate}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ContentControl.Style>
-                </ContentControl>
-            </DataTemplate>
-        </DataGridTemplateColumn.CellTemplate>
-        <DataGridTemplateColumn.CellEditingTemplate>
-            <DataTemplate>
-                <TextBox Text="{Binding Barcode}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
-                    <i:Interaction.Behaviors>
-                        <behaviors:BarcodeCellBehavior/>
-                    </i:Interaction.Behaviors>
-                </TextBox>
-            </DataTemplate>
-        </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataTrigger.Binding>
+                            <Setter Property="ContentTemplate" Value="{StaticResource FallbackTextTemplate}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+    </DataTemplate>
+
+    <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
+                            Header="Barcode" CanUserSort="False" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}" >
     </DataGridTemplateColumn>
 </ResourceDictionary>

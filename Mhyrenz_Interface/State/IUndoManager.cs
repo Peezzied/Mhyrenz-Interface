@@ -1,5 +1,6 @@
 ﻿using Mhyrenz_Interface.Core;
 using System;
+using System.Windows;
 
 namespace Mhyrenz_Interface.State
 {
@@ -14,6 +15,7 @@ namespace Mhyrenz_Interface.State
         void Execute(IUndoableCommand command);
         bool Push(IUndoableCommand command);
         void Redo();
+        bool ShowWarning(Action rejectEffect = null);
         void Undo();
     }
 }

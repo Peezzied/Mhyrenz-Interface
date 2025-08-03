@@ -394,6 +394,7 @@
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Attached\UndoRedoAttached.cs" />
     <Compile Include="Controls\Attached\ValidationHelper.cs" />
     <Compile Include="Controls\Behaviors\BarcodeCellBehavior.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridCompact.cs" />

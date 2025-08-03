@@ -25,6 +25,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
@@ -48,6 +51,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<DateTime?>("Expiry")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("GenericName")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -63,9 +69,14 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<decimal>("RetailPrice")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("SupplierId");
 
                     b.ToTable("Products");
                 });
@@ -112,6 +123,20 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Supplier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Suppliers");
+                });
+
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -147,6 +172,12 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasOne("Mhyrenz_Interface.Domain.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Supplier", "Supplier")
+                        .WithMany("Products")
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

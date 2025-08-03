@@ -41,6 +41,12 @@ namespace Mhyrenz_Interface.Commands
 
         public override void Execute(object parameter)
         {
+            if (_undoRedoManager.CanRedo)
+            {
+                if (!_undoRedoManager.ShowWarning())
+                    return;
+            }
+
             base.Execute(parameter);
 
             if (_products != null)
