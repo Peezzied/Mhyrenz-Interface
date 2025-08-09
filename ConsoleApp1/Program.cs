@@ -32,10 +32,10 @@ namespace ConsoleApp1
             //var transactionsService = new TransactionsDataService(contextFactory);
 
             var serialService= new SerialBarcodeService();
-            serialService.Start("COM4");
+            serialService.Start("COM2");
 
             serialService.OnSerialDisconnected += SerialService_OnSerialDisconnected;
-            serialService.OnSerialReconnected += SerialService_OnSerialReconnected;
+            serialService.OnSerialConnected += SerialService_OnSerialReconnected;
             serialService.OnBarcodeReceived += SerialService_OnBarcodeReceived;
 
             while (true)

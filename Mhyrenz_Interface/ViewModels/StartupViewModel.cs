@@ -209,7 +209,8 @@ namespace Mhyrenz_Interface.ViewModels
 
         private async Task SaveEditActionCommand(object obj)
         {
-            var prompt = MessageBox.Show($"Would you like to change the existing session's period from {_sessionStore.CurrentSession.Period:D} to {EditCalendarDate:D}?",
+            var date = EditCalendarDate;
+            var prompt = MessageBox.Show($"Would you like to change the existing session's period from {_sessionStore.CurrentSession.Period:D} to {date:D}?",
                 "Save Changes",
                 System.Windows.MessageBoxButton.YesNoCancel,
                 System.Windows.MessageBoxImage.Question);
@@ -224,10 +225,10 @@ namespace Mhyrenz_Interface.ViewModels
 
             var oldSession = _sessionStore.CurrentSession.Period;
 
-            _sessionStore.CurrentSession.Period = EditCalendarDate;
+            _sessionStore.CurrentSession.Period = date;
             var newSession = await _sessionService.EditSession(_sessionStore.CurrentSession.UniqueId, new Session
             {
-                Period = EditCalendarDate,
+                Period = date,
                 UniqueId = _sessionStore.CurrentSession.UniqueId
             });
             await _sessionStore.UpdateSession();

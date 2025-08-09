@@ -5,6 +5,16 @@
              xmlns:local="clr-namespace:Mhyrenz_Interface">
     <Application.Resources>
         <ResourceDictionary>
+            <!--<FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter 24pt</FontFamily>-->
+            <FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter</FontFamily>
+            <FontFamily x:Key="Geist">pack://application:,,,/Mhyrenz Interface;component/Fonts/Geist.ttf#Geist</FontFamily>
+
+
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Geist}"/>
+            </Style>
+
+
             <ResourceDictionary.MergedDictionaries>
                 <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
@@ -14,7 +24,7 @@
 
                 <hc:ThemeResources AccentColor="{StaticResource MahApps.Brushes.Accent}"/>
                 <hc:Theme/>
-
+ 
                 <ResourceDictionary Source="/Controls/Templates/BarcodeColumn.xaml"/>
                 <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
                 <ResourceDictionary Source="/Controls/Templates/InventoryDataGridStyle.xaml"/>

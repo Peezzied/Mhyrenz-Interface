@@ -2,12 +2,15 @@
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
+using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
@@ -20,8 +23,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI.WebControls;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using MenuItem = Mhyrenz_Interface.Controls.MenuItem;
 
@@ -40,6 +45,9 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ITransactionsService _transactionService;
         private readonly IUndoRedoManager _undoRedoManger;
         private readonly IDialogCoordinator _dialogCoordinator;
+        private readonly DispatcherTimer _timer;
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private DateTime _baseTime;
 
         public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
 
@@ -62,10 +70,69 @@ namespace Mhyrenz_Interface.ViewModels
             get => _selectedOptionsMenuItem;
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
+
+        private UserControl _ribbonBar;
+        public UserControl RibbonBar
+        {
+            get => _ribbonBar;
+            set
+            {
+                _ribbonBar = value;
+                OnPropertyChanged(nameof(RibbonBar));
+            }
+        }
+
+        private bool _isReady;
+        public bool IsReady
+        {
+            get => _isReady;
+            set
+            {
+                _isReady = value;
+                OnPropertyChanged(nameof(IsReady));
+            }
+        }
+
+
+        private DateTime _today;
+        public DateTime Today
+        {
+            get => _today;
+            set
+            {
+                _today = value;
+                OnPropertyChanged(nameof(Today));
+            }
+        }
+
+        private int _seconds;
+        public int Seconds
+        {
+            get => _seconds;
+            set
+            {
+                _seconds = value;
+                OnPropertyChanged(nameof(Seconds));
+            }
+        }
+
+        private string _session;
+        public string Session
+        {
+            get => _session;
+            set
+            {
+                _session = value;
+                OnPropertyChanged(nameof(Session));
+            }
+        }
+
         public ICommand UndoCommand { get; set; }
         public ICommand RedoCommand { get; private set; }
+        public bool CanMainBarcodeReceive { get; private set; } = true;
 
         public ShellViewModel(
+            ISessionStore sessionStore,
             IInventoryStore inventroyStore,
             IProductService productService,
             ITransactionsService transactionService,
@@ -76,9 +143,15 @@ namespace Mhyrenz_Interface.ViewModels
             IUndoRedoManager undoRedoManager,
             ISerialBarcodeService serialBarcodeService)
         {
+
+            serialBarcodeService.OnSerialConnected += SerialBarcodeService_OnSerialConnected;
+            serialBarcodeService.OnSerialDisconnected += SerialBarcodeService_OnSerialDisconnected;
+            serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+
             serialBarcodeService.Start("COM2");
 
-            serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+            sessionStore.StateChanged += SessionStore_SessionChanged;
+            Session = sessionStore.CurrentSession.Period.ToString("ddd MMM d, yyyy");
 
             _navigationServiceEx = navigationServiceEx;
             _navigationServiceEx.Navigated += OnNavigated;
@@ -88,7 +161,6 @@ namespace Mhyrenz_Interface.ViewModels
             RedoCommand = new RelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo);
 
             _dialogCoordinator = dialogCoordinator;
-
 
             NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
 
@@ -129,6 +201,39 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionStore = transactionStore;
             _productService = productService;
             _transactionService = transactionService;
+
+            _baseTime = DateTime.Now;
+            _stopwatch.Start();
+
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200) // smooth enough but light
+            };
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+        }
+
+        private void SessionStore_SessionChanged(Session obj)
+        {
+            Session = obj?.Period.ToString("ddd MMM d, yyyy");
+        }
+
+        private void SerialBarcodeService_OnSerialDisconnected()
+        {
+            IsReady = false;
+        }
+
+        private void SerialBarcodeService_OnSerialConnected()
+        {
+                IsReady = true;
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            var accurateNow = _baseTime + _stopwatch.Elapsed;
+
+            Today = accurateNow;
+            Seconds = accurateNow.Second;
         }
 
         private void SerialBarcodeService_OnBarcodeReceived(string obj)
@@ -189,11 +294,14 @@ namespace Mhyrenz_Interface.ViewModels
             //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
         }
 
-        //internal static async Task<ShellViewModel> LoadMainViewModel(IServiceProvider sp)
-        //{
-        //    var vm = ActivatorUtilities.CreateInstance<ShellViewModel>(sp);
+        internal void SuspendMainBarcodeReceiver()
+        {
+            CanMainBarcodeReceive = false;
+        }
 
-        //    return vm;
-        //}
+        internal void OpenMainBarcodeReceiver()
+        {
+            CanMainBarcodeReceive = true;
+        }
     }
 }

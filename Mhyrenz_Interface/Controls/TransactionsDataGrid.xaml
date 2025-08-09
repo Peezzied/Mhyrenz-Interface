@@ -25,7 +25,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <hc:Tag ShowCloseButton="False"
+                    <hc:Tag ShowCloseButton="False" FontFamily="Arial"
                                           Padding="10,0"
                                           Margin="2"
                                           Height="20"
@@ -33,7 +33,7 @@
                                           Content="{Binding Product.CategoryName}"
                                           Background="{Binding Product.CategoryColor}" />
 
-                    <local:MaxLinesTextBlock Grid.Column="1"
+                    <local:MaxLinesTextBlock Grid.Column="1" FontFamily="Arial"
                                        Text="{Binding Name}"
                                        FontSize="14"
                                        LineHeight="16"
@@ -47,17 +47,17 @@
                             <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Gray1}"/>
                         </Style>
                     </hc:UniformSpacingPanel.Resources>
-                    <hc:UniformSpacingPanel Spacing="5">
-                        <iconPacks:PackIconRemixIcon Kind="PriceTag3Fill" Style="{StaticResource CommonStyle}"/>
+                    <hc:UniformSpacingPanel Spacing="5" Width="70">
+                        <iconPacks:PackIconMaterial Kind="Cash" Style="{StaticResource CommonStyle}"/>
                         <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}"/>
                     </hc:UniformSpacingPanel>
-                    <hc:UniformSpacingPanel Spacing="5">
-                        <iconPacks:PackIconMaterial Kind="HandCoin" Style="{StaticResource CommonStyle}"/>
-                        <TextBlock Text="{Binding Amount}"/>
+                    <hc:UniformSpacingPanel Spacing="5" Width="65">
+                        <iconPacks:PackIconMaterial Kind="Cart" Style="{StaticResource CommonStyle}"/>
+                        <TextBlock Text="{Binding Amount, StringFormat={}{0} pcs}"/>
                     </hc:UniformSpacingPanel>
                     <hc:UniformSpacingPanel Spacing="5">
-                        <iconPacks:PackIconMaterial Kind="Clock" Style="{StaticResource CommonStyle}"/>
-                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm tt}}"/>
+                        <iconPacks:PackIconMicrons Kind="Clock" Style="{StaticResource CommonStyle}"/>
+                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm;ss tt}}"/>
                     </hc:UniformSpacingPanel>
                 </hc:UniformSpacingPanel>
             </Grid>

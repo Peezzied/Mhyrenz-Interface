@@ -1,4 +1,6 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using Mhyrenz_Interface.Controls;
+using Mhyrenz_Interface.Controls.RibbonBarTools;
+using Mhyrenz_Interface.Domain.Models;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.ComponentModel;
@@ -13,8 +15,8 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private readonly InventoryDataGridViewModel _inventoryDataGridViewModel;
 
-        public string Name => _category;
-        public int Id => _categoryId;
+        public string Name => _category.Name;
+        public int Id => _category.Id;
 
         private ContentControl _controlInstance;
         private Predicate<object> _originalFilter;
@@ -25,6 +27,12 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (_controlInstance == null)
                 {
+                    RibbonBar = new InventoryDataGridTools() { DataContext = this };
+
+                    CanToggleGenericName = _category.Type == ProductType.GenericNamed;
+
+                    CanToggleDependents = CanToggleGenericName;
+
                     _controlInstance = new ContentControl
                     {
                         Content = _inventoryDataGridViewModel,
@@ -35,21 +43,46 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private bool _canToggleDependents;
+        public bool CanToggleDependents
+        {
+            get => _canToggleDependents;
+            set
+            {
+                _canToggleDependents = value;
+                OnPropertyChanged(nameof(CanToggleDependents));
+            }
+        }
+
+        private bool _canToggleGenericName;
+        public bool CanToggleGenericName
+        {
+            get => _canToggleGenericName;
+            set
+            {
+                _canToggleGenericName = value;
+                OnPropertyChanged(nameof(CanToggleGenericName));
+            }
+        }
+
         private readonly ICollectionView _allProducts;
-        private readonly string _category;
-        private readonly int _categoryId;
+        private readonly Category _category;
         private readonly Func<ProductDataViewModel, bool> _searchFilter;
 
+        public UserControl RibbonBar { get; private set; }
+
         public InventoryTabItem(
+            UserControl ribbonBar,
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
             Func<ProductDataViewModel, bool> searchFilter)
         {
-            _category = category.Name;
-            _categoryId = category.Id;
+            _category = category;
             _allProducts = allProducts;
             _searchFilter = searchFilter;
+
+            RibbonBar = ribbonBar;
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel; // REFACTOR WITH FACTORY
 

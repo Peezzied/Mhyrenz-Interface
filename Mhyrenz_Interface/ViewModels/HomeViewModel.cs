@@ -2,6 +2,7 @@
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Controls.RibbonBarTools;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
@@ -32,11 +33,9 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
         private readonly ITransactionStore _transactionStore;
-        private readonly INavigationServiceEx _navigationServiceEx;
         private readonly OverviewChartViewModel _overviewChartViewModel;
         private readonly ISalesRecordService _salesRecordService;
         private readonly ITransactionsService _transactionService;
-        private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
         private readonly InfoPanelViewModel _infoPanelViewModel;
@@ -77,6 +76,8 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        public IncomingPanelViewModel IncomingPanelViewModel { get; set; }
+
         private int currentCount = 0;
         private readonly int maxItems = 14;
 
@@ -104,9 +105,10 @@ namespace Mhyrenz_Interface.ViewModels
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
             IDialogCoordinator dialogCoordinator,
+            IncomingPanelViewModel incomingPanelViewModel,
+            ShellViewModel shellViewModel,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridViewModelFactory) : base(navigationServiceEx)
         {
-            _navigationServiceEx = navigationServiceEx;
             _inventoryStore = inventroyStore;
             _categoryStore = categoryStore;
             _transactionStore = transactionStore;
@@ -114,9 +116,10 @@ namespace Mhyrenz_Interface.ViewModels
             _salesRecordService = salesRecordService;
             _transactionService = transactionsService;
 
-            _inventoryDataGridViewModelFactory = inventoryDataGridViewModelFactory;
-            InventoryDataGridContext = _inventoryDataGridViewModelFactory(this);
+            InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
+            IncomingPanelViewModel = incomingPanelViewModel;
 
+            shellViewModel.RibbonBar = new BarcodeTools() { DataContext = shellViewModel };
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
             _sessionStore = sessionStore;

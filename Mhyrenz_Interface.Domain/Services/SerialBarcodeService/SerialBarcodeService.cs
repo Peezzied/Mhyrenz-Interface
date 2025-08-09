@@ -24,7 +24,7 @@ namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
         private readonly ManagementEventWatcher _insertWatcher;
 
         public event Action OnSerialDisconnected;
-        public event Action OnSerialReconnected;
+        public event Action OnSerialConnected;
         public event Action<string> OnConnectionError;
         public event Action<string> OnBarcodeReceived;
 
@@ -121,7 +121,6 @@ namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
                 if (IsPortAvailable(_targetPortName) && !(_serialPort != null && !_serialPort.IsOpen))
                 {
                     TryConnect(_targetPortName);
-                    OnSerialReconnected?.Invoke();
                 }
             }
         }
@@ -138,6 +137,8 @@ namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
                     _targetPortName = port;
                     _serialPort.PortName = _targetPortName;
                     _serialPort.Open();
+
+                    OnSerialConnected?.Invoke();
                 }
             }
             catch (Exception ex)
@@ -150,7 +151,7 @@ namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
         {
             try
             {
-                if (_serialPort?.IsOpen == true)
+                if (_serialPort?.IsOpen == true) { }
                     _serialPort.Close();
             }
             catch { }

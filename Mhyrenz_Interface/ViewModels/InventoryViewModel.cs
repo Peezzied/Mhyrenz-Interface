@@ -56,6 +56,7 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
+        private readonly ShellViewModel _mainViewModel;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
         private readonly ISessionStore _sessionStore;
@@ -90,6 +91,7 @@ namespace Mhyrenz_Interface.ViewModels
 
                 var tabItem = SelectedItem.CastTo<InventoryTabItem>();
                 tabItem.ControlInstance.Content.CastTo<InventoryDataGridViewModel>().Load();
+                _mainViewModel.RibbonBar = tabItem.RibbonBar;
 
                 tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
@@ -153,9 +155,11 @@ namespace Mhyrenz_Interface.ViewModels
             IProductService productService,
             IReportService reportService,
             IUndoRedoManager undoRedoManager,
+            ShellViewModel shellViewModel,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
+            _mainViewModel = shellViewModel;
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
             _sessionStore = sessionStore;
@@ -254,7 +258,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new InventoryTabItem(vm, category.Key, category.Value,
+            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 

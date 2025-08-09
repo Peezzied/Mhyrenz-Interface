@@ -185,6 +185,19 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        public string GenericName
+        {
+            get => Item.GenericName;
+            set
+            {
+                if (Item.GenericName != value)
+                {
+                    Item.Name = value;
+                    OnPropertyChanged(nameof(GenericName));
+                }
+            }
+        }
+
         private Supplier _supplier;
         public Supplier Supplier
         {

@@ -42,6 +42,9 @@
     <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
 
     <DataGridCheckBoxColumn x:Key="CheckboxColumn" x:Shared="False" Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
+
+    <DataGridTextColumn x:Key="IdColumn" x:Shared="False"  Header="Id" Binding="{Binding Item.Id}"/>
+
     <DataGridTemplateColumn x:Key="NameColumn" x:Shared="False" CanUserSort="False" Header="Name" Width="*" MaxWidth="545">
         <DataGridTemplateColumn.HeaderStyle>
             <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
@@ -51,6 +54,27 @@
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
                 <local:MaxLinesTextBlock Text="{Binding Name}"
+                 MaxLines="3" FontFamily="Arial"
+                 Padding="4"
+                 Width="Auto"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+        <DataGridTemplateColumn.CellEditingTemplate>
+            <DataTemplate>
+                <TextBox FontFamily="Arial" Text="{Binding Name, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellEditingTemplate>
+    </DataGridTemplateColumn>
+
+    <DataGridTemplateColumn x:Key="GenericNameColumn" x:Shared="False" CanUserSort="False" Header="Generic Name" Width="Auto" MaxWidth="545">
+        <DataGridTemplateColumn.HeaderStyle>
+            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            </Style>
+        </DataGridTemplateColumn.HeaderStyle>
+        <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+                <local:MaxLinesTextBlock Text="{Binding GenericName}"
                  LineHeight="16" 
                  MaxLines="3"
                  Padding="4"
@@ -59,10 +83,11 @@
         </DataGridTemplateColumn.CellTemplate>
         <DataGridTemplateColumn.CellEditingTemplate>
             <DataTemplate>
-                <TextBox Text="{Binding Name, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+                <TextBox Text="{Binding GenericName, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
+
     <DataGridTemplateColumn x:Key="RetailColumn" x:Shared="False" Header="Retail" Width="100">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
@@ -102,6 +127,7 @@
             </DataTemplate>
         </DataGridTemplateColumn.CellEditingTemplate>
     </DataGridTemplateColumn>
+    
     <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"/>
     <DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
         <DataGridTemplateColumn.CellTemplate>
@@ -120,11 +146,11 @@
     <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
         <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
-                <hc:Tag ShowCloseButton="False" Width="90" Padding="0" Margin="2" Height="22" Foreground="White" Content="{Binding CategoryName}" Background="{Binding CategoryColor}"/>
+                <hc:Tag ShowCloseButton="False" FontFamily="Arial" Width="90" Padding="0" Margin="2" Height="22" Foreground="White" Content="{Binding CategoryName}" Background="{Binding CategoryColor}"/>
             </DataTemplate>
         </DataGridTemplateColumn.CellTemplate>
     </DataGridTemplateColumn>
-    
+
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
     <Style x:Key="DataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
         <Style.Triggers>
@@ -219,7 +245,6 @@
         <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
         <Setter Property="CanUserResizeColumns" Value="False"/>
         <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
-
         <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
         <Setter Property="CellStyle" Value="{StaticResource DataGridCellStyle}"/>
         <Setter Property="ColumnHeaderStyle">
@@ -256,8 +281,10 @@
                 <behaviors:InventoryDataGridBehavior/>
             </i:Interaction.Behaviors>
             <DataGrid.Columns>
+                <!--<StaticResource ResourceKey="IdColumn"/>-->
                 <StaticResource ResourceKey="CheckboxColumn" />
                 <StaticResource ResourceKey="NameColumn" />
+                <!--<StaticResource ResourceKey="GenericNameColumn"/>-->
                 <StaticResource ResourceKey="RetailColumn" />
                 <StaticResource ResourceKey="PurchaseColumn" />
                 <StaticResource ResourceKey="NetQtyColumn" />

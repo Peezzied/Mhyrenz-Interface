@@ -402,12 +402,24 @@
     <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />
+    <Compile Include="Controls\IncomingItemPanel.xaml.cs">
+      <DependentUpon>IncomingItemPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\InfoPanel.xaml.cs">
       <DependentUpon>InfoPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RibbonBar.xaml.cs">
+      <DependentUpon>RibbonBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RibbonBarTools\BarcodeTools.xaml.cs">
+      <DependentUpon>BarcodeTools.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml.cs">
+      <DependentUpon>InventoryDataGridTools.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
@@ -459,6 +471,7 @@
     <Compile Include="ViewModels\Fake\FakeInfoPanelViewModel.cs" />
     <Compile Include="ViewModels\Fake\FakeTransactionDataGridViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
+    <Compile Include="ViewModels\IncomingPanelViewModel.cs" />
     <Compile Include="ViewModels\InfoPanelViewModel.cs" />
     <Compile Include="ViewModels\InventoryDataGridViewModel.cs" />
     <Compile Include="ViewModels\InventoryTabItem.cs" />
@@ -494,11 +507,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\IncomingItemPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\InfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\OverviewChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RibbonBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RibbonBarTools\BarcodeTools.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -585,6 +614,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Fonts\Geist.ttf" />
+    <Resource Include="Fonts\Inter.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

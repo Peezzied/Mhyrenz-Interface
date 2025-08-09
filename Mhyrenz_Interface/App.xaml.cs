@@ -107,6 +107,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ITransactionsDataService, TransactionsDataService>()
                 .AddSingleton<ITransactionsService, TransactionService>()
 
+                .AddSingleton<IncomingPanelViewModel>()
 
                 .AddTransient<OverviewChartViewModel>()
                 .AddTransient<HomeViewModel>()
@@ -117,6 +118,10 @@ namespace Mhyrenz_Interface
                 .AddTransient<AddProductViewModel>()
                 .AddTransient<SessionBoxContext>()
 
+                //.AddSingleton<CreateViewModel<IncomingPanelViewModel>>(s =>
+                //{
+                //    return _ => ActivatorUtilities.CreateInstance<IncomingPanelViewModel>(s);
+                //})
                 .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
                 {
                     return (object parameter) =>

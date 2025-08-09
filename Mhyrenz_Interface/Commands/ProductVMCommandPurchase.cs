@@ -14,17 +14,6 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Mhyrenz_Interface.Commands
 {
-
-    public class PurchaseProductDTO
-    {
-        public enum Type { Add, Remove }
-
-        public int Amount { get; set; }
-        public Product Product { get; set; }
-        public Type Method { get; set; }
-        public ActionType Intent { get; internal set; }
-    }
-
     public class ProductVMCommandPurchase : PropertyChangeCommand<ProductDataViewModel>
     {
         private readonly ProductDataViewModel _target;
@@ -51,15 +40,15 @@ namespace Mhyrenz_Interface.Commands
             var newValue = _newValue as int? ?? 0;
             var oldValue = _oldValue as int? ?? 0;
 
-            PurchaseProductDTO.Type? method;
+            PurchaseProductCommand.DTO.Type? method;
             if (newValue > oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductDTO.Type.Remove : PurchaseProductDTO.Type.Add;
+                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Remove : PurchaseProductCommand.DTO.Type.Add;
             else if (newValue < oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductDTO.Type.Add : PurchaseProductDTO.Type.Remove;
+                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Add : PurchaseProductCommand.DTO.Type.Remove;
             else
                 return false;
 
-            _command.Execute(new PurchaseProductDTO()
+            _command.Execute(new PurchaseProductCommand.DTO()
             {
                 Amount = Math.Abs(oldValue - newValue),
                 Product = _target.Item,
