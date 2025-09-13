@@ -21,6 +21,15 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
 {
+    public enum Columns
+    {
+        IdColumn,
+        GenericNameColumn,
+        BatchColumn,
+        ExpiryColumn,
+        SupplierColumn
+    }
+
     public class InventoryDataGridViewModel : BaseViewModel
     {
         private ICollectionView _inventory;
@@ -68,7 +77,62 @@ namespace Mhyrenz_Interface.ViewModels
                 OnPropertyChanged(nameof(SelectedItem));
             }
         }
-        public bool IsDiff { get; set; }
+
+        private bool _idColumn;
+        public bool IdColumn
+        {
+            get => _idColumn;
+            set
+            {
+                _idColumn = value;
+                OnPropertyChanged(nameof(IdColumn));
+            }
+        }
+
+        private bool _genericNameColumn;
+        public bool GenericNameColumn
+        {
+            get => _genericNameColumn;
+            set
+            {
+                _genericNameColumn = value;
+                OnPropertyChanged(nameof(GenericNameColumn));
+            }
+        }
+
+        private bool _batchColumn;
+        public bool BatchColumn
+        {
+            get => _batchColumn;
+            set
+            {
+                _batchColumn = value;
+                OnPropertyChanged(nameof(BatchColumn));
+            }
+        }
+
+        private bool _expiryColumn;
+        public bool ExpiryColumn
+        {
+            get => _expiryColumn;
+            set
+            {
+                _expiryColumn = value;
+                OnPropertyChanged(nameof(ExpiryColumn));
+            }
+        }
+
+        private bool _supplierColumn;
+        public bool SupplierColumn
+        {
+            get => _supplierColumn;
+            set
+            {
+                _supplierColumn = value;
+                OnPropertyChanged(nameof(SupplierColumn));
+            }
+        }
+
         public SelectionRowsInfo SelectionInfo { get; set; }
 
         public Func<DataGridCell> GetCell { get; set; }
@@ -79,7 +143,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
-        private readonly NavigationViewModel _viewHost;
+
+        public ICommand ToggleColumnCommand { get; }
+
         private readonly IUndoRedoManager _undoRedoManager;
 
         public class SelectionRowsInfo
@@ -102,7 +168,6 @@ namespace Mhyrenz_Interface.ViewModels
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
-            _viewHost = viewHost;
             _productService = productService;
             _inventoryStore = inventoryStore;
 

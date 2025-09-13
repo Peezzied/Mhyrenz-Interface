@@ -1,12 +1,19 @@
-﻿using Mhyrenz_Interface.Controls;
+﻿using HandyControl.Controls;
+using HandyControl.Tools;
+using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Controls.RibbonBarTools;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Options;
 using System;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -33,10 +40,10 @@ namespace Mhyrenz_Interface.ViewModels
 
                     CanToggleDependents = CanToggleGenericName;
 
-                    _controlInstance = new ContentControl
+                    _controlInstance = new InventoryDataGrid
                     {
-                        Content = _inventoryDataGridViewModel,
-                        ContentTemplate = (DataTemplate)App.Current.FindResource("DataGridDetailedLayout")
+                        Layout = InventoryDataGridLayout.Detailed,
+                        DataContext = _inventoryDataGridViewModel,
                     };
                 }
                 return _controlInstance;
@@ -66,28 +73,82 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private readonly ICollectionView _allProducts;
+        private readonly AppSettingsManager _appSettingsManager;
         private readonly Category _category;
         private readonly Func<ProductDataViewModel, bool> _searchFilter;
 
         public UserControl RibbonBar { get; private set; }
+
+        public ICommand ToggleColumnCommand { get; }
 
         public InventoryTabItem(
             UserControl ribbonBar,
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
+            IOptions<AppSettingsManager.Settings> appSettings,
+            AppSettingsManager appSettingsManager,
             Func<ProductDataViewModel, bool> searchFilter)
         {
+            _appSettingsManager = appSettingsManager;
             _category = category;
             _allProducts = allProducts;
             _searchFilter = searchFilter;
-
+            
             RibbonBar = ribbonBar;
+            ToggleColumnCommand = new RelayCommand<Columns>(ToggleColumn);
 
-            _inventoryDataGridViewModel = inventoryDataGridViewModel; // REFACTOR WITH FACTORY
+            _inventoryDataGridViewModel = inventoryDataGridViewModel;
+
+            var categorySettings = appSettings.Value.Inventory.First(c => c.Key.ConvertToInt() == Id).Value;
+            _inventoryDataGridViewModel.IdColumn = categorySettings.IdColumn;
+            _inventoryDataGridViewModel.GenericNameColumn = categorySettings.GenericColumn ?? false;
+            _inventoryDataGridViewModel.SupplierColumn = categorySettings.SupplierColumn;
+            _inventoryDataGridViewModel.BatchColumn = categorySettings.BatchColumn;
+            _inventoryDataGridViewModel.ExpiryColumn = categorySettings.ExpiryDateColumn;
 
             // Kick off deferred loading (non-blocking)
             DeferInventoryInitialization();
+        }
+
+        private void ToggleColumn(Columns column)
+        {
+            switch (column)
+            {
+                case Columns.IdColumn:
+                    _inventoryDataGridViewModel.IdColumn = !_inventoryDataGridViewModel.IdColumn;
+                    UpdateColumnSetting(nameof(InventorySettings.IdColumn), _inventoryDataGridViewModel.IdColumn);
+                    break;
+                case Columns.GenericNameColumn:
+                    _inventoryDataGridViewModel.GenericNameColumn = !_inventoryDataGridViewModel.GenericNameColumn;
+                    UpdateColumnSetting(nameof(InventorySettings.GenericColumn), _inventoryDataGridViewModel.GenericNameColumn);
+                    break;
+                case Columns.BatchColumn:
+                    _inventoryDataGridViewModel.BatchColumn = !_inventoryDataGridViewModel.BatchColumn; 
+                    UpdateColumnSetting(nameof(InventorySettings.BatchColumn), _inventoryDataGridViewModel.BatchColumn);
+                    break;
+                case Columns.ExpiryColumn:
+                    _inventoryDataGridViewModel.ExpiryColumn = !_inventoryDataGridViewModel.ExpiryColumn;
+                    UpdateColumnSetting(nameof(InventorySettings.ExpiryDateColumn), _inventoryDataGridViewModel.ExpiryColumn); 
+                    break;
+                case Columns.SupplierColumn:
+                    _inventoryDataGridViewModel.SupplierColumn = !_inventoryDataGridViewModel.SupplierColumn;
+                    UpdateColumnSetting(nameof(InventorySettings.SupplierColumn), _inventoryDataGridViewModel.SupplierColumn); 
+                    break;
+            }
+        }
+
+        private void UpdateColumnSetting(string property, bool value)
+        {
+            try
+            {
+                _appSettingsManager.UpdateAppSettingsNode(new[] { nameof(AppSettingsManager.Settings.Inventory), Id.ToString(), property }, value);
+            }
+            catch (Exception e)
+            {
+                Growl.Error($"Failed to save settings due to an error: {e.Message}");
+                throw;
+            }
         }
 
         public override void Dispose()

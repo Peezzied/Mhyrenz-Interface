@@ -67,7 +67,7 @@
                                 <Setter.Value>
                                     <DataTemplate>
                                         <hc:TransitioningContentControl TransitionMode="Top2BottomWithFade">
-                                            <ContentControl Content="{Binding InventoryDataGridContext}" ContentTemplate="{StaticResource DataGridCompactLayout}" Height="500"/>
+                                            <controls:InventoryDataGrid DataContext="{Binding InventoryDataGridContext}" Layout="Compacted" Height="500"/>
                                         </hc:TransitioningContentControl>
                                     </DataTemplate>
                                 </Setter.Value>

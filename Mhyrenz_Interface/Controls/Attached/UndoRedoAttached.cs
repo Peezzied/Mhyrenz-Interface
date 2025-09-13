@@ -18,6 +18,7 @@ using System.Windows.Data;
 using System.Windows.Forms;
 using Control = System.Windows.Controls.Control;
 using MessageBox = HandyControl.Controls.MessageBox;
+using DatePicker = System.Windows.Controls.DatePicker;
 using NumericUpDown = MahApps.Metro.Controls.NumericUpDown;
 using TextBox = System.Windows.Controls.TextBox;
 
@@ -42,32 +43,38 @@ namespace Mhyrenz_Interface.Controls.Attached
 
         private static void OnUndoRedoBound(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (!(bool)e.NewValue) return;
-            var control = d as Control;
-
-            RoutedEventHandler unloadedHandler = null;
-
-            switch (d)
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                case TextBox textBox:
-                    unloadedHandler = TrackControl(textBox, TextBox.TextProperty, textBox.Text);
-                    break;
-                case NumericUpDown numericUpDown:
-                    unloadedHandler = TrackControl(numericUpDown, NumericUpDown.ValueProperty, numericUpDown.Value);
-                    break;
-            }
+                if (!(bool)e.NewValue) return;
+                var control = d as Control;
 
-            if (unloadedHandler != null)
-            {
-                control.Unloaded += unloadedHandler;
+                RoutedEventHandler unloadedHandler = null;
 
-                void CleanupUnloaded(object sender, RoutedEventArgs args)
+                switch (d)
                 {
-                    control.Unloaded -= unloadedHandler;
+                    case TextBox textBox:
+                        unloadedHandler = TrackControl(textBox, TextBox.TextProperty, textBox.Text);
+                        break;
+                    case NumericUpDown numericUpDown:
+                        unloadedHandler = TrackControl(numericUpDown, NumericUpDown.ValueProperty, numericUpDown.Value);
+                        break;
+                    case DatePicker datePicker:
+                        unloadedHandler = TrackControl(datePicker, DatePicker.SelectedDateProperty, datePicker.SelectedDate);
+                        break;
                 }
 
-                control.Unloaded += CleanupUnloaded;
-            }
+                if (unloadedHandler != null)
+                {
+                    control.Unloaded += unloadedHandler;
+
+                    void CleanupUnloaded(object sender, RoutedEventArgs args)
+                    {
+                        control.Unloaded -= unloadedHandler;
+                    }
+
+                    control.Unloaded += CleanupUnloaded;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Input);
         }
 
         private static RoutedEventHandler TrackControl(Control textBox, DependencyProperty dp, object value)
@@ -99,7 +106,10 @@ namespace Mhyrenz_Interface.Controls.Attached
             var propertyValue = expression.ResolvedSource.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
 
             if (!undoRedoManager.CanRedo || value == expression.ResolvedSource)
+            {
+                expression?.UpdateSource();
                 return;
+            }
 
             object convertedValue;
 

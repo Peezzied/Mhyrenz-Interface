@@ -6,6 +6,7 @@ using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -23,12 +24,19 @@ using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -41,6 +49,8 @@ namespace Mhyrenz_Interface
     /// </summary>
     public partial class App : Application
     {
+        private IHost _appHost;
+        private readonly string _configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
         public static IServiceProvider ServiceProvider { get; set; }
         public static AppPresenter Presenter { get; set; }
 
@@ -49,34 +59,48 @@ namespace Mhyrenz_Interface
         }
         protected override async void OnStartup(StartupEventArgs e)
         {
-            var services = CreateServiceCollection();
-            ServiceProvider = services.BuildServiceProvider();
+            _appHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config.AddJsonFile(_configFilePath, optional: false, reloadOnChange: true);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    CreateServiceCollection(services, context);
+                })
+                .Build();
+
+            await _appHost.StartAsync();
+            ServiceProvider = _appHost.Services;
+
+            await ServiceProvider.GetRequiredService<AppSettingsManager>()
+                .GenerateAppSettings(); // TEMPORARY
 
             Presenter = new AppPresenter(ServiceProvider);
 
             await Presenter.AppInit();
 
-            //IServiceProvider serviceProvider = ServiceProvider;
-
             await Presenter.ShowStartUpAsync();
             Presenter.SplashComplete();
-
-            //ServiceProvider.GetRequiredService<ISerialBarcodeService>();
 
             base.OnStartup(e);  
         }
 
-        private IServiceCollection CreateServiceCollection()
+        private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)
         {
-            IServiceCollection services = new ServiceCollection();
 
             Action<DbContextOptionsBuilder> inventoryConfig = options =>
             {
-                options.UseSqlite("Data Source=dev_inventory.db");
+                options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection"));
             };
 
             services
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
+
+                .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
+                .AddSingleton<AppSettingsManager>()
+                .Configure<AppSettingsManager.Settings>(context.Configuration.GetSection("AppSettings"))
+
                 .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
 
                 .AddSingleton<IUndoRedoManager, UndoRedoManager>()
@@ -197,9 +221,6 @@ namespace Mhyrenz_Interface
                 //.AddTransient<Startup>(s => ActivatorUtilities.CreateInstance<Startup>(s))
                 //.AddTransient<MainWindow>(s => ActivatorUtilities.CreateInstance<MainWindow>(s))
                 //.AddSingleton<TestWindow>(s => ActivatorUtilities.CreateInstance<TestWindow>(s));
-
-
-            return services;
         }
     }
 }

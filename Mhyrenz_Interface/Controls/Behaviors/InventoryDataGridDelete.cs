@@ -17,13 +17,14 @@ namespace Mhyrenz_Interface.Controls.Behaviors
     {
         public static readonly DependencyProperty CommandProperty =
             DependencyProperty.Register(nameof(Command), typeof(ICommand), typeof(InventoryDataGridDelete));
-        private readonly IInventoryStore _inventoryStore;
 
         public ICommand Command
         {
             get => (ICommand)GetValue(CommandProperty);
             set => SetValue(CommandProperty, value);
         }
+
+        private readonly IInventoryStore _inventoryStore;
 
         public InventoryDataGridDelete()
         {

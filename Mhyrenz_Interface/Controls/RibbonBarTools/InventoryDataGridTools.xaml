@@ -6,34 +6,35 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
+             xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls.RibbonBarTools"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="800">
     <hc:UniformSpacingPanel Spacing="15" Orientation="Horizontal" ItemVerticalAlignment="Center">
         <TextBlock VerticalAlignment="Center" FontSize="14" Width="70" Foreground="White" d:Text="Generic" Text="{Binding Name}"/>
         <hc:UniformSpacingPanel Grid.Column="1" Orientation="Horizontal" Spacing="7">
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding BarcodeSettingCommand}" Foreground="White" Tiptext="Toggle ID column visibility">
+            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.IdColumn}" Foreground="White" Tiptext="Toggle ID column visibility">
                 <controls:IconButtonWithTip.IconContent>
                     <iconPacks:PackIconBoxIcons Kind="RegularHash"/>
                 </controls:IconButtonWithTip.IconContent>
             </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding BarcodeSettingCommand}" Foreground="White" Tiptext="Toggle Batch column visibility">
+            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.BatchColumn}" Foreground="White" Tiptext="Toggle Batch column visibility">
                 <controls:IconButtonWithTip.IconContent>
                     <iconPacks:PackIconLucide Kind="Tags"/>
                 </controls:IconButtonWithTip.IconContent>
             </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding BarcodeSettingCommand}" Foreground="White" Tiptext="Toggle Expiry Date column visibility">
+            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.ExpiryColumn}" Foreground="White" Tiptext="Toggle Expiry Date column visibility">
                 <controls:IconButtonWithTip.IconContent>
                     <iconPacks:PackIconMaterial Kind="TimerSand"/>
                 </controls:IconButtonWithTip.IconContent>
             </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding BarcodeSettingCommand}" Foreground="White" Tiptext="Barcode Settings">
+            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.SupplierColumn}"  Foreground="White" Tiptext="Toggle Supplier column visibility">
                 <controls:IconButtonWithTip.IconContent>
                     <iconPacks:PackIconMaterial Kind="TruckCargoContainer"/>
                 </controls:IconButtonWithTip.IconContent>
             </controls:IconButtonWithTip>
             <hc:Divider Orientation="Vertical" MaxHeight="25" Visibility="{Binding CanToggleDependents, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <controls:IconButtonWithTip Visibility="{Binding CanToggleGenericName, Converter={StaticResource BooleanToVisibilityConverter}}" TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding BarcodeSettingCommand}" Foreground="White" Tiptext="Toggle Generic Name column visibility">
+            <controls:IconButtonWithTip Visibility="{Binding CanToggleGenericName, Converter={StaticResource BooleanToVisibilityConverter}}" TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.GenericNameColumn}" Foreground="White" Tiptext="Toggle Generic Name column visibility">
                 <controls:IconButtonWithTip.IconContent>
                     <iconPacks:PackIconMaterial Kind="TagTextOutline"/>
                 </controls:IconButtonWithTip.IconContent>
