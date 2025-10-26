@@ -9,24 +9,31 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface
 {
-    public struct StartupAction
-    {
-        public string EventName { get; set; }
-        public string Output { get; set; }
-        public Func<IServiceProvider, Task> Action { get; set; }
-        public StartupAction(string name, string output, Func<IServiceProvider, Task> action)
-        {
-            EventName = name;
-            Action = action;
-            Output = output;
-        }
-    }
-
     public class StartupManager
     {
-        private static readonly Queue<StartupAction> _actions = new Queue<StartupAction>();
+        public struct Action
+        {
+            public string EventName { get; set; }
+            public string Output { get; set; }
+            public Func<IServiceProvider, Task<string>> Method { get; set; }
+            public Action(string name, string output, Func<IServiceProvider, Task<string>> action)
+            {
+                EventName = name;
+                Method = action;
+                Output = output;
+            }
 
-        public static void Register(StartupAction startupAction)
+            public Action(string name, string output, Func<IServiceProvider, Task> action)
+            {
+                EventName = name;
+                Method = (p) => { action(p); return Task.FromResult(string.Empty); };
+                Output = output;
+            }
+        }
+
+        private static readonly Queue<Action> _actions = new Queue<Action>();
+
+        public static void Register(Action startupAction)
         {
             _actions.Enqueue(startupAction);
         }
@@ -37,7 +44,9 @@ namespace Mhyrenz_Interface
             {
                 var item = _actions.Dequeue();
                 splashWindow.AddMessage($"{item.EventName}: {item.Output}...");
-                await item.Action(provider);
+                var outputEffect = await item.Method(provider);
+                if (outputEffect != string.Empty)
+                    splashWindow.AddMessage($"{item.EventName}: {outputEffect}...");
             }
             splashWindow.AddMessage($"Done!");
 

@@ -7,6 +7,7 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"  
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Mhyrenz_Interface.Views"
+      xmlns:converter="clr-namespace:Mhyrenz_Interface.Converters"
       xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
       xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels.Fake"
       xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
@@ -15,34 +16,7 @@
       d:DesignHeight="800" d:DesignWidth="1280" Loaded="UserControl_Loaded"
 >
     <UserControl.Resources>
-        <DataTemplate x:Key="Dashboard">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="53*" />
-                    <ColumnDefinition Width="25"/>
-                    <ColumnDefinition Width="29*" />
-                </Grid.ColumnDefinitions>
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="101*"/>
-                        <RowDefinition Height="445*"/>
-                    </Grid.RowDefinitions>
-                    <Grid VerticalAlignment="Center">
-                        <controls:InfoPanel DataContext="{Binding InfoPanelViewModel}" d:DataContext="{d:DesignInstance vm:FakeInfoPanelViewModel, IsDesignTimeCreatable=True}"/>
-                    </Grid>
-                    <controls:OverviewChart Grid.Row="1" DataContext="{Binding OverviewChartViewModel}" />
-                </Grid>
-                <UniformGrid VerticalAlignment="Top" Grid.Column="2" Columns="3">
-                    <Button>2323</Button>
-                    <Button>2323</Button>
-                    <Button>2323</Button>
-                    <Button>2323</Button>
-                    <Button>2323</Button>
-                    <Button>2323</Button>
-                </UniformGrid>
-            </Grid>
-        </DataTemplate>
+        <converter:String2BooleanConverter x:Key="String2BooleanConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -62,20 +36,50 @@
                 <ContentControl Content="{Binding}" >
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
-                            <Setter Property="VerticalAlignment" Value="Top"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
                             <Setter Property="ContentTemplate">
                                 <Setter.Value>
                                     <DataTemplate>
-                                        <hc:TransitioningContentControl TransitionMode="Top2BottomWithFade">
-                                            <controls:InventoryDataGrid DataContext="{Binding InventoryDataGridContext}" Layout="Compacted" Height="500"/>
-                                        </hc:TransitioningContentControl>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="53*" />
+                                                <ColumnDefinition Width="25"/>
+                                                <ColumnDefinition Width="29*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid Grid.Column="0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid Grid.Row="0" VerticalAlignment="Center">
+                                                    <controls:InfoPanel DataContext="{Binding InfoPanelViewModel}" d:DataContext="{d:DesignInstance vm:FakeInfoPanelViewModel, IsDesignTimeCreatable=True}"/>
+                                                </Grid>
+                                                <controls:OverviewChart Grid.Row="1" DataContext="{Binding OverviewChartViewModel}" />
+                                            </Grid>
+                                            <UniformGrid VerticalAlignment="Top" Grid.Column="2" Columns="3">
+                                                <Button>2323</Button>
+                                                <Button>2323</Button>
+                                                <Button>2323</Button>
+                                                <Button>2323</Button>
+                                                <Button>2323</Button>
+                                                <Button>2323</Button>
+                                            </UniformGrid>
+                                        </Grid>
                                     </DataTemplate>
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding SearchBar}" Value="">
-                                    <Setter Property="VerticalAlignment" Value="Stretch"/>
-                                    <Setter Property="ContentTemplate" Value="{StaticResource Dashboard}"/>
+                                <DataTrigger Binding="{Binding SearchBar, Converter={StaticResource String2BooleanConverter}}" Value="True">
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <hc:TransitioningContentControl VerticalAlignment="Top" TransitionMode="Top2BottomWithFade">
+                                                    <controls:InventoryDataGrid DataContext="{Binding InventoryDataGridContext}" Layout="Compacted" Height="500"/>
+                                                </hc:TransitioningContentControl>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

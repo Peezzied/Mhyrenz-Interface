@@ -26,6 +26,9 @@ namespace Mhyrenz_Interface.Controls
             public ContentAdorner(UIElement adornedElement, FrameworkElement visual)
                 : base(adornedElement)
             {
+                //IsHitTestVisible = false;
+                //Focusable = false;
+
                 _element = visual;
                 _visuals = new VisualCollection(this)
                 {
@@ -80,7 +83,7 @@ namespace Mhyrenz_Interface.Controls
             var content = Adorned as FrameworkElement;
 
             content.DataContext = cell.DataContext;
-            content.LostFocus += Content_LostFocus;
+            content.Unloaded += Content_LostFocus;
 
             _adorner = new ContentAdorner(cell, content);
             AdornerLayer.GetAdornerLayer(cell).Add(_adorner);

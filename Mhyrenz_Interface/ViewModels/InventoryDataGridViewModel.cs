@@ -48,6 +48,8 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
         public event Action<ActionType> UndoRedoEvent;
+
+        public event Action CommitEdits;
         public ICommand DeleteCommand { get; set; }
 
         private IEnumerable<ProductDataViewModel> _selectedItems;
@@ -75,6 +77,17 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _selectedItem = value;
                 OnPropertyChanged(nameof(SelectedItem));
+            }
+        }
+
+        private bool _isGeneric;
+        public bool IsGeneric
+        {
+            get => _isGeneric;
+            set
+            {
+                _isGeneric = value;
+                OnPropertyChanged(nameof(IsGeneric));
             }
         }
 
@@ -145,6 +158,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
 
         public ICommand ToggleColumnCommand { get; }
+        public bool IsEditCancelled { get; private set; }
 
         private readonly IUndoRedoManager _undoRedoManager;
 
@@ -184,6 +198,8 @@ namespace Mhyrenz_Interface.ViewModels
 
         public override void Dispose()
         {
+            IsEditCancelled = true;
+            CommitEdits?.Invoke();
             _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
         }
 

@@ -35,7 +35,7 @@
                 <Style TargetType="ContentControl">
                     <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
                     <Style.Triggers>
-                        <DataTrigger Value="Invalid">
+                        <DataTrigger Value="True">
                             <DataTrigger.Binding>
                                 <Binding Path="Barcode"
                                              Converter="{StaticResource BarcodeToImageConverter}"/>

@@ -141,7 +141,8 @@ namespace Mhyrenz_Interface.State
 
             RemoveProductEvent?.Invoke(this, products);
 
-            RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(product, relativeInventory) - 1, products.ToList()));
+            var index = GetIndexByProduct(product, relativeInventory);
+            RunFilterSuspended(() => LastProductChanged = (Math.Max(0, index - 1), products.ToList()));
 
             foreach (var item in LastProductChanged.Products)
             {

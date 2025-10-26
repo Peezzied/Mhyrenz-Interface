@@ -21,6 +21,8 @@ using MessageBox = HandyControl.Controls.MessageBox;
 using DatePicker = System.Windows.Controls.DatePicker;
 using NumericUpDown = MahApps.Metro.Controls.NumericUpDown;
 using TextBox = System.Windows.Controls.TextBox;
+using DataGrid = System.Windows.Controls.DataGrid;
+using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Attached
 {
@@ -41,6 +43,7 @@ namespace Mhyrenz_Interface.Controls.Attached
 
         private static readonly ConditionalWeakTable<Control, Delegate> _controlEvents = new ConditionalWeakTable<Control, Delegate>();
 
+        private static DataGrid dataGrid;
         private static void OnUndoRedoBound(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -48,102 +51,55 @@ namespace Mhyrenz_Interface.Controls.Attached
                 if (!(bool)e.NewValue) return;
                 var control = d as Control;
 
-                RoutedEventHandler unloadedHandler = null;
+                dataGrid = TreeHelper.TryFindParent<DataGrid>(control);
 
                 switch (d)
                 {
                     case TextBox textBox:
-                        unloadedHandler = TrackControl(textBox, TextBox.TextProperty, textBox.Text);
+                        TrackControl(textBox, TextBox.TextProperty, TextBox.UnloadedEvent);
                         break;
                     case NumericUpDown numericUpDown:
-                        unloadedHandler = TrackControl(numericUpDown, NumericUpDown.ValueProperty, numericUpDown.Value);
+                        TrackControl(numericUpDown, NumericUpDown.ValueProperty, NumericUpDown.LostFocusEvent);
                         break;
                     case DatePicker datePicker:
-                        unloadedHandler = TrackControl(datePicker, DatePicker.SelectedDateProperty, datePicker.SelectedDate);
+                        TrackControl(datePicker, DatePicker.SelectedDateProperty, DatePicker.LostFocusEvent);
                         break;
-                }
-
-                if (unloadedHandler != null)
-                {
-                    control.Unloaded += unloadedHandler;
-
-                    void CleanupUnloaded(object sender, RoutedEventArgs args)
-                    {
-                        control.Unloaded -= unloadedHandler;
-                    }
-
-                    control.Unloaded += CleanupUnloaded;
                 }
             }), System.Windows.Threading.DispatcherPriority.Input);
         }
 
-        private static RoutedEventHandler TrackControl(Control textBox, DependencyProperty dp, object value)
+        private static void TrackControl(Control control, DependencyProperty dp, RoutedEvent routedEvent)
         {
+            var cell = TreeHelper.TryFindParent<System.Windows.Controls.DataGridCell>(control);
             RoutedEventHandler unloadedHandler;
             RoutedEventHandler handler = (s, _) =>
-                TryUpdateSource(textBox, dp, value);
+            {
 
-            textBox.LostFocus += handler;
-            _controlEvents.Add(textBox, handler);
+                //TryUpdateSource(control, dp);
+            };
+
+            control.AddHandler(routedEvent, handler);
+            _controlEvents.Add(control, handler);
 
             unloadedHandler = (_, __) =>
             {
-                if (_controlEvents.TryGetValue(textBox, out var h))
+                if (_controlEvents.TryGetValue(control, out var h))
                 {
-                    textBox.LostFocus -= h as RoutedEventHandler;
-                    _controlEvents.Remove(textBox);
+                    control.AddHandler(routedEvent, h as RoutedEventHandler);
+                    _controlEvents.Remove(control);
                 }
             };
-            return unloadedHandler;
-        }
 
-        private static void TryUpdateSource(DependencyObject target, DependencyProperty dp, object value)
-        {
-            var expression = BindingOperations.GetBindingExpression(target, dp);
-            var control = target.CastTo<Control>();
-            var viewModel = control.DataContext.CastTo<ProductDataViewModel>();
-            var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
-            var propertyValue = expression.ResolvedSource.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
+            control.AddHandler(routedEvent, unloadedHandler);
 
-            if (!undoRedoManager.CanRedo || value == expression.ResolvedSource)
+            var CleanupUnloaded = new RoutedEventHandler((s, _) =>
             {
-                expression?.UpdateSource();
-                return;
-            }
-
-            object convertedValue;
-
-            try
-            {
-                var targetType = Nullable.GetUnderlyingType(dp.PropertyType) ?? dp.PropertyType;
-
-                if (propertyValue == null || targetType.IsInstanceOfType(propertyValue))
-                {
-                    convertedValue = propertyValue;
-                }
-                else
-                {
-                    convertedValue = Convert.ChangeType(propertyValue, targetType);
-                }
-            }
-            catch
-            {
-                convertedValue = propertyValue;
-            }
-
-            if (value == propertyValue)
-            {
-                control.SetValue(dp, convertedValue);
-                return;
-            }
-
-            var prompt = undoRedoManager.ShowWarning(() =>
-            {
-                control.SetValue(dp, convertedValue);
+                control.RemoveHandler(routedEvent, unloadedHandler);
             });
 
-            if (prompt)
-                expression?.UpdateSource();
+            control.AddHandler(routedEvent, CleanupUnloaded);
         }
+
+        
     }
 }

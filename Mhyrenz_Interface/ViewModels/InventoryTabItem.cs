@@ -39,6 +39,7 @@ namespace Mhyrenz_Interface.ViewModels
                     CanToggleGenericName = _category.Type == ProductType.GenericNamed;
 
                     CanToggleDependents = CanToggleGenericName;
+                    _inventoryDataGridViewModel.IsGeneric = CanToggleDependents;
 
                     _controlInstance = new InventoryDataGrid
                     {

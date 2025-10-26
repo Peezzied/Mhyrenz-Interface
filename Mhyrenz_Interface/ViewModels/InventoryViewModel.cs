@@ -193,14 +193,14 @@ namespace Mhyrenz_Interface.ViewModels
             if (DrawerInstance != null)
                 DrawerInstance.Closed -= DrawerInstance_Closed;
 
-            SearchBar = string.Empty;
             foreach (var item in TabItems)
             {
                 var vm = item.ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>();
-                item.Dispose();
                 vm.Dispose();
                 vm.SelectedItemsChanged -= Vm_SelectedItemsChanged;
+                item.Dispose();
             }
+            SearchBar = string.Empty;
         }
 
         private void LoadTabItems()

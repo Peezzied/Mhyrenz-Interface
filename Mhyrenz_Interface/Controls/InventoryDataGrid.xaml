@@ -29,26 +29,13 @@
         </Style>
 
         <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
-
-        <DataTemplate x:Key="NumericEdit">
-            <!-- MahApps NumericUpDown inside editing template -->
-            <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}" 
-       Minimum="0" Maximum="{Binding PurchaseMax}" 
-       NumericInputMode="Numbers" TextAlignment="Center"
-       VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
-        </DataTemplate>
-        <DataTemplate x:Key="NormalEdit">
-            <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding PurchaseNormalEdit, Mode=TwoWay, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"
-       Minimum="0" Maximum="{Binding PurchaseMaxNormal}" HideUpDownButtons="True"
-       NumericInputMode="Numbers" TextAlignment="Center"
-       VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
-        </DataTemplate>
+        <converters:OrConverter x:Key="OrConverter"/>
 
         <converters:PurchaseToGreenConverter x:Key="PurchaseToGreenConverter"/>
         <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
 
         <hc:BindingProxy x:Key="UserControlContext" Value="{Binding}"/>
-        
+
         <DataGridCheckBoxColumn x:Key="CheckboxColumn" x:Shared="False" Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
 
         <DataGridTextColumn x:Key="IdColumn" Width="Auto" x:Shared="False" IsReadOnly="True" Header="Id" Binding="{Binding Item.Id}" Visibility="{Binding Value.IdColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -97,7 +84,7 @@
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="3*"/>
-                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition MinWidth="50" Width="*"/>
                                                             </Grid.ColumnDefinitions>
                                                             <local:MaxLinesTextBlock Text="{Binding Name}"
                                                                  MaxLines="2" FontFamily="Arial"
@@ -122,7 +109,11 @@
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
                     <local:CellAdorner>
-                        <TextBox Margin="2" FontFamily="Arial" VerticalContentAlignment="Center" Text="{Binding Name, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+                        <TextBox Margin="2" FontFamily="Arial" VerticalContentAlignment="Center" Text="{Binding Name, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
+                            </i:Interaction.Behaviors>
+                        </TextBox>
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
@@ -145,7 +136,11 @@
             </DataGridTemplateColumn.CellTemplate>
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
-                    <TextBox Text="{Binding GenericName, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+                    <TextBox Text="{Binding GenericName, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
+                        </i:Interaction.Behaviors>
+                    </TextBox>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
@@ -163,7 +158,11 @@
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
                     <local:CellAdorner>
-                        <TextBox Margin="2" Text="{Binding Batch, UpdateSourceTrigger=Explicit}" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}"/>
+                        <TextBox Margin="2" Text="{Binding Batch, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
+                            </i:Interaction.Behaviors>
+                        </TextBox>
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
@@ -181,7 +180,11 @@
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
                     <local:CellAdorner>
-                        <DatePicker Margin="2" attached:UndoRedoAttached.UndoRedoBound="True" Style="{StaticResource MahApps.Styles.DatePicker}" SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}" mah:TextBoxHelper.ClearTextButton="True"/>
+                        <DatePicker Margin="2" Style="{StaticResource MahApps.Styles.DatePicker}" SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}" mah:TextBoxHelper.ClearTextButton="True">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static DatePicker.SelectedDateProperty}"/>
+                            </i:Interaction.Behaviors>
+                        </DatePicker>
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
@@ -195,9 +198,15 @@
             </DataGridTemplateColumn.CellTemplate>
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
-                    <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding RetailPrice, UpdateSourceTrigger=Explicit}"
-                    Minimum="0" NumericInputMode="Numbers" TextAlignment="Center" StringFormat="C" Culture="en-PH"
-                    VerticalAlignment="Center" ButtonsAlignment="Opposite"/>
+                    <local:CellAdorner>
+                        <mah:NumericUpDown Value="{Binding RetailPrice, UpdateSourceTrigger=Explicit}"
+                        Minimum="0" NumericInputMode="Numbers" TextAlignment="Center" StringFormat="C" Culture="en-PH"
+                        VerticalAlignment="Center" ButtonsAlignment="Opposite">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
+                            </i:Interaction.Behaviors>
+                        </mah:NumericUpDown>
+                    </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
@@ -205,30 +214,43 @@
         <DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="85">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
-                    <TextBlock attached:UndoRedoAttached.UndoRedoBound="True" Text="{Binding Purchase}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
 
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding}">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="ContentTemplate" Value="{StaticResource NumericEdit}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource NormalEdit}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
+                    <local:CellAdorner>
+                        <mah:NumericUpDown
+                        Minimum="0" 
+                        NumericInputMode="Numbers" TextAlignment="Center" 
+                        VerticalAlignment="Center" ButtonsAlignment="Opposite">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
+                            </i:Interaction.Behaviors>
+                            <mah:NumericUpDown.Style>
+                                <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+                                    <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
+                                    <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
+                                            <DataTrigger.Setters>
+                                                <Setter Property="Maximum" Value="{Binding PurchaseMaxNormal}"/>
+                                                <Setter Property="HideUpDownButtons" Value="True"/>
+                                                <Setter Property="Value" Value="{Binding PurchaseNormalEdit, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                                            </DataTrigger.Setters>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </mah:NumericUpDown.Style>
+                        </mah:NumericUpDown>
+                    </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
 
         <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"/>
-        
+
         <DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
@@ -237,9 +259,15 @@
             </DataGridTemplateColumn.CellTemplate>
             <DataGridTemplateColumn.CellEditingTemplate>
                 <DataTemplate>
-                    <mah:NumericUpDown attached:UndoRedoAttached.UndoRedoBound="True" Value="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"
-                                   NumericInputMode="Numbers" TextAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                    <local:CellAdorner>
+                        <mah:NumericUpDown Value="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"
+                                       NumericInputMode="Numbers" TextAlignment="Center"
+                                       VerticalAlignment="Center">
+                            <i:Interaction.Behaviors>
+                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
+                            </i:Interaction.Behaviors>
+                        </mah:NumericUpDown>
+                    </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
@@ -252,7 +280,7 @@
         </DataGridTemplateColumn>
 
         <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
-        
+
         <Style x:Key="DataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
             <Setter Property="ClipToBounds" Value="False"/>
             <Style.Triggers>
@@ -292,35 +320,46 @@
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
+                        <Grid.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}}" Value="True"/>
+                                            <Condition Binding="{Binding Value.IsGeneric, Source={StaticResource UserControlContext}}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Resources>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Product: " VerticalAlignment="Center" />
-                            <TextBlock Text="Generic Name: " VerticalAlignment="Center" />
-                            <TextBlock Text="Expiry: " VerticalAlignment="Center" />
-                            <TextBlock Text="Batch #: " VerticalAlignment="Center" />
+                            <TextBlock Text="Generic Name: " VerticalAlignment="Center" Visibility="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
+                            <TextBlock Text="Expiry: " VerticalAlignment="Center" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
+                            <TextBlock Text="Batch #: " VerticalAlignment="Center" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
                                     Style="{StaticResource DetailsTextStyle}" />
                             <TextBlock Text="{Binding Item.GenericName, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" />
+                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" />
+                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="{Binding Item.Batch, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" />
+                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                         </StackPanel>
                     </Grid>
                     <ContentControl x:Name="BarcodeContent" Content="{Binding}" Margin="5,19,0,0" HorizontalAlignment="Left">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
                                 <Setter Property="ContentTemplate" Value="{StaticResource BarcodeImageTemplate}"/>
-                                <Setter Property="Height" Value="50"/>
+                                <Setter Property="Height" Value="25"/>
+                                <Setter Property="Visibility" Value="{Binding Barcode, Converter={StaticResource String2VisibilityConverter}}"/>
                                 <Style.Triggers>
-                                    <DataTrigger Value="Invalid">
-                                        <DataTrigger.Binding>
-                                            <Binding Path="Barcode"
-                                            Converter="{StaticResource BarcodeToImageConverter}"/>
-                                        </DataTrigger.Binding>
-                                        <Setter Property="Height" Value="0"/>
+                                    <DataTrigger Binding="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -376,9 +415,32 @@
         </DataTemplate>
 
         <DataTemplate x:Key="DataGridDetailedLayout">
-            <DataGrid Style="{StaticResource DataGridStyle}" RowDetailsTemplate="{x:Null}" SelectionUnit="FullRow" SelectionMode="Extended">
+            <DataGrid SelectionUnit="FullRow" SelectionMode="Extended">
+                <DataGrid.Style>
+                    <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridStyle}">
+                        <Setter Property="RowDetailsTemplate" Value="{x:Null}"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Value.IsGeneric, Source={StaticResource UserControlContext}}" Value="True" />
+                                    <Condition Binding="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
+                            </MultiDataTrigger>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource OrConverter}">
+                                        <Binding Path="Value.BatchColumn" Source="{StaticResource UserControlContext}"/>
+                                        <Binding Path="Value.ExpiryColumn" Source="{StaticResource UserControlContext}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Style>
                 <i:Interaction.Behaviors>
-                    <behaviors:InventoryDataGridSelect/>
+                    <behaviors:InventoryDataGridDetailed/>
                     <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
                     <behaviors:InventoryDataGridBehavior/>
                 </i:Interaction.Behaviors>

@@ -29,7 +29,7 @@ namespace Mhyrenz_Interface.Converters
             if (!(cache is null))
                 return cache;
             else
-                return "Invalid";
+                return true;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

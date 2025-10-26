@@ -153,12 +153,12 @@ namespace Mhyrenz_Interface.ViewModels
 
         public override void Dispose()
         {
-            base.TransitionCompleted -= OnTransitionComplete;
-            _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
-
             InventoryDataGridContext.Dispose();
+
             _overviewChartViewModel.Dispose();
             _infoPanelViewModel.Dispose();
+            base.TransitionCompleted -= OnTransitionComplete;
+            _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
         }
 
         private void OnTransitionComplete()

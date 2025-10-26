@@ -7,7 +7,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 {
     public interface IProductService
     {
-        Task <IEnumerable<Product>> GetAll();
+        Task <IEnumerable<Product>> GetAll(bool ignoreFilter = false);
         Task<Product> Get(int id);
         Task<Product> Add(Product entity);
         Task<bool> Remove(Product entity);
@@ -15,5 +15,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task RemoveMany(IEnumerable<Product> products);
         Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities);
         Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, string propertyName, object value);
+        Task<int> RemovePhysical();
     }
 }

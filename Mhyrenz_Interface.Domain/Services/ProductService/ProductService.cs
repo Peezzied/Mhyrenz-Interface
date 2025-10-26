@@ -44,9 +44,9 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return await _productDataService.Get(id) ?? throw new DataException("No product found. Please add a product first.");
         }
 
-        public async Task<IEnumerable<Product>> GetAll()
+        public async Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false)
         {
-            return await _productDataService.GetAll() ?? throw new DataException("No products found.");
+            return ignoreFilter ? await _productDataService.GetAllWithIgnore() : await _productDataService.GetAll();
         }
 
         public async Task<bool> Remove(Product entity)
@@ -57,6 +57,11 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         public async Task RemoveMany(IEnumerable<Product> products)
         {
             await _productDataService.DeleteMany(products);
+        }
+
+        public async Task<int> RemovePhysical()
+        {
+            return await _productDataService.DeleteAllPhysical();
         }
     }
 }

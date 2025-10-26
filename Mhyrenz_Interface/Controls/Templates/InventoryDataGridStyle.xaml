@@ -280,7 +280,7 @@
         </DataTemplate.Resources>
         <DataGrid Style="{StaticResource DataGridStyle}" RowDetailsTemplate="{x:Null}" SelectionUnit="FullRow" SelectionMode="Extended">
             <i:Interaction.Behaviors>
-                <behaviors:InventoryDataGridSelect/>
+                <behaviors:InventoryDataGridDetailed/>
                 <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
                 <behaviors:InventoryDataGridBehavior/>
             </i:Interaction.Behaviors>

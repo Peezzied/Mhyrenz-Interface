@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class InventoryDataGridSelect : Behavior<DataGrid>
+    public class InventoryDataGridDetailed : Behavior<DataGrid>
     {
         protected override void OnAttached()
         {
@@ -35,7 +35,14 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
+            AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().CommitEdits += InventoryDataGridDetailed_CommitEdits;
             App.Current.Dispatcher.BeginInvoke(new Action(() => SelectRow()), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void InventoryDataGridDetailed_CommitEdits()
+        {
+            AssociatedObject.CancelEdit(DataGridEditingUnit.Cell);
+            AssociatedObject.CancelEdit(DataGridEditingUnit.Row);
         }
 
         private void InventoryDataGridSelect_SwitchSelectedItem()

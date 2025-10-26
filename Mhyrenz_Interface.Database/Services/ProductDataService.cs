@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using EFCore.BulkExtensions;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -48,18 +49,19 @@ namespace Mhyrenz_Interface.Database.Services
                     .Include(a => a.Category)
                     .ToListAsync();
                 return entity;
+            }
+        }
 
-
-                //var entity = await base.GetAll();
-
-                //foreach (var item in entity)
-                //{
-                //    context.Entry(item)
-                //           .Reference(p => p.Category)
-                //           .Load();
-                //}
-
-                //return entity;
+        public async Task<IEnumerable<Product>> GetAllWithIgnore()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                IEnumerable<Product> entity = await context.Products
+                    .IgnoreQueryFilters()
+                    .Include(a => a.Transactions)
+                    .Include(a => a.Category)
+                    .ToListAsync();
+                return entity;
             }
         }
 
@@ -76,6 +78,19 @@ namespace Mhyrenz_Interface.Database.Services
                     )
                     .ToListAsync();
                 return entity;
+            }
+        }
+
+        public async Task<int> DeleteAllPhysical()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                IEnumerable<Product> entities = context.Products
+                    .IgnoreQueryFilters()
+                    .Where(e => e.IsDeleted);
+                await context.BulkDeleteAsync(entities.ToList());
+
+                return entities.Count();
             }
         }
     }
