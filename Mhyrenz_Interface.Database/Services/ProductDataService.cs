@@ -1,12 +1,13 @@
-﻿using EFCore.BulkExtensions;
-using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EFCore.BulkExtensions;
+using LiteDB;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
@@ -21,77 +22,114 @@ namespace Mhyrenz_Interface.Database.Services
 
         public override async Task<Product> Get(int id)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                Product entity = await context.Products
-                    .Include(a => a.Transactions)
-                    .Include(a => a.Category)
-                    .FirstOrDefaultAsync((e) => e.Id == id);
-                return entity;
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Product>(Name);
+                    var product = col.FindById(id);
 
-                //var entity = await base.Get(id);
+                    if (product != null && !product.IsDeleted)
+                        LoadReference(context, product);
 
-                //context.Entry(entity)
-                //    .Reference(p => p.Category)
-                //    .Load();
+                    return product;
+                }
+            });
 
-                //return entity;
-            }
-            
         }
 
         public override async Task<IEnumerable<Product>> GetAll()
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                IEnumerable<Product> entity = await context.Products
-                    .Include(a => a.Transactions)
-                    .Include(a => a.Category)
-                    .ToListAsync();
-                return entity;
-            }
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Product>(Name);
+                    var list = col.Find(p => !p.IsDeleted).ToList();
+
+                    LoadReferences(context, list);
+
+                    return list;
+                }
+            });
         }
 
         public async Task<IEnumerable<Product>> GetAllWithIgnore()
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                IEnumerable<Product> entity = await context.Products
-                    .IgnoreQueryFilters()
-                    .Include(a => a.Transactions)
-                    .Include(a => a.Category)
-                    .ToListAsync();
-                return entity;
-            }
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Product>(Name);
+                    var list = col.FindAll().ToList();
+
+                    LoadReferences(context, list);
+
+                    return list;
+                }
+            });
         }
 
         public async Task<IEnumerable<Product>> GetAllByCategory(string name, int? id= null)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                IEnumerable<Product> entity = await context.Products
-                    .Include(a => a.Transactions)
-                    .Include(a => a.Category)
-                    .Where(p =>
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Product>(Name);
+                    var list = col.Find(p =>
+                        !p.IsDeleted &&
                         (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
-                        (id.HasValue && p.CategoryId == id.Value)
-                    )
-                    .ToListAsync();
-                return entity;
-            }
+                        (id.HasValue && p.CategoryId == id)
+                    ).ToList();
+
+                    LoadReferences(context, list);
+
+                    return list;
+                }
+            });
         }
 
         public async Task<int> DeleteAllPhysical()
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                IEnumerable<Product> entities = context.Products
-                    .IgnoreQueryFilters()
-                    .Where(e => e.IsDeleted);
-                await context.BulkDeleteAsync(entities.ToList());
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Product>(Name);
+                    var deleted = col.Find(p => p.IsDeleted).ToList();
 
-                return entities.Count();
-            }
+                    foreach (var p in deleted)
+                        col.Delete(p.Id);
+
+                    return deleted.Count;
+                }
+            });
+        }
+
+        // -----------------------------
+        // Manual relationship loading
+        // -----------------------------
+        private void LoadReferences(ILiteDatabase context, List<Product> list)
+        {
+            foreach (var product in list)
+                LoadReference(context, product);
+        }
+
+        private void LoadReference(ILiteDatabase context, Product product)
+        {
+            if (product == null) return;
+
+            var categoryCol = context.GetCollection<Category>(nameof(Category).TableName());
+            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+
+            // Load category
+            product.Category = categoryCol.FindById(product.CategoryId);
+
+            // Load transactions
+            product.Transactions = trxCol.Query()
+                .Where(t => t.ProductId == product.Id)
+                .ToList();
         }
     }
 }

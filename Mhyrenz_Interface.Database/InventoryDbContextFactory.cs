@@ -1,32 +1,40 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
+using Mhyrenz_Interface.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Options;
 
 namespace Mhyrenz_Interface.Database
 {
     public class InventoryDbContextFactory
     {
-        private readonly Action<DbContextOptionsBuilder> _configureDbContext;
+        private readonly string _databasePath;
 
-        public InventoryDbContextFactory(Action<DbContextOptionsBuilder> configureDbContext)
+        public InventoryDbContextFactory(string databasePath = "Inventory.db")
         {
-            _configureDbContext = configureDbContext;
+            _databasePath = databasePath;
         }
 
-        public InventoryDbContext CreateDbContext()
+        public ILiteDatabase CreateDbContext()
         {
-            DbContextOptionsBuilder<InventoryDbContext> options = new DbContextOptionsBuilder<InventoryDbContext>();
+            ILiteDatabase database = null;
+            if (database == null)
+            {
+                database = new LiteDatabase(_databasePath);
 
-            options.EnableSensitiveDataLogging().EnableDetailedErrors();
+                database.GetCollection<Product>(nameof(Product).TableName())
+                    .EnsureIndex(x => x.IsDeleted);
 
-            _configureDbContext(options);
+                //_database.GetCollection<Category>(nameof(Category).TableName())
+                //    .EnsureIndex(x => x.IsDeleted);
+            }
 
-            return new InventoryDbContext(options.Options);
+            return database;
         }
     }
 }

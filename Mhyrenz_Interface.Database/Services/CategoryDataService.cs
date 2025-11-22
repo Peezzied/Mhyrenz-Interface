@@ -1,11 +1,12 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
@@ -18,30 +19,62 @@ namespace Mhyrenz_Interface.Database.Services
         }
         public override async Task<Category> Get(int id)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                Category entity = await context.Categories
-                    .Include(a => a.Products)
-                        .ThenInclude(p => p.Transactions)
-                    .FirstOrDefaultAsync((e) => e.Id == id);
-                return entity;
-            }
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Category>(nameof(Category).TableName());
+                    var category = col.FindById(id);
+
+                    if (category != null)
+                        LoadProducts(context, category);
+
+                    return category;
+                }
+            });
         }
         public override async Task<IEnumerable<Category>> GetAll()
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                IEnumerable<Category> entity = await context.Categories
-                    .Include(a => a.Products)
-                        .ThenInclude(p => p.Transactions)
-                    .ToListAsync();
-                return entity;
-            }
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    var col = context.GetCollection<Category>(nameof(Category).TableName());
+                    var list = col.FindAll().ToList();
+
+                    foreach (var category in list)
+                        LoadProducts(context, category);
+
+                    return list;
+                }
+            });
         }
 
         public Task<Category> GetByName(string name)
         {
             throw new NotImplementedException();
+        }
+
+        // -----------------------------
+        // Manual loading of relations
+        // -----------------------------
+        private void LoadProducts(ILiteDatabase context, Category category)
+        {
+            if (category == null) return;
+
+            var productCol = context.GetCollection<Product>(nameof(Product).TableName());
+            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+
+            // Load all products under this category
+            category.Products = productCol.Find(p => p.CategoryId == category.Id && !p.IsDeleted).ToList();
+
+            // Load transactions for each product
+            foreach (var product in category.Products)
+            {
+                product.Transactions = trxCol.Query()
+                    .Where(t => t.ProductId == product.Id)
+                    .ToList();
+            }
         }
     }
 }

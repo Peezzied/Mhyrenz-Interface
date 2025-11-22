@@ -81,8 +81,6 @@ namespace Mhyrenz_Interface.ViewModels
                 _category = value;
 
                 IsGeneric = false;
-                if (_category.Type is ProductType.GenericNamed)
-                    IsGeneric = true;
 
                 Validate(nameof(SelectedCategory), value);
                 OnPropertyChanged(nameof(SelectedCategory));
@@ -128,10 +126,10 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        private double _price;
+        private decimal _price;
 
         [Required]
-        public double Price
+        public decimal Price
         {
             get => _price;
             set

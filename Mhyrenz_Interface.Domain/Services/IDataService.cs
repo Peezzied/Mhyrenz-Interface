@@ -18,11 +18,11 @@ namespace Mhyrenz_Interface.Domain.Services
 
         Task DeleteMany(IEnumerable<T> entities);
 
-        Task<T> Update(int id, T entity);
+        Task Update(int id, T entity);
 
         Task<T> UpdateProperty(int id, string propertyName, object newValue);
 
-        Task<bool> Delete(int id);
+        Task Delete(int id);
         Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue);
     }
 }

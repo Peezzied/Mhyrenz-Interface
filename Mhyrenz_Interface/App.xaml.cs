@@ -89,14 +89,9 @@ namespace Mhyrenz_Interface
         private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)
         {
 
-            Action<DbContextOptionsBuilder> inventoryConfig = options =>
-            {
-                options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection"));
-            };
+            var inventoryConfig = context.Configuration.GetConnectionString("DefaultConnection");
 
             services
-                .AddDbContext<InventoryDbContext>(inventoryConfig)
-
                 .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
                 .AddSingleton<AppSettingsManager>()
                 .Configure<AppSettingsManager.Settings>(context.Configuration.GetSection("AppSettings"))

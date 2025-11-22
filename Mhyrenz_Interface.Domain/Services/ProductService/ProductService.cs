@@ -49,9 +49,9 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return ignoreFilter ? await _productDataService.GetAllWithIgnore() : await _productDataService.GetAll();
         }
 
-        public async Task<bool> Remove(Product entity)
+        public async Task Remove(Product entity)
         {
-            return await _productDataService.Delete(entity.Id);
+            await _productDataService.Delete(entity.Id);
         }
 
         public async Task RemoveMany(IEnumerable<Product> products)

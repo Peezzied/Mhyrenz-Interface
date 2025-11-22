@@ -128,7 +128,6 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
                     BatchColumn = false,
                     ExpiryDateColumn = true,
                     SupplierColumn = true,
-                    GenericColumn = c.Type == ProductType.GenericNamed ? true : (bool?)null
                 };
             });
 

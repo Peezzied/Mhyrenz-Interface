@@ -71,12 +71,20 @@ namespace Mhyrenz_Interface.Commands
 
             var session =  _sessionStore.CurrentSession;
 
-            var sales = new SalesRecord()
+            var sales = new SalesRecord
             {
+                Sales = transactions.Select((t) => new Sale
+                {
+                    ProductId = t.Product.Item.Id,
+                    Barcode = t.Barcode,
+                    Price = t.Price,
+                    Qty = t.Amount,
+                    ProductName = t.Name,
+                }),
                 SessionId = session.UniqueId,
                 TotalPurchase = transactions.Sum(t => t.Amount),
-                TotalSales = (double)transactions.Sum(t => t.DTO.Product.Item.NetRetail), // REFACTOR TRANSACTION MODELTYPES decimal TO double
-                Profit = (double)transactions.Sum(t => t.DTO.Product.Item.Profit), // REFACTOR TRANSACTION MODELTYPES decimal TO double
+                TotalSales = (double)transactions.Sum(t => t.DTO.Product.Item.NetRetail),
+                Profit = (double)transactions.Sum(t => t.DTO.Product.Item.Profit),
                 RegisteredAt = session.Period
             };
 

@@ -36,8 +36,6 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     RibbonBar = new InventoryDataGridTools() { DataContext = this };
 
-                    CanToggleGenericName = _category.Type == ProductType.GenericNamed;
-
                     CanToggleDependents = CanToggleGenericName;
                     _inventoryDataGridViewModel.IsGeneric = CanToggleDependents;
 

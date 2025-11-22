@@ -52,7 +52,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
                 {
                     ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
-                    CreatedAt = date,
+                    Timestamp = date,
                     SessionId = session.UniqueId
                 });
 

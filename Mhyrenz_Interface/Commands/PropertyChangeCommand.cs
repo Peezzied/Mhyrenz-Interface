@@ -1,5 +1,4 @@
 ﻿using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Domain.DTO;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;

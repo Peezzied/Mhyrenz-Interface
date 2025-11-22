@@ -64,7 +64,7 @@ namespace Mhyrenz_Interface.Commands
             var product = await _productService.Add(new Product
             {
                 Name = _viewModel.Name,
-                RetailPrice = (decimal)_viewModel.Price, // RESOLVE DECIMAL TO DOUBLE
+                RetailPrice = _viewModel.Price,
                 Qty = _viewModel.Qty,
                 CategoryId = _viewModel.SelectedCategory.Id,
                 Expiry = _viewModel.Expiry,

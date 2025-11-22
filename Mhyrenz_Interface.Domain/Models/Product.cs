@@ -4,14 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public enum ProductType
-    {
-        Standard, GenericNamed
-    }
-
     public class Product: DomainObject
     {
         public Product() { }
@@ -44,16 +40,15 @@ namespace Mhyrenz_Interface.Domain.Models
 
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
-        [NotMapped]
-        public int Purchase => Transactions.Count;
+        [BsonIgnore] public int Purchase => Transactions?.Count ?? 0;
 
         // Calculated
-        public int NetQty => Qty - Purchase;
-        public decimal NetRetail => Purchase * RetailPrice;
-        public decimal CostPrice => Qty * RetailPrice;
-        public decimal ProfitRevenue => RetailPrice - ListPrice;
-        public decimal Profit => Purchase * ProfitRevenue;
-        public decimal TotalListPrice => ListPrice * Qty;
+        [BsonIgnore] public int NetQty => Qty - Purchase;
+        [BsonIgnore] public decimal NetRetail => Purchase * RetailPrice;
+        [BsonIgnore] public decimal CostPrice => Qty * RetailPrice;
+        [BsonIgnore] public decimal ProfitRevenue => RetailPrice - ListPrice;
+        [BsonIgnore] public decimal Profit => Purchase * ProfitRevenue;
+        [BsonIgnore] public decimal TotalListPrice => ListPrice * Qty;
 
         public Product Clone()
         {
@@ -69,15 +64,5 @@ namespace Mhyrenz_Interface.Domain.Models
                 Qty = this.Qty
             };
         }
-    }
-
-    public class ProductUpdateMessage
-    {
-        public ProductUpdateMessage(Product product)
-        {
-            Product = product;
-        }
-
-        public Product Product { get; }
     }
 }

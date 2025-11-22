@@ -1,4 +1,5 @@
 ﻿using EFCore.BulkExtensions;
+using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ namespace Mhyrenz_Interface.Database.Services
 {
     public class GenericDataService<T> : IDataService<T> where T : DomainObject
     {
+        public string Name = nameof(T).TableName();
         private readonly InventoryDbContextFactory _contextFactory;
 
         public GenericDataService(InventoryDbContextFactory contextFactory)
@@ -24,118 +26,111 @@ namespace Mhyrenz_Interface.Database.Services
 
         public async Task<T> Create(T entity)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-
-                var result = await context.Set<T>().AddAsync(entity);
-                await context.SaveChangesAsync();
-
-                return result.Entity;
-            }
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    GetTable().Insert(entity);
+                    return entity;
+                }
+            });
         }
 
         public async Task<IEnumerable<T>> CreateMany(IEnumerable<T> entities)
         {
-            var result = entities.ToList();
-
-            using (var context = _contextFactory.CreateDbContext())
+            return await Task.Run(() =>
             {
-                await context.Set<T>().AddRangeAsync(result);
-                await context.SaveChangesAsync();
-            }
-
-            return result;
+                using (var context = _contextFactory.CreateDbContext())
+                {
+                    GetTable().InsertBulk(entities);
+                    return entities;
+                }
+            });
+            
         }
 
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                T entity = await context.Set<T>().FirstOrDefaultAsync((e) => e.Id == id);
-                context.Set<T>().Remove(entity);
-                await context.SaveChangesAsync();
-
-                return true;
+                await Task.Run(() => GetTable().Delete(id));
             }
         }
 
         public async Task DeleteMany(IEnumerable<T> entities)
         {
+            var ids = entities.Select(i => i.Id).ToHashSet();
             using (var context = _contextFactory.CreateDbContext())
             {
-                var entityType = context.Model.FindEntityType(typeof(T));
-                var key = entityType.FindPrimaryKey();
-                var keyProperty = key.Properties.First();
-
-                var stubs = entities.Select(entity =>
-                {
-                    var id = keyProperty.PropertyInfo.GetValue(entity);
-                    var stub = Activator.CreateInstance(typeof(T));
-                    keyProperty.PropertyInfo.SetValue(stub, id);
-                    return (T)stub;
-                }).ToList();
-
-                await context.BulkDeleteAsync(stubs);
+                await Task.Run(() => GetTable().DeleteMany(i => ids.Contains(i.Id)));
             }
         }
 
         public async virtual Task<T> Get(int id)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                T entity = await context.Set<T>().FirstOrDefaultAsync((e) => e.Id == id);
-                return entity;
+                return await Task.Run(() => GetTable().FindById(id));
             }
         }
 
         public async virtual Task<IEnumerable<T>> GetAll()
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                IEnumerable<T> entities = await context.Set<T>().ToListAsync();
-                return entities;
+                return await Task.Run(() => GetTable().FindAll());
             }
         }
 
 
-        public async Task<T> Update(int id, T updatedEntity)
+        public async Task Update(int id, T updatedEntity)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                updatedEntity.Id = id;
-
-                context.Set<T>().Update(updatedEntity);
-                await context.SaveChangesAsync();
-
-                return updatedEntity;
+                await Task.Run(() => GetTable().Update(id, updatedEntity));
             }
         }
 
         public async Task<T> UpdateProperty(int id, string propertyName, object newValue)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                var entity = await context.Set<T>().FindAsync(id);
-                UpdateEntityProperty(entity, propertyName, newValue);
+                return await Task.Run(() =>
+                {
+                    var entity = GetTable().FindById(id);
+                    GetTable().Update(UpdateEntityProperty(entity, propertyName, newValue));
 
-                await context.SaveChangesAsync();
-                return entity;
+                    return entity;
+                });
             }
 
         }
 
         public async Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue)
         {
-            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                foreach (var item in entities)
+                var ids = entities.Select(i => i.Id).ToHashSet();
+                return await Task.Run(() =>
                 {
-                    UpdateEntityProperty(item, propertyName, newValue);
-                }
+                    IEnumerable<T> newEntities = entities.Select(i =>
+                    {
+                        var edited = UpdateEntityProperty(i, propertyName, newValue);
+                        GetTable().Update(edited);
+                        return edited;
+                    }).ToList();
 
-                await context.BulkUpdateAsync(entities.ToList());
-                return entities;
+                    return newEntities;
+                });
+            }
+        }
+
+        protected ILiteCollection<T> GetTable()
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                return context.GetCollection<T>(Name);
             }
         }
 
