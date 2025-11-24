@@ -1,36 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
     public class SalesRecordDataService : GenericDataService<SalesRecord>, ISalesRecordDataService
     {
-        private readonly InventoryDbContextFactory _contextFactory;
-        public SalesRecordDataService(InventoryDbContextFactory contextFactory) : base(contextFactory)
+        private readonly InventoryDbService _context;
+        public SalesRecordDataService(InventoryDbService context) : base(context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public override async Task<SalesRecord> Get(int id)
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var record = GetTable().FindById(id);
+                var record = GetTable().FindById(id);
 
-                    if (record != null)
-                        LoadSession(context, record);
+                if (record != null)
+                    LoadSession(record);
 
-                    return record;
-                }
+                return record;
             });
         }
 
@@ -38,24 +32,22 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var list = GetTable().FindAll().ToList();
+                var list = GetTable().FindAll().ToList();
 
-                    foreach (var record in list)
-                        LoadSession(context, record);
+                foreach (var record in list)
+                    LoadSession(record);
 
-                    return list;
-                }
+                return list;
             });
         }
 
-        private void LoadSession(ILiteDatabase context, SalesRecord record)
+        private void LoadSession(SalesRecord record)
         {
             if (record == null) return;
 
-            var sessionCol = context.GetCollection<Session>(nameof(Session).TableName());
-            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+            var context = _context.Instance;
+            var sessionCol = context.GetCollection<Session>(typeof(Session).TableName());
+            var trxCol = context.GetCollection<Transaction>(typeof(Transaction).TableName());
 
             // Load the related Session
             var session = sessionCol.FindById(record.SessionId);

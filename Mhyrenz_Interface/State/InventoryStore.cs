@@ -1,6 +1,12 @@
-﻿using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Input;
+using HandyControl.Controls;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
@@ -11,24 +17,8 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Diagnostics;
-using System.Windows.Input;
+using NUnit.Framework;
 
 namespace Mhyrenz_Interface.State
 {
@@ -290,7 +280,7 @@ namespace Mhyrenz_Interface.State
                     _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == product.Id).Key);
 
                     var updated = _productsViewModelFactory(product);
-
+                    Assert.That(updated.Purchase, Is.GreaterThan(0));
                     Products.RemoveAt(index);
                     Products.Insert(index, updated);
 

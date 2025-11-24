@@ -1,35 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Transaction = Mhyrenz_Interface.Domain.Models.Transaction;
 
 namespace Mhyrenz_Interface.Database.Services
 {
     public class TransactionsDataService : GenericDataService<Transaction>, ITransactionsDataService
     {
-        private readonly InventoryDbContextFactory _contextFactory;
+        private readonly InventoryDbService _context;
 
-        public TransactionsDataService(InventoryDbContextFactory contextFactory) : base(contextFactory)
+        public TransactionsDataService(InventoryDbService context) : base(context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public async Task Clean()
         {
             await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    context.DropCollection(Name);
-                    context.GetCollection<Transaction>(Name);
-                }
+                _context.Instance.DropCollection(Name);
+                GetTable();
             });
         }
 
@@ -37,16 +30,11 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Transaction>(Name);
+                var transactions = GetTable().FindAll().ToList();
 
-                    var transactions = col.FindAll().ToList();
+                LoadReferences(transactions);
 
-                    LoadReferences(context, transactions);
-
-                    return transactions;
-                }
+                return transactions;
             });
         }
 
@@ -54,19 +42,14 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Transaction>(Name);
+                var list = GetTable().Query()
+                    .Where(t => t.ProductId == productId)
+                    .OrderByDescending(t => t.Timestamp)
+                    .ToList();
 
-                    var list = col.Query()
-                        .Where(t => t.ProductId == productId)
-                        .OrderByDescending(t => t.Timestamp)
-                        .ToList();
+                LoadReferences(list);
 
-                    LoadReferences(context, list);
-
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -74,19 +57,14 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Transaction>(Name);
+                var trx = GetTable().Query()
+                    .OrderByDescending(t => t.Timestamp)
+                    .FirstOrDefault();
 
-                    var trx = col.Query()
-                        .OrderByDescending(t => t.Timestamp)
-                        .FirstOrDefault();
+                if (trx != null)
+                    LoadReference(trx);
 
-                    if (trx != null)
-                        LoadReference(context, trx);
-
-                    return trx;
-                }
+                return trx;
             });
         }
 
@@ -94,18 +72,13 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Transaction>(Name);
+                var list = GetTable().Query()
+                    .OrderByDescending(t => t.Timestamp)
+                    .ToList();
 
-                    var list = col.Query()
-                        .OrderByDescending(t => t.Timestamp)
-                        .ToList();
+                LoadReferences(list);
 
-                    LoadReferences(context, list);
-
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -113,22 +86,23 @@ namespace Mhyrenz_Interface.Database.Services
         // Manual navigation loading
         // --------------------------
 
-        private void LoadReferences(ILiteDatabase context, List<Transaction> list)
+        private void LoadReferences(List<Transaction> list)
         {
             foreach (var transaction in list)
-                LoadReference(context, transaction);
+                LoadReference(transaction);
         }
 
-        private void LoadReference(ILiteDatabase context, Transaction transaction)
+        private void LoadReference(Transaction transaction)
         {
             if (transaction == null) return;
 
+            var context = _context.Instance;
             transaction.Item = context
-                .GetCollection<Product>(nameof(Product).TableName())
+                .GetCollection<Product>(typeof(Product).TableName())
                 .FindById(transaction.ProductId);
 
             transaction.Session = context
-                .GetCollection<Session>(nameof(Session).TableName())
+                .GetCollection<Session>(typeof(Session).TableName())
                 .FindById(transaction.SessionId);
         }
     }

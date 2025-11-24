@@ -1,13 +1,14 @@
-﻿using Mhyrenz_Interface.Commands;
-using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using HandyControl.Controls;
+using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.State
 {
@@ -16,7 +17,7 @@ namespace Mhyrenz_Interface.State
         ObservableCollection<ProductDataViewModel> Products { get; }
         ICollectionView ProductsCollectionView { get; set; }
         ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
-        (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set;  }
+        (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set; }
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;

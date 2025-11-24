@@ -1,52 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class CategoryDataService: GenericDataService<Category>, ICategoryDataService
+    public class CategoryDataService : GenericDataService<Category>, ICategoryDataService
     {
-        private readonly InventoryDbContextFactory _contextFactory;
-        public CategoryDataService(InventoryDbContextFactory contextFactory) : base(contextFactory)
+        private readonly InventoryDbService _context;
+        public CategoryDataService(InventoryDbService context) : base(context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
         public override async Task<Category> Get(int id)
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Category>(nameof(Category).TableName());
-                    var category = col.FindById(id);
+                var category = GetTable().FindById(id);
 
-                    if (category != null)
-                        LoadProducts(context, category);
+                if (category != null)
+                    LoadProducts(category);
 
-                    return category;
-                }
+                return category;
             });
         }
         public override async Task<IEnumerable<Category>> GetAll()
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Category>(nameof(Category).TableName());
-                    var list = col.FindAll().ToList();
+                var list = GetTable().FindAll().ToList();
 
-                    foreach (var category in list)
-                        LoadProducts(context, category);
+                foreach (var category in list)
+                    LoadProducts(category);
 
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -58,12 +48,13 @@ namespace Mhyrenz_Interface.Database.Services
         // -----------------------------
         // Manual loading of relations
         // -----------------------------
-        private void LoadProducts(ILiteDatabase context, Category category)
+        private void LoadProducts(Category category)
         {
             if (category == null) return;
 
-            var productCol = context.GetCollection<Product>(nameof(Product).TableName());
-            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+            var context = _context.Instance;
+            var productCol = context.GetCollection<Product>(typeof(Product).TableName());
+            var trxCol = context.GetCollection<Transaction>(typeof(Transaction).TableName());
 
             // Load all products under this category
             category.Products = productCol.Find(p => p.CategoryId == category.Id && !p.IsDeleted).ToList();

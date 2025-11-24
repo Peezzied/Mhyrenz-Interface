@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pluralize.NET;
 
 namespace Mhyrenz_Interface.Database
 {
     public static class Utils
     {
-        public static string TableName(this object value)
+        public static string TableName(this Type value)
         {
-            return value + "s";
+            return new Pluralizer().Pluralize(value.Name);
         }
     }
 }

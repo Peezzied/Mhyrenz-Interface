@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LiteDB;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
@@ -34,21 +33,23 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public bool IsDeleted { get; set; }
 
+        public Dictionary<string, object> Extras { get; set; }
+
         // Category
         public int CategoryId { get; set; }
         public Category Category { get; set; }
 
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
-        [BsonIgnore] public int Purchase => Transactions?.Count ?? 0;
+        public int Purchase => Transactions?.Count ?? 0;
 
         // Calculated
-        [BsonIgnore] public int NetQty => Qty - Purchase;
-        [BsonIgnore] public decimal NetRetail => Purchase * RetailPrice;
-        [BsonIgnore] public decimal CostPrice => Qty * RetailPrice;
-        [BsonIgnore] public decimal ProfitRevenue => RetailPrice - ListPrice;
-        [BsonIgnore] public decimal Profit => Purchase * ProfitRevenue;
-        [BsonIgnore] public decimal TotalListPrice => ListPrice * Qty;
+        public int NetQty => Qty - Purchase;
+        public decimal NetRetail => Purchase * RetailPrice;
+        public decimal CostPrice => Qty * RetailPrice;
+        public decimal ProfitRevenue => RetailPrice - ListPrice;
+        public decimal Profit => Purchase * ProfitRevenue;
+        public decimal TotalListPrice => ListPrice * Qty;
 
         public Product Clone()
         {

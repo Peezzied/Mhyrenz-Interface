@@ -69,7 +69,7 @@ namespace Migration
             }
 
             // Insert into LiteDB
-            using (var db = new InventoryDbContextFactory().CreateDbContext())
+            using (var db = new InventoryDbService().CreateDbContext())
             {
                 var categoryCol = db.GetCollection<Category>("Categories");
                 categoryCol.InsertBulk(categories);

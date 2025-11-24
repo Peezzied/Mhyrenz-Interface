@@ -54,9 +54,6 @@ namespace Mhyrenz_Interface
         public static IServiceProvider ServiceProvider { get; set; }
         public static AppPresenter Presenter { get; set; }
 
-        public App()
-        {
-        }
         protected override async void OnStartup(StartupEventArgs e)
         {
             _appHost = Host.CreateDefaultBuilder()
@@ -86,6 +83,12 @@ namespace Mhyrenz_Interface
             base.OnStartup(e);  
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            ServiceProvider.GetRequiredService<InventoryDbService>().Dispose();
+            base.OnExit(e);
+        }
+
         private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)
         {
 
@@ -96,7 +99,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<AppSettingsManager>()
                 .Configure<AppSettingsManager.Settings>(context.Configuration.GetSection("AppSettings"))
 
-                .AddSingleton<InventoryDbContextFactory>(new InventoryDbContextFactory(inventoryConfig))
+                .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
 
                 .AddSingleton<IUndoRedoManager, UndoRedoManager>()
                 .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()

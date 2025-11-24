@@ -119,32 +119,6 @@
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
 
-        <DataGridTemplateColumn x:Key="GenericNameColumn" x:Shared="False" CanUserSort="False" Header="Generic Name" Width="Auto" MaxWidth="545"  Visibility="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <DataGridTemplateColumn.HeaderStyle>
-                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
-                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                </Style>
-            </DataGridTemplateColumn.HeaderStyle>
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <local:MaxLinesTextBlock Text="{Binding GenericName}"
-                 LineHeight="16" 
-                 MaxLines="3"
-                 Padding="4"
-                 Width="Auto"/>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <TextBox Text="{Binding GenericName, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
-                        <i:Interaction.Behaviors>
-                            <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
-                        </i:Interaction.Behaviors>
-                    </TextBox>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>
-
         <DataGridTemplateColumn x:Key="BatchColumn" x:Shared="False" Header="Batch" Width="125" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
@@ -320,31 +294,14 @@
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Grid.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}}" Value="True"/>
-                                            <Condition Binding="{Binding Value.IsGeneric, Source={StaticResource UserControlContext}}" Value="True"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Grid.Resources>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Product: " VerticalAlignment="Center" />
-                            <TextBlock Text="Generic Name: " VerticalAlignment="Center" Visibility="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="Expiry: " VerticalAlignment="Center" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="Batch #: " VerticalAlignment="Center" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
                                     Style="{StaticResource DetailsTextStyle}" />
-                            <TextBlock Text="{Binding Item.GenericName, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
                                     Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
                             <TextBlock Text="{Binding Item.Batch, Converter={StaticResource DetailsTextNoneConverter}}" 
@@ -404,12 +361,12 @@
                     <behaviors:InventoryDataGridCompact/>
                 </i:Interaction.Behaviors>
                 <DataGrid.Columns>
-                    <StaticResource  ResourceKey="CheckboxColumn" />
-                    <StaticResource ResourceKey="NameColumn" />
+                    <!--<StaticResource  ResourceKey="CheckboxColumn" />-->
+                    <!--<StaticResource ResourceKey="NameColumn" />
                     <StaticResource ResourceKey="RetailColumn" />
                     <StaticResource ResourceKey="PurchaseColumn" />
                     <StaticResource ResourceKey="NetQtyColumn" />
-                    <StaticResource ResourceKey="CategoryColumn" />
+                    <StaticResource ResourceKey="CategoryColumn" />-->
                 </DataGrid.Columns>
             </DataGrid>
         </DataTemplate>
@@ -420,13 +377,6 @@
                     <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridStyle}">
                         <Setter Property="RowDetailsTemplate" Value="{x:Null}"/>
                         <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Value.IsGeneric, Source={StaticResource UserControlContext}}" Value="True" />
-                                    <Condition Binding="{Binding Value.GenericNameColumn, Source={StaticResource UserControlContext}}" Value="True"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
-                            </MultiDataTrigger>
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource OrConverter}">
@@ -449,7 +399,6 @@
                     <StaticResource ResourceKey="IdColumn"/>
                     <StaticResource ResourceKey="NameColumn" />
                     <StaticResource ResourceKey="BatchColumn"/>
-                    <StaticResource ResourceKey="GenericNameColumn"/>
                     <StaticResource ResourceKey="ExpiryColumn"/>
                     <StaticResource ResourceKey="RetailColumn" />
                     <StaticResource ResourceKey="PurchaseColumn" />

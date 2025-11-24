@@ -13,27 +13,23 @@ namespace Mhyrenz_Interface.Database.Services
 {
     public class ProductDataService : GenericDataService<Product>, IProductDataService
     {
-        private readonly InventoryDbContextFactory _contextFactory;
+        private readonly InventoryDbService _context;
 
-        public ProductDataService(InventoryDbContextFactory contextFactory) : base(contextFactory)
+        public ProductDataService(InventoryDbService context) : base(context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public override async Task<Product> Get(int id)
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Product>(Name);
-                    var product = col.FindById(id);
+                var product = GetTable().FindById(id);
 
-                    if (product != null && !product.IsDeleted)
-                        LoadReference(context, product);
+                if (product != null && !product.IsDeleted)
+                    LoadReference(product);
 
-                    return product;
-                }
+                return product;
             });
 
         }
@@ -42,15 +38,11 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Product>(Name);
-                    var list = col.Find(p => !p.IsDeleted).ToList();
+                var list = GetTable().Find(p => !p.IsDeleted).ToList();
 
-                    LoadReferences(context, list);
+                LoadReferences(list);
 
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -58,35 +50,27 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Product>(Name);
-                    var list = col.FindAll().ToList();
+                var list = GetTable().FindAll().ToList();
 
-                    LoadReferences(context, list);
+                LoadReferences(list);
 
-                    return list;
-                }
+                return list;
             });
         }
 
-        public async Task<IEnumerable<Product>> GetAllByCategory(string name, int? id= null)
+        public async Task<IEnumerable<Product>> GetAllByCategory(string name, int? id = null)
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Product>(Name);
-                    var list = col.Find(p =>
-                        !p.IsDeleted &&
-                        (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
-                        (id.HasValue && p.CategoryId == id)
-                    ).ToList();
+                var list = GetTable().Find(p =>
+                    !p.IsDeleted &&
+                    (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
+                    (id.HasValue && p.CategoryId == id)
+                ).ToList();
 
-                    LoadReferences(context, list);
+                LoadReferences(list);
 
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -94,34 +78,32 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Product>(Name);
-                    var deleted = col.Find(p => p.IsDeleted).ToList();
+                var col = GetTable();
+                var deleted = col.Find(p => p.IsDeleted).ToList();
 
-                    foreach (var p in deleted)
-                        col.Delete(p.Id);
+                foreach (var p in deleted)
+                    col.Delete(p.Id);
 
-                    return deleted.Count;
-                }
+                return deleted.Count;
             });
         }
 
         // -----------------------------
         // Manual relationship loading
         // -----------------------------
-        private void LoadReferences(ILiteDatabase context, List<Product> list)
+        private void LoadReferences(List<Product> list)
         {
             foreach (var product in list)
-                LoadReference(context, product);
+                LoadReference(product);
         }
 
-        private void LoadReference(ILiteDatabase context, Product product)
+        private void LoadReference(Product product)
         {
             if (product == null) return;
 
-            var categoryCol = context.GetCollection<Category>(nameof(Category).TableName());
-            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+            var context = _context.Instance;
+            var categoryCol = context.GetCollection<Category>(typeof(Category).TableName());
+            var trxCol = context.GetCollection<Transaction>(typeof(Transaction).TableName());
 
             // Load category
             product.Category = categoryCol.FindById(product.CategoryId);

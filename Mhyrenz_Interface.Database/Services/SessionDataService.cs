@@ -1,38 +1,33 @@
-﻿using LiteDB;
-using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class SessionDataService: ISessionDataService
+    public class SessionDataService : ISessionDataService
     {
-        public string Name = nameof(Session).TableName();
-        private readonly InventoryDbContextFactory _contextFactory;
+        public string Name = typeof(Session).TableName();
+        private readonly InventoryDbService _context;
 
-        public SessionDataService(InventoryDbContextFactory contextFactory)
+        public SessionDataService(InventoryDbService context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public async Task<Session> Update(Guid id, Session updatedEntity)
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Session>(Name);
+                var col = _context.Instance.GetCollection<Session>(Name);
 
-                    updatedEntity.UniqueId = id;
-                    col.Update(updatedEntity);
+                updatedEntity.UniqueId = id;
+                col.Update(updatedEntity);
 
-                    return updatedEntity;
-                }
+                return updatedEntity;
             });
         }
 
@@ -40,12 +35,9 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Session>(Name);
-                    col.Insert(entity);
-                    return entity;
-                }
+                var col = _context.Instance.GetCollection<Session>(Name);
+                col.Insert(entity);
+                return entity;
             });
         }
 
@@ -53,11 +45,8 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Session>(Name);
-                    return col.Delete(uid);
-                }
+                var col = _context.Instance.GetCollection<Session>(Name);
+                return col.Delete(uid);
             });
         }
 
@@ -65,16 +54,13 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Session>(Name);
-                    var session = col.FindById(uid);
+                var col = _context.Instance.GetCollection<Session>(Name);
+                var session = col.FindById(uid);
 
-                    if (session != null)
-                        LoadTransactions(context, session);
+                if (session != null)
+                    LoadTransactions(session);
 
-                    return session;
-                }
+                return session;
             });
         }
 
@@ -82,16 +68,13 @@ namespace Mhyrenz_Interface.Database.Services
         {
             return await Task.Run(() =>
             {
-                using (var context = _contextFactory.CreateDbContext())
-                {
-                    var col = context.GetCollection<Session>(Name);
-                    var list = col.FindAll().ToList();
+                var col = _context.Instance.GetCollection<Session>(Name);
+                var list = col.FindAll().ToList();
 
-                    foreach (var s in list)
-                        LoadTransactions(context, s);
+                foreach (var s in list)
+                    LoadTransactions(s);
 
-                    return list;
-                }
+                return list;
             });
         }
 
@@ -99,9 +82,9 @@ namespace Mhyrenz_Interface.Database.Services
         // -----------------------------
         // Manual relationship loading
         // -----------------------------
-        private void LoadTransactions(ILiteDatabase context, Session session)
+        private void LoadTransactions(Session session)
         {
-            var trxCol = context.GetCollection<Transaction>(nameof(Transaction).TableName());
+            var trxCol = _context.Instance.GetCollection<Transaction>(typeof(Transaction).TableName());
 
             session.Transactions = trxCol.Query()
                 .Where(t => t.SessionId == session.UniqueId)

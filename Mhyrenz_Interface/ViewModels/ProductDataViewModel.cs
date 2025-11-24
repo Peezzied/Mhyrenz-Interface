@@ -1,28 +1,17 @@
-﻿using HandyControl.Tools.Command;
+﻿using System;
+using System.Windows.Input;
+using System.Windows.Media;
+using HandyControl.Tools.Command;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
-using System;
-using System.Runtime.CompilerServices;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Navigation;
-using ZXing.QrCode.Internal;
+using ObservableCollections;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class ProductDataViewModelDTO
-    {
-        public Product Product { get; set; }
-        public ISessionStore SessionStore { get; set; }
-        public Action OnSessionNull { get; set; }
-    }
-
     public interface IBarcodeBound
     {
         string Barcode { get; set; }
@@ -31,7 +20,7 @@ namespace Mhyrenz_Interface.ViewModels
         void Load();
     }
 
-    public class ProductDataViewModel: BaseViewModel, IBarcodeBound
+    public class ProductDataViewModel : BaseViewModel, IBarcodeBound
     {
         private readonly ISessionStore _sessionStore;
         private readonly ICategoryStore _categoryStore;
@@ -83,7 +72,8 @@ namespace Mhyrenz_Interface.ViewModels
 
         public event Action BarcodeReceived;
 
-        public int NetQty { 
+        public int NetQty
+        {
             get => Item.NetQty;
         }
 
@@ -100,9 +90,9 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private bool _isCtrlClicked = false;
-        public bool IsCtrlClicked 
-        { 
-            get => _isCtrlClicked; 
+        public bool IsCtrlClicked
+        {
+            get => _isCtrlClicked;
             set
             {
                 _isCtrlClicked = value;
@@ -110,9 +100,9 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public int PurchaseMax 
+        public int PurchaseMax
         {
-            get => Item.NetQty; 
+            get => Item.NetQty;
         }
 
         public int PurchaseMaxNormal
@@ -120,9 +110,9 @@ namespace Mhyrenz_Interface.ViewModels
             get => Item.Qty;
         }
 
-        public int QtyMin 
+        public int QtyMin
         {
-            get => Purchase; 
+            get => Purchase;
         }
 
         //private int _cachedPurchase;
@@ -171,7 +161,7 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
 
-        public string Name 
+        public string Name
         {
             get => Item.Name;
 
@@ -305,6 +295,8 @@ namespace Mhyrenz_Interface.ViewModels
         public int CategoryId => Item.CategoryId;
         public string CategoryName => Item.Category.Name;
 
+        public ObservableDictionary<string, object> Extras { get; set; }
+
         public ICommand GoToItemCommand { get; }
 
         private bool SessionRequire()
@@ -319,4 +311,4 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
     }
-}   
+}
