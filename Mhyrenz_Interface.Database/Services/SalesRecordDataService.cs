@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
@@ -15,30 +14,24 @@ namespace Mhyrenz_Interface.Database.Services
             _context = context;
         }
 
-        public override async Task<SalesRecord> Get(int id)
+        public override SalesRecord Get(object id)
         {
-            return await Task.Run(() =>
-            {
-                var record = GetTable().FindById(id);
+            var record = GetTable().FindById((dynamic)id);
 
-                if (record != null)
-                    LoadSession(record);
+            if (record != null)
+                LoadSession(record);
 
-                return record;
-            });
+            return record;
         }
 
-        public override async Task<IEnumerable<SalesRecord>> GetAll()
+        public override IEnumerable<SalesRecord> GetAll()
         {
-            return await Task.Run(() =>
-            {
-                var list = GetTable().FindAll().ToList();
+            var list = GetTable().FindAll().ToList();
 
-                foreach (var record in list)
-                    LoadSession(record);
+            foreach (var record in list)
+                LoadSession(record);
 
-                return list;
-            });
+            return list;
         }
 
         private void LoadSession(SalesRecord record)
@@ -56,7 +49,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 // Load transactions for this session
                 session.Transactions = trxCol.Query()
-                    .Where(t => t.SessionId == session.UniqueId)
+                    .Where(t => t.SessionId == session.Id)
                     .ToList();
 
                 record.Session = session;

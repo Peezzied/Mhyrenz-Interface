@@ -42,9 +42,9 @@ namespace Mhyrenz_Interface.Commands
 
             PurchaseProductCommand.DTO.Type? method;
             if (newValue > oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Remove : PurchaseProductCommand.DTO.Type.Add;
+                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Subtract : PurchaseProductCommand.DTO.Type.Add;
             else if (newValue < oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Add : PurchaseProductCommand.DTO.Type.Remove;
+                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Add : PurchaseProductCommand.DTO.Type.Subtract;
             else
                 return false;
 

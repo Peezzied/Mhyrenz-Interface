@@ -15,9 +15,9 @@ namespace Mhyrenz_Interface.State
     public interface IInventoryStore
     {
         ObservableCollection<ProductDataViewModel> Products { get; }
-        ICollectionView ProductsCollectionView { get; set; }
-        ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
-        (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set; }
+        ICollectionView ProductsCollectionView { get; }
+        ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; }
+        (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; }
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;

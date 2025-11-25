@@ -8,21 +8,21 @@ namespace Mhyrenz_Interface.Domain.Services
 {
     public interface IDataService<T>
     {
-        Task<IEnumerable<T>> GetAll();
+        IEnumerable<T> GetAll();
 
-        Task<T> Get(int id);
+        T Get(object id);
 
-        Task<T> Create(T entity);
+        T Create(T entity);
 
-        Task<IEnumerable<T>> CreateMany(IEnumerable<T> entities);
+        IEnumerable<T> CreateMany(IEnumerable<T> entities);
 
-        Task DeleteMany(IEnumerable<T> entities);
+        void DeleteMany(IEnumerable<T> entities);
 
-        Task Update(int id, T entity);
+        T Update(object id, T entity);
 
-        Task<T> UpdateProperty(int id, string propertyName, object newValue);
+        T UpdateProperty(object id, string propertyName, object newValue);
 
-        Task Delete(int id);
-        Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue);
+        bool Delete(object id);
+        IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue);
     }
 }

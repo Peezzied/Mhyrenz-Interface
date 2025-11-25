@@ -18,26 +18,27 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
 
         public async Task<bool> DeleteSession(Guid uid)
         {
-            return await _sessionDataService.Delete(uid);
+            return await Task.Run(() => _sessionDataService.Delete(uid));
         }
 
         public async Task<Session> GenerateSession(Session session)
         {
-            var result = await _sessionDataService.Create(session);
-                        
-            return result;
+            return await Task.Run(() => _sessionDataService.Create(session));
         }
 
         public async Task<Session> EditSession(Guid id, Session session)
         {
-            return await _sessionDataService.Update(id, session);
+            return await Task.Run(() => _sessionDataService.Update(id, session));
         }
 
         public async Task<Session> GetSession() 
         {
-            var result = await _sessionDataService.GetAll();
+            return await Task.Run(() =>
+            {
+                var result = _sessionDataService.GetAll();
 
-            return result.OrderByDescending(s => s.Period).FirstOrDefault();
+                return result.OrderByDescending(s => s.Period).FirstOrDefault();
+            });
         }
     }
 }

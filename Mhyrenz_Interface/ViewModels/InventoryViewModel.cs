@@ -79,7 +79,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
-                ((InventoryTabItem)SelectedItem).Refresh();
+                ((InventoryTabItem)SelectedItem).Refresh(); // OFTEN THROWS AN EXCEPTION WHEN CATEGORIES IS EMPTY
 
             }
         }

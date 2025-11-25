@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Session
+    public class Session: DomainObject
     {
-        public Guid UniqueId { get; set; }
+        public new Guid Id { get; set; }
         public DateTime Period { get; set; }
         public IEnumerable<Transaction> Transactions { get; set; }
     }

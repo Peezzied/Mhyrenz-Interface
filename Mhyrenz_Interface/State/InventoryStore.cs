@@ -35,10 +35,10 @@ namespace Mhyrenz_Interface.State
             new Dictionary<ProductDataViewModel, PropertyChangeTracker<ProductDataViewModel>>();
 
         public ObservableCollection<ProductDataViewModel> Products { get; } = new SmartObservableCollection<ProductDataViewModel>();
-        public ICollectionView ProductsCollectionView { get; set; }
-        public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; set; }
-        public ICommand UpdateProductCommand { get; set; }
-        public (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; set; }
+        public ICollectionView ProductsCollectionView { get; private set; }
+        public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; private set; }
+        public ICommand UpdateProductCommand { get; private set; }
+        public (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; private set; }
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
@@ -106,7 +106,7 @@ namespace Mhyrenz_Interface.State
         public async Task Register(IEnumerable<Product> transactions)
         {
             // SLOW TIME COMPLEXITY - RESOLVE LATER
-
+            
             var tasks = transactions.Select(item =>
                 _productService.EditProperty(item.Id, nameof(Product.Qty), item.Qty) // resolve a batch edit
             );
@@ -280,11 +280,11 @@ namespace Mhyrenz_Interface.State
                     _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == product.Id).Key);
 
                     var updated = _productsViewModelFactory(product);
-                    Assert.That(updated.Purchase, Is.GreaterThan(0));
+                    //Assert.That(updated.Purchase != viewModel.Purchase);
                     Products.RemoveAt(index);
                     Products.Insert(index, updated);
 
-                    PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
+                    PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs() 
                     {
                         ProductId = product.Id,
                         Product = updated

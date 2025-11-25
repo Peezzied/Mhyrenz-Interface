@@ -185,7 +185,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             _undoRedoManager.Clear();
 
-            await _sessionService.DeleteSession(_sessionStore.CurrentSession.UniqueId);
+            await _sessionService.DeleteSession(_sessionStore.CurrentSession.Id);
             await _sessionStore.UpdateSession();
 
             await _transactionStore.InitializeAsync();
@@ -226,10 +226,10 @@ namespace Mhyrenz_Interface.ViewModels
             var oldSession = _sessionStore.CurrentSession.Period;
 
             _sessionStore.CurrentSession.Period = date;
-            var newSession = await _sessionService.EditSession(_sessionStore.CurrentSession.UniqueId, new Session
+            var newSession = await _sessionService.EditSession(_sessionStore.CurrentSession.Id, new Session
             {
                 Period = date,
-                UniqueId = _sessionStore.CurrentSession.UniqueId
+                Id = _sessionStore.CurrentSession.Id
             });
             await _sessionStore.UpdateSession();
 

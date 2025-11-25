@@ -1,67 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using EFCore.BulkExtensions;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
     public class ProductDataService : GenericDataService<Product>, IProductDataService
     {
         private readonly InventoryDbService _context;
+        private readonly ICategoryDataService _categoryDataService;
+        private readonly ITransactionsDataService _transactionsDataService;
 
-        public ProductDataService(InventoryDbService context) : base(context)
+        public ProductDataService(InventoryDbService context, ICategoryDataService categoryDataService, ITransactionsDataService transactionsDataService) : base(context)
         {
             _context = context;
+            _categoryDataService = categoryDataService;
+            _transactionsDataService = transactionsDataService;
         }
 
-        public override async Task<Product> Get(int id)
+        public override Product Get(object id)
         {
-            return await Task.Run(() =>
+            var product = GetTable().FindById((int)id);
+
+            if (product != null && !product.IsDeleted)
             {
-                var product = GetTable().FindById(id);
+                product.Category = _categoryDataService.GetRaw(product.CategoryId);
 
-                if (product != null && !product.IsDeleted)
-                    LoadReference(product);
+                // Load transactions
+                product.Transactions = _transactionsDataService.GetAllRaw()
+                    .Where(t => (int)t.ProductId == (int)product.Id)
+                    .ToList();
+            }
 
-                return product;
-            });
-
+            return product;
         }
 
-        public override async Task<IEnumerable<Product>> GetAll()
+        public override IEnumerable<Product> GetAll()
         {
-            return await Task.Run(() =>
-            {
                 var list = GetTable().Find(p => !p.IsDeleted).ToList();
 
                 LoadReferences(list);
 
                 return list;
-            });
         }
 
-        public async Task<IEnumerable<Product>> GetAllWithIgnore()
+        public IEnumerable<Product> GetAllWithIgnore()
         {
-            return await Task.Run(() =>
-            {
                 var list = GetTable().FindAll().ToList();
 
                 LoadReferences(list);
 
                 return list;
-            });
         }
 
-        public async Task<IEnumerable<Product>> GetAllByCategory(string name, int? id = null)
+        public IEnumerable<Product> GetAllByCategory(string name, int? id = null)
         {
-            return await Task.Run(() =>
-            {
                 var list = GetTable().Find(p =>
                     !p.IsDeleted &&
                     (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
@@ -71,13 +66,10 @@ namespace Mhyrenz_Interface.Database.Services
                 LoadReferences(list);
 
                 return list;
-            });
         }
 
-        public async Task<int> DeleteAllPhysical()
+        public int DeleteAllPhysical()
         {
-            return await Task.Run(() =>
-            {
                 var col = GetTable();
                 var deleted = col.Find(p => p.IsDeleted).ToList();
 
@@ -85,7 +77,6 @@ namespace Mhyrenz_Interface.Database.Services
                     col.Delete(p.Id);
 
                 return deleted.Count;
-            });
         }
 
         // -----------------------------
@@ -93,25 +84,27 @@ namespace Mhyrenz_Interface.Database.Services
         // -----------------------------
         private void LoadReferences(List<Product> list)
         {
-            foreach (var product in list)
-                LoadReference(product);
-        }
+            // 1 — load categories ONCE
+            var categoryIds = list.Select(p => p.CategoryId).Distinct().ToHashSet();
+            var categories = _categoryDataService.GetAllRaw()
+                .Where(c => categoryIds.Contains(c.Id))
+                .ToDictionary(c => c.Id);
 
-        private void LoadReference(Product product)
-        {
-            if (product == null) return;
+            // 2 — load transactions ONCE
+            var allTransactions = _transactionsDataService.GetAllRaw();
+            var trxLookup = allTransactions
+                .GroupBy(t => (int)t.ProductId)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            var context = _context.Instance;
-            var categoryCol = context.GetCollection<Category>(typeof(Category).TableName());
-            var trxCol = context.GetCollection<Transaction>(typeof(Transaction).TableName());
+            // 3 — map references
+            foreach (var p in list)
+            {
+                categories.TryGetValue(p.CategoryId, out var cat);
+                p.Category = cat;
 
-            // Load category
-            product.Category = categoryCol.FindById(product.CategoryId);
-
-            // Load transactions
-            product.Transactions = trxCol.Query()
-                .Where(t => t.ProductId == product.Id)
-                .ToList();
+                trxLookup.TryGetValue((int)p.Id, out var trx);
+                p.Transactions = trx;
+            }
         }
     }
 }

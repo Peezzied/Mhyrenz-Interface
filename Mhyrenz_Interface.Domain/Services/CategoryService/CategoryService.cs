@@ -16,9 +16,14 @@ namespace Mhyrenz_Interface.Domain.Services.CategoryService
             _categoryDataService = categoryDataService;
         }
 
+        public async Task<Category> Get(int id)
+        {
+            return await Task.Run(() => _categoryDataService.Get(id));
+        }
+
         public async Task<IEnumerable<Category>> GetAllCategories()
         {
-            return await _categoryDataService.GetAll();
+            return await Task.Run(() => _categoryDataService.GetAll());
         }
     }
 }

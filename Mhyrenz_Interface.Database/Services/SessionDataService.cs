@@ -1,81 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class SessionDataService : ISessionDataService
+    public class SessionDataService : GenericDataService<Session>, ISessionDataService
     {
-        public string Name = typeof(Session).TableName();
         private readonly InventoryDbService _context;
+        private readonly ITransactionsDataService _transactionsDataService;
 
-        public SessionDataService(InventoryDbService context)
+        public SessionDataService(InventoryDbService context, ITransactionsDataService transactionsDataService) : base(context)
         {
             _context = context;
+            _transactionsDataService = transactionsDataService;
         }
 
-        public async Task<Session> Update(Guid id, Session updatedEntity)
+        public override Session Get(object id)
         {
-            return await Task.Run(() =>
-            {
-                var col = _context.Instance.GetCollection<Session>(Name);
+            var col = _context.Instance.GetCollection<Session>(Name);
+            var session = col.FindById((dynamic)id);
 
-                updatedEntity.UniqueId = id;
-                col.Update(updatedEntity);
+            if (session != null)
+                LoadTransactions(session);
 
-                return updatedEntity;
-            });
+            return session;
         }
 
-        public async Task<Session> Create(Session entity)
+        public override IEnumerable<Session> GetAll()
         {
-            return await Task.Run(() =>
-            {
-                var col = _context.Instance.GetCollection<Session>(Name);
-                col.Insert(entity);
-                return entity;
-            });
-        }
+            var list = GetTable().FindAll().ToList();
 
-        public async Task<bool> Delete(Guid uid)
-        {
-            return await Task.Run(() =>
-            {
-                var col = _context.Instance.GetCollection<Session>(Name);
-                return col.Delete(uid);
-            });
-        }
+            foreach (var s in list)
+                LoadTransactions(s);
 
-        public async Task<Session> Get(Guid uid)
-        {
-            return await Task.Run(() =>
-            {
-                var col = _context.Instance.GetCollection<Session>(Name);
-                var session = col.FindById(uid);
-
-                if (session != null)
-                    LoadTransactions(session);
-
-                return session;
-            });
-        }
-
-        public async Task<IEnumerable<Session>> GetAll()
-        {
-            return await Task.Run(() =>
-            {
-                var col = _context.Instance.GetCollection<Session>(Name);
-                var list = col.FindAll().ToList();
-
-                foreach (var s in list)
-                    LoadTransactions(s);
-
-                return list;
-            });
+            return list;
         }
 
 
@@ -86,8 +46,8 @@ namespace Mhyrenz_Interface.Database.Services
         {
             var trxCol = _context.Instance.GetCollection<Transaction>(typeof(Transaction).TableName());
 
-            session.Transactions = trxCol.Query()
-                .Where(t => t.SessionId == session.UniqueId)
+            session.Transactions = _transactionsDataService.GetAll()
+                .Where(t => t.SessionId == session.Id)
                 .ToList();
         }
     }

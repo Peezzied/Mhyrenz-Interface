@@ -8,6 +8,7 @@ namespace Mhyrenz_Interface.Domain.Models
 {
     public class SalesRecord: DomainObject
     {
+        public new int Id { get; set; }
         public int TotalPurchase { get; set; }
         public double TotalSales { get; set; }  
         public double Profit { get; set; }

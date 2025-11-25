@@ -20,48 +20,54 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
         public async Task<Product> Add(Product entity)
         {
-            return await _productDataService.Create(entity);
+            return await Task.Run(() => _productDataService.Create(entity));
         }
 
         public async Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities)
         {
-            return await _productDataService.CreateMany(entities);
+            return await Task.Run(() => _productDataService.CreateMany(entities));
         }
 
         public async Task<Product> EditProperty(int id, string propertyName, object value)
         {
-            var newEntity = await _productDataService.UpdateProperty(id, propertyName, value);
-            return newEntity;
+            return await Task.Run(() =>
+            {
+                var newEntity = _productDataService.UpdateProperty(id, propertyName, value);
+                return newEntity;
+            });
         }
         public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, string propertyName, object value)
         {
-            var newEntities = await _productDataService.UpdatePropertyRange(products, propertyName, value);
-            return newEntities;
+            return await Task.Run(() =>
+            {
+                var newEntities = _productDataService.UpdatePropertyRange(products, propertyName, value);
+                return newEntities;
+            });
         }
 
         public async Task<Product> Get(int id)
         {
-            return await _productDataService.Get(id) ?? throw new DataException("No product found. Please add a product first.");
+            return await Task.Run(() => _productDataService.Get(id) ?? throw new DataException("No product found. Please add a product first."));
         }
 
         public async Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false)
         {
-            return ignoreFilter ? await _productDataService.GetAllWithIgnore() : await _productDataService.GetAll();
+            return await Task.Run(() => { return ignoreFilter ? _productDataService.GetAllWithIgnore() : _productDataService.GetAll(); });
         }
 
         public async Task Remove(Product entity)
         {
-            await _productDataService.Delete(entity.Id);
+            await Task.Run(() => _productDataService.Delete(entity.Id));
         }
 
         public async Task RemoveMany(IEnumerable<Product> products)
         {
-            await _productDataService.DeleteMany(products);
+            await Task.Run(() => _productDataService.DeleteMany(products));
         }
 
         public async Task<int> RemovePhysical()
         {
-            return await _productDataService.DeleteAllPhysical();
+            return await Task.Run(() => _productDataService.DeleteAllPhysical());
         }
     }
 }

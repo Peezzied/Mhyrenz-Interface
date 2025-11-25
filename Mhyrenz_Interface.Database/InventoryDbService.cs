@@ -33,7 +33,7 @@ namespace Mhyrenz_Interface.Database
                 .Ignore(x => x.Purchase);
 
             BsonMapper.Global.Entity<Session>()
-                .Id(x => x.UniqueId);
+                .Id(x => x.Id);
 
             Instance.GetCollection<Product>(typeof(Product).TableName())
                 .EnsureIndex(x => x.IsDeleted);

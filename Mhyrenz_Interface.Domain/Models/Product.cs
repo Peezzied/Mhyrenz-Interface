@@ -18,6 +18,7 @@ namespace Mhyrenz_Interface.Domain.Models
             CategoryId = categoryId;
         }
 
+        public new int Id { get; set; }
         public string Name { get; set; }
         public string GenericName { get; set; }
 

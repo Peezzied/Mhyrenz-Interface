@@ -1,101 +1,92 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class GenericDataService<T> : IDataService<T> where T : DomainObject
+    public class GenericDataService<T> : TableBound<T>, IDataService<T> where T : DomainObject
     {
-        public string Name = typeof(T).TableName();
         private readonly InventoryDbService _context;
 
-        public GenericDataService(InventoryDbService context)
+        public GenericDataService(InventoryDbService context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<T> Create(T entity)
+        public virtual T Create(T entity)
         {
-            return await Task.Run(() =>
-            {
-                GetTable().Insert(entity);
-                return entity;
-            });
+            GetTable().Insert(entity);
+            return entity;
         }
 
-        public async Task<IEnumerable<T>> CreateMany(IEnumerable<T> entities)
+        public virtual IEnumerable<T> CreateMany(IEnumerable<T> entities)
         {
-            return await Task.Run(() =>
-            {
-                GetTable().InsertBulk(entities);
-                return entities;
-            });
-
+            GetTable().InsertBulk(entities);
+            return entities;
         }
 
 
-        public async Task Delete(int id)
+        public virtual bool Delete(object id)
         {
-            await Task.Run(() => GetTable().Delete(id));
+            return GetTable().Delete((dynamic)id);
         }
 
-        public async Task DeleteMany(IEnumerable<T> entities)
+        public virtual void DeleteMany(IEnumerable<T> entities)
+        {
+            var baseId = typeof(DomainObject).GetProperty("Id"); // base Id to ignore
+
+            var idProp = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(p =>
+                    p.CanRead && p.CanWrite &&             // must be readable/writable
+                    (p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                     p.Name.Equals(typeof(T).Name + "Id", StringComparison.OrdinalIgnoreCase)) &&
+                    p != baseId) ?? throw new InvalidOperationException($"Cannot find a derived Id property for type {typeof(T).Name}");
+
+            var ids = entities.Select(i => idProp.GetValue(i)).ToHashSet();
+            GetTable().DeleteMany(i => ids.Contains(i.Id));
+        }
+
+        public virtual T Get(object id)
+        {
+            return GetTable().FindById((dynamic)id);
+        }
+
+        public virtual IEnumerable<T> GetAll()
+        {
+            return GetTable().FindAll();
+        }
+
+
+        public virtual T Update(object id, T updatedEntity)
+        {
+            GetTable().Update((dynamic)id, updatedEntity);
+            return Get((dynamic)id);
+        }
+
+        public virtual T UpdateProperty(dynamic id, string propertyName, object newValue)
+        {
+            var entity = GetTable().FindById(id);
+            GetTable().Update(UpdateEntityProperty(entity, propertyName, newValue));
+
+            return entity;
+        }
+
+        public virtual IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue)
         {
             var ids = entities.Select(i => i.Id).ToHashSet();
-            await Task.Run(() => GetTable().DeleteMany(i => ids.Contains(i.Id)));
-        }
 
-        public async virtual Task<T> Get(int id)
-        {
-            return await Task.Run(() => GetTable().FindById(id));
-        }
-
-        public async virtual Task<IEnumerable<T>> GetAll()
-        {
-            return await Task.Run(() => GetTable().FindAll());
-        }
-
-
-        public async Task Update(int id, T updatedEntity)
-        {
-            await Task.Run(() => GetTable().Update(id, updatedEntity));
-        }
-
-        public async Task<T> UpdateProperty(int id, string propertyName, object newValue)
-        {
-            return await Task.Run(() =>
+            IEnumerable<T> newEntities = entities.Select(i =>
             {
-                var entity = GetTable().FindById(id);
-                GetTable().Update(UpdateEntityProperty(entity, propertyName, newValue));
+                var edited = UpdateEntityProperty(i, propertyName, newValue);
+                GetTable().Update(edited);
+                return edited;
+            }).ToList();
 
-                return entity;
-            });
-
-        }
-
-        public async Task<IEnumerable<T>> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue)
-        {
-            var ids = entities.Select(i => i.Id).ToHashSet();
-            return await Task.Run(() =>
-            {
-                IEnumerable<T> newEntities = entities.Select(i =>
-                {
-                    var edited = UpdateEntityProperty(i, propertyName, newValue);
-                    GetTable().Update(edited);
-                    return edited;
-                }).ToList();
-
-                return newEntities;
-            });
-        }
-
-        protected ILiteCollection<T> GetTable()
-        {
-            return _context.Instance.GetCollection<T>(Name);
+            return newEntities;
         }
 
         private T UpdateEntityProperty(T entity, string propertyName, object newValue)

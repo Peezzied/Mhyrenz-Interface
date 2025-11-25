@@ -28,7 +28,7 @@ namespace Mhyrenz_Interface.Commands
 
         public class DTO
         {
-            public enum Type { Add, Remove }
+            public enum Type { Add, Subtract }
             public int Amount { get; set; }
             public Product Product { get; set; }
             public Type Method { get; set; }
@@ -47,8 +47,8 @@ namespace Mhyrenz_Interface.Commands
                 case DTO.Type.Add:
                     await _transactionsService.Add(DTO.Product, _dateTime, DTO.Amount, _canCombine);
                     break;
-                case DTO.Type.Remove:
-                    await _transactionsService.Remove(DTO.Product, DTO.Amount);
+                case DTO.Type.Subtract:
+                    await _transactionsService.Subtract(DTO.Product, DTO.Amount);
                     break;
             }
         }

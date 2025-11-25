@@ -53,6 +53,7 @@
     <Compile Include="Services\ProductDataService.cs" />
     <Compile Include="Services\SalesRecordDataService.cs" />
     <Compile Include="Services\SessionDataService.cs" />
+    <Compile Include="TableBound.cs" />
     <Compile Include="Services\TransactionsDataService.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

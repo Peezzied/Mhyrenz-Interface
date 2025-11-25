@@ -7,12 +7,8 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ISessionDataService
+    public interface ISessionDataService: IDataService<Session>
     {
-        Task<Session> Create(Session entity);
-        Task<bool> Delete(Guid uid);
-        Task<Session> Get(Guid uid);
-        Task<IEnumerable<Session>> GetAll();
-        Task<Session> Update(Guid id, Session updatedEntity);
+        
     }
 }

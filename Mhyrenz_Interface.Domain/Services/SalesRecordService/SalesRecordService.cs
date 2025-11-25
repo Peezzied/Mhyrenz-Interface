@@ -20,8 +20,11 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         }
         public async Task<bool> RegisterSales(SalesRecord sales)
         {
-            await _transactionsService.RemoveAll();
-            await _salesRecordDataService.Create(sales);
+            await Task.Run(() =>
+            {
+                _transactionsService.RemoveAll();
+                _salesRecordDataService.Create(sales);
+            });
 
             return true;
         }

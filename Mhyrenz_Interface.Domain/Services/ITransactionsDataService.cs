@@ -7,9 +7,10 @@ namespace Mhyrenz_Interface.Domain.Services
 {
     public interface ITransactionsDataService: IDataService<Transaction>
     {
-        Task<IEnumerable<Transaction>> GetLatestsByProduct(int productId);
-        Task<IEnumerable<Transaction>> GetLatests();
-        Task<Transaction> GetLast();
-        Task Clean();
+        IEnumerable<Transaction> GetLatestsByProduct(int productId);
+        IEnumerable<Transaction> GetLatests();
+        Transaction GetLast();
+        void Clean();
+        IEnumerable<Transaction> GetAllRaw();
     }
 }

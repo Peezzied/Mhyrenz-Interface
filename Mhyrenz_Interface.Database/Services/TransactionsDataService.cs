@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Transaction = Mhyrenz_Interface.Domain.Models.Transaction;
 
 namespace Mhyrenz_Interface.Database.Services
@@ -17,69 +18,64 @@ namespace Mhyrenz_Interface.Database.Services
             _context = context;
         }
 
-        public async Task Clean()
+        public void Clean()
         {
-            await Task.Run(() =>
-            {
-                _context.Instance.DropCollection(Name);
-                GetTable();
-            });
+            _context.Instance.DropCollection(Name);
+            GetTable();
         }
 
-        public override async Task<IEnumerable<Transaction>> GetAll()
+        public new IEnumerable<Transaction> GetAll()
         {
-            return await Task.Run(() =>
-            {
-                var transactions = GetTable().FindAll().ToList();
+            var transactions = GetTable().FindAll().ToList();
 
-                LoadReferences(transactions);
+            LoadReferences(transactions);
 
-                return transactions;
-            });
+            return transactions;
         }
 
-        public async Task<IEnumerable<Transaction>> GetLatestsByProduct(int productId)
+        public IEnumerable<Transaction> GetLatestsByProduct(int productId)
         {
-            return await Task.Run(() =>
-            {
-                var list = GetTable().Query()
-                    .Where(t => t.ProductId == productId)
-                    .OrderByDescending(t => t.Timestamp)
-                    .ToList();
+            var list = GetTable().Query()
+                .Where(t => t.ProductId == productId)
+                .OrderByDescending(t => t.Timestamp)
+                .ToList();
 
-                LoadReferences(list);
+            LoadReferences(list);
 
-                return list;
-            });
+            return list;
         }
 
-        public async Task<Transaction> GetLast()
+        public Transaction GetLast()
         {
-            return await Task.Run(() =>
+            var transaction = GetTable().Query()
+                .OrderByDescending(t => t.Timestamp)
+                .FirstOrDefault();
+
+            if (transaction != null)
             {
-                var trx = GetTable().Query()
-                    .OrderByDescending(t => t.Timestamp)
-                    .FirstOrDefault();
+                var context = _context.Instance;
+                transaction.Item = context
+                    .GetCollection<Product>(typeof(Product).TableName())
+                    .FindById(transaction.ProductId);
 
-                if (trx != null)
-                    LoadReference(trx);
+                transaction.Session = context
+                    .GetCollection<Session>(typeof(Session).TableName())
+                    .FindById(transaction.SessionId);
+            }
+                
 
-                return trx;
-            });
+            return transaction;
         }
 
-        public async Task<IEnumerable<Transaction>> GetLatests()
+        public IEnumerable<Transaction> GetLatests()
         {
-            return await Task.Run(() =>
-            {
-                var list = GetTable().Query()
-                    .OrderByDescending(t => t.Timestamp)
-                    .ToList();
+            var list = GetTable().Query()
+                .OrderByDescending(t => t.Timestamp)
+                .ToList();
 
-                LoadReferences(list);
+            LoadReferences(list);
 
-                return list;
-            });
+            return list;
         }
 
         // --------------------------
@@ -88,22 +84,36 @@ namespace Mhyrenz_Interface.Database.Services
 
         private void LoadReferences(List<Transaction> list)
         {
+            var context = _context.Instance;
+
+            // 1. Get all product IDs we need
+            var productIds = list.Select(t => t.ProductId).Distinct().ToHashSet();
+            var products = context
+                .GetCollection<Product>(typeof(Product).TableName())
+                .Find(p => productIds.Contains(p.Id))
+                .ToDictionary(p => p.Id);
+
+            // 2. Get all session IDs we need
+            var sessionIds = list.Select(t => t.SessionId).Distinct().ToHashSet();
+            var sessions = context
+                .GetCollection<Session>(typeof(Session).TableName())
+                .Find(s => sessionIds.Contains(s.Id))
+                .ToDictionary(s => s.Id);
+
+            // 3. Assign references in-memory
             foreach (var transaction in list)
-                LoadReference(transaction);
+            {
+                products.TryGetValue(transaction.ProductId, out var product);
+                sessions.TryGetValue(transaction.SessionId, out var session);
+
+                transaction.Item = product;
+                transaction.Session = session;
+            }
         }
 
-        private void LoadReference(Transaction transaction)
+        public IEnumerable<Transaction> GetAllRaw()
         {
-            if (transaction == null) return;
-
-            var context = _context.Instance;
-            transaction.Item = context
-                .GetCollection<Product>(typeof(Product).TableName())
-                .FindById(transaction.ProductId);
-
-            transaction.Session = context
-                .GetCollection<Session>(typeof(Session).TableName())
-                .FindById(transaction.SessionId);
+            return base.GetAll();
         }
     }
 }

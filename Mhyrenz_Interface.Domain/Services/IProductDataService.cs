@@ -7,8 +7,8 @@ namespace Mhyrenz_Interface.Domain.Services
 {
     public interface IProductDataService : IDataService<Product>
     {
-        Task<int> DeleteAllPhysical();
-        Task<IEnumerable<Product>> GetAllByCategory(string name, int? id);
-        Task<IEnumerable<Product>> GetAllWithIgnore();
+        int DeleteAllPhysical();
+        IEnumerable<Product> GetAllByCategory(string name, int? id);
+        IEnumerable<Product> GetAllWithIgnore();
     }
 }

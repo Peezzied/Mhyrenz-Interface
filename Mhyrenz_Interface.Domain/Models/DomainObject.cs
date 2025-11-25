@@ -8,6 +8,6 @@ namespace Mhyrenz_Interface.Domain.Models
 {
     public class DomainObject
     {
-        public int Id { get; set; }
+        public object Id { get; set; }
     }
 }
