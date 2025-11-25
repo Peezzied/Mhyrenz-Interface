@@ -85,7 +85,7 @@ namespace Mhyrenz_Interface.ViewModels
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
-            IOptions<AppSettingsManager.Settings> appSettings,
+            IOptionsMonitor<AppSettingsManager.Settings> appSettings,
             AppSettingsManager appSettingsManager,
             Func<ProductDataViewModel, bool> searchFilter)
         {
@@ -99,7 +99,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel;
 
-            var categorySettings = appSettings.Value.Inventory.First(c => c.Key.ConvertToInt() == Id).Value;
+            var categorySettings = appSettings.CurrentValue.Inventory.First(c => c.Key.ConvertToInt() == Id).Value;
             _inventoryDataGridViewModel.IdColumn = categorySettings.IdColumn;
             _inventoryDataGridViewModel.GenericNameColumn = categorySettings.GenericColumn ?? false;
             _inventoryDataGridViewModel.SupplierColumn = categorySettings.SupplierColumn;

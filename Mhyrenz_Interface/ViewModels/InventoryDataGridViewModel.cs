@@ -193,7 +193,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
             _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
-
+            IsEditCancelled = false;
         }
 
         public override void Dispose()

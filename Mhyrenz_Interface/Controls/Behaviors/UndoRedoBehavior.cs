@@ -17,8 +17,13 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class UndoRedoBehavior : Behavior<Control>
     {
-        private static DataGrid dataGrid;
+        private readonly static Dictionary<Control, DataGrid> dataGrid;
         private static BindingExpression bindingEx;
+
+        static UndoRedoBehavior()
+        {
+            dataGrid = new Dictionary<Control, DataGrid>();
+        }
 
         public DependencyProperty TargetProperty
         {
@@ -32,6 +37,11 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 typeof(DependencyProperty),
                 typeof(UndoRedoBehavior),
                 new PropertyMetadata(null));
+
+        public static void Renew()
+        {
+            dataGrid.Clear();
+        }
 
 
         protected override void OnAttached()
@@ -47,7 +57,9 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                dataGrid = dataGrid ?? TreeHelper.TryFindParent<DataGrid>(AssociatedObject);
+                if (dataGrid is null || !dataGrid.TryGetValue(AssociatedObject, out var dg))
+                    dataGrid.Add(AssociatedObject, TreeHelper.TryFindParent<DataGrid>(AssociatedObject));            
+
                 bindingEx = AssociatedObject.GetBindingExpression(TargetProperty);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -75,7 +87,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             var vmPropertyValue = expression.ResolvedSource.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
 
 
-            if (dataGrid.DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
+            if (dataGrid[AssociatedObject].DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
                 return;
 
             if (!undoRedoManager.CanRedo || controlPropertyValue == expression.ResolvedSource)

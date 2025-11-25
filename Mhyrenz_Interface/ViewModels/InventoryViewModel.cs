@@ -59,7 +59,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
         private readonly AppSettingsManager _appSettingsManager;
-        private readonly IOptions<AppSettingsManager.Settings> _appSettings;
+        private readonly IOptionsMonitor<AppSettingsManager.Settings> _appSettings;
         private readonly ShellViewModel _mainViewModel;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
@@ -160,7 +160,7 @@ namespace Mhyrenz_Interface.ViewModels
             IReportService reportService,
             IUndoRedoManager undoRedoManager,
             ShellViewModel shellViewModel,
-            IOptions<AppSettingsManager.Settings> appSettings,
+            IOptionsMonitor<AppSettingsManager.Settings> appSettings,
             AppSettingsManager appSettingsManager,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)

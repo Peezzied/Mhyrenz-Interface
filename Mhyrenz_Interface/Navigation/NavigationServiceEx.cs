@@ -1,4 +1,5 @@
-﻿using Mhyrenz_Interface.ViewModels.Factory;
+﻿using Mhyrenz_Interface.Controls.Behaviors;
+using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.Navigation
 {
@@ -21,6 +23,7 @@ namespace Mhyrenz_Interface.Navigation
             set
             {
                 _currentViewModel?.Dispose();
+                App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoBehavior.Renew()), DispatcherPriority.ContextIdle);
 
                 _currentViewModel = value;
             }
