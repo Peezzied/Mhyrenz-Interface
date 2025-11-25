@@ -8,7 +8,7 @@ using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using NUnit.Framework;
 
-namespace Mhyrenz_Interface.Test
+namespace Mhyrenz_Interface.Test.RepositoryTestSetup
 {
     [SetUpFixture]
     public class RepositoryTestSetup

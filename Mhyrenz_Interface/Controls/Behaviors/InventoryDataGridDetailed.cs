@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
@@ -23,7 +24,23 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.SelectionChanged += DataGrid_SelectionChanged;
             AssociatedObject.Loaded += AssociatedObject_Loaded;
             AssociatedObject.Unloaded += AssociatedObject_Unloaded;
-            base.OnAttached();
+
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+                //if (vm.ColumnExtras.Any())
+                //{
+                //    foreach (var item in vm.ColumnExtras)
+                //    {
+                //        AssociatedObject.Columns.Add(new DataGridTemplateColumn
+                //        {
+                            
+                //        });
+                //    }
+                //}
+            }), DispatcherPriority.ContextIdle);
+
+                base.OnAttached();
         }
 
         private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
@@ -36,7 +53,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().CommitEdits += InventoryDataGridDetailed_CommitEdits;
-            App.Current.Dispatcher.BeginInvoke(new Action(() => SelectRow()), System.Windows.Threading.DispatcherPriority.Background);
+            App.Current.Dispatcher.BeginInvoke(new Action(() => SelectRow()), DispatcherPriority.Background);
         }
 
         private void InventoryDataGridDetailed_CommitEdits()
@@ -78,13 +95,13 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                         return;
                     }
                     AssociatedObject.ScrollIntoView(AssociatedObject.SelectedItem);
-                }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+                }), DispatcherPriority.ContextIdle);
 
                 vm.SelectionInfo.CanSelect = false;
 
                 //if (!canSelect)
                 //    AssociatedObject.SelectedIndex = -1;
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+            }), DispatcherPriority.ContextIdle);
 
         }
 

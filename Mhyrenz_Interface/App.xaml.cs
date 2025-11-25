@@ -94,10 +94,15 @@ namespace Mhyrenz_Interface
 
             var inventoryConfig = context.Configuration.GetConnectionString("DefaultConnection");
 
+            services.AddOptions<AppSettingsManager.Settings>()
+                .BindConfiguration("AppSettings");
+
+            services.AddOptions<List<InventorySettings>>()
+                .BindConfiguration("Inventory");
+
             services
                 .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
                 .AddSingleton<AppSettingsManager>()
-                .Configure<AppSettingsManager.Settings>(context.Configuration.GetSection("AppSettings"))
 
                 .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
 

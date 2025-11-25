@@ -1,10 +1,12 @@
 ﻿using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Internal;
+using ObservableCollections;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -60,12 +62,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _selectedItems = value;
 
-                bool state;
-                if (value.Any())
-                    state = true;
-                else state = false;
-
-                SelectedItemsChanged?.Invoke(state);
+                SelectedItemsChanged?.Invoke(value.Any());
             }
         }
 
@@ -145,6 +142,8 @@ namespace Mhyrenz_Interface.ViewModels
                 OnPropertyChanged(nameof(SupplierColumn));
             }
         }
+
+        public ObservableDictionary<string, InventorySettings.ColumnSchema> ColumnExtras { get; set; }
 
         public SelectionRowsInfo SelectionInfo { get; set; }
 

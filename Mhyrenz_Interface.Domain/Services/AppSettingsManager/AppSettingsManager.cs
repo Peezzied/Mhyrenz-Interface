@@ -35,7 +35,6 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
         {
             public string ExportTemplate { get; set; }
             public string BarcodePort { get; set; }
-            public Dictionary<string, InventorySettings> Inventory { get; set; }
         }
 
 
@@ -110,20 +109,21 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
                 root["AppSettings"] = appSettings;
             }
 
-            await GenerateInventory(appSettings);
+            await GenerateInventory(root);
 
             File.WriteAllText(Path, root.ToString(Formatting.Indented));
         }
-        private async Task GenerateInventory(JObject appSettings)
+        public async Task GenerateInventory(JObject root)
         {
-            var categories = await _categoryService.GetAllCategories();
+            var categories = await _categoryService.GetAllCategories(); // REFACTOR: INJECT INSTEAD AFTER LOAD
 
             var categoryDict = categories.Select(c =>
             {
+                // DEFAULTS
                 return new InventorySettings
                 {
-                    Name = c.Name,
                     Id = c.Id,
+                    Name = c.Name,
                     IdColumn = false,
                     BatchColumn = false,
                     ExpiryDateColumn = true,
@@ -131,46 +131,39 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
                 };
             });
 
-            if (!(appSettings["Inventory"] is JObject inventoryNode))
-            {
-                inventoryNode = new JObject();
-                appSettings["Inventory"] = inventoryNode;
-            }
+            var inventoryArray = root["Inventory"] as JArray ?? new JArray();
+            var inventoryDict = inventoryArray
+                .OfType<JObject>()
+                .Where(obj => obj["Id"] != null) // CONSIDER FOR NAME AS THE KEY AS WELL
+                .ToDictionary(
+                    obj => (int)obj["Id"],
+                    obj => obj            
+                );
 
             foreach (var newSettings in categoryDict)
             {
-                var categoryId = newSettings.Id.ToString();
-
-                JToken existingNode = inventoryNode[categoryId];
-                JObject categoryNode;
-
-                if (existingNode is JObject existingJObject)
-                {
-                    categoryNode = existingJObject;
-                }
-                else
+                var isExisting = inventoryDict.TryGetValue(newSettings.Id, out var categoryNode);
+                if (!isExisting)
                 {
                     categoryNode = new JObject();
-                    inventoryNode[categoryId] = categoryNode;  // Attach new JObject to parent
+                    inventoryArray.Add(categoryNode); // only append new node if not exisiting
                 }
 
-                void AddPropertyIfMissing(string propName, object val, bool force = false)
+                void AddPropertyIfMissing(string propName, object val)
                 {
-                    if (!categoryNode.TryGetValue(propName, out var _) || force)
-                    {
+                    if (!categoryNode.TryGetValue(propName, out var _))
                         categoryNode[propName] = JToken.FromObject(val);
-                    }
                 }
 
+                AddPropertyIfMissing(nameof(newSettings.Id), newSettings.Id);
                 AddPropertyIfMissing(nameof(newSettings.Name), newSettings.Name);
-                if (newSettings.GenericColumn.HasValue)
-                    AddPropertyIfMissing("GenericColumn", newSettings.GenericColumn.Value);
                 AddPropertyIfMissing(nameof(newSettings.IdColumn), newSettings.IdColumn);
                 AddPropertyIfMissing(nameof(newSettings.BatchColumn), newSettings.BatchColumn);
                 AddPropertyIfMissing(nameof(newSettings.ExpiryDateColumn), newSettings.ExpiryDateColumn);
                 AddPropertyIfMissing(nameof(newSettings.SupplierColumn), newSettings.SupplierColumn);
-
             }
+
+            root["Inventory"] = inventoryArray;
 
         }
     }

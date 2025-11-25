@@ -59,7 +59,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
         private readonly AppSettingsManager _appSettingsManager;
-        private readonly IOptionsMonitor<AppSettingsManager.Settings> _appSettings;
+        private readonly IOptionsMonitor<List<InventorySettings>> _inventorySettings;
         private readonly ShellViewModel _mainViewModel;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
@@ -160,13 +160,13 @@ namespace Mhyrenz_Interface.ViewModels
             IReportService reportService,
             IUndoRedoManager undoRedoManager,
             ShellViewModel shellViewModel,
-            IOptionsMonitor<AppSettingsManager.Settings> appSettings,
+            IOptionsMonitor<List<InventorySettings>> inventorySettings,
             AppSettingsManager appSettingsManager,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
             _appSettingsManager = appSettingsManager;
-            _appSettings = appSettings;
+            _inventorySettings = inventorySettings;
             _mainViewModel = shellViewModel;
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
@@ -266,7 +266,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value, _appSettings, _appSettingsManager,
+            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value, _inventorySettings, _appSettingsManager,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 

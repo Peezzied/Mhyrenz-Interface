@@ -8,6 +8,7 @@ using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
@@ -85,7 +86,7 @@ namespace Mhyrenz_Interface.ViewModels
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
-            IOptionsMonitor<AppSettingsManager.Settings> appSettings,
+            IOptionsMonitor<List<InventorySettings>> inventorySettings,
             AppSettingsManager appSettingsManager,
             Func<ProductDataViewModel, bool> searchFilter)
         {
@@ -99,9 +100,8 @@ namespace Mhyrenz_Interface.ViewModels
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel;
 
-            var categorySettings = appSettings.CurrentValue.Inventory.First(c => c.Key.ConvertToInt() == Id).Value;
+            var categorySettings = inventorySettings.CurrentValue.First(c => c.Id == Id);
             _inventoryDataGridViewModel.IdColumn = categorySettings.IdColumn;
-            _inventoryDataGridViewModel.GenericNameColumn = categorySettings.GenericColumn ?? false;
             _inventoryDataGridViewModel.SupplierColumn = categorySettings.SupplierColumn;
             _inventoryDataGridViewModel.BatchColumn = categorySettings.BatchColumn;
             _inventoryDataGridViewModel.ExpiryColumn = categorySettings.ExpiryDateColumn;
@@ -117,10 +117,6 @@ namespace Mhyrenz_Interface.ViewModels
                 case Columns.IdColumn:
                     _inventoryDataGridViewModel.IdColumn = !_inventoryDataGridViewModel.IdColumn;
                     UpdateColumnSetting(nameof(InventorySettings.IdColumn), _inventoryDataGridViewModel.IdColumn);
-                    break;
-                case Columns.GenericNameColumn:
-                    _inventoryDataGridViewModel.GenericNameColumn = !_inventoryDataGridViewModel.GenericNameColumn;
-                    UpdateColumnSetting(nameof(InventorySettings.GenericColumn), _inventoryDataGridViewModel.GenericNameColumn);
                     break;
                 case Columns.BatchColumn:
                     _inventoryDataGridViewModel.BatchColumn = !_inventoryDataGridViewModel.BatchColumn; 
@@ -141,7 +137,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             try
             {
-                _appSettingsManager.UpdateAppSettingsNode(new[] { nameof(AppSettingsManager.Settings.Inventory), Id.ToString(), property }, value);
+                //_appSettingsManager.UpdateAppSettingsNode(new[] { nameof(AppSettingsManager.Settings.Inventory), Id.ToString(), property }, value);
             }
             catch (Exception e)
             {
