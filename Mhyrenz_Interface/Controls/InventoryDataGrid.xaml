@@ -6,6 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
+             xmlns:columns="clr-namespace:Mhyrenz_Interface.Controls.Columns"
              xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Controls.Behaviors"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
@@ -164,7 +165,21 @@
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
 
-        <DataGridTemplateColumn x:Key="RetailColumn" x:Shared="False" Header="Retail" Width="100">
+        <Style x:Key="PurchaseStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+            <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
+            <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
+                    <DataTrigger.Setters>
+                        <Setter Property="Maximum" Value="{Binding PurchaseMaxNormal}"/>
+                        <Setter Property="HideUpDownButtons" Value="True"/>
+                        <Setter Property="Value" Value="{Binding PurchaseNormalEdit, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                    </DataTrigger.Setters>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--<DataGridTemplateColumn x:Key="RetailColumn" x:Shared="False" Header="Retail" Width="100">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                     <TextBlock TextAlignment="Center" Text="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
@@ -183,9 +198,9 @@
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>
-        <!--<DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" Binding="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" />-->
-        <DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="85">
+        </DataGridTemplateColumn>-->
+        
+        <!--<DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="85">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
@@ -221,11 +236,9 @@
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>
+        </DataGridTemplateColumn>-->
 
-        <DataGridTextColumn ElementStyle="{StaticResource TextBlockCenter}" x:Key="NetQtyColumn" x:Shared="False" IsReadOnly="True" Header="Net Qty" Binding="{Binding NetQty}" Width="70"/>
-
-        <DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
+        <!--<DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                     <TextBlock TextAlignment="Center" Text="{Binding Qty}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
@@ -244,7 +257,8 @@
                     </local:CellAdorner>
                 </DataTemplate>
             </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>
+        </DataGridTemplateColumn>-->
+        
         <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
@@ -363,9 +377,9 @@
                 <DataGrid.Columns>
                     <!--<StaticResource  ResourceKey="CheckboxColumn" />-->
                     <!--<StaticResource ResourceKey="NameColumn" />
-                    <StaticResource ResourceKey="RetailColumn" />
-                    <StaticResource ResourceKey="PurchaseColumn" />
-                    <StaticResource ResourceKey="NetQtyColumn" />
+                    <columns:NumberColumn Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                    <columns:NumberColumn Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
+                    <DataGridTextColumn Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
                     <StaticResource ResourceKey="CategoryColumn" />-->
                 </DataGrid.Columns>
             </DataGrid>
@@ -398,12 +412,32 @@
                     <StaticResource ResourceKey="CheckboxColumn" />
                     <StaticResource ResourceKey="IdColumn"/>
                     <StaticResource ResourceKey="NameColumn" />
-                    <StaticResource ResourceKey="BatchColumn"/>
-                    <StaticResource ResourceKey="ExpiryColumn"/>
-                    <StaticResource ResourceKey="RetailColumn" />
-                    <StaticResource ResourceKey="PurchaseColumn" />
-                    <StaticResource ResourceKey="NetQtyColumn" />
-                    <StaticResource ResourceKey="QtyColumn" />
+                    <columns:TextColumn ValuePath="Batch" Header="Batch" Width="125" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <DataGridTemplateColumn Header="Expiry" Width="125" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:MaxLinesTextBlock Text="{Binding Expiry}"
+                                 MaxLines="3" FontFamily="Arial"
+                                 Padding="4"
+                                 Width="Auto"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <local:CellAdorner>
+                                    <DatePicker Margin="2" Style="{StaticResource MahApps.Styles.DatePicker}" SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}" mah:TextBoxHelper.ClearTextButton="True">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:UndoRedoBehavior TargetProperty="{x:Static DatePicker.SelectedDateProperty}"/>
+                                        </i:Interaction.Behaviors>
+                                    </DatePicker>
+                                </local:CellAdorner>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <columns:NumberColumn Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                    <columns:NumberColumn Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
+                    <DataGridTextColumn Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
+                    <columns:NumberColumn Header="Qty" Width="85" ValuePath="Qty" MinimumPath="QtyMin"/>
                     <StaticResource ResourceKey="BarcodeColumn" />
                     <StaticResource ResourceKey="CategoryColumn" />
                 </DataGrid.Columns>

@@ -484,6 +484,9 @@
     <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
     <Compile Include="Controls\Behaviors\UndoRedoBehavior.cs" />
     <Compile Include="Controls\CellAdorner.cs" />
+    <Compile Include="Controls\Columns\BaseTemplateColumn.cs" />
+    <Compile Include="Controls\Columns\NumberColumn.cs" />
+    <Compile Include="Controls\Columns\TextColumn.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />
     <Compile Include="Controls\IncomingItemPanel.xaml.cs">
       <DependentUpon>IncomingItemPanel.xaml</DependentUpon>
