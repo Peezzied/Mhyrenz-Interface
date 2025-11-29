@@ -232,6 +232,10 @@
       <Project>{04B6ED9D-C5B6-41C7-8337-8F20D5FA1468}</Project>
       <Name>Mhyrenz_Interface.Domain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Mhyrenz_Interface\Mhyrenz_Interface.csproj">
+      <Project>{6EA70DDC-7A02-4ACA-AFF4-80FFD1FBC33E}</Project>
+      <Name>Mhyrenz_Interface</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

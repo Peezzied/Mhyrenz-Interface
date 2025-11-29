@@ -524,8 +524,11 @@
     <Compile Include="Converters\EmptyStringToZero.cs" />
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />
     <Compile Include="Converters\String2BooleanConverter.cs" />
+    <Compile Include="Core\Aliases.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
+    <Compile Include="Controls\Columns\ColumnType.cs" />
+    <Compile Include="Core\InventorySettingsProvider.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="Core\ValidationAttributes.cs" />

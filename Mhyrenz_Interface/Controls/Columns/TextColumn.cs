@@ -27,7 +27,7 @@ namespace Mhyrenz_Interface.Controls.Columns
             };
 
             if (ValuePath != null)
-                textBox.SetBinding(TextBox.TextProperty, new Binding(ValuePath) { UpdateSourceTrigger = UpdateSourceTrigger.Explicit });
+                textBox.SetBinding(TextBox.TextProperty, new Binding(ValuePath) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.Explicit });
 
             return (textBox, TextBox.TextProperty);
         }

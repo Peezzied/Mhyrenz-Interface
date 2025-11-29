@@ -1,17 +1,20 @@
-﻿using HandyControl.Tools.Extension;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xaml.Behaviors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
@@ -58,7 +61,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (dataGrid is null || !dataGrid.TryGetValue(AssociatedObject, out var dg))
-                    dataGrid.Add(AssociatedObject, TreeHelper.TryFindParent<DataGrid>(AssociatedObject));            
+                    dataGrid.Add(AssociatedObject, TreeHelper.TryFindParent<DataGrid>(AssociatedObject));
 
                 bindingEx = AssociatedObject.GetBindingExpression(TargetProperty);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
@@ -78,19 +81,41 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         }
 
         private void TryUpdateSource(DependencyObject target, DependencyProperty dp)
-        {   
+        {
             var expression = bindingEx;
             var control = target.CastTo<Control>();
             var viewModel = control.DataContext.CastTo<ProductDataViewModel>();
             var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
             var controlPropertyValue = control.GetValue(dp);
-            var vmPropertyValue = expression.ResolvedSource.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
+
+            var bindingPath = expression.ParentBinding.Path.Path;
+            var match = Regex.Match(bindingPath, @"^(?<prop>\w+)\[(?<key>[^\]]+)\](?:\..*)?$");
+            object vmPropertyValue;
+
+            if (match.Success)
+            {
+                var prop = match.Groups["prop"].Value;
+                var key = match.Groups["key"].Value;
+
+                var dictObj = expression.DataItem.GetType().GetProperty(prop).GetValue(viewModel);
+                var dictType = dictObj.GetType();
+
+                var containsMethod = dictType.GetMethod("ContainsKey");
+                bool exists = (bool)containsMethod.Invoke(dictObj, new object[] { key });
+
+                var indexer = dictType.GetProperty("Item");
+                vmPropertyValue = indexer.GetValue(dictObj, new object[] { key });
+            }
+            else
+            {
+                vmPropertyValue = expression.DataItem.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
+            }
 
 
             if (dataGrid[AssociatedObject].DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
                 return;
 
-            if (!undoRedoManager.CanRedo || controlPropertyValue == expression.ResolvedSource)
+            if (!undoRedoManager.CanRedo || controlPropertyValue.ToString() == vmPropertyValue.ToString())
             {
                 expression?.UpdateSource();
                 return;

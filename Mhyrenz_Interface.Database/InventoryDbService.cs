@@ -30,7 +30,9 @@ namespace Mhyrenz_Interface.Database
                 .Ignore(x => x.ProfitRevenue)
                 .Ignore(x => x.Profit)
                 .Ignore(x => x.TotalListPrice)
-                .Ignore(x => x.Purchase);
+                .Ignore(x => x.Purchase)
+                .Ignore(x => x.Transactions)
+                .Ignore(x => x.Category);
 
             BsonMapper.Global.Entity<Session>()
                 .Id(x => x.Id);

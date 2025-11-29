@@ -1,8 +1,4 @@
-﻿using HandyControl.Tools.Extension;
-using Mhyrenz_Interface.ViewModels;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Xaml.Behaviors;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,6 +10,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using ControlzEx.Standard;
+using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Controls.Columns;
+using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.ViewModels;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
@@ -28,16 +31,37 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
-                //if (vm.ColumnExtras.Any())
-                //{
-                //    foreach (var item in vm.ColumnExtras)
-                //    {
-                //        AssociatedObject.Columns.Add(new DataGridTemplateColumn
-                //        {
-                            
-                //        });
-                //    }
-                //}
+                if (vm.ColumnExtras is null)
+                    return;
+                if (vm.ColumnExtras.Any())
+                {
+                    foreach (var item in vm.ColumnExtras)
+                    {
+                        var name = item.Value.Name;
+                        var type = item.Value.Type;
+                        var field = item.Value.Field;
+
+                        switch ((ColumnType)Enum.Parse(typeof(ColumnType), type))
+                        {
+                            case ColumnType.Number:
+                                //AssociatedObject.Columns.Add(new NumberColumn
+                                //{
+                                //    ValuePath = 
+                                //});
+                                break;
+                            case ColumnType.Text:
+                                AssociatedObject.Columns.Add(new TextColumn
+                                {
+                                    Header = name,
+                                    ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{field}].Value"
+                                });
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
             }), DispatcherPriority.ContextIdle);
 
                 base.OnAttached();

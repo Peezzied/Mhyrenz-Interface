@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
@@ -49,6 +50,8 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
                         .AddSingleton<AppSettingsManager>()
                         .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
 
+                        .AddSingleton<InventorySettingsProvider>()
+
                         .AddSingleton<ICategoryDataService, CategoryDataService>()
                         .AddSingleton<ICategoryService, CategoryService>()
                         .AddSingleton<ITransactionsDataService, TransactionsDataService>()
@@ -57,6 +60,7 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
                 .Build();
             ServiceProvider = _appHost.Services;
             await ServiceProvider.GetRequiredService<AppSettingsManager>().GenerateAppSettings();
+            AppSettingsTestSetup.ServiceProvider.GetRequiredService<InventorySettingsProvider>().Load();
         }
     }
 
@@ -73,6 +77,12 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
         public async Task AppSettingsIOptionsMonitorTest()
         {
             Assert.That(AppSettingsTestSetup.ServiceProvider.GetRequiredService<IOptionsMonitor<List<InventorySettings>>>().CurrentValue, Is.Not.Null);
+        }
+
+        [Test]
+        public void InventorySettingsProviderTest()
+        {
+            
         }
     }
 }

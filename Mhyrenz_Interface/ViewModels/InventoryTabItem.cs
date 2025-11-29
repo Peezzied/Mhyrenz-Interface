@@ -86,7 +86,7 @@ namespace Mhyrenz_Interface.ViewModels
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
-            IOptionsMonitor<List<InventorySettings>> inventorySettings,
+            InventorySettingsProvider inventorySettingsProvider,
             AppSettingsManager appSettingsManager,
             Func<ProductDataViewModel, bool> searchFilter)
         {
@@ -100,11 +100,29 @@ namespace Mhyrenz_Interface.ViewModels
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel;
 
-            var categorySettings = inventorySettings.CurrentValue.First(c => c.Id == Id);
+
+            var categorySettings = inventorySettingsProvider.SettigsMap[Id];
+
             _inventoryDataGridViewModel.IdColumn = categorySettings.IdColumn;
             _inventoryDataGridViewModel.SupplierColumn = categorySettings.SupplierColumn;
             _inventoryDataGridViewModel.BatchColumn = categorySettings.BatchColumn;
             _inventoryDataGridViewModel.ExpiryColumn = categorySettings.ExpiryDateColumn;
+
+            if (inventorySettingsProvider.ColumnSchemaMap.TryGetValue(Id, out var columnSchemas))
+            {
+
+                if (_inventoryDataGridViewModel.ColumnExtras is null)
+                {
+                    _inventoryDataGridViewModel.ColumnExtras = new ObservableDictionary<string, InventorySettings.ColumnSchema>(columnSchemas.ToDictionary(k => k.Name, v => v));
+
+                }
+                foreach (var item in columnSchemas)
+                {
+                    if (_inventoryDataGridViewModel.ColumnExtras.TryGetValue(item.Name, out var value) )
+                        _inventoryDataGridViewModel.ColumnExtras[item.Name] = item;
+                }
+            }
+
 
             // Kick off deferred loading (non-blocking)
             DeferInventoryInitialization();

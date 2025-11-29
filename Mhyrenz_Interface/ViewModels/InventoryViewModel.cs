@@ -1,4 +1,14 @@
-﻿using HandyControl.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using HandyControl.Controls;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Commands;
@@ -13,24 +23,6 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -59,7 +51,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
         private readonly AppSettingsManager _appSettingsManager;
-        private readonly IOptionsMonitor<List<InventorySettings>> _inventorySettings;
+        private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly ShellViewModel _mainViewModel;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
@@ -160,13 +152,13 @@ namespace Mhyrenz_Interface.ViewModels
             IReportService reportService,
             IUndoRedoManager undoRedoManager,
             ShellViewModel shellViewModel,
-            IOptionsMonitor<List<InventorySettings>> inventorySettings,
+            InventorySettingsProvider inventorySettingsProvider,
             AppSettingsManager appSettingsManager,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
             _appSettingsManager = appSettingsManager;
-            _inventorySettings = inventorySettings;
+            _inventorySettingsProvider = inventorySettingsProvider;
             _mainViewModel = shellViewModel;
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
@@ -266,7 +258,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value, _inventorySettings, _appSettingsManager,
+            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value, _inventorySettingsProvider, _appSettingsManager,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 

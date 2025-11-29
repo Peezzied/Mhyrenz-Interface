@@ -1,7 +1,13 @@
-﻿using HandyControl.Controls;
-using HandyControl.Tools;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
@@ -73,6 +79,8 @@ namespace Mhyrenz_Interface
             await ServiceProvider.GetRequiredService<AppSettingsManager>()
                 .GenerateAppSettings(); // TEMPORARY
 
+            ServiceProvider.GetRequiredService<InventorySettingsProvider>().Load();
+
             Presenter = new AppPresenter(ServiceProvider);
 
             await Presenter.AppInit();
@@ -105,6 +113,8 @@ namespace Mhyrenz_Interface
                 .AddSingleton<AppSettingsManager>()
 
                 .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
+
+                .AddSingleton<InventorySettingsProvider>()
 
                 .AddSingleton<IUndoRedoManager, UndoRedoManager>()
                 .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()
