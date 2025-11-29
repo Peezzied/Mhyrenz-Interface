@@ -1,11 +1,9 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ITransactionsDataService: IDataService<Transaction>
+    public interface ITransactionsDataService : IDataService<Transaction>
     {
         IEnumerable<Transaction> GetLatestsByProduct(int productId);
         IEnumerable<Transaction> GetLatests();

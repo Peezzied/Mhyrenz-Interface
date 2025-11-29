@@ -1,13 +1,18 @@
-﻿using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Navigation;
+using System.Windows.Threading;
+using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
-using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.State;
@@ -15,19 +20,6 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.ObjectModel;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web.UI.WebControls;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Navigation;
-using System.Windows.Threading;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using MenuItem = Mhyrenz_Interface.Controls.MenuItem;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -225,7 +217,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void SerialBarcodeService_OnSerialConnected()
         {
-                IsReady = true;
+            IsReady = true;
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -246,8 +238,8 @@ namespace Mhyrenz_Interface.ViewModels
             switch (parameter.CastTo<ActionType>())
             {
                 case ActionType.Undo:
-                    _undoRedoManger.Undo(); 
-                      break;
+                    _undoRedoManger.Undo();
+                    break;
                 case ActionType.Redo:
                     _undoRedoManger.Redo();
                     break;
@@ -283,7 +275,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             UpdateCurrentViewModel(contentType);
 
-            
+
         }
 
         private void UpdateCurrentViewModel(Type viewType)

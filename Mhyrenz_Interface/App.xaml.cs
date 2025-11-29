@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using MahApps.Metro.Controls.Dialogs;
-using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
@@ -22,29 +21,15 @@ using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Domain.State;
-using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Test;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace Mhyrenz_Interface
 {
@@ -62,6 +47,9 @@ namespace Mhyrenz_Interface
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+
+            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -88,7 +76,7 @@ namespace Mhyrenz_Interface
             await Presenter.ShowStartUpAsync();
             Presenter.SplashComplete();
 
-            base.OnStartup(e);  
+            base.OnStartup(e);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -144,7 +132,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ITransactionsDataService, TransactionsDataService>()
                 .AddSingleton<ITransactionsService, TransactionService>()
 
-                .AddSingleton<IncomingPanelViewModel>()
+                .AddTransient<IncomingPanelViewModel>()
 
                 .AddTransient<OverviewChartViewModel>()
                 .AddTransient<HomeViewModel>()
@@ -231,9 +219,9 @@ namespace Mhyrenz_Interface
                     };
                 });
 
-                //.AddTransient<Startup>(s => ActivatorUtilities.CreateInstance<Startup>(s))
-                //.AddTransient<MainWindow>(s => ActivatorUtilities.CreateInstance<MainWindow>(s))
-                //.AddSingleton<TestWindow>(s => ActivatorUtilities.CreateInstance<TestWindow>(s));
+            //.AddTransient<Startup>(s => ActivatorUtilities.CreateInstance<Startup>(s))
+            //.AddTransient<MainWindow>(s => ActivatorUtilities.CreateInstance<MainWindow>(s))
+            //.AddSingleton<TestWindow>(s => ActivatorUtilities.CreateInstance<TestWindow>(s));
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mhyrenz_Interface.Domain.Models
+﻿namespace Mhyrenz_Interface.Domain.Models
 {
     public class Sale
     {
@@ -14,6 +8,6 @@ namespace Mhyrenz_Interface.Domain.Models
         public decimal Price { get; set; }
         public int Qty { get; set; }
 
-        public Product Item { get; set; } 
+        public Product Item { get; set; }
     }
 }

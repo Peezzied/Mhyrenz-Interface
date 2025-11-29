@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -28,7 +24,7 @@ namespace Mhyrenz_Interface.Core
         public bool CanExecute(object parameter) =>
             _canExecute == null || _canExecute((T)parameter);
 
-        public void Execute(object parameter) => 
+        public void Execute(object parameter) =>
             _execute((T)parameter);
     }
     public class RelayCommand : ICommand

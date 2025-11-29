@@ -1,34 +1,25 @@
-﻿using HandyControl.Tools.Extension;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Threading;
 using MahApps.Metro.Controls.Dialogs;
-using Mhyrenz_Interface;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls.RibbonBarTools;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.State;
-using Mhyrenz_Interface.Domain.State.Mediator;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class HomeViewModel: NavigationViewModel, ISalesRegisterHost
+    public class HomeViewModel : NavigationViewModel, ISalesRegisterHost
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
@@ -42,7 +33,7 @@ namespace Mhyrenz_Interface.ViewModels
         private InventoryDataGridViewModel _invetoryDataGridContext;
         public InventoryDataGridViewModel InventoryDataGridContext
         {
-            get =>  _invetoryDataGridContext;
+            get => _invetoryDataGridContext;
             set
             {
                 _invetoryDataGridContext = value;
@@ -82,7 +73,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly int maxItems = 14;
 
         private string _searchBar = string.Empty;
-        public string SearchBar 
+        public string SearchBar
         {
             get => _searchBar;
             set
@@ -138,7 +129,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void SessionStore_StateChanged(Session obj)
         {
-            
+
         }
 
         private async Task OpenStartupActionCommand(object arg)
@@ -175,7 +166,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void DeferLoad()
         {
-                InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
+            InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
             InventoryDataGridContext.Inventory.Filter += FilterProducts;
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -187,7 +178,7 @@ namespace Mhyrenz_Interface.ViewModels
                     }
 
             }), DispatcherPriority.ContextIdle);
-                Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
+            Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
         }
 
         private bool FilterProducts(object obj)
@@ -207,7 +198,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             }
             else return false;
-            
+
         }
 
     }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Category: DomainObject
+    public class Category : DomainObject
     {
         public new int Id { get; set; }
         public string Name { get; set; }

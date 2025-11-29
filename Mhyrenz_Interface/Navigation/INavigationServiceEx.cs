@@ -1,7 +1,7 @@
-﻿using Mhyrenz_Interface.ViewModels.Factory;
-using System;
+﻿using System;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.Navigation
 {

@@ -1,16 +1,9 @@
-﻿using HandyControl.Controls;
-using HandyControl.Data;
-using Mhyrenz_Interface.Commands;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels.Factory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.State

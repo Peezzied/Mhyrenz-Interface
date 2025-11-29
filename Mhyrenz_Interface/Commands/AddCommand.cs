@@ -1,4 +1,10 @@
-﻿using HandyControl.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using HandyControl.Controls;
 using HandyControl.Data;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
@@ -7,13 +13,6 @@ using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Commands
 {
@@ -40,7 +39,7 @@ namespace Mhyrenz_Interface.Commands
 
         public override bool CanExecute(object parameter)
         {
-            return base.CanExecute(parameter) 
+            return base.CanExecute(parameter)
                 && Validator.TryValidateObject(_viewModel, new ValidationContext(_viewModel), null, validateAllProperties: true)
                 && CanSubmit;
         }
@@ -60,7 +59,7 @@ namespace Mhyrenz_Interface.Commands
 
         public override async Task ExecuteAsync(object parameter)
         {
-            CanSubmit = false; 
+            CanSubmit = false;
             var product = await _productService.Add(new Product
             {
                 Name = _viewModel.Name,
@@ -69,14 +68,14 @@ namespace Mhyrenz_Interface.Commands
                 CategoryId = _viewModel.SelectedCategory.Id,
                 Expiry = _viewModel.Expiry,
                 Batch = _viewModel.Batch,
-                Barcode = _viewModel.Barcode 
+                Barcode = _viewModel.Barcode
             });
 
             _products = _inventoryStore.AddProduct(new[] { await _productService.Get(product.Id) });
 
             Growl.Success(new GrowlInfo
             {
-                Message = $"Product \"{product.Name}\" has been added successfully!" ,
+                Message = $"Product \"{product.Name}\" has been added successfully!",
                 ShowDateTime = false,
             });
             _viewModel.RaiseSubmitSuccess(_products.First());
@@ -112,7 +111,7 @@ namespace Mhyrenz_Interface.Commands
         }
     }
 
-    public interface IUndoRedoBound: ICommandAsync, ICommand
+    public interface IUndoRedoBound : ICommandAsync, ICommand
     {
         bool AllowBack { get; }
 

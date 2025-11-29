@@ -1,13 +1,10 @@
-﻿using Mhyrenz_Interface.ViewModels;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.Core
 {
@@ -78,6 +75,12 @@ namespace Mhyrenz_Interface.Core
             {
                 OnErrorsChanged(propertyName);
             }
+        }
+
+        public override void Dispose()
+        {
+            ErrorsChanged = null;
+            SubmitSuccess = null;
         }
     }
 }

@@ -1,11 +1,8 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using System;
+using System.Threading.Tasks;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.State
 {
@@ -19,9 +16,9 @@ namespace Mhyrenz_Interface.State
         private Session _currentSession;
         private readonly ISessionService _sessionService;
 
-        public Session CurrentSession 
-        { 
-            get => _currentSession; 
+        public Session CurrentSession
+        {
+            get => _currentSession;
             set
             {
                 _currentSession = value;

@@ -1,10 +1,7 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.State;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.SessionService
 {
@@ -31,7 +28,7 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             return await Task.Run(() => _sessionDataService.Update(id, session));
         }
 
-        public async Task<Session> GetSession() 
+        public async Task<Session> GetSession()
         {
             return await Task.Run(() =>
             {

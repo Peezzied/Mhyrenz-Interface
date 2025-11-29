@@ -1,11 +1,5 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.SessionService;
-using Mhyrenz_Interface.Domain.State;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
 {

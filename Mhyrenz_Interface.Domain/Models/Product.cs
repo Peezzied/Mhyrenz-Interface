@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Product: DomainObject
+    public class Product : DomainObject
     {
         public Product() { }
         public Product(string name, decimal retailPrice, decimal listPrice, int categoryId)

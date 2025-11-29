@@ -1,4 +1,8 @@
-﻿using HandyControl.Controls;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using HandyControl.Controls;
 using HandyControl.Data;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
@@ -9,14 +13,6 @@ using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.State;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
 {

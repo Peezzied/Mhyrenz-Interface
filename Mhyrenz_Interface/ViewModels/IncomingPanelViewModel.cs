@@ -1,26 +1,20 @@
-﻿using HandyControl.Controls;
+﻿using System.Linq;
+using HandyControl.Controls;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
-using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class IncomingPanelViewModel: BaseViewModel
+    public class IncomingPanelViewModel : BaseViewModel
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly ShellViewModel _mainViewModel;
-        private readonly PurchaseProductCommand _purchaseProductCommand;
         private readonly ITransactionsService _transactionsService;
         private readonly INavigationServiceEx _navigationService;
 
@@ -89,6 +83,13 @@ namespace Mhyrenz_Interface.ViewModels
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Qty));
             OnPropertyChanged(nameof(Price));
+        }
+
+        public override void Dispose()
+        {
+            _inventoryStore.PropertyChanged -= InventoryStore_PropertyChanged;
+            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
+            _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
         }
 
         private ProductDataViewModel _item;

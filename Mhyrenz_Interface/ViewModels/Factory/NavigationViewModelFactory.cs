@@ -1,15 +1,13 @@
-﻿using HandyControl.Tools.Extension;
-using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.Views;
-using Microsoft.Xaml.Behaviors.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Navigation;
+using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Views;
 
 namespace Mhyrenz_Interface.ViewModels.Factory
 {
-    public class NavigationViewModel: BaseViewModel 
+    public class NavigationViewModel : BaseViewModel
     {
         private readonly INavigationServiceEx _navigationServiceEx;
 
@@ -58,7 +56,7 @@ namespace Mhyrenz_Interface.ViewModels.Factory
             var viewType = parameter as Type;
             if (_viewsSet.TryGetValue(viewType, out var viewModel))
             {
-                
+
                 return viewModel.factory.CastTo<CreateViewModel<NavigationViewModel>>().Invoke();
             }
 

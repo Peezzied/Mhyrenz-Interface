@@ -1,15 +1,12 @@
-﻿using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Xaml.Behaviors;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Mhyrenz_Interface.State;
+using Mhyrenz_Interface.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {

@@ -1,17 +1,13 @@
-﻿using ClosedXML.Excel;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Threading;
+using ClosedXML.Excel;
 using ClosedXML.Report;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows;
-using System.Windows.Threading;
 
 namespace Mhyrenz_Interface.Domain.Services.ReportsService
 {

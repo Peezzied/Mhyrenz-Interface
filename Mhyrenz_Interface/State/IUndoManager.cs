@@ -1,6 +1,5 @@
-﻿using Mhyrenz_Interface.Core;
-using System;
-using System.Windows;
+﻿using System;
+using Mhyrenz_Interface.Core;
 
 namespace Mhyrenz_Interface.State
 {

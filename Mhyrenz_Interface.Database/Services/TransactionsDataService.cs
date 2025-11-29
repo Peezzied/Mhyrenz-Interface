@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Transaction = Mhyrenz_Interface.Domain.Models.Transaction;
 
 namespace Mhyrenz_Interface.Database.Services
@@ -62,7 +60,7 @@ namespace Mhyrenz_Interface.Database.Services
                     .GetCollection<Session>(typeof(Session).TableName())
                     .FindById(transaction.SessionId);
             }
-                
+
 
             return transaction;
         }

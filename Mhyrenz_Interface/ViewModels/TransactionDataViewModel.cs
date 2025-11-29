@@ -1,17 +1,9 @@
-﻿using HandyControl.Tools.Command;
-using HandyControl.Tools.Extension;
+﻿using System;
+using System.Windows.Input;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.Views;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -44,7 +36,7 @@ namespace Mhyrenz_Interface.ViewModels
             _inventroyStore.PropertyChanged += OnProductPropertyChanged;
         }
 
-        public void Load()
+        public void LoadReceiver()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
         }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
@@ -39,44 +38,44 @@ namespace Mhyrenz_Interface.Database.Services
 
         public override IEnumerable<Product> GetAll()
         {
-                var list = GetTable().Find(p => !p.IsDeleted).ToList();
+            var list = GetTable().Find(p => !p.IsDeleted).ToList();
 
-                LoadReferences(list);
+            LoadReferences(list);
 
-                return list;
+            return list;
         }
 
         public IEnumerable<Product> GetAllWithIgnore()
         {
-                var list = GetTable().FindAll().ToList();
+            var list = GetTable().FindAll().ToList();
 
-                LoadReferences(list);
+            LoadReferences(list);
 
-                return list;
+            return list;
         }
 
         public IEnumerable<Product> GetAllByCategory(string name, int? id = null)
         {
-                var list = GetTable().Find(p =>
-                    !p.IsDeleted &&
-                    (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
-                    (id.HasValue && p.CategoryId == id)
-                ).ToList();
+            var list = GetTable().Find(p =>
+                !p.IsDeleted &&
+                (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
+                (id.HasValue && p.CategoryId == id)
+            ).ToList();
 
-                LoadReferences(list);
+            LoadReferences(list);
 
-                return list;
+            return list;
         }
 
         public int DeleteAllPhysical()
         {
-                var col = GetTable();
-                var deleted = col.Find(p => p.IsDeleted).ToList();
+            var col = GetTable();
+            var deleted = col.Find(p => p.IsDeleted).ToList();
 
-                foreach (var p in deleted)
-                    col.Delete(p.Id);
+            foreach (var p in deleted)
+                col.Delete(p.Id);
 
-                return deleted.Count;
+            return deleted.Count;
         }
 
         // -----------------------------

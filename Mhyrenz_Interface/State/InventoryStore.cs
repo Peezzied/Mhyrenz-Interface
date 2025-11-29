@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using HandyControl.Controls;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
@@ -18,8 +17,6 @@ using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using NUnit.Framework;
 
 namespace Mhyrenz_Interface.State
 {
@@ -126,7 +123,7 @@ namespace Mhyrenz_Interface.State
         public async Task Register(IEnumerable<Product> transactions)
         {
             // SLOW TIME COMPLEXITY - RESOLVE LATER
-            
+
             var tasks = transactions.Select(item =>
                 _productService.EditProperty(item.Id, entity => entity.Qty = item.Qty) // resolve a batch edit
             );
@@ -352,7 +349,7 @@ namespace Mhyrenz_Interface.State
 
         public void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, PurchaseProductCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null)
         {
-            
+
         }
 
         private async void HandlePropertyChanged(

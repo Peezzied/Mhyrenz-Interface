@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -52,7 +49,7 @@ namespace Mhyrenz_Interface.Core
         void OnCanExecuteChanged();
     }
 
-    public interface ICommandAsync: ICommand
+    public interface ICommandAsync : ICommand
     {
         Task ExecuteAsync(object parameter);
     }

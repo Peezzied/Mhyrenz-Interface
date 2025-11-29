@@ -11,7 +11,7 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
             string cacheDir = Path.Combine(Path.GetTempPath(), "Mhyrenz Interface Barcodes");
             if (!File.Exists(cacheDir))
                 Directory.CreateDirectory(cacheDir);
-            
+
             Dir = cacheDir;
         }
     }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mhyrenz_Interface.ViewModels.Factory
+﻿namespace Mhyrenz_Interface.ViewModels.Factory
 {
     public class ViewModelFactory<T> : IViewModelFactory<T> where T : BaseViewModel
     {
@@ -17,7 +11,7 @@ namespace Mhyrenz_Interface.ViewModels.Factory
 
         public T CreateViewModel(object parameter = null)
         {
-                return _vm(parameter);
+            return _vm(parameter);
         }
     }
 }

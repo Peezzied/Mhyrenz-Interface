@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Mhyrenz_Interface;
+﻿using Mhyrenz_Interface;
 
 public class PrimativeNotifyProperty<T> : BaseViewModel
 {

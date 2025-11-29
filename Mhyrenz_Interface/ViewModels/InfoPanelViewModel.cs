@@ -1,15 +1,10 @@
-﻿using Mhyrenz_Interface.State;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+using Mhyrenz_Interface.State;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class InfoPanelViewModel: BaseViewModel
+    public class InfoPanelViewModel : BaseViewModel
     {
         private readonly IInventoryStore _inventoryStore;
 
@@ -88,7 +83,7 @@ namespace Mhyrenz_Interface.ViewModels
         }
     }
 
-    public class InfoCard: BaseViewModel
+    public class InfoCard : BaseViewModel
     {
         public enum CardType
         {

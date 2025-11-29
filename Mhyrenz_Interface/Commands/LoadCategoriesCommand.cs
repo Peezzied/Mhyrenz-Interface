@@ -1,16 +1,9 @@
-﻿using HandyControl.Tools.Extension;
+﻿using System.Threading.Tasks;
+using System.Windows.Data;
 using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
 
 namespace Mhyrenz_Interface.Commands
 {

@@ -1,21 +1,14 @@
-﻿using HandyControl.Controls;
-using HandyControl.Tools;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Windows.Controls;
+using System.Windows.Input;
+using HandyControl.Controls;
 using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Controls.RibbonBarTools;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.Common;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -94,7 +87,7 @@ namespace Mhyrenz_Interface.ViewModels
             _category = category;
             _allProducts = allProducts;
             _searchFilter = searchFilter;
-            
+
             RibbonBar = ribbonBar;
             ToggleColumnCommand = new RelayCommand<Columns>(ToggleColumn);
 
@@ -118,7 +111,7 @@ namespace Mhyrenz_Interface.ViewModels
                 }
                 foreach (var item in columnSchemas)
                 {
-                    if (_inventoryDataGridViewModel.ColumnExtras.TryGetValue(item.Name, out var value) )
+                    if (_inventoryDataGridViewModel.ColumnExtras.TryGetValue(item.Name, out var value))
                         _inventoryDataGridViewModel.ColumnExtras[item.Name] = item;
                 }
             }
@@ -137,16 +130,16 @@ namespace Mhyrenz_Interface.ViewModels
                     UpdateColumnSetting(nameof(InventorySettings.IdColumn), _inventoryDataGridViewModel.IdColumn);
                     break;
                 case Columns.BatchColumn:
-                    _inventoryDataGridViewModel.BatchColumn = !_inventoryDataGridViewModel.BatchColumn; 
+                    _inventoryDataGridViewModel.BatchColumn = !_inventoryDataGridViewModel.BatchColumn;
                     UpdateColumnSetting(nameof(InventorySettings.BatchColumn), _inventoryDataGridViewModel.BatchColumn);
                     break;
                 case Columns.ExpiryColumn:
                     _inventoryDataGridViewModel.ExpiryColumn = !_inventoryDataGridViewModel.ExpiryColumn;
-                    UpdateColumnSetting(nameof(InventorySettings.ExpiryDateColumn), _inventoryDataGridViewModel.ExpiryColumn); 
+                    UpdateColumnSetting(nameof(InventorySettings.ExpiryDateColumn), _inventoryDataGridViewModel.ExpiryColumn);
                     break;
                 case Columns.SupplierColumn:
                     _inventoryDataGridViewModel.SupplierColumn = !_inventoryDataGridViewModel.SupplierColumn;
-                    UpdateColumnSetting(nameof(InventorySettings.SupplierColumn), _inventoryDataGridViewModel.SupplierColumn); 
+                    UpdateColumnSetting(nameof(InventorySettings.SupplierColumn), _inventoryDataGridViewModel.SupplierColumn);
                     break;
             }
         }

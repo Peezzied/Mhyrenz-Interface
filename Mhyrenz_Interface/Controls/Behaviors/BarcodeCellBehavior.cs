@@ -1,20 +1,12 @@
-﻿using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
+﻿using System.Windows.Controls;
+using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xaml.Behaviors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class BarcodeCellBehavior: Behavior<TextBox>
+    public class BarcodeCellBehavior : Behavior<TextBox>
     {
         private IBarcodeBound _viewModel;
         private readonly ShellViewModel MainViewModel = App.ServiceProvider.GetRequiredService<ShellViewModel>();
@@ -46,7 +38,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             AssociatedObject.DataContext.CastTo<IBarcodeBound>().BarcodeReceived += BarcodeCellBehavior_BarcodeReceived;
             _viewModel = AssociatedObject.DataContext.CastTo<IBarcodeBound>();
 
-            _viewModel.Load();
+            _viewModel.LoadReceiver();
         }
     }
 }

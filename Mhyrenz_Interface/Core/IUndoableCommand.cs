@@ -1,6 +1,5 @@
-﻿using Mhyrenz_Interface.ViewModels.Factory;
-using System;
-using System.Windows.Input;
+﻿using System;
+using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.Core
 {

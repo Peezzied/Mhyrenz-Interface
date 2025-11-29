@@ -1,7 +1,6 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Threading;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.ReportsService
 {

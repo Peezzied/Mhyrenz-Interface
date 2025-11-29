@@ -1,12 +1,10 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.State
 {

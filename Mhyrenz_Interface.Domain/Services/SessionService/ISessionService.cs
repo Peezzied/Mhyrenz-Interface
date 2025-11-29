@@ -1,6 +1,6 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.SessionService
 {

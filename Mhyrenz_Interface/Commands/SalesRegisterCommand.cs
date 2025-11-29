@@ -1,18 +1,14 @@
-﻿using HandyControl.Controls;
-using LiveChartsCore.Kernel;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using HandyControl.Controls;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
-using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Commands
 {
@@ -69,7 +65,7 @@ namespace Mhyrenz_Interface.Commands
                 return;
             }
 
-            var session =  _sessionStore.CurrentSession;
+            var session = _sessionStore.CurrentSession;
 
             var sales = new SalesRecord
             {
@@ -89,8 +85,8 @@ namespace Mhyrenz_Interface.Commands
             };
 
             var grouped = transactions.GroupBy(t => t.Product.Item.Id)
-                .Select(g => new Product() 
-                { 
+                .Select(g => new Product()
+                {
                     Id = g.First().Product.Item.Id,
                     Qty = g.First().Product.NetQty
                 }).ToList();
@@ -110,7 +106,7 @@ namespace Mhyrenz_Interface.Commands
                 "Register Success",
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Information);
-            Growl.Success("Sales has been registered."); 
+            Growl.Success("Sales has been registered.");
         }
 
         private void ShowErrorAndStopLoading(string message, bool showDateTime)

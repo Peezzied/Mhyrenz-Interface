@@ -1,4 +1,7 @@
-﻿using HandyControl.Controls;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using HandyControl.Controls;
 using HandyControl.Tools;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -6,15 +9,6 @@ using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.Views;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Navigation;
-using System.Windows.Threading;
 using Window = System.Windows.Window;
 
 namespace Mhyrenz_Interface
@@ -27,10 +21,10 @@ namespace Mhyrenz_Interface
         public AppPresenter(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            StartupManager.Register(new StartupManager.Action("Inventory Store", "Fetching data from database", async (sp) =>  await InventoryStore.LoadInventoryStore(sp)));
+            StartupManager.Register(new StartupManager.Action("Inventory Store", "Fetching data from database", async (sp) => await InventoryStore.LoadInventoryStore(sp)));
             StartupManager.Register(new StartupManager.Action("Transactions Store", "Loading transactions from cache", async (sp) => await TransactionStore.LoadTransactionStore(sp)));
             StartupManager.Register(new StartupManager.Action("Categories Store", "Categorizing inventory from cache", async (sp) => await CategoryStore.LoadCategoryStore(sp)));
-            StartupManager.Register(new StartupManager.Action("Utility", "Deleting items", 
+            StartupManager.Register(new StartupManager.Action("Utility", "Deleting items",
                 async (sp) =>
                 {
                     var count = await sp.GetRequiredService<IProductService>().RemovePhysical();

@@ -1,14 +1,9 @@
-﻿using Mhyrenz_Interface.Core;
+﻿using System;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Commands
 {

@@ -56,7 +56,7 @@ namespace Mhyrenz_Interface.Core
         {
             public PropertyChangeTrackerArgs(T owner, object value, string navigator) : base(owner, value, navigator) { }
         }
-        
+
         public Dictionary<string, IBasePropertyChangeTrackerArgs<BaseViewModel>> PreviousValues { get; } = new Dictionary<string, IBasePropertyChangeTrackerArgs<BaseViewModel>>();
         public T Target { get; private set; }
         public Dictionary<string, Action<PropertyChangeTracker<T>, TargetChangedEventArgs, object, object>> Methods { get; } = new Dictionary<string, Action<PropertyChangeTracker<T>, TargetChangedEventArgs, object, object>>();

@@ -1,5 +1,4 @@
 ﻿using LiteDB;
-using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Database.Services
 {

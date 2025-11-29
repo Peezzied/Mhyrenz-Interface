@@ -1,4 +1,11 @@
-﻿using HandyControl.Tools.Extension;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Media;
+using HandyControl.Tools.Extension;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
@@ -6,13 +13,6 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.State;
 using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Media;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -68,7 +68,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void Item_PointCreated(ChartPoint<ObservableValue, LiveChartsCore.SkiaSharpView.Drawing.Geometries.DoughnutGeometry, LiveChartsCore.SkiaSharpView.Drawing.Geometries.LabelGeometry> obj)
         {
-            _categoryStore.Colors[obj.Context.Series.Tag.CastTo<int>()] = new BrushConverter().ConvertFromString((obj.Context.Series as PieSeries<ObservableValue>).Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>(); 
+            _categoryStore.Colors[obj.Context.Series.Tag.CastTo<int>()] = new BrushConverter().ConvertFromString((obj.Context.Series as PieSeries<ObservableValue>).Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>();
         }
 
         private void InventoryStore_Loaded()

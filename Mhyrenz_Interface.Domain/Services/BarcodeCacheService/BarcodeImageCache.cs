@@ -1,23 +1,17 @@
-﻿using Mhyrenz_Interface.Domain.Exceptions;
-using Mhyrenz_Interface.Domain.Models;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.Caching;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using Mhyrenz_Interface.Domain.Exceptions;
+using Mhyrenz_Interface.Domain.Models;
 using ZXing;
 
 namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService

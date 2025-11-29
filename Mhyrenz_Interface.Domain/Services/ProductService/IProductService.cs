@@ -1,13 +1,12 @@
-﻿using Mhyrenz_Interface.Domain.Models;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.ProductService
 {
     public interface IProductService
     {
-        Task <IEnumerable<Product>> GetAll(bool ignoreFilter = false);
+        Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false);
         Task<Product> Get(int id);
         Task<Product> Add(Product entity);
         Task Remove(Product entity);

@@ -1,16 +1,7 @@
-﻿using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
-using Mhyrenz_Interface.ViewModels;
-using Mhyrenz_Interface.ViewModels.Factory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Input;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.Commands
 {

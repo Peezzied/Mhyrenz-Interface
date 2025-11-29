@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
@@ -82,7 +80,7 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
         [Test]
         public void InventorySettingsProviderTest()
         {
-            
+
         }
     }
 }

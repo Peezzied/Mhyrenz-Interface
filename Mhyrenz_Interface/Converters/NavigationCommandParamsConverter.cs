@@ -1,13 +1,9 @@
-﻿using MahApps.Metro.Controls;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MenuItem = Mhyrenz_Interface.Controls.MenuItem;
 using System.Windows.Data;
+using MahApps.Metro.Controls;
+using MenuItem = Mhyrenz_Interface.Controls.MenuItem;
 
 namespace Mhyrenz_Interface.Converters
 {

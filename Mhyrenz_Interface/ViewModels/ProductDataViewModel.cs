@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -10,7 +9,6 @@ using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
-using ObservableCollections;
 using RelayCommand = Mhyrenz_Interface.Core.RelayCommand;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -20,7 +18,7 @@ namespace Mhyrenz_Interface.ViewModels
         string Barcode { get; set; }
 
         event Action BarcodeReceived;
-        void Load();
+        void LoadReceiver();
     }
 
     public class ProductDataViewModel : BaseViewModel, IBarcodeBound
@@ -57,11 +55,11 @@ namespace Mhyrenz_Interface.ViewModels
             GoToItemCommand = new RelayCommand(GoToItemActionCommand);
             if (Item.Extras != null)
             {
-                Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)) );
+                Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)));
                 Extras.ValueChanged += Extras_ValueChanged;
             }
         }
-        public void Load()
+        public void LoadReceiver()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
         }

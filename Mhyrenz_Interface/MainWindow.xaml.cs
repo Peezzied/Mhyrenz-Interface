@@ -1,9 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
-using HandyControl.Controls;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;

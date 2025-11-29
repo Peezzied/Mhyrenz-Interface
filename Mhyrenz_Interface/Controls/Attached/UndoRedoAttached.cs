@@ -1,28 +1,12 @@
-﻿using HandyControl.Controls;
-using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
-using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.UI;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Forms;
+using MahApps.Metro.Controls;
 using Control = System.Windows.Controls.Control;
-using MessageBox = HandyControl.Controls.MessageBox;
+using DataGrid = System.Windows.Controls.DataGrid;
 using DatePicker = System.Windows.Controls.DatePicker;
 using NumericUpDown = MahApps.Metro.Controls.NumericUpDown;
 using TextBox = System.Windows.Controls.TextBox;
-using DataGrid = System.Windows.Controls.DataGrid;
-using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Controls.Attached
 {
@@ -100,6 +84,6 @@ namespace Mhyrenz_Interface.Controls.Attached
             control.AddHandler(routedEvent, CleanupUnloaded);
         }
 
-        
+
     }
 }

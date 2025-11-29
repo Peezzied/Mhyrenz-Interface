@@ -1,20 +1,15 @@
-﻿using Mhyrenz_Interface.Commands;
-using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.CategoryService;
-using Mhyrenz_Interface.ViewModels;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.CategoryService;
+using Mhyrenz_Interface.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.State
 {
@@ -74,7 +69,7 @@ namespace Mhyrenz_Interface.State
                 Categories[item].Filter = obj => obj is ProductDataViewModel vm
                     && vm.CategoryId == item.Id;
             }
-        }   
+        }
 
         public static async Task LoadCategoryStore(IServiceProvider serviceProvider)
         {

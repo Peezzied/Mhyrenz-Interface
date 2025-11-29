@@ -1,18 +1,13 @@
 ﻿
-using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.ViewModels;
-using Microsoft.Xaml.Behaviors;
 using System;
-using System.Drawing;
-using System.Runtime.Remoting.Contexts;
-using System.Runtime.Remoting.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
+using HandyControl.Tools.Extension;
+using MahApps.Metro.Controls;
+using Mhyrenz_Interface.ViewModels;
+using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
@@ -59,7 +54,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void OnRightClick(object sender, MouseButtonEventArgs e)
         {
             var cell = TreeHelper.TryFindParent<DataGridCell>(e.OriginalSource as DependencyObject);
-            
+
 
             if (cell != null && cell.DataContext is ProductDataViewModel vm)
             {
@@ -70,20 +65,20 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             _state = true;
 
             ClickHandler(sender, e);
-            
-                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var inputBox = TreeHelper.FindChild<NumericUpDown>(cell);
+
+                if (cell != null && cell.DataContext is ProductDataViewModel && inputBox != null)
                 {
-                    var inputBox = TreeHelper.FindChild<NumericUpDown>(cell);
+                    inputBox.Focus();
+                    Keyboard.Focus(inputBox);
 
-                    if (cell != null && cell.DataContext is ProductDataViewModel && inputBox != null)
-                    {
-                        inputBox.Focus();   
-                        Keyboard.Focus(inputBox);
+                    AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().GetCell = () => cell;
+                }
 
-                        AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().GetCell = () => cell;
-                    }
-
-                }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
 
         private void OnLeftClick(object sender, MouseButtonEventArgs e)

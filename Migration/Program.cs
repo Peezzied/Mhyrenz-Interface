@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LiteDB;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Domain.Models;
 using Microsoft.Data.Sqlite;
@@ -40,7 +36,7 @@ namespace Migration
             using (var sqliteConn = new SqliteConnection("Data Source=dev_inventory.db"))
             {
                 sqliteConn.Open();
-                using (var cmd = new SqliteCommand (
+                using (var cmd = new SqliteCommand(
                     @"SELECT Id, Name, Qty, RetailPrice, ListPrice, Barcode, Expiry, Batch, IsDeleted, CategoryId 
                   FROM ""Products""", sqliteConn))
                 using (var reader = cmd.ExecuteReader())

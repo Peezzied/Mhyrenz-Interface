@@ -1,18 +1,11 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using static Mhyrenz_Interface.Domain.Services.AppSettingsManager.AppSettingsManager;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
 {
@@ -137,7 +130,7 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
                 .Where(obj => obj["Id"] != null) // CONSIDER FOR NAME AS THE KEY AS WELL
                 .ToDictionary(
                     obj => (int)obj["Id"],
-                    obj => obj            
+                    obj => obj
                 );
 
             foreach (var newSettings in categoryDict)

@@ -1,19 +1,13 @@
-﻿using HandyControl.Tools.Extension;
+﻿using System;
+using System.Windows.Controls;
+using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.ViewModels;
 using Microsoft.Xaml.Behaviors;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Mhyrenz_Interface.Controls.Behaviors
 {
-    public class InventoryDataGridCompact: Behavior<DataGrid>
+    public class InventoryDataGridCompact : Behavior<DataGrid>
     {
         protected override void OnAttached()
         {

@@ -1,18 +1,13 @@
-﻿using HandyControl.Controls;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using HandyControl.Controls;
 using HandyControl.Data;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
-using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Media;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Commands
 {

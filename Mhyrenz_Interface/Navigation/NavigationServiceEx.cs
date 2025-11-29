@@ -1,17 +1,14 @@
-﻿using Mhyrenz_Interface.Controls.Behaviors;
-using Mhyrenz_Interface.ViewModels.Factory;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Diagnostics;
-using System.Web.UI.WebControls;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using Mhyrenz_Interface.Controls.Behaviors;
+using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.Navigation
 {
-    public class NavigationServiceEx: INavigationServiceEx
+    public class NavigationServiceEx : INavigationServiceEx
     {
         private NavigationViewModel _currentViewModel;
         public NavigationViewModel CurrentViewModel
@@ -111,13 +108,13 @@ namespace Mhyrenz_Interface.Navigation
             if (e.Content is FrameworkElement element && CurrentViewModel != null)
             {
                 element.DataContext = CurrentViewModel;
-                App.Current.Dispatcher.BeginInvoke(new Action(() => 
+                App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     _navigationCallBack?.Invoke(CurrentViewModel);
                     _navigationCallBack = null;
                 }));
             }
-             
+
             Frame.Navigated -= SetDataContextAfterNavigation;
         }
 

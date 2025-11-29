@@ -1,7 +1,4 @@
-﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -9,7 +6,6 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
 {
@@ -152,7 +148,7 @@ namespace Mhyrenz_Interface.Domain.Services.SerialBarcodeService
             try
             {
                 if (_serialPort?.IsOpen == true) { }
-                    _serialPort.Close();
+                _serialPort.Close();
             }
             catch { }
 
