@@ -67,42 +67,27 @@ namespace Mhyrenz_Interface.Database.Services
             return Get((dynamic)id);
         }
 
-        public virtual T UpdateProperty(dynamic id, string propertyName, object newValue)
+        public virtual T UpdateProperty(dynamic id, UpdateEntity<T> update)
         {
             var entity = GetTable().FindById(id);
-            GetTable().Update(UpdateEntityProperty(entity, propertyName, newValue));
+            update(entity);
+            GetTable().Update(entity);
 
             return entity;
         }
 
-        public virtual IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue)
+        public virtual IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, UpdateEntity<T> update)
         {
             var ids = entities.Select(i => i.Id).ToHashSet();
 
             IEnumerable<T> newEntities = entities.Select(i =>
             {
-                var edited = UpdateEntityProperty(i, propertyName, newValue);
-                GetTable().Update(edited);
-                return edited;
+                update(i);
+                GetTable().Update(i);
+                return i;
             }).ToList();
 
             return newEntities;
-        }
-
-        private T UpdateEntityProperty(T entity, string propertyName, object newValue)
-        {
-            if (entity == null)
-                return null;
-
-            var property = typeof(T).GetProperty(propertyName);
-            if (property == null || !property.CanWrite)
-                throw new InvalidOperationException($"'{propertyName}' is not a valid property of {typeof(T).Name}");
-
-            Type targetType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-            var convertedValue = Convert.ChangeType(newValue, targetType);
-            property.SetValue(entity, convertedValue);
-
-            return entity;
         }
     }
 }

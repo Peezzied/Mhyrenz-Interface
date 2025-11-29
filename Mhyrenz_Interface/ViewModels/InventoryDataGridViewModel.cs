@@ -6,7 +6,6 @@ using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Internal;
-using ObservableCollections;
 using System;
 using System.Collections;
 using System.Collections.Generic;

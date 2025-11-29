@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
-using HandyControl.Tools.Command;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.State;
@@ -9,6 +11,7 @@ using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
 using ObservableCollections;
+using RelayCommand = Mhyrenz_Interface.Core.RelayCommand;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -27,7 +30,17 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly INavigationServiceEx _navigationService;
         private readonly Action _requireSession;
-        public Product Item { get; set; }
+
+        private Product _item;
+        public Product Item
+        {
+            get => _item;
+            set
+            {
+                _item = value;
+                OnPropertyChanged(null);
+            }
+        }
 
         public ProductDataViewModel(ISessionStore sessionStore,
             ICategoryStore categoryStore,
@@ -42,10 +55,20 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationService = navigationServiceEx;
 
             GoToItemCommand = new RelayCommand(GoToItemActionCommand);
+            if (Item.Extras != null)
+            {
+                Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)) );
+                Extras.ValueChanged += Extras_ValueChanged;
+            }
         }
         public void Load()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+        }
+
+        private void Extras_ValueChanged(object sender, ValueChangedEventArgs<string, PrimativeNotifyProperty<object>> e)
+        {
+            OnPropertyChanged(e.Key);
         }
 
         private void GoToItemActionCommand(object obj)
@@ -67,6 +90,7 @@ namespace Mhyrenz_Interface.ViewModels
         public override void Dispose()
         {
             _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
+            Extras.ValueChanged -= Extras_ValueChanged;
             BarcodeReceived = null;
         }
 
@@ -295,7 +319,7 @@ namespace Mhyrenz_Interface.ViewModels
         public int CategoryId => Item.CategoryId;
         public string CategoryName => Item.Category.Name;
 
-        public ObservableDictionary<string, object> Extras { get; set; }
+        public ObservableDictionary<string, PrimativeNotifyProperty<object>> Extras { get; private set; }
 
         public ICommand GoToItemCommand { get; }
 

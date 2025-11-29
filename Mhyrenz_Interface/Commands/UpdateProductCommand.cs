@@ -1,6 +1,7 @@
 ﻿using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Exceptions;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using System;
@@ -16,8 +17,7 @@ namespace Mhyrenz_Interface.Commands
     public class UpdateProductCommandDTO
     {
         public int Id { get; set; }
-        public string PropertyName { get; set; }
-        public object Value { get; set; }
+        public UpdateEntity<Product> Updater { get; set; }
     }
     public class UpdateProductCommand : BaseAsyncCommand
     {
@@ -34,23 +34,8 @@ namespace Mhyrenz_Interface.Commands
         {
             var DTO = parameter as UpdateProductCommandDTO;
 
-            try
-            {
-                var updated = await _productService.EditProperty(DTO.Id, DTO.PropertyName, DTO.Value);
-                //Debug.WriteLine($"Updated product {updated.Id} from command.");
-            }
-            catch (InvalidPriceException)
-            {
-
-            }
-            catch (NegativeException)
-            {
-
-            }
-            catch (DataException)
-            {
-                
-            }
+            var updated = await _productService.EditProperty(DTO.Id, DTO.Updater);
+            //Debug.WriteLine($"Updated product {updated.Id} from command.");
         }
     }
 }

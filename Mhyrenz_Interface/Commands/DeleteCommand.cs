@@ -70,7 +70,7 @@ namespace Mhyrenz_Interface.Commands
             //var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
             _products = products.Select(i => i.Item).ToList();
 
-            await _productService.EditPropertyRange(_products, nameof(Product.IsDeleted), true);
+            await _productService.EditPropertyRange(_products, entity => entity.IsDeleted = true);
             _inventoryStore.RemoveProduct(products);
 
         }
@@ -89,7 +89,7 @@ namespace Mhyrenz_Interface.Commands
 
         public async void Undo(object parameter = null)
         {
-            _products = await _productService.EditPropertyRange(_products.Select(i => i), nameof(Product.IsDeleted), false);
+            _products = await _productService.EditPropertyRange(_products.Select(i => i), entity => entity.IsDeleted = false);
             _inventoryStore.AddProduct(_products);
         }
     }

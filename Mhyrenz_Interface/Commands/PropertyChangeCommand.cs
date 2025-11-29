@@ -72,7 +72,7 @@ namespace Mhyrenz_Interface.Commands
 
         private void SetProperty(object value)
         {
-            var prop = typeof(T).GetProperty(_propertyName);
+            var prop = _target.GetType().GetProperty(_propertyName);
             if (prop != null && prop.CanWrite)
             {
                 PropertyChangeTracker.Suppress = true;

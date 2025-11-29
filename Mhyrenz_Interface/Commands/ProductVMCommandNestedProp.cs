@@ -12,23 +12,27 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class ProductVMCommandCommon : PropertyChangeCommand<ProductDataViewModel>
+    public class ProductVMCommandNestedProp : PropertyChangeCommand<BaseViewModel>
     {
-        private readonly ProductDataViewModel _target;
+        private readonly ProductDataViewModel _targetProduct;
+        private readonly BaseViewModel _owner;
         private readonly string _propertyName;
         private readonly object _oldValue;
         private readonly object _newValue;
         private readonly ICommand _command;
 
-        public ProductVMCommandCommon(ProductDataViewModel target,
+        public ProductVMCommandNestedProp(BaseViewModel owner,
+            string navigatorName,
             string propertyName,
             object oldValue,
             object newValue,
             ICommand command,
             Action propertyChangeHandler,
-            Type currentViewIn) : base(target, propertyName, oldValue, newValue, propertyChangeHandler, currentViewIn)
+            Type currentViewIn,
+            ProductDataViewModel targetProduct) : base(owner, navigatorName, oldValue, newValue, propertyChangeHandler, currentViewIn)
         {
-            _target = target;
+            _targetProduct = targetProduct;
+            _owner = owner;
             _oldValue = oldValue;
             _newValue = newValue;
             _propertyName = propertyName;
@@ -39,9 +43,16 @@ namespace Mhyrenz_Interface.Commands
         {
             _command.Execute(new UpdateProductCommandDTO()
             {
-                Id = _target.Item.Id,
-                PropertyName = _propertyName,
-                Value = intent == ActionType.Undo ? _oldValue : _newValue
+                Id = _targetProduct.Item.Id,
+                Updater = entity =>
+                {
+                    var value = intent == ActionType.Undo ? _oldValue : _newValue;
+
+                    if (entity.Extras is null)
+                        entity.Extras = new Dictionary<string, object>();
+
+                    entity.Extras[_propertyName] = value;
+                }
             });
 
             return true;

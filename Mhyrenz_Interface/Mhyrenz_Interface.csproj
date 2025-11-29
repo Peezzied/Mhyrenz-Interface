@@ -463,10 +463,11 @@
     </ApplicationDefinition>
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
+    <Compile Include="Commands\ProductVMCommandNestedProp.cs" />
     <Compile Include="Commands\CreateSessionCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\LoadCategoriesCommand.cs" />
-    <Compile Include="Commands\ProductVMCommandCommon.cs" />
+    <Compile Include="Commands\ProductVMCommandCommonProp.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\PurchaseProductCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
@@ -528,7 +529,9 @@
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Controls\Columns\ColumnType.cs" />
+    <Compile Include="Core\ObservableDictionary.cs" />
     <Compile Include="Core\InventorySettingsProvider.cs" />
+    <Compile Include="Core\PrimativeNotifyProperty.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="Core\ValidationAttributes.cs" />

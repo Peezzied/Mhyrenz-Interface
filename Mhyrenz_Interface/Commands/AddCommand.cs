@@ -89,7 +89,7 @@ namespace Mhyrenz_Interface.Commands
 
         public async void Redo(object parameter = null)
         {
-            var product = (await _productService.EditPropertyRange(_products.Select(i => i.Item), nameof(Product.IsDeleted), false)).First();
+            var product = (await _productService.EditPropertyRange(_products.Select(i => i.Item), entity => entity.IsDeleted = false)).First();
 
             _products = _inventoryStore.AddProduct(new[] { product });
 

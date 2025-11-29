@@ -28,19 +28,19 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             return await Task.Run(() => _productDataService.CreateMany(entities));
         }
 
-        public async Task<Product> EditProperty(int id, string propertyName, object value)
+        public async Task<Product> EditProperty(int id, UpdateEntity<Product> update)
         {
             return await Task.Run(() =>
             {
-                var newEntity = _productDataService.UpdateProperty(id, propertyName, value);
+                var newEntity = _productDataService.UpdateProperty(id, update);
                 return newEntity;
             });
         }
-        public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, string propertyName, object value)
+        public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, UpdateEntity<Product> update)
         {
             return await Task.Run(() =>
             {
-                var newEntities = _productDataService.UpdatePropertyRange(products, propertyName, value);
+                var newEntities = _productDataService.UpdatePropertyRange(products, update);
                 return newEntities;
             });
         }

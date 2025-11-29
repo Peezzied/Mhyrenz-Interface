@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
+    public delegate void UpdateEntity<T>(T entity);
     public interface IDataService<T>
     {
         IEnumerable<T> GetAll();
@@ -20,9 +21,9 @@ namespace Mhyrenz_Interface.Domain.Services
 
         T Update(object id, T entity);
 
-        T UpdateProperty(object id, string propertyName, object newValue);
+        T UpdateProperty(object id, UpdateEntity<T> update);
+        IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, UpdateEntity<T> update);
 
         bool Delete(object id);
-        IEnumerable<T> UpdatePropertyRange(IEnumerable<T> entities, string propertyName, object newValue);
     }
 }
