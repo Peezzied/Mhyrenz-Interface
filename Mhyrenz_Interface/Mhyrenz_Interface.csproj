@@ -512,6 +512,7 @@
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Templates\Proxy\InventoryDataGridBindingProxy.cs" />
+    <Compile Include="Controls\Templates\Selectors\InventoryDataGridTemplateSelector.cs" />
     <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>

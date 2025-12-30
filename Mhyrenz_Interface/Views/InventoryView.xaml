@@ -8,6 +8,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Mhyrenz_Interface.Views"
       xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
+      xmlns:selectors="clr-namespace:Mhyrenz_Interface.Controls.Templates.Selectors"
       xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
@@ -52,9 +53,22 @@
                 ItemsSource="{Binding TabItems}"
                 mah:TabControlHelper.Underlined="TabPanel"
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
+            <TabControl.Resources>
+                <DataTemplate x:Key="Detailed" DataType="{x:Type vm:InventoryDataGridViewModel}">
+                    <controls:InventoryDataGrid Layout="Detailed"/>
+                </DataTemplate>
+                <DataTemplate x:Key="Compacted" DataType="{x:Type vm:InventoryDataGridViewModel}">
+                    <controls:InventoryDataGrid Layout="Compacted"/>
+                </DataTemplate>
+                <selectors:InventoryDataGridTemplateSelector x:Key="InventoryDataGridTemplateSelector"
+                    DetailedTemplate="{StaticResource Detailed}"
+                    CompactedTemplate="{StaticResource Compacted}"/>
+            </TabControl.Resources>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding ControlInstance}"/>
+                    <ContentControl 
+                        Content="{Binding ContentViewModel}" 
+                        ContentTemplateSelector="{StaticResource InventoryDataGridTemplateSelector}"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

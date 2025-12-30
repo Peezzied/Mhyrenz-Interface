@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
@@ -63,14 +62,17 @@ namespace Mhyrenz_Interface.ViewModels
             set => SetProperty(ref _selectedOptionsMenuItem, value);
         }
 
-        private UserControl _ribbonBar;
-        public UserControl RibbonBar
+        private object _ribbonBarViewModel;
+        public object RibbonBarViewModel
         {
-            get => _ribbonBar;
+            get
+            {
+                return _ribbonBarViewModel;
+            }
             set
             {
-                _ribbonBar = value;
-                OnPropertyChanged(nameof(RibbonBar));
+                _ribbonBarViewModel = value;
+                OnPropertyChanged(nameof(RibbonBarViewModel));
             }
         }
 
@@ -280,10 +282,11 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void UpdateCurrentViewModel(Type viewType)
         {
-            _navigationServiceEx.CurrentViewModel = _viewModelFactory.CreateViewModel(viewType);
+            var vm = _viewModelFactory.CreateViewModel(viewType);
+            _navigationServiceEx.CurrentViewModel = vm;
             OnPropertyChanged(nameof(CurrentViewModel));
 
-            //Debug.WriteLine($"Current ViewModel updated to: {CurrentViewModel.GetType().Name}");
+            RibbonBarViewModel = this;
         }
 
         internal void SuspendMainBarcodeReceiver()

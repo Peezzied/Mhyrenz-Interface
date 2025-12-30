@@ -86,13 +86,13 @@ namespace Mhyrenz_Interface.ViewModels
                 _selectedItem = value;
 
                 var tabItem = SelectedItem.CastTo<InventoryTabItem>();
-                tabItem.ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>().Load();
-                _mainViewModel.RibbonBar = tabItem.RibbonBar;
+                tabItem.ContentViewModel.Load();
+                _mainViewModel.RibbonBarViewModel = tabItem;
 
-                tabItem.Refresh();
+                if (!SearchBar.IsNullOrEmpty()) tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
 
-                var selected = tabItem.ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>().SelectedItems;
+                var selected = tabItem.ContentViewModel.SelectedItems;
                 if (selected != null && selected.Any())
                     CanDelete = true;
                 else CanDelete = false;
@@ -187,7 +187,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             foreach (var item in TabItems)
             {
-                var vm = item.ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>();
+                var vm = item.ContentViewModel;
                 vm.Dispose();
                 vm.SelectedItemsChanged -= Vm_SelectedItemsChanged;
                 item.Dispose();
@@ -212,7 +212,7 @@ namespace Mhyrenz_Interface.ViewModels
             var categoryId = products.First().CategoryId;
 
             InventoryTabItem newTab = tabItems[categoryId];
-            var vm = newTab.ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>();
+            var vm = newTab.ContentViewModel;
             bool isDiff = false;
             if (newTab != SelectedItem)
             {
@@ -258,7 +258,8 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var vm = _inventoryDataGridViewModelFactory(this);
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            var tab = new InventoryTabItem(_mainViewModel.RibbonBar, vm, category.Key, category.Value, _inventorySettingsProvider, _appSettingsManager,
+            vm.Layout = InventoryDataGridLayout.Detailed;
+            var tab = new InventoryTabItem(vm, category.Key, category.Value, _inventorySettingsProvider, _appSettingsManager,
                 product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
             );
 
@@ -327,7 +328,7 @@ namespace Mhyrenz_Interface.ViewModels
         private void DeleteCommand(object parameter)
         {
             var cmd = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
-            var vm = SelectedItem.CastTo<InventoryTabItem>().ControlInstance.DataContext.CastTo<InventoryDataGridViewModel>();
+            var vm = SelectedItem.CastTo<InventoryTabItem>().ContentViewModel;
 
             cmd.Execute(vm.SelectedItems);
         }

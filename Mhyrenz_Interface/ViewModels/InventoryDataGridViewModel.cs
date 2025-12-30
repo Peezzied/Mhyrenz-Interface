@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -25,6 +26,7 @@ namespace Mhyrenz_Interface.ViewModels
 
     public class InventoryDataGridViewModel : BaseViewModel
     {
+        public InventoryDataGridLayout Layout { get; set; }
         private ICollectionView _inventory;
         public ICollectionView Inventory
         {
@@ -65,17 +67,6 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _selectedItem = value;
                 OnPropertyChanged(nameof(SelectedItem));
-            }
-        }
-
-        private bool _isGeneric;
-        public bool IsGeneric
-        {
-            get => _isGeneric;
-            set
-            {
-                _isGeneric = value;
-                OnPropertyChanged(nameof(IsGeneric));
             }
         }
 

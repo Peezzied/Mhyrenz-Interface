@@ -6,9 +6,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls"
+             xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
+             xmlns:tools="clr-namespace:Mhyrenz_Interface.Controls.RibbonBarTools"
              mc:Ignorable="d" 
              xmlns:core="clr-namespace:Mhyrenz_Interface.Core"
              d:DesignHeight="50" d:DesignWidth="800">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type vm:ShellViewModel}">
+            <tools:BarcodeTools/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InventoryTabItem}">
+            <tools:InventoryDataGridTools/>
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid Background="Black">
         <hc:FlexPanel Margin="30, 0" FlexDirection="Row" JustifyContent="SpaceBetween">
             <hc:UniformSpacingPanel Spacing="30" Grid.Row="0" Orientation="Horizontal">
@@ -24,7 +34,7 @@
                         </local:IconButtonWithTip.IconContent>
                     </local:IconButtonWithTip>
                 </hc:UniformSpacingPanel>
-                <ContentControl Content="{Binding RibbonBar}"/>
+                <ContentControl Content="{Binding RibbonBarViewModel}"/>
             </hc:UniformSpacingPanel>
             <hc:UniformSpacingPanel Spacing="20" VerticalAlignment="Center">
                 <hc:Shield FontSize="14" Subject="session" d:Status="Fri, August 08" Status="{Binding Session}"/>

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Controls;
 using System.Windows.Input;
 using HandyControl.Controls;
-using Mhyrenz_Interface.Controls;
-using Mhyrenz_Interface.Controls.RibbonBarTools;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
@@ -19,49 +16,19 @@ namespace Mhyrenz_Interface.ViewModels
         public string Name => _category.Name;
         public int Id => _category.Id;
 
-        private ContentControl _controlInstance;
         private Predicate<object> _originalFilter;
 
-        public ContentControl ControlInstance
+        private InventoryDataGridViewModel _contentViewModel;
+        public InventoryDataGridViewModel ContentViewModel
         {
             get
             {
-                if (_controlInstance == null)
-                {
-                    RibbonBar = new InventoryDataGridTools() { DataContext = this };
-
-                    CanToggleDependents = CanToggleGenericName;
-                    _inventoryDataGridViewModel.IsGeneric = CanToggleDependents;
-
-                    _controlInstance = new InventoryDataGrid
-                    {
-                        Layout = InventoryDataGridLayout.Detailed,
-                        DataContext = _inventoryDataGridViewModel,
-                    };
-                }
-                return _controlInstance;
+                return _contentViewModel;
             }
-        }
-
-        private bool _canToggleDependents;
-        public bool CanToggleDependents
-        {
-            get => _canToggleDependents;
             set
             {
-                _canToggleDependents = value;
-                OnPropertyChanged(nameof(CanToggleDependents));
-            }
-        }
-
-        private bool _canToggleGenericName;
-        public bool CanToggleGenericName
-        {
-            get => _canToggleGenericName;
-            set
-            {
-                _canToggleGenericName = value;
-                OnPropertyChanged(nameof(CanToggleGenericName));
+                _contentViewModel = value;
+                OnPropertyChanged(nameof(ContentViewModel));
             }
         }
 
@@ -70,12 +37,9 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly Category _category;
         private readonly Func<ProductDataViewModel, bool> _searchFilter;
 
-        public UserControl RibbonBar { get; private set; }
-
         public ICommand ToggleColumnCommand { get; }
 
         public InventoryTabItem(
-            UserControl ribbonBar,
             InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             ICollectionView allProducts,
@@ -88,10 +52,10 @@ namespace Mhyrenz_Interface.ViewModels
             _allProducts = allProducts;
             _searchFilter = searchFilter;
 
-            RibbonBar = ribbonBar;
             ToggleColumnCommand = new RelayCommand<Columns>(ToggleColumn);
 
             _inventoryDataGridViewModel = inventoryDataGridViewModel;
+            ContentViewModel = _inventoryDataGridViewModel;
 
 
             var categorySettings = inventorySettingsProvider.SettigsMap[Id];
