@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.Controls
 {
@@ -18,8 +19,6 @@ namespace Mhyrenz_Interface.Controls
             InitializeComponent();
         }
 
-
-
         public InventoryDataGridLayout Layout
         {
             get { return (InventoryDataGridLayout)GetValue(LayoutProperty); }
@@ -29,6 +28,15 @@ namespace Mhyrenz_Interface.Controls
         public static readonly DependencyProperty LayoutProperty =
             DependencyProperty.Register("Layout", typeof(InventoryDataGridLayout), typeof(InventoryDataGrid), new PropertyMetadata(InventoryDataGridLayout.Compacted));
 
+
+        public object TabOwner
+        {
+            get { return (InventoryTabItem)GetValue(TabOwnerProperty); }
+            set { SetValue(TabOwnerProperty, value); }
+        }
+            
+        public static readonly DependencyProperty TabOwnerProperty =
+            DependencyProperty.Register("TabOwner", typeof(InventoryTabItem), typeof(InventoryDataGrid), new PropertyMetadata(null));
 
     }
 }

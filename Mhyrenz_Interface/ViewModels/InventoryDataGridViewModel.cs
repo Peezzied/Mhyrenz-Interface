@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls;
+using Mhyrenz_Interface.Controls.Behaviors;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -15,33 +18,13 @@ using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public enum Columns
-    {
-        IdColumn,
-        GenericNameColumn,
-        BatchColumn,
-        ExpiryColumn,
-        SupplierColumn
-    }
-
     public class InventoryDataGridViewModel : BaseViewModel
     {
-        public InventoryDataGridLayout Layout { get; set; }
-        private ICollectionView _inventory;
-        public ICollectionView Inventory
-        {
-            get => _inventory;
-            set
-            {
-                if (_inventory != value)
-                {
-                    _inventory = value;
-                    _inventory.SortDescriptions.Clear();
-                    _inventory.SortDescriptions.Add(new SortDescription(nameof(ProductDataViewModel.Name), ListSortDirection.Ascending));
-                    OnPropertyChanged(nameof(Inventory));
-                }
-            }
-        }
+        public InventoryDataGridLayout Layout { get; }
+
+        private readonly ICollectionView _inventory;
+        public ICollectionView Inventory => _inventory;
+
         public event Action<ActionType> UndoRedoEvent;
 
         public event Action CommitEdits;
@@ -59,6 +42,8 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        public IEnumerable<DataGridColumn> DataGridColumnOwner { get; set; }
+
         private object _selectedItem;
         public object SelectedItem
         {
@@ -69,6 +54,8 @@ namespace Mhyrenz_Interface.ViewModels
                 OnPropertyChanged(nameof(SelectedItem));
             }
         }
+
+        public ObservableDictionary<string, ColumnSettingViewModel> ColumnsSettings { get; set; }
 
         private bool _idColumn;
         public bool IdColumn
@@ -104,13 +91,13 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private bool _expiryColumn;
-        public bool ExpiryColumn
+        public bool ExpiryDateColumn
         {
             get => _expiryColumn;
             set
             {
                 _expiryColumn = value;
-                OnPropertyChanged(nameof(ExpiryColumn));
+                OnPropertyChanged(nameof(ExpiryDateColumn));
             }
         }
 
@@ -125,6 +112,21 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private bool _barcodeColumn;
+        public bool BarcodeColumn
+        {
+            get
+            {
+                return _barcodeColumn;
+            }
+            set
+            {
+                _barcodeColumn = value;
+                OnPropertyChanged(nameof(BarcodeColumn));
+            }
+        }
+
+
         public ObservableDictionary<string, InventorySettings.ColumnSchema> ColumnExtras { get; set; }
 
         public SelectionRowsInfo SelectionInfo { get; set; }
@@ -134,6 +136,7 @@ namespace Mhyrenz_Interface.ViewModels
         public event Action<ProductDataViewModel> Purchased;
         public event Action<bool> SelectedItemsChanged;
         public event Action SwitchSelectedItem;
+        public event Action OnLoad;
 
         private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
@@ -159,22 +162,39 @@ namespace Mhyrenz_Interface.ViewModels
             public bool CanSelect { get; set; }
         }
 
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost)
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost, InventoryDataGridLayout layout)
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
             _productService = productService;
-            _inventoryStore = inventoryStore;
 
+            _inventory = new ListCollectionView(_inventoryStore.Products);
+
+            Layout = layout;
 
             DeleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
         }
 
+        private void ApplyDefaultSort()
+        {
+            if (_inventory is ListCollectionView view)
+            {
+                view.CustomSort = Comparer<ProductDataViewModel>.Create((a, b) =>
+                    StringComparer.CurrentCultureIgnoreCase.Compare(a?.Name, b?.Name)
+                );
+
+                view.Refresh();
+            }
+        }
+
         public void Load()
         {
+            // FIXME: the subscription may cause the lag
             _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
             _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
             IsEditCancelled = false;
+            ApplyDefaultSort();
+            OnLoad?.Invoke();
         }
 
         public override void Dispose()
@@ -182,6 +202,7 @@ namespace Mhyrenz_Interface.ViewModels
             IsEditCancelled = true;
             CommitEdits?.Invoke();
             _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
+            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;  
         }
 
         public void SelectItem(bool isDiff, int index, IEnumerable<ProductDataViewModel> selection)

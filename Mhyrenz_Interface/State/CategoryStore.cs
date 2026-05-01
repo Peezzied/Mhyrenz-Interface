@@ -22,18 +22,8 @@ namespace Mhyrenz_Interface.State
 
         public event Action Updated;
 
-        private Dictionary<Category, ICollectionView> _categories = new Dictionary<Category, ICollectionView>();
-        public Dictionary<Category, ICollectionView> Categories
-        {
-            get => _categories;
-            set
-            {
-                _categories = value;
-                OnChange();
-            }
-        }
-
         public Dictionary<int, Brush> Colors { get; set; } = new Dictionary<int, Brush>();
+        public Dictionary<Category, Predicate<object>> CategoriesFilter { get; private set; } = new Dictionary<Category, Predicate<object>>();
 
         private void OnChange()
         {
@@ -59,14 +49,13 @@ namespace Mhyrenz_Interface.State
 
         public async Task UpdateCategories()
         {
-            Categories.Clear();
+            CategoriesFilter.Clear();
 
             var result = await _categoryService.GetAllCategories();
 
             foreach (var item in result)
             {
-                Categories[item] = new ListCollectionView(_inventoryStore.Products);
-                Categories[item].Filter = obj => obj is ProductDataViewModel vm
+                CategoriesFilter[item] = obj => obj is ProductDataViewModel vm
                     && vm.CategoryId == item.Id;
             }
         }

@@ -37,11 +37,11 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
                 {
                     var inventoryConfig = context.Configuration.GetConnectionString("DefaultConnection");
 
-                    services.AddOptions<AppSettingsManager.Settings>()
+                    services.AddOptions<AppSettingsManager.AppSettings>()
                         .BindConfiguration("AppSettings");
 
                     services.AddOptions<List<InventorySettings>>()
-                        .BindConfiguration("Inventory");
+                        .BindConfiguration("InventorySettings");
 
                     services
                         .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
@@ -78,9 +78,12 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
         }
 
         [Test]
-        public void InventorySettingsProviderTest()
+        public async Task UpdateAppSettingsNodeTest()
         {
-
+            AppSettingsTestSetup.ServiceProvider.GetRequiredService<AppSettingsManager>().UpdateAppSettingsNode<AppSettingsManager.AppSettings>(options =>
+            {
+                options.BarcodePort = "IT WORKED";
+            });
         }
     }
 }

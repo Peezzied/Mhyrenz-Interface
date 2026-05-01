@@ -22,5 +22,17 @@ namespace Mhyrenz_Interface.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("{}")]
+        public string InventoryDataGrid {
+            get {
+                return ((string)(this["InventoryDataGrid"]));
+            }
+            set {
+                this["InventoryDataGrid"] = value;
+            }
+        }
     }
 }

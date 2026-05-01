@@ -90,11 +90,11 @@ namespace Mhyrenz_Interface
 
             var inventoryConfig = context.Configuration.GetConnectionString("DefaultConnection");
 
-            services.AddOptions<AppSettingsManager.Settings>()
+            services.AddOptions<AppSettingsManager.AppSettings>()
                 .BindConfiguration("AppSettings");
 
             services.AddOptions<List<InventorySettings>>()
-                .BindConfiguration("Inventory");
+                .BindConfiguration("InventorySettings");
 
             services
                 .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
@@ -103,6 +103,8 @@ namespace Mhyrenz_Interface
                 .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
 
                 .AddSingleton<InventorySettingsProvider>()
+
+                .AddSingleton<InventoryDataGridSettingsProvider>()
 
                 .AddSingleton<IUndoRedoManager, UndoRedoManager>()
                 .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()
@@ -142,63 +144,23 @@ namespace Mhyrenz_Interface
                 .AddTransient<InventoryDataGridViewModel>()
                 .AddTransient<AddProductViewModel>()
                 .AddTransient<SessionBoxContext>()
+                .AddTransient<InventoryTabItem>()
 
                 //.AddSingleton<CreateViewModel<IncomingPanelViewModel>>(s =>
                 //{
                 //    return _ => ActivatorUtilities.CreateInstance<IncomingPanelViewModel>(s);
                 //})
-                .AddSingleton<CreateViewModel<ProductDataViewModel>>(s =>
-                {
-                    return (object parameter) =>
-                    {
-                        if (parameter is Product product)
-                            return ActivatorUtilities.CreateInstance<ProductDataViewModel>(s, product);
-                        throw new ArgumentException("Invalid parameter type for ProductDataViewModel creation.");
-                    };
-                })
-                .AddSingleton<CreateViewModel<TransactionDataViewModel>>(s =>
-                {
-                    return (object parameter) =>
-                    {
-                        if (parameter is TransactionDataViewModelDTO dto)
-                            return ActivatorUtilities.CreateInstance<TransactionDataViewModel>(s, dto);
-
-                        throw new ArgumentException("Invalid parameter type for TransactionDataViewModel creation.");
-                    };
-                })
-                .AddSingleton<CreateViewModel<SessionBoxContext>>(s =>
-                {
-                    return _ => s.GetRequiredService<SessionBoxContext>();
-                })
-                .AddSingleton<CreateViewModel<AddProductViewModel>>(s =>
-                {
-                    return _ => ActivatorUtilities.CreateInstance<AddProductViewModel>(s);
-                })
-                .AddSingleton<CreateViewModel<InventoryDataGridViewModel>>(s =>
-                {
-                    return (object parameter) =>
-                    {
-                        if (parameter is BaseViewModel vm)
-                            return ActivatorUtilities.CreateInstance<InventoryDataGridViewModel>(s, vm);
-                        throw new ArgumentException("Invalid parameter type for InventoryDataGridViewModel creation.");
-                    };
-                })
-                .AddSingleton<CreateViewModel<HomeViewModel>>(s =>
-                {
-                    return _ => ActivatorUtilities.CreateInstance<HomeViewModel>(s);
-                })
-                .AddSingleton<CreateViewModel<InventoryViewModel>>(s =>
-                {
-                    return _ => ActivatorUtilities.CreateInstance<InventoryViewModel>(s);
-                })
-                .AddSingleton<CreateViewModel<TransactionViewModel>>(s =>
-                {
-                    return _ => ActivatorUtilities.CreateInstance<TransactionViewModel>(s);
-                })
-                .AddSingleton<CreateViewModel<SettingsViewModel>>(s =>
-                {
-                    return _ => ActivatorUtilities.CreateInstance<SettingsViewModel>(s);
-                })
+                .AddViewModelFactory<ProductDataViewModel, Product>()
+                .AddViewModelFactory<TransactionDataViewModel, TransactionDataViewModelDTO>()
+                .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
+                .AddViewModelFactory<InventoryDataGridViewModel>()
+                .AddViewModelFactory<InventoryTabItem>()
+                .AddViewModelFactory<SessionBoxContext>(resolveFromContainer: true)
+                .AddViewModelFactory<AddProductViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<InventoryViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<TransactionViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<SettingsViewModel>(resolveFromContainer: true)
 
                 .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()

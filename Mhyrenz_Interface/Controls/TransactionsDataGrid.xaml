@@ -25,13 +25,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <hc:Tag ShowCloseButton="False" FontFamily="Arial"
-                                          Padding="10,0"
-                                          Margin="2"
-                                          Height="20"
-                                          Foreground="White"
-                                          Content="{Binding Product.CategoryName}"
-                                          Background="{Binding Product.CategoryColor}" />
+                    <local:CategoryTag Padding="10,0" CategoryName="{Binding Product.CategoryName}" CategoryColor="{Binding Product.CategoryColor}"/>
 
                     <local:MaxLinesTextBlock Grid.Column="1" FontFamily="Arial"
                                        Text="{Binding Name}"

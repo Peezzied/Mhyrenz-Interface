@@ -122,11 +122,11 @@ namespace Mhyrenz_Interface.State
 
         public async Task Register(IEnumerable<Product> transactions)
         {
-            // SLOW TIME COMPLEXITY - RESOLVE LATER
+            // FIXME: SLOW TIME COMPLEXITY - RESOLVE LATER
 
             var tasks = transactions.Select(item =>
-                _productService.EditProperty(item.Id, entity => entity.Qty = item.Qty) // resolve a batch edit
-            );
+                _productService.EditProperty(item.Id, entity => entity.Qty = item.Qty)
+            );  // FIXME: resolve with batch edit (EditRangeProperty)
 
             await Task.WhenAll(tasks);
 
@@ -308,18 +308,12 @@ namespace Mhyrenz_Interface.State
                 {
                     await App.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _trackers.Remove(_trackers.FirstOrDefault(t => t.Key.Item.Id == product.Id).Key);
-
-                        //var updated = _productsViewModelFactory(product);
-                        //Assert.That(updated.Purchase != viewModel.Purchase);
                         vm.Item = product;
                         PurchaseEvent?.Invoke(vm, new InventoryStoreEventArgs()
                         {
                             ProductId = product.Id,
                             Product = vm
                         });
-
-                        _trackers[Products[index]] = TrackProduct(Products[index]);
                     }), System.Windows.Threading.DispatcherPriority.Input);
 
                     LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });

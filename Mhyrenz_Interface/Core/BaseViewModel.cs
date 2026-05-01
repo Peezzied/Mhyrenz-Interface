@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Mhyrenz_Interface
 {
-    public delegate TViewModel CreateViewModel<out TViewModel>(object parameter = null);
+    public delegate TViewModel CreateViewModel<out TViewModel>(params object[] parameters);
 
     public abstract class BaseViewModel : INotifyPropertyChanged, IDisposable
     {

@@ -10,35 +10,13 @@
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls.RibbonBarTools"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="800">
-    <hc:UniformSpacingPanel Spacing="15" Orientation="Horizontal" ItemVerticalAlignment="Center">
-        <TextBlock VerticalAlignment="Center" FontSize="14" Width="70" Foreground="White" d:Text="Generic" Text="{Binding Name}"/>
-        <hc:UniformSpacingPanel Grid.Column="1" Orientation="Horizontal" Spacing="7">
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.IdColumn}" Foreground="White" Tiptext="Toggle ID column visibility">
-                <controls:IconButtonWithTip.IconContent>
-                    <iconPacks:PackIconBoxIcons Kind="RegularHash"/>
-                </controls:IconButtonWithTip.IconContent>
-            </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.BatchColumn}" Foreground="White" Tiptext="Toggle Batch column visibility">
-                <controls:IconButtonWithTip.IconContent>
-                    <iconPacks:PackIconLucide Kind="Tags"/>
-                </controls:IconButtonWithTip.IconContent>
-            </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.ExpiryColumn}" Foreground="White" Tiptext="Toggle Expiry Date column visibility">
-                <controls:IconButtonWithTip.IconContent>
-                    <iconPacks:PackIconMaterial Kind="TimerSand"/>
-                </controls:IconButtonWithTip.IconContent>
-            </controls:IconButtonWithTip>
-            <controls:IconButtonWithTip TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.SupplierColumn}"  Foreground="White" Tiptext="Toggle Supplier column visibility">
-                <controls:IconButtonWithTip.IconContent>
-                    <iconPacks:PackIconMaterial Kind="TruckCargoContainer"/>
-                </controls:IconButtonWithTip.IconContent>
-            </controls:IconButtonWithTip>
-            <hc:Divider Orientation="Vertical" MaxHeight="25" Visibility="{Binding CanToggleDependents, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <controls:IconButtonWithTip Visibility="{Binding CanToggleGenericName, Converter={StaticResource BooleanToVisibilityConverter}}" TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Command="{Binding ToggleColumnCommand}" CommandParameter="{x:Static vm:Columns.GenericNameColumn}" Foreground="White" Tiptext="Toggle Generic Name column visibility">
-                <controls:IconButtonWithTip.IconContent>
-                    <iconPacks:PackIconMaterial Kind="TagTextOutline"/>
-                </controls:IconButtonWithTip.IconContent>
-            </controls:IconButtonWithTip>
-        </hc:UniformSpacingPanel>
+    <hc:UniformSpacingPanel Spacing="10" Orientation="Horizontal" ItemVerticalAlignment="Center">
+        <controls:CategoryTag CategoryName="{Binding Name}" CategoryColor="{Binding Color}" d:CategoryColor="Green" d:CategoryName="Generic"/>
+        <ToggleButton x:Name="ColumnListOpener" HorizontalAlignment="Left" IsChecked="True" Style="{StaticResource ToggleButtonIcon.Small}" hc:IconSwitchElement.Geometry="{StaticResource LeftGeometry}" hc:IconSwitchElement.GeometrySelected="{StaticResource RightGeometry}"/>
+        <Popup VerticalAlignment="Stretch" PlacementTarget="{Binding ElementName=ColumnListOpener}" AllowsTransparency="True" IsOpen="{Binding IsChecked, ElementName=ColumnListOpener}">
+            <Border VerticalAlignment="Stretch" Padding="0,7" Effect="{StaticResource EffectShadow3}" Margin="24">
+                <controls:ColumnList/>
+            </Border>
+        </Popup>
     </hc:UniformSpacingPanel>
 </UserControl>

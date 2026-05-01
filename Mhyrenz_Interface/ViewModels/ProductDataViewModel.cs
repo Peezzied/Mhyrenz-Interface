@@ -88,7 +88,7 @@ namespace Mhyrenz_Interface.ViewModels
         public override void Dispose()
         {
             _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
-            Extras.ValueChanged -= Extras_ValueChanged;
+            if (Extras != null) Extras.ValueChanged -= Extras_ValueChanged;
             BarcodeReceived = null;
         }
 

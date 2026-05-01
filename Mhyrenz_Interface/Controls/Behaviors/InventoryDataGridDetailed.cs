@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
 using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Controls.Attached;
 using Mhyrenz_Interface.Controls.Columns;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.ViewModels;
@@ -14,18 +18,40 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class InventoryDataGridDetailed : Behavior<DataGrid>
     {
-        protected override void OnAttached()
+        public InventoryTabItem TabOwner
         {
-            AssociatedObject.SelectionChanged += DataGrid_SelectionChanged;
-            AssociatedObject.Loaded += AssociatedObject_Loaded;
-            AssociatedObject.Unloaded += AssociatedObject_Unloaded;
+            get { return (InventoryTabItem)GetValue(TabOwnerProperty); }
+            set { SetValue(TabOwnerProperty, value); }
+        }
 
+        public static readonly DependencyProperty TabOwnerProperty =
+            DependencyProperty.Register("TabOwner", typeof(InventoryTabItem), typeof(InventoryDataGridDetailed), new PropertyMetadata(null, OnTabOwnerChanged));
+
+        public static event Action<InventoryTabItem> TabChanged;
+
+        private static void OnTabOwnerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var behavior = (InventoryDataGridDetailed)d;
+            var tab = e.NewValue as InventoryTabItem;
+
+            if (tab == null || behavior.AssociatedObject == null)
+                return;
+
+            behavior.InventoryDataGridDetailed_TabChanged(tab);
+        }
+
+        public InventoryDataGridDetailed()
+        {
+            TabChanged += InventoryDataGridDetailed_TabChanged;
+        }
+
+        private void InventoryDataGridDetailed_TabChanged(InventoryTabItem tab)
+        {
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
-                if (vm.ColumnExtras is null)
-                    return;
-                if (vm.ColumnExtras.Any())
+
+                if (vm.ColumnExtras?.Any() ?? false)
                 {
                     foreach (var item in vm.ColumnExtras)
                     {
@@ -42,11 +68,13 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                                 //});
                                 break;
                             case ColumnType.Text:
-                                AssociatedObject.Columns.Add(new TextColumn
+                                var column = new TextColumn
                                 {
                                     Header = name,
-                                    ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{field}].Value"
-                                });
+                                    ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{field}].Value",
+                                };
+                                AssociatedObject.Columns.Add(column);
+                                InventoryDataGridColumn.SetColumnPath(column, field);
                                 break;
 
                             default:
@@ -54,22 +82,71 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                         }
                     }
                 }
-            }), DispatcherPriority.ContextIdle);
+
+                tab.LoadColumns(AssociatedObject.Columns.Select(x => new ColumnInfo
+                {
+                    Header = x.Header?.ToString(),
+                    DisplayIndex = x.DisplayIndex,
+                    IgnoreReorder = InventoryDataGridColumn.GetIgnoreReorder(x),
+                    IgnoreVisibilityToggle = InventoryDataGridColumn.GetIgnoreVisibilityToggle(x),
+                }));
+
+                foreach (var col in AssociatedObject.Columns)
+                {
+                    if (col.Header != null)
+                    {
+                        var columnPath = InventoryDataGridColumn.GetColumnPath(col);
+
+                        BindingOperations.ClearBinding(col, DataGridColumn.VisibilityProperty);
+                        BindingOperations.ClearBinding(col, DataGridColumn.DisplayIndexProperty);
+
+                        BindingOperations.SetBinding(col, DataGridColumn.VisibilityProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{columnPath ?? col.Header}].{nameof(ColumnSettingViewModel.IsVisible)}"),
+                            Converter = new BooleanToVisibilityConverter(),
+                        });
+
+                        BindingOperations.SetBinding(col, DataGridColumn.DisplayIndexProperty, new Binding
+                        {
+                            Source = vm,
+                            Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{columnPath ?? col.Header}].{nameof(ColumnSettingViewModel.DisplayIndex)}"),
+                            Mode = BindingMode.TwoWay
+                        });
+                    }
+                }
+            }));
+        }
+
+        protected override void OnAttached()
+        {
+            AssociatedObject.SelectionChanged += DataGrid_SelectionChanged;
+            AssociatedObject.Loaded += AssociatedObject_Loaded;
+            AssociatedObject.Unloaded += AssociatedObject_Unloaded;
 
             base.OnAttached();
         }
 
         private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
         {
-            AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem;
-            //AssociatedObject.Loaded -= AssociatedObject_Loaded;
+            var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+
+            vm.SwitchSelectedItem -= InventoryDataGridSelect_SwitchSelectedItem;
+            vm.CommitEdits -= InventoryDataGridDetailed_CommitEdits;
+
         }
 
         private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
         {
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
             AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().CommitEdits += InventoryDataGridDetailed_CommitEdits;
-            App.Current.Dispatcher.BeginInvoke(new Action(() => SelectRow()), DispatcherPriority.Background);
+
+            var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                SelectRow();
+            }), DispatcherPriority.Background);
         }
 
         private void InventoryDataGridDetailed_CommitEdits()
@@ -129,5 +206,13 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
             //Debug.WriteLine($"{vm.SelectedItems.ElementAt(0).Name} SELECTED!");
         }
+    }
+
+    public class ColumnInfo
+    {
+        public string Header { get; internal set; }
+        public int DisplayIndex { get; internal set; }
+        public bool IgnoreVisibilityToggle { get; internal set; }
+        public bool IgnoreReorder { get; internal set; }
     }
 }

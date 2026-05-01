@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
@@ -56,6 +57,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
         private readonly ISessionStore _sessionStore;
+        private readonly CreateViewModel<InventoryTabItem> _inventoryTabItemFactory;
         private readonly IProductService _productService;
         private readonly IReportService _reportService;
         private readonly IUndoRedoManager _undoRedoManager;
@@ -71,7 +73,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
-                ((InventoryTabItem)SelectedItem).Refresh(); // OFTEN THROWS AN EXCEPTION WHEN CATEGORIES IS EMPTY
+                ((InventoryTabItem)SelectedItem).Refresh(); // FIXME: OFTEN THROWS AN EXCEPTION WHEN CATEGORIES IS EMPTY
 
             }
         }
@@ -88,6 +90,19 @@ namespace Mhyrenz_Interface.ViewModels
                 var tabItem = SelectedItem.CastTo<InventoryTabItem>();
                 tabItem.ContentViewModel.Load();
                 _mainViewModel.RibbonBarViewModel = tabItem;
+
+                var vm = tabItem.ContentViewModel;
+                System.Diagnostics.Debug.WriteLine("=== AFTER TAB SWITCH ===");
+                System.Diagnostics.Debug.WriteLine($"VM: {vm.GetHashCode()}");
+                System.Diagnostics.Debug.WriteLine($"VIEW: {vm.Inventory.GetHashCode()}");
+
+                System.Diagnostics.Debug.WriteLine(
+                    string.Join(", ",
+                        vm.Inventory.Cast<ProductDataViewModel>()
+                            .Take(10)
+                            .Select(p => p.Name)
+                    )
+                );
 
                 if (!SearchBar.IsNullOrEmpty()) tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
@@ -154,6 +169,7 @@ namespace Mhyrenz_Interface.ViewModels
             ShellViewModel shellViewModel,
             InventorySettingsProvider inventorySettingsProvider,
             AppSettingsManager appSettingsManager,
+            CreateViewModel<InventoryTabItem> inventoryTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
         {
@@ -163,6 +179,7 @@ namespace Mhyrenz_Interface.ViewModels
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;
             _sessionStore = sessionStore;
+            _inventoryTabItemFactory = inventoryTabItemFactory;
             _inventoryDataGridViewModelFactory = inventoryDataGridviewModelFactory;
             _addProductViewModelFactory = addProductViewModelFactory;
             _productService = productService;
@@ -199,9 +216,9 @@ namespace Mhyrenz_Interface.ViewModels
         {
             TabItems.Clear();
 
-            foreach (var category in _categorystore.Categories)
+            foreach (var category in _categorystore.CategoriesFilter)
             {
-                AddTabItem(category);
+                AddTabItem(category.Key, category.Value);
             }
         }
         #endregion
@@ -254,13 +271,16 @@ namespace Mhyrenz_Interface.ViewModels
 
         }
 
-        private void AddTabItem(KeyValuePair<Category, ICollectionView> category)
+        // for each category, create a tab item with a datagrid and filter for the category
+        private void AddTabItem(Category category, Predicate<object> filter)
         {
-            var vm = _inventoryDataGridViewModelFactory(this);
+            var vm = _inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Detailed);
+
             vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-            vm.Layout = InventoryDataGridLayout.Detailed;
-            var tab = new InventoryTabItem(vm, category.Key, category.Value, _inventorySettingsProvider, _appSettingsManager,
-                product => string.IsNullOrWhiteSpace(SearchBar) || product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0
+            var tab = _inventoryTabItemFactory(vm, category, filter,
+                (Func<ProductDataViewModel, bool>)(product =>
+                    string.IsNullOrWhiteSpace(SearchBar) ||
+                    product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0)
             );
 
             TabItems.Add(tab);
@@ -270,13 +290,13 @@ namespace Mhyrenz_Interface.ViewModels
         #region "Event handlers"
         private void CategoryStore_Updated()
         {
-            var items = TabItems.ToDictionary(i => i.Id, i => i);
-            foreach (var item in _categorystore.Categories)
-            {
-                if (items.ContainsKey(item.Key.Id))
-                    return;
-                AddTabItem(item);
-            }
+            //var items = TabItems.ToDictionary(i => i.Id, i => i);
+            //foreach (var item in _categorystore.CategoriesFilter)
+            //{
+            //    if (items.ContainsKey(item.Key.Id))
+            //        return;
+            //    AddTabItem(item);
+            //}
         }
 
         private void DrawerInstance_Closed(object sender, RoutedEventArgs e)

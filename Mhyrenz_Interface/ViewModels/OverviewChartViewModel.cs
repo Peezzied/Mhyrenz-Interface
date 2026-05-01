@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using System.Windows.Media;
 using HandyControl.Tools.Extension;
 using LiveChartsCore.Defaults;
@@ -48,7 +50,6 @@ namespace Mhyrenz_Interface.ViewModels
 
         public string Bindtest { get; set; } = "Hello, World! from OverviewChartViewModel!";
         public ObservableCollection<PieSeries<ObservableValue>> SalesByCategory { get; private set; } = new ObservableCollection<PieSeries<ObservableValue>>();
-        public Dictionary<Category, ICollectionView> Categories => _categoryStore.Categories;
 
         public ObservableCollection<CategoryChartViewModel> CategoryChartData = new ObservableCollection<CategoryChartViewModel>();
 
@@ -62,8 +63,22 @@ namespace Mhyrenz_Interface.ViewModels
 
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                LoadChart(Categories);
+                LoadChart(GetCategoriesView());
             }));
+        }
+
+        private Dictionary<Category, ICollectionView> GetCategoriesView()
+        {
+            return _categoryStore.CategoriesFilter.ToDictionary(
+                x => x.Key,
+                x =>
+                {
+                    ICollectionView view = new ListCollectionView(_inventoryStore.Products)
+                        {
+                            Filter = x.Value
+                        };
+                    return view;
+                });
         }
 
         private void Item_PointCreated(ChartPoint<ObservableValue, LiveChartsCore.SkiaSharpView.Drawing.Geometries.DoughnutGeometry, LiveChartsCore.SkiaSharpView.Drawing.Geometries.LabelGeometry> obj)
@@ -90,7 +105,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             foreach (var item in CategoryChartData)
             {
-                item.Sales.Value = (double)Categories[item.Category].Cast<ProductDataViewModel>()
+                item.Sales.Value = (double)GetCategoriesView()[item.Category].Cast<ProductDataViewModel>()
                     .Where(p => p.Purchase > 0)
                     .Sum(x => x.NetRetailPrice);
             }

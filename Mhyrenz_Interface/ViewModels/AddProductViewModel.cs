@@ -31,8 +31,6 @@ namespace Mhyrenz_Interface.ViewModels
             _categoryStore = categoryStore;
             _inventoryStore = inventoryStore;
 
-            Categories.AddRange(_categoryStore.Categories.Select(c => c.Key));
-
             base.SubmitActionCommand = new AddCommand(this, productService, inventoryStore, undoRedoManager);
         }
 

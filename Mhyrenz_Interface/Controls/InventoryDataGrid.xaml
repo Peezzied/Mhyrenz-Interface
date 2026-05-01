@@ -37,9 +37,10 @@
 
         <hc:BindingProxy x:Key="UserControlContext" Value="{Binding}"/>
 
+        <!--Column Templates-->
         <DataGridCheckBoxColumn x:Key="CheckboxColumn" x:Shared="False" Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
 
-        <DataGridTextColumn x:Key="IdColumn" Width="Auto" x:Shared="False" IsReadOnly="True" Header="Id" Binding="{Binding Item.Id}" Visibility="{Binding Value.IdColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <DataGridTextColumn attached:InventoryDataGridColumn.IgnoreReorder="True" x:Key="IdColumn" Width="Auto" x:Shared="False" IsReadOnly="True" Header="Id" Binding="{Binding Item.Id}">
             <DataGridTextColumn.ElementStyle>
                 <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                     <Setter Property="FontFamily" Value="Consolas"/>
@@ -50,7 +51,7 @@
             </DataGridTextColumn.ElementStyle>
         </DataGridTextColumn>
 
-        <DataGridTemplateColumn x:Key="NameColumn" x:Shared="False" CanUserSort="False" Header="Name" MaxWidth="545">
+        <DataGridTemplateColumn attached:InventoryDataGridColumn.IgnoreReorder="True" attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" x:Key="NameColumn" x:Shared="False" SortMemberPath="Name" SortDirection="Ascending" Header="Name" MaxWidth="545">
             <DataGridTemplateColumn.HeaderStyle>
                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
                     <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -120,51 +121,15 @@
             </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
 
-        <DataGridTemplateColumn x:Key="BatchColumn" x:Shared="False" Header="Batch" Width="125" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
-                    <local:MaxLinesTextBlock Text="{Binding Batch}"
-                         LineHeight="16" 
-                         MaxLines="3"
-                         Padding="4"
-                         Width="Auto"/>
+                    <local:CategoryTag CategoryName="{Binding CategoryName}" CategoryColor="{Binding CategoryColor}"/>
                 </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <local:CellAdorner>
-                        <TextBox Margin="2" Text="{Binding Batch, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
-                            <i:Interaction.Behaviors>
-                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
-                            </i:Interaction.Behaviors>
-                        </TextBox>
-                    </local:CellAdorner>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
         </DataGridTemplateColumn>
-
-        <DataGridTemplateColumn x:Key="ExpiryColumn" x:Shared="False" Header="Expiry" Width="125" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <local:MaxLinesTextBlock Text="{Binding Expiry}"
-                         MaxLines="3" FontFamily="Arial"
-                         Padding="4"
-                         Width="Auto"/>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <local:CellAdorner>
-                        <DatePicker Margin="2" Style="{StaticResource MahApps.Styles.DatePicker}" SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}" mah:TextBoxHelper.ClearTextButton="True">
-                            <i:Interaction.Behaviors>
-                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static DatePicker.SelectedDateProperty}"/>
-                            </i:Interaction.Behaviors>
-                        </DatePicker>
-                    </local:CellAdorner>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>
-
+        <!--/Column Templates-->
+        
         <Style x:Key="PurchaseStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
             <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
             <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
@@ -178,94 +143,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-
-        <!--<DataGridTemplateColumn x:Key="RetailColumn" x:Shared="False" Header="Retail" Width="100">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <TextBlock TextAlignment="Center" Text="{Binding RetailPrice, StringFormat=C, ConverterCulture=en-PH}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <local:CellAdorner>
-                        <mah:NumericUpDown Value="{Binding RetailPrice, UpdateSourceTrigger=Explicit}"
-                        Minimum="0" NumericInputMode="Numbers" TextAlignment="Center" StringFormat="C" Culture="en-PH"
-                        VerticalAlignment="Center" ButtonsAlignment="Opposite">
-                            <i:Interaction.Behaviors>
-                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
-                            </i:Interaction.Behaviors>
-                        </mah:NumericUpDown>
-                    </local:CellAdorner>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>-->
-        
-        <!--<DataGridTemplateColumn  x:Key="PurchaseColumn" x:Shared="False" x:Name="Purchase" Header="Purchase" Width="85">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Purchase}" HorizontalAlignment="Center" />
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <local:CellAdorner>
-                        <mah:NumericUpDown
-                        Minimum="0" 
-                        NumericInputMode="Numbers" TextAlignment="Center" 
-                        VerticalAlignment="Center" ButtonsAlignment="Opposite">
-                            <i:Interaction.Behaviors>
-                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
-                            </i:Interaction.Behaviors>
-                            <mah:NumericUpDown.Style>
-                                <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
-                                    <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
-                                    <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
-                                            <DataTrigger.Setters>
-                                                <Setter Property="Maximum" Value="{Binding PurchaseMaxNormal}"/>
-                                                <Setter Property="HideUpDownButtons" Value="True"/>
-                                                <Setter Property="Value" Value="{Binding PurchaseNormalEdit, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
-                                            </DataTrigger.Setters>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </mah:NumericUpDown.Style>
-                        </mah:NumericUpDown>
-                    </local:CellAdorner>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>-->
-
-        <!--<DataGridTemplateColumn x:Key="QtyColumn" x:Shared="False" Header="Qty" Width="85">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <TextBlock TextAlignment="Center" Text="{Binding Qty}" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"/>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-            <DataGridTemplateColumn.CellEditingTemplate>
-                <DataTemplate>
-                    <local:CellAdorner>
-                        <mah:NumericUpDown Value="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"
-                                       NumericInputMode="Numbers" TextAlignment="Center"
-                                       VerticalAlignment="Center">
-                            <i:Interaction.Behaviors>
-                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static mah:NumericUpDown.ValueProperty}"/>
-                            </i:Interaction.Behaviors>
-                        </mah:NumericUpDown>
-                    </local:CellAdorner>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellEditingTemplate>
-        </DataGridTemplateColumn>-->
-        
-        <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <hc:Tag ShowCloseButton="False" FontFamily="Arial" Width="90" Padding="0" Margin="2" Height="22" Foreground="White" Content="{Binding CategoryName}" Background="{Binding CategoryColor}"/>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-        </DataGridTemplateColumn>
 
         <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
 
@@ -310,16 +187,16 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Product: " VerticalAlignment="Center" />
-                            <TextBlock Text="Expiry: " VerticalAlignment="Center" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
-                            <TextBlock Text="Batch #: " VerticalAlignment="Center" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}" />
+                            <TextBlock Text="Expiry: " VerticalAlignment="Center" />
+                            <TextBlock Text="Batch #: " VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
                                     Style="{StaticResource DetailsTextStyle}" />
                             <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
+                                    Style="{StaticResource DetailsTextStyle}" />
                             <TextBlock Text="{Binding Item.Batch, Converter={StaticResource DetailsTextNoneConverter}}" 
-                                    Style="{StaticResource DetailsTextStyle}" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource Boolean2VisibilityReConverter}}"/>
+                                    Style="{StaticResource DetailsTextStyle}" />
                         </StackPanel>
                     </Grid>
                     <ContentControl x:Name="BarcodeContent" Content="{Binding}" Margin="5,19,0,0" HorizontalAlignment="Left">
@@ -342,15 +219,15 @@
 
         <Style x:Key="DataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid.Azure}">
             <Setter Property="EnableColumnVirtualization" Value="True"/>
+            <Setter Property="CanUserSortColumns" Value="False"/>
             <Setter Property="EnableRowVirtualization" Value="True"/>
             <Setter Property="GridLinesVisibility" Value="All"/>
             <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
-            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
-            <Setter Property="ItemsSource" Value="{Binding Inventory, IsAsync=True}"/>
+            <Setter Property="ItemsSource" Value="{Binding Inventory}"/>
             <Setter Property="AutoGenerateColumns" Value="False"/>
-            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
             <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
             <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+            <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
             <Setter Property="MaxWidth" Value="1920"/>
             <Setter Property="MaxHeight" Value="1080"/>
             <Setter Property="CanUserReorderColumns" Value="False"/>
@@ -386,7 +263,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="DataGridDetailedLayout">
-            <DataGrid SelectionUnit="FullRow" SelectionMode="Extended">
+            <DataGrid FrozenColumnCount="3" SelectionUnit="FullRow" SelectionMode="Extended">
                 <DataGrid.Style>
                     <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridStyle}">
                         <Setter Property="RowDetailsTemplate" Value="{x:Null}"/>
@@ -395,7 +272,7 @@
                                 <DataTrigger.Binding>
                                     <MultiBinding Converter="{StaticResource OrConverter}">
                                         <Binding Path="Value.BatchColumn" Source="{StaticResource UserControlContext}"/>
-                                        <Binding Path="Value.ExpiryColumn" Source="{StaticResource UserControlContext}"/>
+                                        <Binding Path="Value.ExpiryDateColumn" Source="{StaticResource UserControlContext}"/>
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
@@ -404,7 +281,7 @@
                     </Style>
                 </DataGrid.Style>
                 <i:Interaction.Behaviors>
-                    <behaviors:InventoryDataGridDetailed/>
+                    <behaviors:InventoryDataGridDetailed TabOwner="{Binding TabOwner, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                     <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
                     <behaviors:InventoryDataGridBehavior/>
                 </i:Interaction.Behaviors>
@@ -412,8 +289,8 @@
                     <StaticResource ResourceKey="CheckboxColumn" />
                     <StaticResource ResourceKey="IdColumn"/>
                     <StaticResource ResourceKey="NameColumn" />
-                    <columns:TextColumn ValuePath="Batch" Header="Batch" Width="125" Visibility="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <DataGridTemplateColumn Header="Expiry" Width="125" Visibility="{Binding Value.ExpiryColumn, Source={StaticResource UserControlContext}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <columns:TextColumn ValuePath="Batch" Header="Batch" Width="125" />
+                    <DataGridTemplateColumn Header="Expiry" Width="125" >
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <local:MaxLinesTextBlock Text="{Binding Expiry}"
@@ -434,11 +311,11 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-                    <columns:NumberColumn Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                    <columns:NumberColumn Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
-                    <DataGridTextColumn Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
-                    <columns:NumberColumn Header="Qty" Width="85" ValuePath="Qty" MinimumPath="QtyMin"/>
-                    <StaticResource ResourceKey="BarcodeColumn" />
+                    <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                    <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
+                    <DataGridTextColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
+                    <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" ValuePath="Qty" MinimumPath="QtyMin"/>
+                    <DataGridTemplateColumn Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}"  />
                     <StaticResource ResourceKey="CategoryColumn" />
                 </DataGrid.Columns>
             </DataGrid>

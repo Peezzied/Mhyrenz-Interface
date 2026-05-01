@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Controls.RibbonBarTools;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
@@ -107,10 +108,9 @@ namespace Mhyrenz_Interface.ViewModels
             _salesRecordService = salesRecordService;
             _transactionService = transactionsService;
 
-            InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
+            InventoryDataGridContext = inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Compacted);
             IncomingPanelViewModel = incomingPanelViewModel;
 
-            shellViewModel.RibbonBar = new BarcodeTools() { DataContext = shellViewModel };
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
 
             _sessionStore = sessionStore;
@@ -166,8 +166,8 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void DeferLoad()
         {
-            InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
-            InventoryDataGridContext.Inventory.Filter += FilterProducts;
+            //InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
+            //InventoryDataGridContext.Inventory.Filter += FilterProducts;
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
 

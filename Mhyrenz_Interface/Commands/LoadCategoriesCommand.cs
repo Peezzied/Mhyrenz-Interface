@@ -21,16 +21,16 @@ namespace Mhyrenz_Interface.Commands
 
         public override async Task ExecuteAsync(object parameter)
         {
-            var result = await _categoryService.GetAllCategories();
+            //var result = await _categoryService.GetAllCategories();
 
-            foreach (var item in result)
-            {
-                _categoryStore.Categories[item] = new ListCollectionView(_inventoryStore.Products)
-                {
-                    Filter = (obj) => obj is ProductDataViewModel vm
-                        && vm.CategoryId == item.Id
-                };
-            }
+            //foreach (var item in result)
+            //{
+            //    _categoryStore.Categories[item] = new ListCollectionView(_inventoryStore.Products)
+            //    {
+            //        Filter = (obj) => obj is ProductDataViewModel vm
+            //            && vm.CategoryId == item.Id
+            //    };
+            //}
 
         }
     }

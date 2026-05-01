@@ -26,8 +26,8 @@ namespace Mhyrenz_Interface.Core
 
             foreach (var setting in _monitor.CurrentValue)
             {
-                if (setting.ColumnExtras != null)
-                    columnMap[setting.Id] = setting.ColumnExtras;
+                if (setting.ExtraColumns != null)
+                    columnMap[setting.Id] = setting.ExtraColumns;
 
                 settingsMap[setting.Id] = setting;
             }

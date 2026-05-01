@@ -107,6 +107,9 @@ namespace Mhyrenz_Interface.Core
                     var propertyName = arg.Navigator;
                     var property = arg.Owner.GetType().GetProperty(propertyName) ?? throw new NoNullAllowedException("property");
                     var newValue = property.GetValue(arg.Owner);
+
+                    if (newValue == arg.Value) return;
+
                     Methods[e.PropertyName]?.Invoke(this, new TargetChangedEventArgs(
                         arg,
                         e.PropertyName), arg.Value, newValue);

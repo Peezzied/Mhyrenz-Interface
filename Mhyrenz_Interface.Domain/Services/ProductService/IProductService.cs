@@ -4,6 +4,7 @@ using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.ProductService
 {
+    // TODO: update to abstract the soft delete of an item.
     public interface IProductService
     {
         Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false);

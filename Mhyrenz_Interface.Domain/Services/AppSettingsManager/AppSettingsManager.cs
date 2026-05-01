@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
@@ -24,7 +25,7 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
             }
         }
 
-        public class Settings
+        public class AppSettings
         {
             public string ExportTemplate { get; set; }
             public string BarcodePort { get; set; }
@@ -38,49 +39,20 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
         }
 
 
-        public void UpdateAppSettingsNode(string[] path, object newValue)
+        public void UpdateAppSettingsNode<T>(Action<T> updater, string section = null)
         {
-            var keyPath = path.ToList();
-
-            if (keyPath == null || keyPath.Count == 0)
-                throw new ArgumentException("Key path must not be empty.");
-
             var text = File.Exists(Path) ? File.ReadAllText(Path) : "{}";
 
-            JObject root;
-            try
-            {
-                root = JObject.Parse(text);
-            }
-            catch
-            {
-                root = new JObject();
-            }
+            var rootObj = JObject.Parse(text)[section ?? typeof(T).Name] ?? throw new InvalidOperationException($"Section '{typeof(T).Name}' not found.");
+            var config = rootObj.ToObject<T>();
 
-            if (!(root["AppSettings"] is JObject currentNode))
-            {
-                currentNode = new JObject();
-                root["AppSettings"] = currentNode;
-            }
+            updater(config);
 
-            for (int i = 0; i < keyPath.Count - 1; i++)
-            {
-                var key = keyPath[i];
-
-                if (!(currentNode[key] is JObject nextNode))
-                {
-                    nextNode = new JObject();
-                    currentNode[key] = nextNode;
-                }
-
-                currentNode = nextNode;
-            }
-
-            var lastKey = keyPath[keyPath.Count - 1];
-            currentNode[lastKey] = newValue != null ? JToken.FromObject(newValue) : JValue.CreateNull();
-
+            var root = JObject.Parse(text);
+            root[section ?? typeof(T).Name] = JToken.FromObject(config);
             File.WriteAllText(Path, root.ToString(Formatting.Indented));
         }
+
 
 
         public async Task GenerateAppSettings()
@@ -117,14 +89,10 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    IdColumn = false,
-                    BatchColumn = false,
-                    ExpiryDateColumn = true,
-                    SupplierColumn = true,
                 };
             });
 
-            var inventoryArray = root["Inventory"] as JArray ?? new JArray();
+            var inventoryArray = root["InventorySettings"] as JArray ?? new JArray();
             var inventoryDict = inventoryArray
                 .OfType<JObject>()
                 .Where(obj => obj["Id"] != null) // CONSIDER FOR NAME AS THE KEY AS WELL
@@ -150,13 +118,9 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
 
                 AddPropertyIfMissing(nameof(newSettings.Id), newSettings.Id);
                 AddPropertyIfMissing(nameof(newSettings.Name), newSettings.Name);
-                AddPropertyIfMissing(nameof(newSettings.IdColumn), newSettings.IdColumn);
-                AddPropertyIfMissing(nameof(newSettings.BatchColumn), newSettings.BatchColumn);
-                AddPropertyIfMissing(nameof(newSettings.ExpiryDateColumn), newSettings.ExpiryDateColumn);
-                AddPropertyIfMissing(nameof(newSettings.SupplierColumn), newSettings.SupplierColumn);
             }
 
-            root["Inventory"] = inventoryArray;
+            root["InventorySettings"] = inventoryArray;
 
         }
     }
