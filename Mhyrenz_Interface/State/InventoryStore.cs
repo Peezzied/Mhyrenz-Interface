@@ -37,7 +37,9 @@ namespace Mhyrenz_Interface.State
         public ICollectionView ProductsCollectionView { get; private set; }
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; private set; }
         public ICommand UpdateProductCommand { get; private set; }
-        public (int Index, IEnumerable<ProductDataViewModel> Products) LastProductChanged { get; private set; }
+        public (int Category, ChangedProductInfo ChangedProductInfo) LastProductChanged { get; private set; }
+
+        
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
@@ -149,9 +151,9 @@ namespace Mhyrenz_Interface.State
             RemoveProductEvent?.Invoke(this, products);
 
             var index = GetIndexByProduct(product, relativeInventory);
-            RunFilterSuspended(() => LastProductChanged = (Math.Max(0, index - 1), products.ToList()));
+            RunFilterSuspended(() => LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, products.Select(x => x.Item.Id).ToArray())));
 
-            foreach (var item in LastProductChanged.Products)
+            foreach (var item in products)
             {
                 var productVm = _trackers.FirstOrDefault(t => t.Key.Item.Id == item.Item.Id).Key;
                 _trackers.Remove(productVm);
@@ -163,27 +165,19 @@ namespace Mhyrenz_Interface.State
         {
             var displayProducts = products.Select(product => _productsViewModelFactory(product));
 
-            ProductDataViewModel productVm = default;
-            var isFirst = true;
+
             foreach (var item in displayProducts)
             {
                 _trackers[item] = TrackProduct(item);
-
-                if (isFirst)
-                {
-                    productVm = item;
-                    Products.Add(productVm);
-                    isFirst = false;
-                }
-                else
-                    Products.Add(item);
-
+                Products.Add(item);
             }
 
 
+            ProductDataViewModel productVm = displayProducts.FirstOrDefault();
             AddProductEvent?.Invoke(this, displayProducts);
 
-            RunFilterSuspended(() => LastProductChanged = (GetIndexByProduct(productVm), displayProducts));
+            var index = GetIndexByProduct(productVm);
+            RunFilterSuspended(() => LastProductChanged = (productVm.Item.CategoryId, new ChangedProductInfo(index, products.Select(x => x.Id).ToArray())));
 
             return displayProducts;
         }
@@ -199,14 +193,20 @@ namespace Mhyrenz_Interface.State
             return RunFilterSuspended(() => ProductsCollectionView.Cast<ProductDataViewModel>().ElementAt(index));
         }
 
+
         public int GetIndexByProduct(ProductDataViewModel product, IEnumerable<ProductDataViewModel> collection = null)
         {
             var map = RunFilterSuspended(() => (collection ?? ProductsCollectionView
                 .Cast<ProductDataViewModel>())
-                .Select((p, index) => new { p.Item.Id, Index = index })
-                .ToDictionary(x => x.Id, x => x.Index));
+                .Select((p, idx) => new { p.Item.Id, Index = idx })
+                .ToDictionary(x => x.Id, x => x.Index));  // TODO consider to load this once and keep it updated with changes
 
-            return map[product.Item.Id];
+            if (map.TryGetValue(product.Item.Id, out var index))
+            {
+                return index;
+            }
+
+            return -1;
         }
 
 
@@ -248,7 +248,8 @@ namespace Mhyrenz_Interface.State
                     {
                         ProductId = product.Id,
                     });
-                    LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });
+
+                    LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, new[] { product.Id }));
                 });
 
                 _undoRedoManager.Execute(new ProductVMCommandCommonProp(
@@ -278,7 +279,7 @@ namespace Mhyrenz_Interface.State
                     {
                         ProductId = product.Id,
                     });
-                    LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });
+                    LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, new[] { product.Id }));
                 });
 
                 var propertyChangedArgs = args.Target as IBasePropertyChangeTrackerArgs<BaseViewModel>;
@@ -316,7 +317,7 @@ namespace Mhyrenz_Interface.State
                         });
                     }), System.Windows.Threading.DispatcherPriority.Input);
 
-                    LastProductChanged = (GetIndexByProduct(Products[index]), new[] { Products[index] });
+                    LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, new[] { product.Id }));
                 });
 
                 _undoRedoManager.Execute(new ProductVMCommandPurchase(
@@ -358,7 +359,7 @@ namespace Mhyrenz_Interface.State
             if (tracker.PreviousValues.TryGetValue(propertyOf, out var previousValue) && previousValue is null)
                 return;
 
-            int index = Products.IndexOf(Products.FirstOrDefault(x => x.Item.Id == target.Item.Id));
+            int index = Products.IndexOf(Products.FirstOrDefault(x => x.Item.Id == target.Item.Id)); // TODO can source the index from the global map of indecies
 
             if (index >= 0)
             {

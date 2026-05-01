@@ -79,6 +79,9 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         private object _selectedItem;
+        /// <summary>
+        /// Selected tab.
+        /// </summary>
         public object SelectedItem
         {
             get => _selectedItem;
@@ -90,19 +93,6 @@ namespace Mhyrenz_Interface.ViewModels
                 var tabItem = SelectedItem.CastTo<InventoryTabItem>();
                 tabItem.ContentViewModel.Load();
                 _mainViewModel.RibbonBarViewModel = tabItem;
-
-                var vm = tabItem.ContentViewModel;
-                System.Diagnostics.Debug.WriteLine("=== AFTER TAB SWITCH ===");
-                System.Diagnostics.Debug.WriteLine($"VM: {vm.GetHashCode()}");
-                System.Diagnostics.Debug.WriteLine($"VIEW: {vm.Inventory.GetHashCode()}");
-
-                System.Diagnostics.Debug.WriteLine(
-                    string.Join(", ",
-                        vm.Inventory.Cast<ProductDataViewModel>()
-                            .Take(10)
-                            .Select(p => p.Name)
-                    )
-                );
 
                 if (!SearchBar.IsNullOrEmpty()) tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
@@ -223,12 +213,11 @@ namespace Mhyrenz_Interface.ViewModels
         }
         #endregion
 
-        public void RowIntoView(IEnumerable<ProductDataViewModel> products)
+        public void RowIntoView(int[] products)
         {
             var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
-            var categoryId = products.First().CategoryId;
 
-            InventoryTabItem newTab = tabItems[categoryId];
+            InventoryTabItem newTab = tabItems[_inventoryStore.LastProductChanged.Category];
             var vm = newTab.ContentViewModel;
             bool isDiff = false;
             if (newTab != SelectedItem)
@@ -240,13 +229,22 @@ namespace Mhyrenz_Interface.ViewModels
             if (SearchBar != string.Empty)
                 SearchBar = string.Empty;
 
-            var selectIndex = newTab.ProductIndexOf(_inventoryStore.GetProductByIndex(_inventoryStore.LastProductChanged.Index));
-            if (selectIndex < 0)
+            if (_inventoryStore.LastProductChanged.ChangedProductInfo.Index >= 0)
             {
-                selectIndex = _inventoryStore.LastProductChanged.Index;
+                var selectIndex = newTab.ProductIndexOf(_inventoryStore.LastProductChanged.ChangedProductInfo.Products.First());
+
+                // FIXME: this logic may cause some unwanted behavior. If encountered, consider tab switch only
+                if (selectIndex < 0)
+                {
+                    selectIndex = _inventoryStore.LastProductChanged.ChangedProductInfo.Index;
+                }
+                vm.SelectItem(isDiff, selectIndex, _inventoryStore.LastProductChanged.ChangedProductInfo.Products);
+            }
+            else
+            {
+                // TODO: show alert only if the index is out of range
             }
 
-            vm.SelectItem(isDiff, selectIndex, products);
         }
 
         public void SelectTab(int categoryId)
@@ -306,11 +304,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             IsSwitchReady = false;
 
-            int tabSelect = _inventoryStore.LastProductChanged.Products.First().CategoryId;
-            int index = _inventoryStore.LastProductChanged.Index;
-
-
-            RowIntoView(new[] { AddedProduct });
+            RowIntoView(new[] { AddedProduct.Item.Id });
         }
 
         private void Vm_SelectedItemsChanged(bool state)
@@ -320,7 +314,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void Vm_RowIntoView(ProductDataViewModel item)
         {
-            RowIntoView(new[] { item });
+            RowIntoView(new[] { item.Item.Id });
         }
 
         private void Vm_SubmitSuccess(object sender, ProductDataViewModel vm)

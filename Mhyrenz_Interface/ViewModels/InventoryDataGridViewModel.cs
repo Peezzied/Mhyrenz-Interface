@@ -31,6 +31,9 @@ namespace Mhyrenz_Interface.ViewModels
         public ICommand DeleteCommand { get; set; }
 
         private IEnumerable<ProductDataViewModel> _selectedItems;
+        /// <summary>
+        /// Selected rows.
+        /// </summary>
         public IEnumerable<ProductDataViewModel> SelectedItems
         {
             get => _selectedItems;
@@ -148,7 +151,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public class SelectionRowsInfo
         {
-            public SelectionRowsInfo(int index, IEnumerable<ProductDataViewModel> items, bool isDifferent, bool canSelect = true)
+            public SelectionRowsInfo(int index, int[] items, bool isDifferent, bool canSelect = true)
             {
                 Index = index;
                 Items = items;
@@ -157,7 +160,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
 
             public int Index { get; set; }
-            public IEnumerable<ProductDataViewModel> Items { get; set; }
+            public int[] Items { get; set; }
             public bool IsDifferent { get; set; }
             public bool CanSelect { get; set; }
         }
@@ -205,7 +208,7 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;  
         }
 
-        public void SelectItem(bool isDiff, int index, IEnumerable<ProductDataViewModel> selection)
+        public void SelectItem(bool isDiff, int index, int[] selection)
         {
             SelectionInfo = new SelectionRowsInfo(index, selection, isDiff);
 
@@ -219,7 +222,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Products);
+                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.ChangedProductInfo.Products);
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }

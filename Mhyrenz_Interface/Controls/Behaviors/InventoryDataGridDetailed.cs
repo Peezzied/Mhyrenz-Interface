@@ -170,7 +170,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 if (!isFromSwitch && !vm.SelectionInfo.CanSelect)
                     return;
 
-                var selectionMap = vm.SelectionInfo.Items.Select(i => i.Item.Id).ToHashSet();
+                var selectionMap = vm.SelectionInfo.Items.ToHashSet();
                 AssociatedObject.SelectedItems.Clear();
                 foreach (var item in AssociatedObject.Items.Cast<ProductDataViewModel>())
                 {

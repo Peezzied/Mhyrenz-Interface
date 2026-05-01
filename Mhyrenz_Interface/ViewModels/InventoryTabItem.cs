@@ -166,13 +166,18 @@
 
             public void Refresh() => _inventoryDataGridViewModel.Inventory?.Refresh();
 
-            public int ProductIndexOf(ProductDataViewModel product)
+            /// <summary>
+            /// Gets the relative row index from this tab.
+            /// </summary>
+            /// <param name="product">product id</param>
+            /// <returns>relative index</returns>
+            public int ProductIndexOf(int product)
             {
                 var relativeInventoryMap = _view.Cast<ProductDataViewModel>()
                     .Select((p, index) => new { p.Item.Id, Index = index })
                     .ToDictionary(i => i.Id, i => i.Index);
 
-                if (relativeInventoryMap.TryGetValue(product.Item.Id, out var value))
+                if (relativeInventoryMap.TryGetValue(product, out var value))
                 {
                     return value;
                 }
