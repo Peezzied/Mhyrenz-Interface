@@ -34,7 +34,7 @@ namespace Mhyrenz_Interface.Commands
         {
             var view = vm as InventoryViewModel;
 
-            view.RowIntoView(App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged.Products);
+            view.RowIntoView(App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged.ChangedProductInfo.Products);
         }
 
         public void Execute()

@@ -140,7 +140,8 @@ namespace Mhyrenz_Interface.State
         public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
         {
             //var productsMap = products.ToHashSet();
-            var product = products.First();
+            var productsList = products.ToList();
+            var product = productsList.First();
 
             var relativeInventory = ProductsCollectionView.Cast<ProductDataViewModel>()
                 .AsParallel()
@@ -148,12 +149,12 @@ namespace Mhyrenz_Interface.State
                 .OrderBy(i => i.Name)
                 .Where(i => i.CategoryId == products.First().CategoryId);
 
-            RemoveProductEvent?.Invoke(this, products);
+            RemoveProductEvent?.Invoke(this, productsList);
 
             var index = GetIndexByProduct(product, relativeInventory);
-            RunFilterSuspended(() => LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, products.Select(x => x.Item.Id).ToArray())));
+            RunFilterSuspended(() => LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, productsList.Select(x => x.Item.Id).ToArray())));
 
-            foreach (var item in products)
+            foreach (var item in productsList)
             {
                 var productVm = _trackers.FirstOrDefault(t => t.Key.Item.Id == item.Item.Id).Key;
                 _trackers.Remove(productVm);

@@ -75,7 +75,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 var view = vm as InventoryViewModel;
                 view.SelectTab(CategoryId);
-                view.RowIntoView(new[] { this });
+                view.RowIntoView(new[] { Item.Id });
             });
         }
 
