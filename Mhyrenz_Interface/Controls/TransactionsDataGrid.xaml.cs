@@ -13,5 +13,10 @@ namespace Mhyrenz_Interface.Controls
 
 
         }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

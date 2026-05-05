@@ -51,7 +51,7 @@ namespace Mhyrenz_Interface.Commands
 
             _salesRegisterHost.IsRegistering = true;
 
-            var transactions = _transactionStore.Transactions.Where(t => t.DTO.Session.Id.Equals(_sessionStore.CurrentSession.Id));
+            var transactions = _transactionStore.Transactions.Where(t => t.Session.Id.Equals(_sessionStore.CurrentSession.Id));
 
             if (!transactions.Any())
             {
@@ -79,8 +79,8 @@ namespace Mhyrenz_Interface.Commands
                 }),
                 SessionId = session.Id,
                 TotalPurchase = transactions.Sum(t => t.Amount),
-                TotalSales = (double)transactions.Sum(t => t.DTO.Product.Item.NetRetail),
-                Profit = (double)transactions.Sum(t => t.DTO.Product.Item.Profit),
+                TotalSales = (double)transactions.Sum(t => t.Product.Item.NetRetail),
+                Profit = (double)transactions.Sum(t => t.Product.Item.Profit),
                 RegisteredAt = session.Period
             };
 

@@ -213,11 +213,11 @@ namespace Mhyrenz_Interface.ViewModels
         }
         #endregion
 
-        public void RowIntoView(int[] products)
+        public void RowIntoView(int category, int[] products)
         {
             var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
 
-            InventoryTabItem newTab = tabItems[_inventoryStore.LastProductChanged.Category];
+            InventoryTabItem newTab = tabItems[category];
             var vm = newTab.ContentViewModel;
             bool isDiff = false;
             if (newTab != SelectedItem)
@@ -229,21 +229,15 @@ namespace Mhyrenz_Interface.ViewModels
             if (SearchBar != string.Empty)
                 SearchBar = string.Empty;
 
-            if (_inventoryStore.LastProductChanged.ChangedProductInfo.Index >= 0)
-            {
-                var selectIndex = newTab.ProductIndexOf(_inventoryStore.LastProductChanged.ChangedProductInfo.Products.First());
+            var changedProductInfo = _inventoryStore.LastProductChanged.ChangedProductInfo;
+            var selectIndex = changedProductInfo != null ? changedProductInfo.Value.Index : newTab.ProductIndexOf(products.First());
 
-                // FIXME: this logic may cause some unwanted behavior. If encountered, consider tab switch only
-                if (selectIndex < 0)
-                {
-                    selectIndex = _inventoryStore.LastProductChanged.ChangedProductInfo.Index;
-                }
-                vm.SelectItem(isDiff, selectIndex, _inventoryStore.LastProductChanged.ChangedProductInfo.Products);
-            }
-            else
+            if (selectIndex < 0)
             {
                 // TODO: show alert only if the index is out of range
+                return;
             }
+            vm.SelectItem(isDiff, selectIndex, products);
 
         }
 
@@ -304,7 +298,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             IsSwitchReady = false;
 
-            RowIntoView(new[] { AddedProduct.Item.Id });
+            RowIntoView(AddedProduct.Item.CategoryId, new[] { AddedProduct.Item.Id });
         }
 
         private void Vm_SelectedItemsChanged(bool state)
@@ -314,7 +308,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void Vm_RowIntoView(ProductDataViewModel item)
         {
-            RowIntoView(new[] { item.Item.Id });
+            RowIntoView(AddedProduct.Item.CategoryId, new[] { item.Item.Id });
         }
 
         private void Vm_SubmitSuccess(object sender, ProductDataViewModel vm)

@@ -48,7 +48,7 @@ namespace Mhyrenz_Interface.Commands
         {
             var view = vm as InventoryViewModel;
 
-            view.RowIntoView(_inventoryStore.LastProductChanged.ChangedProductInfo.Products);
+            view.RowIntoView(_inventoryStore.LastProductChanged.Category, _inventoryStore.LastProductChanged.ChangedProductInfo.Value.Products);
         }
 
         public override void Execute(object parameter)

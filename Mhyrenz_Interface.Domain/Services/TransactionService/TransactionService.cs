@@ -11,15 +11,18 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
     public class TransactionService : ITransactionsService
     {
         private readonly ITransactionsDataService _transactionsDataService;
+        private readonly ICategoryDataService _categoryDataService;
         private readonly ISessionDataService _sessionDataService;
         private readonly ISessionStore _store;
 
         public TransactionService(
             ITransactionsDataService transactionsDataService,
+            ICategoryDataService categoryDataService,
             ISessionDataService sessionDataService,
             ISessionStore store)
         {
             _transactionsDataService = transactionsDataService;
+            _categoryDataService = categoryDataService;
             _store = store;
             _sessionDataService = sessionDataService;
         }
@@ -50,6 +53,9 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
                 .Select(_ => new Transaction
                 {
                     ProductId = (int)product.Id,
+                    Price = product.RetailPrice,
+                    Category = _categoryDataService.Get(product.CategoryId).Name,
+                    ItemName = product.Name,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
                     Timestamp = date,
                     SessionId = session.Id

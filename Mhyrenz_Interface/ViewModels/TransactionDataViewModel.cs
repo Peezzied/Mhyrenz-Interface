@@ -14,6 +14,9 @@ namespace Mhyrenz_Interface.ViewModels
         public int Amount { get; set; }
         public DateTime Date { get; set; }
         public Session Session { get; set; }
+        public string ProductName { get; set; }
+        public decimal Price { get; set; }
+        public string Category { get; set; }
     }
 
     public class TransactionDataViewModel : BaseViewModel, IBarcodeBound
@@ -64,42 +67,33 @@ namespace Mhyrenz_Interface.ViewModels
             OnPropertyChanged(nameof(Barcode));
         }
 
-        public ICommand GoToItemCommand => DTO.Product.GoToItemCommand;
+        public ICommand GoToItemCommand => Product?.GoToItemCommand;
 
-        public ProductDataViewModel Product
-        {
-            get => DTO.Product;
-            set
-            {
-                if (DTO.Product != value)
-                {
-                    //_product = value;
-                    DTO.Product = value;
+        public ProductDataViewModel Product => DTO.Product;
 
-                }
-            }
-        }
+        public Session Session => DTO.Session;
 
         public string Barcode
         {
-            get => DTO.Product.Barcode;
+            get => Product?.Barcode;
             set
             {
-                if (DTO.Product.Barcode != value)
+                if (Product?.Barcode != value)
                 {
-                    DTO.Product.Barcode = value;
+                    Product.Barcode = value;
                     OnPropertyChanged(nameof(Barcode));
                 }
             }
         }
-        public string Name
-        {
-            get => DTO.Product.Name;
-        }
-        public decimal Price
-        {
-            get => DTO.Product.RetailPrice;
-        }
+
+        public bool IsDeleted => DTO.Product == null;
+
+        public string Category => DTO.Category;
+
+        public string Name => DTO.ProductName;
+
+        public decimal Price => Product?.RetailPrice ?? DTO.Price;
+
         public int Amount
         {
             get => DTO.Amount;
@@ -113,9 +107,6 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
-        public string Date
-        {
-            get => DTO.Date.ToString("T");
-        }
+        public string Date => DTO.Date.ToString("T");
     }
 }

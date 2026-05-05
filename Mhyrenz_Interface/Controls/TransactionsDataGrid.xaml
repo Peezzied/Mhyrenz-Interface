@@ -25,32 +25,41 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <local:CategoryTag Padding="10,0" CategoryName="{Binding Product.CategoryName}" CategoryColor="{Binding Product.CategoryColor}"/>
+                    <local:CategoryTag Padding="10,0" CategoryName="{Binding Category}" CategoryColor="{Binding Product.CategoryColor}"/>
+                    <local:MaxLinesTextBlock Grid.Column="1"
+                         FontFamily="Arial"
+                         Text="{Binding Name}"
+                         FontSize="14"
+                         LineHeight="16"
+                         MaxLines="1"
+                         VerticalAlignment="Center"
+                         Margin="5,0,0,0">
+                        <local:MaxLinesTextBlock.Style>
+                            <Style TargetType="local:MaxLinesTextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="TextDecorations" Value="{x:Null}" />
 
-                    <local:MaxLinesTextBlock Grid.Column="1" FontFamily="Arial"
-                                       Text="{Binding Name}"
-                                       FontSize="14"
-                                       LineHeight="16"
-                                       MaxLines="1"
-                                       VerticalAlignment="Center"
-                                       Margin="5,0,0,0"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.SystemControlErrorTextForeground}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </local:MaxLinesTextBlock.Style>
+                    </local:MaxLinesTextBlock>
                 </Grid>
-                <hc:UniformSpacingPanel Grid.Row="2" Spacing="10">
-                    <hc:UniformSpacingPanel.Resources>
-                        <Style TargetType="Control" x:Key="CommonStyle">
-                            <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Gray1}"/>
-                        </Style>
-                    </hc:UniformSpacingPanel.Resources>
+                <hc:UniformSpacingPanel Margin="12,0" Grid.Row="2" Spacing="10">
                     <hc:UniformSpacingPanel Spacing="5" Width="70">
-                        <iconPacks:PackIconMaterial Kind="Cash" Style="{StaticResource CommonStyle}"/>
-                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}"/>
+                        <iconPacks:PackIconMaterial Kind="Cash"/>
+                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}" /> 
                     </hc:UniformSpacingPanel>
                     <hc:UniformSpacingPanel Spacing="5" Width="65">
-                        <iconPacks:PackIconMaterial Kind="Cart" Style="{StaticResource CommonStyle}"/>
+                        <iconPacks:PackIconMaterial Kind="Cart"/>
                         <TextBlock Text="{Binding Amount, StringFormat={}{0} pcs}"/>
                     </hc:UniformSpacingPanel>
                     <hc:UniformSpacingPanel Spacing="5">
-                        <iconPacks:PackIconMicrons Kind="Clock" Style="{StaticResource CommonStyle}"/>
+                        <iconPacks:PackIconMaterial Kind="Clock"/>
                         <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm;ss tt}}"/>
                     </hc:UniformSpacingPanel>
                 </hc:UniformSpacingPanel>
@@ -59,7 +68,7 @@
     </UserControl.Resources>
     <Grid>
         <DataGrid ItemsSource="{Binding Transactions}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserDeleteRows="False" 
-                  Style="{StaticResource MahApps.Styles.DataGrid}" CanUserResizeColumns="False" CanUserSortColumns="False">
+                  Style="{StaticResource MahApps.Styles.DataGrid}" CanUserResizeColumns="False" CanUserSortColumns="False" SelectionChanged="DataGrid_SelectionChanged">
             <DataGrid.Columns>
                 <DataGridTemplateColumn IsReadOnly="True" Width="Auto" >
                     <DataGridTemplateColumn.CellTemplate>
@@ -132,6 +141,18 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow}">
+                    <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Separator}"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="Background" Value="{StaticResource MahApps.Brushes.SystemControlBackgroundChromeMediumLow}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
     </Grid>
 </UserControl>

@@ -22,6 +22,7 @@ namespace Mhyrenz_Interface
             public Action(string name, string output, Func<IServiceProvider, Task> action)
             {
                 EventName = name;
+                // FIXME: this undermines the Task of the action
                 Method = (p) => { action(p); return Task.FromResult(string.Empty); };
                 Output = output;
             }

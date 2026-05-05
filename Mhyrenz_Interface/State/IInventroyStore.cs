@@ -28,7 +28,7 @@ namespace Mhyrenz_Interface.State
         ObservableCollection<ProductDataViewModel> Products { get; }
         ICollectionView ProductsCollectionView { get; }
         ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; }
-        (int Category, ChangedProductInfo ChangedProductInfo) LastProductChanged { get; }
+        (int Category, ChangedProductInfo? ChangedProductInfo) LastProductChanged { get; }
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;

@@ -37,7 +37,7 @@ namespace Mhyrenz_Interface.State
         public ICollectionView ProductsCollectionView { get; private set; }
         public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; private set; }
         public ICommand UpdateProductCommand { get; private set; }
-        public (int Category, ChangedProductInfo ChangedProductInfo) LastProductChanged { get; private set; }
+        public (int Category, ChangedProductInfo? ChangedProductInfo) LastProductChanged { get; private set; }
 
         
 

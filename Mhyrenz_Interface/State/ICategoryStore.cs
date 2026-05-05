@@ -16,6 +16,7 @@ namespace Mhyrenz_Interface.State
         ICommand LoadCategoriesCommand { get; }
         Dictionary<Category, Predicate<object>> CategoriesFilter { get; }
         Dictionary<int, Brush> Colors { get; set; }
+        Dictionary<int, Category> Categories { get; }
 
         Task UpdateCategories();
     }

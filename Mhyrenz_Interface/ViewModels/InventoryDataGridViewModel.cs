@@ -222,7 +222,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.ChangedProductInfo.Products);
+                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Category, _inventoryStore.LastProductChanged.ChangedProductInfo.Value.Products);
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }

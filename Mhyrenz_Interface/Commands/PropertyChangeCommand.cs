@@ -34,7 +34,9 @@ namespace Mhyrenz_Interface.Commands
         {
             var view = vm as InventoryViewModel;
 
-            view.RowIntoView(App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged.ChangedProductInfo.Products);
+            var lastProductChanged = App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged;
+            // FIXME anti pattern, but it works for now.
+            view.RowIntoView(lastProductChanged.Category, lastProductChanged.ChangedProductInfo.Value.Products);
         }
 
         public void Execute()

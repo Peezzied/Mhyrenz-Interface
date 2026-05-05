@@ -17,6 +17,7 @@ namespace Mhyrenz_Interface.State
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly CreateViewModel<TransactionDataViewModel> _transactionsViewModelFactory;
         private readonly IInventoryStore _inventoryStore;
+        private readonly ICategoryStore _categoryStore;
         private readonly ITransactionsService _transactionService;
         private List<PropertyChangeTracker<TransactionDataViewModel>> _trackers = new List<PropertyChangeTracker<TransactionDataViewModel>>();
 
@@ -27,11 +28,13 @@ namespace Mhyrenz_Interface.State
             IEnumerable<Product> products,
             CreateViewModel<TransactionDataViewModel> productsViewModelFactory,
             IInventoryStore inventoryStore,
+            ICategoryStore categoryStore,
             ITransactionsService transactionsService)
         {
             _undoRedoManager = undoRedoManager;
             _transactionsViewModelFactory = productsViewModelFactory;
             _inventoryStore = inventoryStore;
+            _categoryStore = categoryStore;
             _transactionService = transactionsService;
 
             _inventoryStore.PurchaseEvent += async (s, e) => await InitializeAsync();
@@ -85,6 +88,9 @@ namespace Mhyrenz_Interface.State
                     .Select(group => _transactionsViewModelFactory(new TransactionDataViewModelDTO()
                     {
                         Id = group.Key,
+                        Price = group.First().Price,
+                        Category = group.First().Category,
+                        ProductName = group.First().ItemName,
                         Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),
                         Amount = group.Count(),
                         Date = group.Max(t => t.Timestamp),
@@ -93,7 +99,9 @@ namespace Mhyrenz_Interface.State
 
                 foreach (var item in displayTransaction)
                 {
-                    _trackers.Add(TrackTransactions(item));
+                    if (item.Product != null)
+                        _trackers.Add(TrackTransactions(item));
+
                     Transactions.Add(item);
                 }
             });
@@ -103,12 +111,10 @@ namespace Mhyrenz_Interface.State
 
         private PropertyChangeTracker<TransactionDataViewModel> TrackTransactions(TransactionDataViewModel viewModel)
         {
-            Action<PropertyChangeTracker<TransactionDataViewModel>, TargetChangedEventArgs, object, object> method;
-
-            method = (tracker, args, oldValue, newValue) =>
+            void method(PropertyChangeTracker<TransactionDataViewModel> tracker, TargetChangedEventArgs args, object oldValue, object newValue)
             {
                 HandleBarcodeChange(args);
-            };
+            }
 
             var _tracker = new PropertyChangeTracker<TransactionDataViewModel>(viewModel);
 
@@ -120,20 +126,20 @@ namespace Mhyrenz_Interface.State
 
         private void HandleBarcodeChange(TargetChangedEventArgs args)
         {
-            var target = (TransactionDataViewModel)args.Target;
-            var propertyName = args.PropertyOf;
+            //var target = (TransactionDataViewModel)args.Target;
+            //var propertyName = args.PropertyOf;
 
-            var productId = target.DTO.Product.Item.Id;
+            //var productId = target.Product.Item.Id;
 
-            var productLookup = _products.ToDictionary(p => p.Item.Id);
+            //var productLookup = _products.ToDictionary(p => p.Item.Id);
 
-            foreach (var transaction in Transactions)
-            {
-                if (productLookup.TryGetValue(productId, out var product) && transaction.Product.Item.Id == productId)
-                {
-                    transaction.Product = product;
-                }
-            }
+            //foreach (var transaction in Transactions)
+            //{
+            //    if (productLookup.TryGetValue(productId, out var product) && transaction.Product.Item.Id == productId)
+            //    {
+            //        transaction.Product = product;
+            //    }
+            //}
         }
 
         public static async Task LoadTransactionStore(IServiceProvider serviceProvider)

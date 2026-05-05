@@ -11,7 +11,6 @@ namespace Mhyrenz_Interface.Controls
 
         public CategoryTag()
         {
-            // Create inner TextBlock
             _textBlock = new TextBlock
             {
                 FontFamily = new FontFamily("Arial"),
@@ -20,21 +19,46 @@ namespace Mhyrenz_Interface.Controls
                 HorizontalAlignment = HorizontalAlignment.Center
             };
 
-            // Set default appearance of Border
             Height = 20;
             Padding = new Thickness(10, 0, 10, 0);
-            CornerRadius = new CornerRadius(10); // rounded corners
+            CornerRadius = new CornerRadius(10);
 
             Child = _textBlock;
 
-            // Bind TextBlock.Text to CategoryName
-            _textBlock.SetBinding(TextBlock.TextProperty, new Binding(nameof(CategoryName)) { Source = this });
+            _textBlock.SetBinding(TextBlock.TextProperty,
+                new Binding(nameof(CategoryName)) { Source = this });
 
-            // Bind Border.Background to CategoryColor
-            SetBinding(BackgroundProperty, new Binding(nameof(CategoryColor)) { Source = this });
+            SetBinding(BackgroundProperty,
+                new Binding(nameof(CategoryColor)) { Source = this });
+
+            IsEnabledChanged += CategoryTag_IsEnabledChanged;
+
+            UpdateDisabledVisualState();
         }
 
-        // ─── Dependency Properties ────────────────────────────────
+        private void CategoryTag_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateDisabledVisualState();
+        }
+
+        private void UpdateDisabledVisualState()
+        {
+            if (!IsEnabled)
+            {
+                _textBlock.FontStyle = FontStyles.Italic;
+                Background = TryFindResource("MahApps.Brushes.Badged.Foreground.Disabled") as Brush
+                             ?? Brushes.Gray;
+            }
+            else
+            {
+                _textBlock.FontStyle = FontStyles.Normal;
+
+                BindingOperations.SetBinding(
+                    this,
+                    BackgroundProperty,
+                    new Binding(nameof(CategoryColor)) { Source = this });
+            }
+        }
 
         public string CategoryName
         {
