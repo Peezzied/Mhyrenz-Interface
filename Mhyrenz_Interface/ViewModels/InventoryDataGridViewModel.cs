@@ -172,6 +172,7 @@ namespace Mhyrenz_Interface.ViewModels
             _productService = productService;
 
             _inventory = new ListCollectionView(_inventoryStore.Products);
+            ApplyDefaultSort();
 
             Layout = layout;
 
@@ -196,7 +197,6 @@ namespace Mhyrenz_Interface.ViewModels
             _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
             _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
             IsEditCancelled = false;
-            ApplyDefaultSort();
             OnLoad?.Invoke();
         }
 

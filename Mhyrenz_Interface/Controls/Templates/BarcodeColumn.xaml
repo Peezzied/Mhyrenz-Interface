@@ -6,7 +6,6 @@
                     xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                     xmlns:conv="clr-namespace:Mhyrenz_Interface.Converters">
     
-    <conv:BarcodeToImageConverter x:Key="BarcodeToImageConverter"/>
     <DataTemplate x:Key="BarcodeImageTemplate">
         <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}, IsAsync=True}"
            MaxWidth="130"/>
@@ -47,8 +46,4 @@
             </ContentControl.Style>
         </ContentControl>
     </DataTemplate>
-
-    <DataGridTemplateColumn x:Key="BarcodeColumn" x:Shared="False"
-                            Header="Barcode" CanUserSort="False" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}" >
-    </DataGridTemplateColumn>
 </ResourceDictionary>

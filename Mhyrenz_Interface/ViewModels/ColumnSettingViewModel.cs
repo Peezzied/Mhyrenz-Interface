@@ -15,6 +15,24 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryDataGridSettingsProvider = inventoryDataGridSettingsProvider;
         }
 
+        public void Initialize(bool isVisible, int displayIndex, string name, bool hidden, bool isDraggable)
+        {
+            // Set backing fields directly — no OnPropertyChanged, no Save()
+            _isVisible = isVisible;
+            _displayIndex = displayIndex;
+            Name = name;
+            Hidden = hidden;
+            IsDraggable = isDraggable;
+
+            // Sync to model without saving
+            _columnSetting.IsVisible = isVisible;
+            _columnSetting.DisplayIndex = displayIndex;
+
+            OnPropertyChanged(string.Empty);
+
+            _isSaveEnabled = true;
+        }
+
         public Category Owner { get; set; }
         public string Name { get; set; }
         private bool _isVisible;
@@ -34,6 +52,8 @@ namespace Mhyrenz_Interface.ViewModels
         public bool IsDraggable { get; internal set; }
         public bool Hidden { get; internal set; }
         private int _displayIndex;
+        private bool _isSaveEnabled;
+
         public int DisplayIndex
         {
             get
@@ -51,7 +71,8 @@ namespace Mhyrenz_Interface.ViewModels
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             base.OnPropertyChanged(propertyName);
-            _inventoryDataGridSettingsProvider.Save();
+            if (_isSaveEnabled)
+                _inventoryDataGridSettingsProvider.Save();
         }
     }
 }

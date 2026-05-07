@@ -6,18 +6,23 @@ namespace Mhyrenz_Interface.Core
 {
     public class InventoryDataGridSettingsProvider
     {
-        public Dictionary<int, Dictionary<string, ColumnSetting>> Categories { get; set; }
-        public InventoryDataGridSettingsProvider()
+        private Dictionary<int, Dictionary<string, ColumnSetting>> _categories;
+
+        public Dictionary<int, Dictionary<string, ColumnSetting>> Categories
         {
-            var inventoryDataGridSettings = Properties.Settings.Default.InventoryDataGrid;
-            if (string.IsNullOrWhiteSpace(inventoryDataGridSettings))
+            get => _categories ?? (_categories = Load());
+        }
+
+        private Dictionary<int, Dictionary<string, ColumnSetting>> Load()
+        {
+            var json = Properties.Settings.Default.InventoryDataGrid;
+            if (!string.IsNullOrWhiteSpace(json))
             {
-                Categories = new Dictionary<int, Dictionary<string, ColumnSetting>>();
+                return JsonSerializer.Deserialize<Dictionary<int,
+                    Dictionary<string, ColumnSetting>>>(json)
+                    ?? new Dictionary<int, Dictionary<string, ColumnSetting>>();
             }
-            else
-            {
-                Categories = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, ColumnSetting>>>(inventoryDataGridSettings);
-            }
+            return new Dictionary<int, Dictionary<string, ColumnSetting>>();
         }
 
         public void Save()

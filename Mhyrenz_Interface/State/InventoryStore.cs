@@ -100,7 +100,7 @@ namespace Mhyrenz_Interface.State
         }
         public void LoadProducts(IEnumerable<Product> products)
         {
-
+            // TODO use begininvoke instead
             App.Current.Dispatcher.Invoke(() =>
             {
                 Products.Clear();

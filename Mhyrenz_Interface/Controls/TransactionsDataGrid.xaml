@@ -13,20 +13,25 @@
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:FakeTransactionDataGridViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <DataTemplate x:Key="EntryTemplate">
-            <Grid Margin="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/Templates/BarcodeColumn.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-                <Grid Grid.Row="0" Margin="0,0,0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <local:CategoryTag Padding="10,0" CategoryName="{Binding Category}" CategoryColor="{Binding Product.CategoryColor}"/>
-                    <local:MaxLinesTextBlock Grid.Column="1"
+            <DataTemplate x:Key="EntryTemplate">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <local:CategoryTag Padding="10,0" CategoryName="{Binding Category}" CategoryColor="{Binding Product.CategoryColor}"/>
+                        <local:MaxLinesTextBlock Grid.Column="1"
                          FontFamily="Arial"
                          Text="{Binding Name}"
                          FontSize="14"
@@ -34,37 +39,38 @@
                          MaxLines="1"
                          VerticalAlignment="Center"
                          Margin="5,0,0,0">
-                        <local:MaxLinesTextBlock.Style>
-                            <Style TargetType="local:MaxLinesTextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                <Setter Property="TextDecorations" Value="{x:Null}" />
+                            <local:MaxLinesTextBlock.Style>
+                                <Style TargetType="local:MaxLinesTextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="TextDecorations" Value="{x:Null}" />
 
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsDeleted}" Value="True">
-                                        <Setter Property="FontStyle" Value="Italic"/>
-                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.SystemControlErrorTextForeground}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </local:MaxLinesTextBlock.Style>
-                    </local:MaxLinesTextBlock>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                                            <Setter Property="FontStyle" Value="Italic"/>
+                                            <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.SystemControlErrorTextForeground}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </local:MaxLinesTextBlock.Style>
+                        </local:MaxLinesTextBlock>
+                    </Grid>
+                    <hc:UniformSpacingPanel Margin="12,0" Grid.Row="2" Spacing="10">
+                        <hc:UniformSpacingPanel Spacing="5" Width="70">
+                            <iconPacks:PackIconMaterial Kind="Cash"/>
+                            <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}" />
+                        </hc:UniformSpacingPanel>
+                        <hc:UniformSpacingPanel Spacing="5" Width="65">
+                            <iconPacks:PackIconMaterial Kind="Cart"/>
+                            <TextBlock Text="{Binding Amount, StringFormat={}{0} pcs}"/>
+                        </hc:UniformSpacingPanel>
+                        <hc:UniformSpacingPanel Spacing="5">
+                            <iconPacks:PackIconMaterial Kind="Clock"/>
+                            <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm;ss tt}}"/>
+                        </hc:UniformSpacingPanel>
+                    </hc:UniformSpacingPanel>
                 </Grid>
-                <hc:UniformSpacingPanel Margin="12,0" Grid.Row="2" Spacing="10">
-                    <hc:UniformSpacingPanel Spacing="5" Width="70">
-                        <iconPacks:PackIconMaterial Kind="Cash"/>
-                        <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}" /> 
-                    </hc:UniformSpacingPanel>
-                    <hc:UniformSpacingPanel Spacing="5" Width="65">
-                        <iconPacks:PackIconMaterial Kind="Cart"/>
-                        <TextBlock Text="{Binding Amount, StringFormat={}{0} pcs}"/>
-                    </hc:UniformSpacingPanel>
-                    <hc:UniformSpacingPanel Spacing="5">
-                        <iconPacks:PackIconMaterial Kind="Clock"/>
-                        <TextBlock Text="{Binding Date, StringFormat={}{0:hh:mm;ss tt}}"/>
-                    </hc:UniformSpacingPanel>
-                </hc:UniformSpacingPanel>
-            </Grid>
-        </DataTemplate>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <DataGrid ItemsSource="{Binding Transactions}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserDeleteRows="False" 

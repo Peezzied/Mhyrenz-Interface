@@ -8,14 +8,19 @@ namespace Mhyrenz_Interface.Converters
 {
     public class BarcodeToImageConverter : IValueConverter
     {
-        public static IBarcodeImageCache Cache => App.ServiceProvider?.GetService<IBarcodeImageCache>();
+        private readonly IBarcodeImageCache _cache;
+
+        public BarcodeToImageConverter(IBarcodeImageCache cache)
+        {
+            _cache = cache;
+        }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (!(value is string code) || string.IsNullOrWhiteSpace(code))
                 return null;
 
-            var cache = Cache.GetOrCreate(code);
+            var cache = _cache.GetOrCreate(code);
             if (!(cache is null))
                 return cache;
             else

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using MahApps.Metro.Controls.Dialogs;
+using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
@@ -47,9 +48,6 @@ namespace Mhyrenz_Interface
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-
-            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
-
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -65,9 +63,12 @@ namespace Mhyrenz_Interface
             ServiceProvider = _appHost.Services;
 
             await ServiceProvider.GetRequiredService<AppSettingsManager>()
-                .GenerateAppSettings(); // TEMPORARY
+                .GenerateAppSettings(); // FIXME: TEMPORARY
 
             ServiceProvider.GetRequiredService<InventorySettingsProvider>().Load();
+
+            Resources.Add("BarcodeToImageConverter",
+                ServiceProvider.GetRequiredService<BarcodeToImageConverter>());
 
             Presenter = new AppPresenter(ServiceProvider);
 
@@ -105,6 +106,8 @@ namespace Mhyrenz_Interface
                 .AddSingleton<InventorySettingsProvider>()
 
                 .AddSingleton<InventoryDataGridSettingsProvider>()
+
+                .AddSingleton<BarcodeToImageConverter>()
 
                 .AddSingleton<IUndoRedoManager, UndoRedoManager>()
                 .AddSingleton<ISerialBarcodeService, SerialBarcodeService>()

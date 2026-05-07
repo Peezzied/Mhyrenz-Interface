@@ -25,7 +25,6 @@
                 <hc:ThemeResources AccentColor="{StaticResource MahApps.Brushes.Accent}"/>
                 <hc:Theme/>
  
-                <ResourceDictionary Source="/Controls/Templates/BarcodeColumn.xaml"/>
                 <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
                 <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
