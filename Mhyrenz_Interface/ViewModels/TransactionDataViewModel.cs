@@ -58,7 +58,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void OnProductPropertyChanged(object sender, InventoryStoreEventArgs e)
         {
-            if (e.ProductId != DTO.Product.Item.Id)
+            if (e.ProductId != Product?.Item.Id)
                 return;
 
             OnPropertyChanged(nameof(Product));

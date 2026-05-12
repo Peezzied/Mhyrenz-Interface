@@ -88,30 +88,29 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             {
                 var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
 
+                // Clear stale bindings from the previous tab BEFORE touching LoadColumns
+                foreach (var col in AssociatedObject.Columns)
+                {
+                    BindingOperations.ClearBinding(col, DataGridColumn.VisibilityProperty);
+                    BindingOperations.ClearBinding(col, DataGridColumn.DisplayIndexProperty);
+                }
+
                 if (vm.ColumnExtras?.Any() ?? false)
                 {
+                    var existingHeaders = AssociatedObject.Columns
+                        .Select(c => c.Header?.ToString())
+                        .ToHashSet();
+
                     foreach (var item in vm.ColumnExtras)
                     {
-                        var name = item.Value.Name;
-                        var type = item.Value.Type;
-                        var field = item.Value.Field;
-
-                        switch ((ColumnType)Enum.Parse(typeof(ColumnType), type))
+                        if (existingHeaders.Contains(item.Value.Name)) continue;
+                        var column = new TextColumn
                         {
-                            case ColumnType.Number:
-                                break;
-
-                            case ColumnType.Text:
-                                var column = new TextColumn
-                                {
-                                    Header = name,
-                                    ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{field}].Value",
-                                };
-
-                                AssociatedObject.Columns.Add(column);
-                                InventoryDataGridColumn.SetColumnPath(column, field);
-                                break;
-                        }
+                            Header = item.Value.Name,
+                            ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{item.Value.Field}].Value",
+                        };
+                        AssociatedObject.Columns.Add(column);
+                        InventoryDataGridColumn.SetColumnPath(column, item.Value.Field);
                     }
                 }
 
@@ -129,9 +128,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
                     var columnPath = InventoryDataGridColumn.GetColumnPath(col);
 
-                    BindingOperations.ClearBinding(col, DataGridColumn.VisibilityProperty);
-                    BindingOperations.ClearBinding(col, DataGridColumn.DisplayIndexProperty);
-
                     BindingOperations.SetBinding(col, DataGridColumn.VisibilityProperty, new Binding
                     {
                         Source = vm,
@@ -143,7 +139,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                     {
                         Source = vm,
                         Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{columnPath ?? col.Header}].{nameof(ColumnSettingViewModel.DisplayIndex)}"),
-                        Mode = BindingMode.TwoWay
+                        Mode = BindingMode.OneWay  // ← critical change
                     });
                 }
             }));

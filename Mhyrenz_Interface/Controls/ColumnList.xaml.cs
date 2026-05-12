@@ -36,19 +36,19 @@ namespace Mhyrenz_Interface.Controls
             {
                 var list = DragablzItemsControl.ItemsOrganiser.Sort(DragablzItemsControl.Items.Cast<object>()
                   .Select(item => DragablzItemsControl.ItemContainerGenerator.ContainerFromItem(item) as DragablzItem))
-                  .OrderBy(di => di.LogicalIndex);
+                  .OrderBy(di => di.LogicalIndex)
+                  .ToHashSet();
 
 
-                var sortedIndices = list
-                    .Select(i => ((ColumnSettingViewModel)i.Content).DisplayIndex)
-                    .OrderBy(i => i)
-                    .ToList();
+                //var sortedIndices = list
+                //    .Select(i => ((ColumnSettingViewModel)i.Content).DisplayIndex)
+                //    .OrderBy(i => i)
+                //    .ToList();
 
                 for (int i = 0; i < list.Count(); i++)
                 {
                     var item = (ColumnSettingViewModel)list.ElementAt(i).Content;
-                    var sortedIndex = sortedIndices[i];
-                    item.DisplayIndex = sortedIndex;
+                    item.DisplayIndex = i + 1;
                 }
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }

@@ -86,8 +86,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public void LoadColumns(IEnumerable<ColumnInfo> columns)
         {
-            Columns.Clear();
-            ColumnsView.Clear();
+            // --- Phase 1: resolve settings, build all entries without touching Columns yet ---
 
             if (!_inventoryDataGridSettingsProvider.Categories.TryGetValue(Id, out var settings))
             {
@@ -99,10 +98,13 @@ namespace Mhyrenz_Interface.ViewModels
             if (_inventorySettingsProvider.ColumnSchemaMap.TryGetValue(Id, out var columnSchemas)
                 && ContentViewModel.ColumnExtras is null)
             {
-                ContentViewModel.ColumnExtras = new ObservableDictionary<string, InventorySettings.ColumnSchema>(columnSchemas.ToDictionary(k => k.Name, v => v));
+                ContentViewModel.ColumnExtras = new ObservableDictionary<string, InventorySettings.ColumnSchema>(
+                    columnSchemas.ToDictionary(k => k.Name, v => v));
             }
 
             bool needsSave = false;
+            var newEntries = new Dictionary<string, ColumnSettingViewModel>(); // no notifications yet
+            var newColumnsView = new List<ColumnSettingViewModel>();
 
             foreach (var column in columns)
             {
@@ -112,49 +114,44 @@ namespace Mhyrenz_Interface.ViewModels
                 InventorySettings.ColumnSchema extra = null;
                 ContentViewModel.ColumnExtras?.TryGetValue(column.Header, out extra);
 
-                if (settings.TryGetValue(column.Header, out var setting))
+                if (!settings.TryGetValue(column.Header, out var setting))
                 {
-                    var coluumnSettingViewModel = _columnSettingViewModelFactory(setting);
-                    coluumnSettingViewModel.Name = column.Header;
-                    coluumnSettingViewModel.Hidden = !column.IgnoreVisibilityToggle;
-                    coluumnSettingViewModel.IsVisible = setting.IsVisible;
-                    coluumnSettingViewModel.IsDraggable = !column.IgnoreReorder;
-                    coluumnSettingViewModel.DisplayIndex = setting.DisplayIndex == -1 ? column.DisplayIndex : setting.DisplayIndex;
-                    Columns.Add(extra?.Field ?? column.Header, coluumnSettingViewModel);
-                }
-                else
-                {
-                    //if (column.IgnoreVisibilityToggle && column.IgnoreReorder) continue;
-
-                    setting = new ColumnSetting() { DisplayIndex = column.DisplayIndex };
-                    if (!settings.ContainsKey(column.Header))
+                    setting = new ColumnSetting()
                     {
-                        settings[column.Header] = setting;
-                        needsSave = true;
-                    }
-
-                    var coluumnSettingViewModel = _columnSettingViewModelFactory(setting);
-
-                    coluumnSettingViewModel.Initialize(
-                        isVisible: setting.IsVisible,
-                        displayIndex: setting.DisplayIndex == -1 ? column.DisplayIndex : setting.DisplayIndex,
-                        name: column.Header,
-                        hidden: !column.IgnoreVisibilityToggle,
-                        isDraggable: !column.IgnoreReorder
-                    );
-
-                    Columns.Add(extra?.Field ?? column.Header, coluumnSettingViewModel);
+                        DisplayIndex = column.DisplayIndex
+                    };
+                    settings[column.Header] = setting;
+                    needsSave = true;
                 }
+
+                var columnSettingViewModel = _columnSettingViewModelFactory(setting);
+
+                columnSettingViewModel.Initialize(
+                    isVisible: setting.IsVisible,
+                    displayIndex: setting.DisplayIndex == -1
+                        ? column.DisplayIndex
+                        : setting.DisplayIndex,
+                    name: column.Header,
+                    hidden: !column.IgnoreVisibilityToggle,
+                    isDraggable: !column.IgnoreReorder
+                );
+
+                newEntries.Add(extra?.Field ?? column.Header, columnSettingViewModel);
             }
 
-            if (needsSave) _inventoryDataGridSettingsProvider.Save();
+            if (needsSave)
+                _inventoryDataGridSettingsProvider.Save();
 
-            foreach (var col in Columns.Values.OrderBy(c => c.DisplayIndex))
-            {
+            // --- Phase 2: apply atomically so bindings only cascade once the dict is complete ---
+
+            Columns.Clear();
+            ColumnsView.Clear();
+
+            foreach (var kvp in newEntries)
+                Columns.Add(kvp.Key, kvp.Value);
+
+            foreach (var col in newEntries.Values.OrderBy(c => c.DisplayIndex))
                 ColumnsView.Add(col);
-            }
-
-
         }
 
         public override void Dispose()

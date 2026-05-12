@@ -79,7 +79,11 @@ namespace Mhyrenz_Interface.Core
 
         public TValue this[TKey key]
         {
-            get { return _dictionary[key]; }
+            get
+            {
+                _dictionary.TryGetValue(key, out TValue value);
+                return value; // returns default(TValue) instead of throwing
+            }
             set
             {
                 bool exists = _dictionary.TryGetValue(key, out TValue oldValue);
