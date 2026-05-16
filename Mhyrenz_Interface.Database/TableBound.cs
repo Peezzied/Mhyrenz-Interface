@@ -2,7 +2,7 @@
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class TableBound<T> where T : class
+    public class TableBound<T>
     {
         private readonly InventoryDbService _context;
         public string Name = typeof(T).TableName();

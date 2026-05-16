@@ -2,7 +2,7 @@
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ISalesRecordDataService : IDataService<SalesRecord>
+    public interface ISalesRecordDataService : IWriteDataService<SalesRecord, int>
     {
     }
 }

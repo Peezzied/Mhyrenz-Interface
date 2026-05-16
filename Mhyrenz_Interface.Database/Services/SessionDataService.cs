@@ -1,54 +1,82 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class SessionDataService : GenericDataService<Session>, ISessionDataService
+    public class SessionDataService : ISessionDataService
     {
-        private readonly InventoryDbService _context;
+        private readonly InventoryDbContextFactory _contextFactory;
         private readonly ITransactionsDataService _transactionsDataService;
 
-        public SessionDataService(InventoryDbService context, ITransactionsDataService transactionsDataService) : base(context)
+        public SessionDataService(InventoryDbContextFactory contextFactory, ITransactionsDataService transactionsDataService)
         {
-            _context = context;
+            _contextFactory = contextFactory;
             _transactionsDataService = transactionsDataService;
         }
 
-        public override Session Get(object id)
+        public async Task<Session> Create(Session entity)
         {
-            var col = _context.Instance.GetCollection<Session>(Name);
-            var session = col.FindById((dynamic)id);
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var result = await context.Sessions.AddAsync(entity);
+                await context.SaveChangesAsync();
 
-            if (session != null)
-                LoadTransactions(session);
-
-            return session;
+                return result.Entity;
+            }
         }
 
-        public override IEnumerable<Session> GetAll()
+        public async Task Delete(Guid id)
         {
-            var list = GetTable().FindAll().ToList();
-
-            foreach (var s in list)
-                LoadTransactions(s);
-
-            return list;
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var entity = await LoadSessions(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id);
+                context.Sessions.Remove(entity);
+                await context.SaveChangesAsync();
+            }
         }
 
-
-        // -----------------------------
-        // Manual relationship loading
-        // -----------------------------
-        private void LoadTransactions(Session session)
+        public async Task<Session> Get(Guid id)
         {
-            var trxCol = _context.Instance.GetCollection<Transaction>(typeof(Transaction).TableName());
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadSessions(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id); ;
+            }
+        }
 
-            session.Transactions = _transactionsDataService.GetAll()
-                .Where(t => t.SessionId == session.Id)
-                .ToList();
+        public async Task<IReadOnlyList<Session>> GetAll()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadSessions(context)
+                    .ToListAsync(); ;
+            }
+        }
+
+        public async Task<Session> Update(Guid id, Session updatedEntity)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                updatedEntity.Id = id;
+
+                context.Sessions.Update(updatedEntity);
+                await context.SaveChangesAsync();
+
+                return updatedEntity;
+            }
+        }
+
+        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Session, IEnumerable<Transaction>> LoadSessions(InventoryDbContext context)
+        {
+            return context.Sessions
+                .Include(a => a.Transactions);
         }
     }
 }

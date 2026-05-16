@@ -81,14 +81,14 @@ namespace Mhyrenz_Interface.State
                     kvp => kvp.Value.ToDictionary(c => c.Field, c => (object)null)
                 );
 
-            foreach (var product in products)
-            {
-                if (product.Extras is null &&
-                    extrasTemplates.TryGetValue(product.CategoryId, out var template))
-                {
-                    product.Extras = template;
-                }
-            }
+            //foreach (var product in products)
+            //{
+            //    if (product.Extras is null &&
+            //        extrasTemplates.TryGetValue(product.CategoryId, out var template))
+            //    {
+            //        product.Extras = template;
+            //    }
+            //}
 
             LoadProducts(products);
         }

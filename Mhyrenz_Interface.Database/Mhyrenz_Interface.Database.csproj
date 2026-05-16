@@ -45,10 +45,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InventoryDbContext.cs" />
+    <Compile Include="InventoryDbContextFactory.cs" />
+    <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
     <Compile Include="InventoryDbService.cs" />
+    <Compile Include="Migrations\20260516114942_UniqueBarcode.cs" />
+    <Compile Include="Migrations\20260516114942_UniqueBarcode.Designer.cs">
+      <DependentUpon>20260516114942_UniqueBarcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CategoryDataService.cs" />
-    <Compile Include="Services\GenericDataService.cs" />
     <Compile Include="Services\ProductDataService.cs" />
     <Compile Include="Services\SalesRecordDataService.cs" />
     <Compile Include="Services\SessionDataService.cs" />

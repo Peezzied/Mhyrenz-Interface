@@ -163,7 +163,6 @@
     <Compile Include="Exceptions\InvalidSession.cs" />
     <Compile Include="Exceptions\NegativeException.cs" />
     <Compile Include="Models\Category.cs" />
-    <Compile Include="Models\DomainObject.cs" />
     <Compile Include="Models\InventorySettings.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Sale.cs" />
@@ -180,10 +179,12 @@
     <Compile Include="Services\CategoryService\CategoryService.cs" />
     <Compile Include="Services\CategoryService\ICategoryService.cs" />
     <Compile Include="Services\ICategoryDataService.cs" />
-    <Compile Include="Services\IDataService.cs" />
+    <Compile Include="Services\IWriteDataService.cs" />
     <Compile Include="Services\IProductDataService.cs" />
+    <Compile Include="Services\IReadDataService.cs" />
     <Compile Include="Services\ISalesRecordDataService.cs" />
     <Compile Include="Services\ISessionDataService.cs" />
+    <Compile Include="Services\IWriteManyDataService.cs" />
     <Compile Include="Services\ProductService\IProductService.cs" />
     <Compile Include="Services\ProductService\ProductService.cs" />
     <Compile Include="Services\ITransactionsDataService.cs" />

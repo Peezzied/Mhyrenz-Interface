@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ITransactionsDataService : IDataService<Transaction>
+    public interface ITransactionsDataService : IWriteManyDataService<Transaction>, IReadDataService<Transaction, int>
     {
-        IEnumerable<Transaction> GetLatestsByProduct(int productId);
-        IEnumerable<Transaction> GetLatests();
-        Transaction GetLast();
-        void Clean();
-        IEnumerable<Transaction> GetAllRaw();
+        Task<IReadOnlyList<Transaction>> GetAllByProduct(int productId);
+        Task<Transaction> GetLast();
+        Task Clean();
     }
 }

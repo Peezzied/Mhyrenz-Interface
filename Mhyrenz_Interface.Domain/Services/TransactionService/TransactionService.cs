@@ -40,7 +40,7 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             if (product.NetQty - amount < 0)
                 throw new InsufficientQuantityException(product.NetQty, amount, product);
 
-            var lastItem = withRecent ? _transactionsDataService.GetLast() : default;
+            var lastItem = withRecent ? await _transactionsDataService.GetLast() : default;
             var isNew = lastItem != null && (int)lastItem?.ProductId == (int)product.Id;
             var newGuid = Guid.NewGuid();
 
@@ -52,62 +52,51 @@ namespace Mhyrenz_Interface.Domain.Services.TransactionService
             var newTransactions = Enumerable.Range(0, amount)
                 .Select(_ => new Transaction
                 {
-                    ProductId = (int)product.Id,
-                    Price = product.RetailPrice,
-                    Category = _categoryDataService.Get(product.CategoryId).Name,
-                    ItemName = product.Name,
+                    ProductId = product.Id,
                     UniqueId = isNew ? lastItem.UniqueId : newGuid,
                     Timestamp = date,
                     SessionId = session.Id
                 });
 
-            _transactionsDataService.CreateMany(newTransactions);
+            await _transactionsDataService.CreateMany(newTransactions);
 
-
-            return await Task.FromResult(detachedEntity);
+            return detachedEntity;
         }
 
         public async Task<IEnumerable<Transaction>> Subtract(Product product, int amount = 1)
         {
-            var transactions = _transactionsDataService.GetLatestsByProduct((int)product.Id);
+            var transactions = await _transactionsDataService.GetAllByProduct((int)product.Id);
 
             var matching = transactions
                 .Take(amount)
                 .ToList();
 
-            _transactionsDataService.DeleteMany(matching);
+            await _transactionsDataService.DeleteMany(matching);
 
             return await Task.FromResult(matching);
         }
 
         public async Task Clear()
         {
-            await Task.Run(async () =>
-            {
-                var transactions = await GetLatests();
+            var transactions = await GetLatests();
 
-                _transactionsDataService.DeleteMany(transactions);
+            await _transactionsDataService.DeleteMany(transactions);
 
-                _transactionsDataService.Clean();
-            });
+            await _transactionsDataService.Clean();
         }
 
         public async Task<IEnumerable<Transaction>> GetLatests()
         {
-            return await Task.Run(() => _transactionsDataService.GetLatests());
+            return await Task.Run(() => _transactionsDataService.GetAll());
         }
 
-        public async Task<bool> RemoveAll()
+        public async Task RemoveAll()
         {
-            return await Task.Run(() =>
-            {
-                var transactions = _transactionsDataService.GetLatests();
+            var transactions = await _transactionsDataService.GetAll();
 
-                if (transactions.Any())
-                    _transactionsDataService.DeleteMany(transactions);
-
-                return true;
-            });
+            if (transactions.Any())
+                await _transactionsDataService.DeleteMany(transactions);
         }
+
     }
 }

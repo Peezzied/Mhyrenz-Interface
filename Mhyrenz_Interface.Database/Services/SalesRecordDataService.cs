@@ -1,60 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class SalesRecordDataService : GenericDataService<SalesRecord>, ISalesRecordDataService
+    [Obsolete]
+
+    public class SalesRecordDataService : ISalesRecordDataService
     {
-        private readonly InventoryDbService _context;
-        public SalesRecordDataService(InventoryDbService context) : base(context)
+        private readonly InventoryDbContextFactory _contextFactory;
+        public SalesRecordDataService(InventoryDbContextFactory contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
-        public override SalesRecord Get(object id)
+        public Task<SalesRecord> Create(SalesRecord entity)
         {
-            var record = GetTable().FindById((dynamic)id);
-
-            if (record != null)
-                LoadSession(record);
-
-            return record;
+            throw new NotImplementedException();
         }
 
-        public override IEnumerable<SalesRecord> GetAll()
+        public Task Delete(int id)
         {
-            var list = GetTable().FindAll().ToList();
-
-            foreach (var record in list)
-                LoadSession(record);
-
-            return list;
+            throw new NotImplementedException();
         }
 
-        private void LoadSession(SalesRecord record)
+        public Task<SalesRecord> Update(int id, SalesRecord updatedEntity)
         {
-            if (record == null) return;
-
-            var context = _context.Instance;
-            var sessionCol = context.GetCollection<Session>(typeof(Session).TableName());
-            var trxCol = context.GetCollection<Transaction>(typeof(Transaction).TableName());
-
-            // Load the related Session
-            var session = sessionCol.FindById(record.SessionId);
-
-            if (session != null)
-            {
-                // Load transactions for this session
-                session.Transactions = trxCol.Query()
-                    .Where(t => t.SessionId == session.Id)
-                    .ToList();
-
-                record.Session = session;
-            }
-
+            throw new NotImplementedException();
         }
     }
 }

@@ -53,11 +53,11 @@ namespace Mhyrenz_Interface.ViewModels
             _navigationService = navigationServiceEx;
 
             GoToItemCommand = new RelayCommand(GoToItemActionCommand);
-            if (Item.Extras != null)
-            {
-                Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)));
-                Extras.ValueChanged += Extras_ValueChanged;
-            }
+            //if (Item.Extras != null)
+            //{
+            //    Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)));
+            //    Extras.ValueChanged += Extras_ValueChanged;
+            //}
         }
         public void LoadReceiver()
         {
@@ -193,19 +193,6 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     Item.Name = value;
                     OnPropertyChanged(nameof(Name));
-                }
-            }
-        }
-
-        public string GenericName
-        {
-            get => Item.GenericName;
-            set
-            {
-                if (Item.GenericName != value)
-                {
-                    Item.Name = value;
-                    OnPropertyChanged(nameof(GenericName));
                 }
             }
         }

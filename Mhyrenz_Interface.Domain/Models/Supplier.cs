@@ -2,9 +2,9 @@
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Supplier : DomainObject
+    public class Supplier
     {
-        public new int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public ICollection<Product> Products { get; set; }
     }

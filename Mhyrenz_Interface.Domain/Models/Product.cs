@@ -3,20 +3,11 @@ using System.Collections.Generic;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Product : DomainObject
+    public class Product
     {
-        public Product() { }
-        public Product(string name, decimal retailPrice, decimal listPrice, int categoryId)
-        {
-            Name = name;
-            RetailPrice = retailPrice;
-            ListPrice = listPrice;
-            CategoryId = categoryId;
-        }
 
-        public new int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
-        public string GenericName { get; set; }
 
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; }
@@ -28,9 +19,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 
-        public bool IsDeleted { get; set; }
-
-        public Dictionary<string, object> Extras { get; set; }
+        public bool IsDeleted { get; private set;  }
 
         // Category
         public int CategoryId { get; set; }
@@ -47,6 +36,16 @@ namespace Mhyrenz_Interface.Domain.Models
         public decimal ProfitRevenue => RetailPrice - ListPrice;
         public decimal Profit => Purchase * ProfitRevenue;
         public decimal TotalListPrice => ListPrice * Qty;
+
+        public void Delete()
+        {
+            IsDeleted = true;
+        }
+
+        public void DeleteBack()
+        {
+            IsDeleted = false;
+        }
 
         public Product Clone()
         {

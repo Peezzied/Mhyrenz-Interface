@@ -1,117 +1,101 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 using Transaction = Mhyrenz_Interface.Domain.Models.Transaction;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class TransactionsDataService : GenericDataService<Transaction>, ITransactionsDataService
+    public class TransactionsDataService : ITransactionsDataService
     {
-        private readonly InventoryDbService _context;
+        private readonly InventoryDbContextFactory _contextFactory;
 
-        public TransactionsDataService(InventoryDbService context) : base(context)
+        public TransactionsDataService(InventoryDbContextFactory contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
-        public void Clean()
+        public async Task Clean()
         {
-            _context.Instance.DropCollection(Name);
-            GetTable();
-        }
-
-        public new IEnumerable<Transaction> GetAll()
-        {
-            var transactions = GetTable().FindAll().ToList();
-
-            LoadReferences(transactions);
-
-            return transactions;
-        }
-
-        public IEnumerable<Transaction> GetLatestsByProduct(int productId)
-        {
-            var list = GetTable().Query()
-                .Where(t => t.ProductId == productId)
-                .OrderByDescending(t => t.Timestamp)
-                .ToList();
-
-            LoadReferences(list);
-
-            return list;
-        }
-
-        public Transaction GetLast()
-        {
-            var transaction = GetTable().Query()
-                .OrderByDescending(t => t.Timestamp)
-                .FirstOrDefault();
-
-            if (transaction != null)
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                var context = _context.Instance;
-                transaction.Item = context
-                    .GetCollection<Product>(typeof(Product).TableName())
-                    .FindById(transaction.ProductId);
-
-                transaction.Session = context
-                    .GetCollection<Session>(typeof(Session).TableName())
-                    .FindById(transaction.SessionId);
-            }
-
-
-            return transaction;
-        }
-
-        public IEnumerable<Transaction> GetLatests()
-        {
-            var list = GetTable().Query()
-                .OrderByDescending(t => t.Timestamp)
-                .ToList();
-
-            LoadReferences(list);
-
-            return list;
-        }
-
-        // --------------------------
-        // Manual navigation loading
-        // --------------------------
-
-        private void LoadReferences(List<Transaction> list)
-        {
-            var context = _context.Instance;
-
-            // 1. Get all product IDs we need
-            var productIds = list.Select(t => t.ProductId).Distinct().ToHashSet();
-            var products = context
-                .GetCollection<Product>(typeof(Product).TableName())
-                .Find(p => productIds.Contains(p.Id))
-                .ToDictionary(p => p.Id);
-
-            // 2. Get all session IDs we need
-            var sessionIds = list.Select(t => t.SessionId).Distinct().ToHashSet();
-            var sessions = context
-                .GetCollection<Session>(typeof(Session).TableName())
-                .Find(s => sessionIds.Contains(s.Id))
-                .ToDictionary(s => s.Id);
-
-            // 3. Assign references in-memory
-            foreach (var transaction in list)
-            {
-                products.TryGetValue(transaction.ProductId, out var product);
-                sessions.TryGetValue(transaction.SessionId, out var session);
-
-                transaction.Item = product;
-                transaction.Session = session;
+                await context.Database.ExecuteSqlRawAsync($"DELETE FROM sqlite_sequence WHERE name = '{nameof(context.Transactions)}';");
+                await context.Database.ExecuteSqlRawAsync("VACUUM;");
             }
         }
 
-        public IEnumerable<Transaction> GetAllRaw()
+        public async Task<IReadOnlyList<Transaction>> GetAll()
         {
-            return base.GetAll();
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadTransactions(context)
+                    .IgnoreQueryFilters()
+                    .OrderByDescending(t => t.Timestamp)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<IReadOnlyList<Transaction>> GetAllByProduct(int productId)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadTransactions(context)
+                    .IgnoreQueryFilters()
+                    .Where(t => t.ProductId == productId)
+                    .OrderByDescending(t => t.Timestamp)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<Transaction> GetLast()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadTransactions(context)
+                    .IgnoreQueryFilters()
+                    .OrderByDescending(t => t.Timestamp)
+                    .FirstOrDefaultAsync();
+            }
+        }
+
+        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Transaction, Session> LoadTransactions(InventoryDbContext context)
+        {
+            return context.Transactions
+                .Include(a => a.Item)
+                .Include(a => a.Session);
+        }
+
+        public async Task<IReadOnlyList<Transaction>> CreateMany(IEnumerable<Transaction> entities)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var result = entities.ToList();
+                await context.Transactions.AddRangeAsync(result);
+                await context.SaveChangesAsync();
+                return result;
+            }
+        }
+
+        public async Task DeleteMany(IEnumerable<Transaction> entities)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Transactions.RemoveRange(entities);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Transaction> Get(int id)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadTransactions(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id); ;
+            }
         }
     }
 }

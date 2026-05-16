@@ -28,6 +28,7 @@ using Mhyrenz_Interface.Test;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Mhyrenz_Interface.Views;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -57,15 +58,21 @@ namespace Mhyrenz_Interface
                 {
                     CreateServiceCollection(services, context);
                 })
-                .Build();
+                .Build();  
 
             await _appHost.StartAsync();
             ServiceProvider = _appHost.Services;
+
+            using (var context = ServiceProvider.GetRequiredService<InventoryDbContextFactory>().CreateDbContext())
+            {
+                context.Database.Migrate();
+            } // FIXME: TEMPORARY, CHANGE LATER. DEFER TO DATABASE INTIALIZER
 
             await ServiceProvider.GetRequiredService<AppSettingsManager>()
                 .GenerateAppSettings(); // FIXME: TEMPORARY
 
             ServiceProvider.GetRequiredService<InventorySettingsProvider>().Load();
+
 
             Resources.Add("BarcodeToImageConverter",
                 ServiceProvider.GetRequiredService<BarcodeToImageConverter>());
@@ -82,14 +89,16 @@ namespace Mhyrenz_Interface
 
         protected override void OnExit(ExitEventArgs e)
         {
-            ServiceProvider.GetRequiredService<InventoryDbService>().Dispose();
             base.OnExit(e);
         }
 
         private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)
         {
 
-            var inventoryConfig = context.Configuration.GetConnectionString("DefaultConnection");
+            Action<DbContextOptionsBuilder> inventoryConfig = options =>
+            {
+                options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")); // FIXME: TEMPORARY, CHANGE LATER
+            };
 
             services.AddOptions<AppSettingsManager.AppSettings>()
                 .BindConfiguration("AppSettings");
@@ -101,7 +110,8 @@ namespace Mhyrenz_Interface
                 .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
                 .AddSingleton<AppSettingsManager>()
 
-                .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
+                .AddDbContext<InventoryDbContext>(inventoryConfig)
+                .AddSingleton(new InventoryDbContextFactory(inventoryConfig))
 
                 .AddSingleton<InventorySettingsProvider>()
 

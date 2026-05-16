@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
 
@@ -26,44 +27,59 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
         public async Task<Product> EditProperty(int id, UpdateEntity<Product> update)
         {
-            return await Task.Run(() =>
-            {
-                var newEntity = _productDataService.UpdateProperty(id, update);
-                return newEntity;
-            });
+            var product = await Get(id);
+            update(product);
+            return await _productDataService.MarkChanged(product);
         }
+
         public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, UpdateEntity<Product> update)
         {
-            return await Task.Run(() =>
+            foreach (var product in products)
             {
-                var newEntities = _productDataService.UpdatePropertyRange(products, update);
-                return newEntities;
-            });
+                update(product);
+            }
+            return await _productDataService.MarkChangedRange(products);
         }
 
         public async Task<Product> Get(int id)
         {
-            return await Task.Run(() => _productDataService.Get(id) ?? throw new DataException("No product found. Please add a product first."));
+            return await _productDataService.Get(id);
         }
 
         public async Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false)
         {
-            return await Task.Run(() => { return ignoreFilter ? _productDataService.GetAllWithIgnore() : _productDataService.GetAll(); });
+            return ignoreFilter ? await _productDataService.GetAllWithIgnore() : await _productDataService.GetAll();
         }
 
-        public async Task Remove(Product entity)
+        public async Task<Product> Remove(Product entity)
         {
-            await Task.Run(() => _productDataService.Delete(entity.Id));
+            entity.Delete();
+            return await _productDataService.MarkChanged(entity);
         }
 
-        public async Task RemoveMany(IEnumerable<Product> products)
+        public async Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<Product> products)
         {
-            await Task.Run(() => _productDataService.DeleteMany(products));
+            foreach (var product in products)
+            {
+                product.Delete();
+            }
+            return await _productDataService.MarkChangedRange(products);
+        }
+
+        public async Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<Product> products)
+        {
+            foreach (var product in products)
+            {
+                product.DeleteBack();
+            }
+            return await _productDataService.MarkChangedRange(products);
         }
 
         public async Task<int> RemovePhysical()
         {
-            return await Task.Run(() => _productDataService.DeleteAllPhysical());
+            var products = (await _productDataService.GetAllWithIgnore()).Where(x => x.IsDeleted);
+            await _productDataService.DeleteMany(products);
+            return products.Count();
         }
     }
 }

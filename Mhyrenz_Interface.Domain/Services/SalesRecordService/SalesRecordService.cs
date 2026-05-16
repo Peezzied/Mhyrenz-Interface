@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
 {
+    [Obsolete]
     public class SalesRecordService : ISalesRecordService
     {
         private readonly ISalesRecordDataService _salesRecordDataService;
@@ -12,6 +14,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
             _salesRecordDataService = salesRecordDataService;
             _transactionsService = transactionsService;
         }
+
         public async Task<bool> RegisterSales(SalesRecord sales)
         {
             await Task.Run(() =>

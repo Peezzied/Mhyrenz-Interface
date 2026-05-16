@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class Session : DomainObject
+    public class Session
     {
-        public new Guid Id { get; set; }
+        public Guid Id { get; set; }
         public DateTime Period { get; set; }
         public IEnumerable<Transaction> Transactions { get; set; }
     }

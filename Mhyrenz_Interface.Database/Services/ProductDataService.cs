@@ -1,108 +1,134 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
+using EFCore.BulkExtensions;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class ProductDataService : GenericDataService<Product>, IProductDataService
+    public class ProductDataService : IProductDataService
     {
-        private readonly InventoryDbService _context;
+        private readonly InventoryDbContextFactory _contextFactory;
         private readonly ICategoryDataService _categoryDataService;
         private readonly ITransactionsDataService _transactionsDataService;
 
-        public ProductDataService(InventoryDbService context, ICategoryDataService categoryDataService, ITransactionsDataService transactionsDataService) : base(context)
+        public ProductDataService(InventoryDbContextFactory contextFactory, ICategoryDataService categoryDataService, ITransactionsDataService transactionsDataService)
         {
-            _context = context;
+            _contextFactory = contextFactory;
             _categoryDataService = categoryDataService;
             _transactionsDataService = transactionsDataService;
         }
 
-        public override Product Get(object id)
+        public async Task<Product> Get(int id)
         {
-            var product = GetTable().FindById((int)id);
-
-            if (product != null && !product.IsDeleted)
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                product.Category = _categoryDataService.GetRaw(product.CategoryId);
-
-                // Load transactions
-                product.Transactions = _transactionsDataService.GetAllRaw()
-                    .Where(t => (int)t.ProductId == (int)product.Id)
-                    .ToList();
+                return await LoadProducts(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id); ;
             }
-
-            return product;
         }
 
-        public override IEnumerable<Product> GetAll()
+        public async Task<IReadOnlyList<Product>> GetAll()
         {
-            var list = GetTable().Find(p => !p.IsDeleted).ToList();
-
-            LoadReferences(list);
-
-            return list;
-        }
-
-        public IEnumerable<Product> GetAllWithIgnore()
-        {
-            var list = GetTable().FindAll().ToList();
-
-            LoadReferences(list);
-
-            return list;
-        }
-
-        public IEnumerable<Product> GetAllByCategory(string name, int? id = null)
-        {
-            var list = GetTable().Find(p =>
-                !p.IsDeleted &&
-                (!string.IsNullOrEmpty(name) && p.Category.Name == name) &&
-                (id.HasValue && p.CategoryId == id)
-            ).ToList();
-
-            LoadReferences(list);
-
-            return list;
-        }
-
-        public int DeleteAllPhysical()
-        {
-            var col = GetTable();
-            var deleted = col.Find(p => p.IsDeleted).ToList();
-
-            foreach (var p in deleted)
-                col.Delete(p.Id);
-
-            return deleted.Count;
-        }
-
-        // -----------------------------
-        // Manual relationship loading
-        // -----------------------------
-        private void LoadReferences(List<Product> list)
-        {
-            // 1 — load categories ONCE
-            var categoryIds = list.Select(p => p.CategoryId).Distinct().ToHashSet();
-            var categories = _categoryDataService.GetAllRaw()
-                .Where(c => categoryIds.Contains(c.Id))
-                .ToDictionary(c => c.Id);
-
-            // 2 — load transactions ONCE
-            var allTransactions = _transactionsDataService.GetAllRaw();
-            var trxLookup = allTransactions
-                .GroupBy(t => (int)t.ProductId)
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            // 3 — map references
-            foreach (var p in list)
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                categories.TryGetValue(p.CategoryId, out var cat);
-                p.Category = cat;
+                return await LoadProducts(context)
+                    .ToListAsync(); ;
+            }
+        }
 
-                trxLookup.TryGetValue((int)p.Id, out var trx);
-                p.Transactions = trx;
+        public async Task<IReadOnlyList<Product>> GetAllWithIgnore()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadProducts(context)
+                    .IgnoreQueryFilters()
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<Product> Create(Product entity)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var result = await context.Products.AddAsync(entity);
+                await context.SaveChangesAsync();
+
+                return result.Entity;
+            }
+        }
+
+        public async Task<IReadOnlyList<Product>> CreateMany(IEnumerable<Product> entities)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var result = entities.ToList();
+                await context.Products.AddRangeAsync(result);
+                await context.SaveChangesAsync();
+                return result;
+            }
+        }
+
+        public async Task DeleteMany(IEnumerable<Product> entities)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Products.RemoveRange(entities);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Product> Update(int id, Product updatedEntity)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                updatedEntity.Id = id;
+                context.Products.Update(updatedEntity);
+                await context.SaveChangesAsync();
+                return updatedEntity;
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var entity = await LoadProducts(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id);
+                context.Products.Remove(entity);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Product, Category> LoadProducts(InventoryDbContext context)
+        {
+            return context.Products
+                .Include(a => a.Transactions)
+                .Include(a => a.Category);
+        }
+
+        public async Task<Product> MarkChanged(Product product)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Products.Update(product);
+                await context.SaveChangesAsync();
+                return product;
+            }
+        }
+
+        public async Task<IReadOnlyList<Product>> MarkChangedRange(IEnumerable<Product> products)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Products.UpdateRange(products);
+                await context.SaveChangesAsync();
+                return products.ToList();
             }
         }
     }

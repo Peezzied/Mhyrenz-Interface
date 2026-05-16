@@ -12,6 +12,7 @@ using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.Commands
 {
+    [Obsolete]
     public class SalesRegisterCommand : BaseAsyncCommand
     {
         private readonly ISalesRecordService _salesRecordService;

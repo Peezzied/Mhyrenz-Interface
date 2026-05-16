@@ -25,7 +25,6 @@ namespace Mhyrenz_Interface.State
 
         public TransactionStore(
             IUndoRedoManager undoRedoManager,
-            IEnumerable<Product> products,
             CreateViewModel<TransactionDataViewModel> productsViewModelFactory,
             IInventoryStore inventoryStore,
             ICategoryStore categoryStore,
@@ -55,26 +54,6 @@ namespace Mhyrenz_Interface.State
 
         public void LoadTransactions(IEnumerable<Transaction> transactions)
         {
-            //_trackers.Clear();
-            //Transactions.Clear();
-            //ChangeTracking.IsInventoryLoaded = true;
-
-            //var displayTransaction = transactions
-            //    .GroupBy(transaction => transaction.UniqueId)
-            //    .Select(group => _transactionsViewModelFactory.CreateViewModel(new TransactionDataViewModelDTO() { 
-            //        Id = group.Key,
-            //        Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),
-            //        Amount = group.Count(),
-            //        Date = group.Max(t => t.CreatedAt),
-            //    }));
-
-            //foreach (var item in displayTransaction)
-            //{
-            //    _trackers.Add(TrackTransactions(item));
-            //    Transactions.Add(item);
-            //}
-
-
             Application.Current.Dispatcher.Invoke(() =>
             {
                 _trackers.Clear();
@@ -83,23 +62,32 @@ namespace Mhyrenz_Interface.State
                 if (transactions == null)
                     return;
 
-                var displayTransaction = transactions
-                    .GroupBy(transaction => transaction.UniqueId)
-                    .Select(group => _transactionsViewModelFactory(new TransactionDataViewModelDTO()
-                    {
-                        Id = group.Key,
-                        Price = group.First().Price,
-                        Category = group.First().Category,
-                        ProductName = group.First().ItemName,
-                        Product = _products.FirstOrDefault(p => p.Item.Id == group.First().ProductId),
-                        Amount = group.Count(),
-                        Date = group.Max(t => t.Timestamp),
-                        Session = group.First().Session,
-                    }));
+                var productById = _products.ToDictionary(
+                       p => p.Item.Id,
+                       p => p
+                   ); // TODO: use the lookup table in the inventorystore instead when it's implemented
 
-                foreach (var item in displayTransaction)
+                var displayTransactions = transactions
+                    .GroupBy(t => t.UniqueId)
+                    .Select(group =>
+                    {
+                        var first = group.First();
+
+                        productById.TryGetValue(first.ProductId, out var product);
+
+                        return _transactionsViewModelFactory(new TransactionDataViewModelDTO()
+                        {
+                            Id = group.Key,
+                            Product = product,
+                            Amount = group.Count(),
+                            Date = group.Max(t => t.Timestamp),
+                            Session = first.Session,
+                        });
+                    });
+
+                foreach (var item in displayTransactions)
                 {
-                    if (item.Product != null)
+                    if (!item.Product.Item.IsDeleted)
                         _trackers.Add(TrackTransactions(item));
 
                     Transactions.Add(item);

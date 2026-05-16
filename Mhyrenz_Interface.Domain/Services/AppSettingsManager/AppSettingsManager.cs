@@ -80,7 +80,7 @@ namespace Mhyrenz_Interface.Domain.Services.AppSettingsManager
         }
         public async Task GenerateInventory(JObject root)
         {
-            var categories = await _categoryService.GetAllCategories(); // REFACTOR: INJECT INSTEAD AFTER LOAD
+            var categories = await _categoryService.GetAllCategories(); // FIXME: INJECT INSTEAD AFTER LOAD?
 
             var categoryDict = categories.Select(c =>
             {

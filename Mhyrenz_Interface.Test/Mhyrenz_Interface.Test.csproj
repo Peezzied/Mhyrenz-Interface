@@ -215,7 +215,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppSettingsTest.cs" />
-    <Compile Include="RepositoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

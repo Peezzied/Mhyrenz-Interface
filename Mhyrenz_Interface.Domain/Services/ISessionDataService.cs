@@ -1,8 +1,9 @@
-﻿using Mhyrenz_Interface.Domain.Models;
+﻿using System;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ISessionDataService : IDataService<Session>
+    public interface ISessionDataService : IWriteDataService<Session, Guid>, IReadDataService<Session, Guid>
     {
 
     }

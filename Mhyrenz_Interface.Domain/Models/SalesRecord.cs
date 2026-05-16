@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
-    public class SalesRecord : DomainObject
+    [Obsolete]
+    public class SalesRecord
     {
-        public new int Id { get; set; }
+        public int Id { get; set; }
         public int TotalPurchase { get; set; }
         public double TotalSales { get; set; }
         public double Profit { get; set; }

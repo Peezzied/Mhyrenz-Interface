@@ -10,11 +10,12 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task<IEnumerable<Product>> GetAll(bool ignoreFilter = false);
         Task<Product> Get(int id);
         Task<Product> Add(Product entity);
-        Task Remove(Product entity);
+        Task<Product> Remove(Product entity);
         Task<Product> EditProperty(int id, UpdateEntity<Product> update);
-        Task RemoveMany(IEnumerable<Product> products);
+        Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<Product> products);
         Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities);
         Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, UpdateEntity<Product> update);
         Task<int> RemovePhysical();
+        Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<Product> products);
     }
 }

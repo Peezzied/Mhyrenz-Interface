@@ -3,10 +3,7 @@ using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
-    public interface ICategoryDataService : IDataService<Category>
+    public interface ICategoryDataService : IWriteDataService<Category, int>, IReadDataService<Category, int>
     {
-        IEnumerable<Category> GetAllRaw();
-        Category GetByName(string name);
-        Category GetRaw(int id);
     }
 }

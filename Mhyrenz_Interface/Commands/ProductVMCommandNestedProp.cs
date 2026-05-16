@@ -15,6 +15,7 @@ namespace Mhyrenz_Interface.Commands
         private readonly object _newValue;
         private readonly ICommand _command;
 
+        [Obsolete]
         public ProductVMCommandNestedProp(BaseViewModel owner,
             string navigatorName,
             string propertyName,
@@ -35,19 +36,19 @@ namespace Mhyrenz_Interface.Commands
 
         public override bool Command(object parameter, ActionType intent)
         {
-            _command.Execute(new UpdateProductCommandDTO()
-            {
-                Id = _targetProduct.Item.Id,
-                Updater = entity =>
-                {
-                    var value = intent == ActionType.Undo ? _oldValue : _newValue;
+            //_command.Execute(new UpdateProductCommandDTO()
+            //{
+            //    Id = _targetProduct.Item.Id,
+            //    Updater = entity =>
+            //    {
+            //        var value = intent == ActionType.Undo ? _oldValue : _newValue;
 
-                    if (entity.Extras is null)
-                        entity.Extras = new Dictionary<string, object>();
+            //        if (entity.Extras is null)
+            //            entity.Extras = new Dictionary<string, object>();
 
-                    entity.Extras[_propertyName] = value;
-                }
-            });
+            //        entity.Extras[_propertyName] = value;
+            //    }
+            //});
 
             return true;
         }

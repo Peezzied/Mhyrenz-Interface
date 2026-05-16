@@ -1,5 +1,8 @@
-﻿namespace Mhyrenz_Interface.Domain.Models
+﻿using System;
+
+namespace Mhyrenz_Interface.Domain.Models
 {
+    [Obsolete]
     public class Sale
     {
         public int ProductId { get; set; }

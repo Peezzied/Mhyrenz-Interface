@@ -1,75 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mhyrenz_Interface.Database.Services
 {
-    public class CategoryDataService : GenericDataService<Category>, ICategoryDataService
+    public class CategoryDataService : ICategoryDataService
     {
-        private readonly InventoryDbService _context;
-        private readonly ITransactionsDataService _transactionsDataService;
+        private readonly InventoryDbContextFactory _contextFactory;
 
-        public CategoryDataService(InventoryDbService context, ITransactionsDataService transactionsDataService) : base(context)
+        public CategoryDataService(InventoryDbContextFactory contextFactory)
         {
-            _context = context;
-            _transactionsDataService = transactionsDataService;
-        }
-        public new Category Get(object id)
-        {
-            var category = GetTable().FindById((dynamic)id);
-
-            if (category != null)
-                LoadProducts(category);
-
-            return category;
-        }
-        public override IEnumerable<Category> GetAll()
-        {
-            var list = GetTable().FindAll().ToList();
-
-            foreach (var category in list)
-                LoadProducts(category);
-
-            return list;
+            _contextFactory = contextFactory;
         }
 
-        public IEnumerable<Category> GetAllRaw()
+        public async Task<Category> Create(Category entity)
         {
-            return base.GetAll();
-        }
-
-        public Category GetByName(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Category GetRaw(int id)
-        {
-            return base.Get(id);
-        }
-
-        // -----------------------------
-        // Manual loading of relations
-        // -----------------------------
-        private void LoadProducts(Category category)
-        {
-            if (category == null) return;
-
-            var productCol = _context.Instance.GetCollection<Product>(typeof(Product).TableName());
-
-            // Load all products under this category
-            category.Products = productCol.Find(p => p.CategoryId == category.Id && !p.IsDeleted).ToList();
-
-            // Load transactions for each product
-            foreach (var product in category.Products)
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                product.Transactions = _transactionsDataService.GetAllRaw()
-                    .Where(t => t.ProductId == product.Id)
-                    .ToList();
+                var result = await context.Categories.AddAsync(entity);
+                await context.SaveChangesAsync();
+
+                return result.Entity;
             }
+        }
+
+        public async Task Delete(int id)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                var entity = await LoadCategories(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id);
+                context.Categories.Remove(entity);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Category> Get(int id)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                Category entity = await LoadCategories(context)
+                    .FirstOrDefaultAsync((e) => e.Id == id);
+                return entity;
+            }
+        }
+
+        public async Task<IReadOnlyList<Category>> GetAll()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadCategories(context)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<Category> Update(int id, Category updatedEntity)
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                updatedEntity.Id = id;
+                context.Categories.Update(updatedEntity);
+                await context.SaveChangesAsync();
+                return updatedEntity;
+            }
+        }
+
+        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Category, ICollection<Transaction>> LoadCategories(InventoryDbContext context)
+        {
+            return context.Categories
+                .Include(a => a.Products)
+                    .ThenInclude(p => p.Transactions);
         }
     }
 }

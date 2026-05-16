@@ -14,9 +14,6 @@ namespace Mhyrenz_Interface.ViewModels
         public int Amount { get; set; }
         public DateTime Date { get; set; }
         public Session Session { get; set; }
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }
-        public string Category { get; set; }
     }
 
     public class TransactionDataViewModel : BaseViewModel, IBarcodeBound
@@ -86,13 +83,13 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public bool IsDeleted => DTO.Product == null;
+        public bool IsDeleted => Product.Item.IsDeleted;
 
-        public string Category => DTO.Category;
+        public string Category => Product.CategoryName;
 
-        public string Name => DTO.ProductName;
+        public string Name => Product.Name;
 
-        public decimal Price => Product?.RetailPrice ?? DTO.Price;
+        public decimal Price => Product.RetailPrice;
 
         public int Amount
         {
