@@ -15,6 +15,8 @@ namespace Mhyrenz_Interface.Database
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<PharmaDetails> PharmaDetails { get; set; }
+
         public InventoryDbContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

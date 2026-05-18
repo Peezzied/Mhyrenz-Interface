@@ -164,6 +164,7 @@
     <Compile Include="Exceptions\NegativeException.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\InventorySettings.cs" />
+    <Compile Include="Models\PharmaDetails.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Sale.cs" />
     <Compile Include="Models\SalesRecord.cs" />

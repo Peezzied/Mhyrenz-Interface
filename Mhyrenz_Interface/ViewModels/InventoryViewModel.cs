@@ -232,29 +232,32 @@ namespace Mhyrenz_Interface.ViewModels
 
         public void RowIntoView(int category, int[] products)
         {
-            var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
-
-            InventoryTabItem newTab = tabItems[category];
-            var vm = newTab.ContentViewModel;
-            bool isDiff = false;
-            if (newTab != SelectedItem)
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                SelectedItem = newTab;
-                isDiff = true;
-            }
+                var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
 
-            if (SearchBar != string.Empty)
-                SearchBar = string.Empty;
+                InventoryTabItem newTab = tabItems[category];
+                var vm = newTab.ContentViewModel;
+                bool isDiff = false;
+                if (newTab != SelectedItem)
+                {
+                    SelectedItem = newTab;
+                    isDiff = true;
+                }
 
-            var changedProductInfo = _inventoryStore.LastProductChanged.ChangedProductInfo;
-            var selectIndex = changedProductInfo != null ? changedProductInfo.Value.Index : newTab.ProductIndexOf(products.First());
+                if (SearchBar != string.Empty)
+                    SearchBar = string.Empty;
 
-            if (selectIndex < 0)
-            {
-                // TODO: show alert only if the index is out of range
-                return;
-            }
-            vm.SelectItem(isDiff, selectIndex, products);
+                var changedProductInfo = _inventoryStore.LastProductChanged.ChangedProductInfo;
+                var selectIndex = changedProductInfo != null ? changedProductInfo.Value.Index : newTab.ProductIndexOf(products.First());
+
+                if (selectIndex < 0)
+                {
+                    // TODO: show alert only if the index is out of range
+                    return;
+                }
+                vm.SelectItem(isDiff, selectIndex, products);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
 
         }
 

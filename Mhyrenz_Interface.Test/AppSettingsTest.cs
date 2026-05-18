@@ -46,7 +46,6 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
                     services
                         .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
                         .AddSingleton<AppSettingsManager>()
-                        .AddSingleton<InventoryDbService>(new InventoryDbService(inventoryConfig))
 
                         .AddSingleton<InventorySettingsProvider>()
 

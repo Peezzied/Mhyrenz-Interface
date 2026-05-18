@@ -94,10 +94,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         public event Action BarcodeReceived;
 
-        public int NetQty
-        {
-            get => Item.NetQty;
-        }
+        public PharmaDetails PharmaDetails => Item.PharmaDetails;
+
+        public int NetQty => Item.NetQty;
 
         private bool _isSelected;
 
@@ -122,20 +121,11 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public int PurchaseMax
-        {
-            get => Item.NetQty;
-        }
+        public int PurchaseMax => Item.NetQty;
 
-        public int PurchaseMaxNormal
-        {
-            get => Item.Qty;
-        }
+        public int PurchaseMaxNormal => Item.Qty;
 
-        public int QtyMin
-        {
-            get => Purchase;
-        }
+        public int QtyMin => Purchase;
 
         //private int _cachedPurchase;
         private int _purchase;
@@ -177,10 +167,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public int Purchase
-        {
-            get => Item.Purchase;
-        }
+        public int Purchase => Item.Purchase;
 
 
         public string Name
@@ -223,10 +210,8 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
-        public decimal NetRetailPrice
-        {
-            get => Item.NetRetail;
-        }
+        public decimal NetRetailPrice => Item.NetRetail;
+
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
@@ -241,10 +226,8 @@ namespace Mhyrenz_Interface.ViewModels
                 }
             }
         }
-        public decimal ListPrice
-        {
-            get => Item.ListPrice;
-        }
+        public decimal ListPrice => Item.ListPrice;
+        
         public string Barcode
         {
             get => Item.Barcode;

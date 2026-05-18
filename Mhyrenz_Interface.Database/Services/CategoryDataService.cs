@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LiteDB;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +32,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                var entity = await LoadCategories(context)
+                var entity = await context.Categories
                     .FirstOrDefaultAsync((e) => e.Id == id);
                 context.Categories.Remove(entity);
                 await context.SaveChangesAsync();
@@ -44,7 +43,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                Category entity = await LoadCategories(context)
+                Category entity = await context.Categories
                     .FirstOrDefaultAsync((e) => e.Id == id);
                 return entity;
             }
@@ -54,7 +53,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                return await LoadCategories(context)
+                return await context.Categories
                     .ToListAsync();
             }
         }
@@ -68,13 +67,6 @@ namespace Mhyrenz_Interface.Database.Services
                 await context.SaveChangesAsync();
                 return updatedEntity;
             }
-        }
-
-        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Category, ICollection<Transaction>> LoadCategories(InventoryDbContext context)
-        {
-            return context.Categories
-                .Include(a => a.Products)
-                    .ThenInclude(p => p.Transactions);
         }
     }
 }

@@ -21,6 +21,9 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public bool IsDeleted { get; private set;  }
 
+        public int? PharmaDetailsId { get; set; }
+        public PharmaDetails PharmaDetails { get; set; }
+
         // Category
         public int CategoryId { get; set; }
         public Category Category { get; set; }
