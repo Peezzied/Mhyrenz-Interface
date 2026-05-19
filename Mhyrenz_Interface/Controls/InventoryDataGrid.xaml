@@ -21,19 +21,10 @@
                 <ResourceDictionary Source="/Controls/Templates/BarcodeColumn.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-
-            <Style x:Key="DetailsTextStyle" TargetType="TextBlock">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="N/A">
-                        <Setter Property="Foreground" Value="Red"/>
-                        <Setter Property="FontStyle" Value="Italic"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
             <Style x:Key="TextBlockCenter" TargetType="TextBlock">
                 <Setter Property="TextAlignment" Value="Center"/>
             </Style>
+
 
             <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
             <converters:OrConverter x:Key="OrConverter"/>
@@ -41,101 +32,143 @@
             <converters:PurchaseToGreenConverter x:Key="PurchaseToGreenConverter"/>
             <converters:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
 
+            <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
+
             <hc:BindingProxy x:Key="UserControlContext" Value="{Binding}"/>
 
-            <!--Column Templates-->
-            <DataGridCheckBoxColumn x:Key="CheckboxColumn" x:Shared="False" Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
+            <!--#region IdColumn-->
+            <Style x:Key="IdColumnElementStyle"
+       TargetType="TextBlock"
+       BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="FontWeight" Value="DemiBold"/>
+                <Setter Property="TextAlignment" Value="Right"/>
+                <Setter Property="Padding" Value="5"/>
+            </Style>
+            <!--#endregion-->
+            <!--#region NameColumn-->
+            <Style x:Key="NameColumnHeaderStyle"
+       TargetType="DataGridColumnHeader"
+       BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
+                <Setter Property="HorizontalContentAlignment"
+            Value="Left"/>
+            </Style>
 
-            <DataGridTextColumn attached:InventoryDataGridColumn.IgnoreReorder="True" x:Key="IdColumn" Width="Auto" x:Shared="False" IsReadOnly="True" Header="Id" Binding="{Binding Item.Id}">
-                <DataGridTextColumn.ElementStyle>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                        <Setter Property="FontFamily" Value="Consolas"/>
-                        <Setter Property="FontWeight" Value="DemiBold"/>
-                        <Setter Property="TextAlignment" Value="Right"/>
-                        <Setter Property="Padding" Value="5"/>
-                    </Style>
-                </DataGridTextColumn.ElementStyle>
-            </DataGridTextColumn>
+            <DataTemplate x:Key="NameColumnCellTemplate">
+                <ContentControl Content="{Binding}">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <local:MaxLinesTextBlock Text="{Binding Name}"
+                                                     LineHeight="16"
+                                                     MaxLines="2"
+                                                     FontFamily="Arial"
+                                                     Padding="4"
+                                                     Width="Auto"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
 
-            <DataGridTemplateColumn attached:InventoryDataGridColumn.IgnoreReorder="True" attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" x:Key="NameColumn" x:Shared="False" SortMemberPath="Name" SortDirection="Ascending" Header="Name" MaxWidth="545">
-                <DataGridTemplateColumn.HeaderStyle>
-                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
-                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                    </Style>
-                </DataGridTemplateColumn.HeaderStyle>
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <ContentControl Content="{Binding}">
-                            <ContentControl.Style>
-                                <Style TargetType="ContentControl">
-                                    <Setter Property="ContentTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <local:MaxLinesTextBlock Text="{Binding Name}"
-                                                 LineHeight="16" 
-                                                 MaxLines="2" FontFamily="Arial"
-                                                 Padding="4"
-                                                 Width="Auto"/>
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Batch, Converter={StaticResource Object2BooleanConverter}}" Value="True"/>
-                                                <Condition Binding="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}}" Value="False"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <MultiDataTrigger.Setters>
-                                                <Setter Property="ContentTemplate">
-                                                    <Setter.Value>
-                                                        <DataTemplate>
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="3*"/>
-                                                                    <ColumnDefinition MinWidth="50" Width="*"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <local:MaxLinesTextBlock Text="{Binding Name}"
-                                                                 MaxLines="2" FontFamily="Arial"
-                                                                 Padding="4" LineHeight="16" 
-                                                                 Width="Auto"/>
-                                                                <local:MaxLinesTextBlock Grid.Column="1" Text="{Binding Batch}"
-                                                                  MaxLines="2" FontFamily="Arial" LineHeight="16" 
-                                                                 Padding="4" Foreground="Red"
-                                                                 Width="Auto"/>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </MultiDataTrigger.Setters>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ContentControl.Style>
-                        </ContentControl>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-                <DataGridTemplateColumn.CellEditingTemplate>
-                    <DataTemplate>
-                        <local:CellAdorner>
-                            <TextBox Margin="2" FontFamily="Arial" VerticalContentAlignment="Center" Text="{Binding Name, UpdateSourceTrigger=Explicit}" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
-                                <i:Interaction.Behaviors>
-                                    <behaviors:UndoRedoBehavior TargetProperty="{x:Static TextBox.TextProperty}"/>
-                                </i:Interaction.Behaviors>
-                            </TextBox>
-                        </local:CellAdorner>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellEditingTemplate>
-            </DataGridTemplateColumn>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Batch, Converter={StaticResource Object2BooleanConverter}}"
+                                       Value="True"/>
+                                        <Condition Binding="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}}"
+                                       Value="False"/>
+                                    </MultiDataTrigger.Conditions>
 
-            <DataGridTemplateColumn x:Key="CategoryColumn" x:Shared="False" Header="Category" CanUserResize="False">
-                <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                        <local:CategoryTag CategoryName="{Binding CategoryName, Mode=OneTime}" CategoryColor="{Binding CategoryColor, Mode=OneTime}"/>
-                    </DataTemplate>
-                </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <!--/Column Templates-->
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="3*" />
+                                                            <ColumnDefinition Width="*" MinWidth="50"/>
+                                                        </Grid.ColumnDefinitions>
 
+                                                        <local:MaxLinesTextBlock Text="{Binding Name}"
+                                                                     MaxLines="2"
+                                                                     FontFamily="Arial"
+                                                                     Padding="4"
+                                                                     LineHeight="16"
+                                                                     Width="Auto"/>
+
+                                                        <local:MaxLinesTextBlock Grid.Column="1"
+                                                                     Text="{Binding Batch}"
+                                                                     MaxLines="2"
+                                                                     FontFamily="Arial"
+                                                                     LineHeight="16"
+                                                                     Padding="4"
+                                                                     Foreground="Red"
+                                                                     Width="Auto"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+            </DataTemplate>
+
+            <DataTemplate x:Key="NameColumnCellEditingTemplate">
+                <local:CellAdorner>
+                    <TextBox Margin="2"
+                 FontFamily="Arial"
+                 VerticalContentAlignment="Center"
+                 Text="{Binding Name, UpdateSourceTrigger=Explicit}"
+                 Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+
+                        <i:Interaction.Behaviors>
+                            <behaviors:UndoRedoBehavior
+                    TargetProperty="{x:Static TextBox.TextProperty}" />
+                        </i:Interaction.Behaviors>
+
+                    </TextBox>
+                </local:CellAdorner>
+            </DataTemplate>
+            <!--#endregion-->
+            <!--#region CategoryColumn-->
+            <DataTemplate x:Key="CategoryColumnCellTemplate">
+                <local:CategoryTag
+        CategoryName="{Binding CategoryName, Mode=OneTime}"
+        CategoryColor="{Binding CategoryColor, Mode=OneTime}" />
+            </DataTemplate>
+            <!--#endregion-->
+            <!--#region ExpiryColumn-->
+            <DataTemplate x:Key="ExpiryColumnCellTemplate">
+                <local:MaxLinesTextBlock
+        Text="{Binding Expiry}"
+        MaxLines="3"
+        FontFamily="Arial"
+        Padding="4"
+        Width="Auto"/>
+            </DataTemplate>
+
+            <DataTemplate x:Key="ExpiryColumnCellEditingTemplate">
+                <local:CellAdorner>
+                    <DatePicker
+            Margin="2"
+            Style="{StaticResource MahApps.Styles.DatePicker}"
+            SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}"
+            mah:TextBoxHelper.ClearTextButton="True">
+
+                        <i:Interaction.Behaviors>
+                            <behaviors:UndoRedoBehavior
+                    TargetProperty="{x:Static DatePicker.SelectedDateProperty}" />
+                        </i:Interaction.Behaviors>
+
+                    </DatePicker>
+                </local:CellAdorner>
+            </DataTemplate>
+            <!--#endregion-->
+            <!--#region PurchaseColumn-->
             <Style x:Key="PurchaseStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
                 <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
                 <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
@@ -149,29 +182,7 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-
-            <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
-
-            <Style x:Key="DataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="2">
-                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
-                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="0">
-                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-                        <Setter Property="BorderThickness" Value="0"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Purchase, Converter={StaticResource PurchaseToGreenConverter}}" Value="True">
-                        <Setter Property="Background" Value="#807CFC00"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
+            <!--#endregion-->
 
             <DataTemplate x:Key="DetailsRow">
                 <Border BorderThickness="0" Padding="10">
@@ -196,6 +207,16 @@
                                 <TextBlock Text="Batch #: " VerticalAlignment="Center" />
                             </StackPanel>
                             <StackPanel Grid.Column="2">
+                                <StackPanel.Resources>
+                                    <Style x:Key="DetailsTextStyle" TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="N/A">
+                                                <Setter Property="Foreground" Value="Red"/>
+                                                <Setter Property="FontStyle" Value="Italic"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Resources>
                                 <TextBlock Text="{Binding Name, Converter={StaticResource DetailsTextNoneConverter}}" 
                                     Style="{StaticResource DetailsTextStyle}" />
                                 <TextBlock Text="{Binding Item.Expiry, Converter={StaticResource DetailsTextNoneConverter}}" 
@@ -237,7 +258,6 @@
                 <Setter Property="CanUserResizeColumns" Value="True" />
                 <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
                 <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
-                <Setter Property="CellStyle" Value="{StaticResource DataGridCellStyle}"/>
                 <Setter Property="ColumnHeaderStyle">
                     <Setter.Value>
                         <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
@@ -248,19 +268,83 @@
             </Style>
 
             <DataTemplate x:Key="DataGridCompactLayout">
-                <DataGrid CanUserResizeColumns="False" RowHeight="60" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False">
+                <DataGrid CanUserResizeColumns="False" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False"
+                          xmlns:dd="urn:gong-wpf-dragdrop"
+                          RowDetailsVisibilityMode="{Binding DataContext.ProductRowDetailsVisibilityMode, RelativeSource={RelativeSource AncestorType=local:SaleTabContent}}"
+                          dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=local:SaleTabContent}}"
+                          dd:DragDrop.IsDragSource="True"
+                          RowHeaderWidth="25"
+                          HeadersVisibility="All"
+                          SelectionMode="Single"
+                          dd:DragDrop.UseDefaultDragAdorner="True">
                     <i:Interaction.Behaviors>
                         <behaviors:InventoryDataGridBehavior/>
                         <behaviors:InventoryDataGridCompact/>
                     </i:Interaction.Behaviors>
+                    <DataGrid.Resources>
+                        <Style
+                            x:Key="{ComponentResourceKey
+                                ResourceId=MetroDataGridSelectAllButtonStyle,
+                                TypeInTargetAssembly={x:Type DataGrid}}"
+                            TargetType="{x:Type Button}">
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <!-- an empty ControlTemplate is fine -->
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <DockPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                            <TextBlock FontSize="18"
+                                               FontWeight="ExtraBlack"
+                                               Text="ⓘ"
+                                               TextAlignment="Center">
+                                                <TextBlock.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock
+                                                            TextWrapping="Wrap"
+                                                            MaxWidth="220"
+                                                            Text="You can drag and drop items from this grid to the left one to add them to the sale." />
+                                                    </ToolTip>
+                                                </TextBlock.ToolTip>
+                                            </TextBlock>
+                                        </DockPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <!--<StaticResource  ResourceKey="CheckboxColumn" />-->
-                        <!--<StaticResource ResourceKey="NameColumn" />
-                    <columns:NumberColumn Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                    <columns:NumberColumn Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
-                    <DataGridTextColumn Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
-                    <StaticResource ResourceKey="CategoryColumn" />-->
+                        <DataGridTemplateColumn IsReadOnly="True" Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" />
+                        <columns:NumberColumn IsReadOnly="True" Header="Retail" Width="100" ValuePath="RetailPrice" StringFormat="C"/>
+                        <columns:NumberColumn IsReadOnly="True" Header="Qty" Width="85" ValuePath="Qty"/>
+                        <DataGridTemplateColumn IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
+                    <DataGrid.RowHeaderTemplate>
+                        <DataTemplate>
+                            <local:IconButtonWithTip>
+                                <controls:IconButtonWithTip.IconContent>
+                                    <iconPacks:PackIconMaterialDesign Kind="AddBox" />
+                                </controls:IconButtonWithTip.IconContent>
+                            </local:IconButtonWithTip>
+                        </DataTemplate>
+                    </DataGrid.RowHeaderTemplate>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="0">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
                 </DataGrid>
             </DataTemplate>
 
@@ -282,43 +366,45 @@
                             </Style.Triggers>
                         </Style>
                     </DataGrid.Style>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="2">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="0">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Purchase, Converter={StaticResource PurchaseToGreenConverter}}" Value="True">
+                                    <Setter Property="Background" Value="#807CFC00"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
                     <i:Interaction.Behaviors>
                         <behaviors:InventoryDataGridDetailed TabOwner="{Binding TabOwner, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                         <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
                         <behaviors:InventoryDataGridBehavior/>
                     </i:Interaction.Behaviors>
                     <DataGrid.Columns>
-                        <StaticResource ResourceKey="CheckboxColumn" />
-                        <StaticResource ResourceKey="IdColumn"/>
-                        <StaticResource ResourceKey="NameColumn" />
+                        <DataGridCheckBoxColumn Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
+                        <DataGridTextColumn Header="Id" Width="Auto" IsReadOnly="True" Binding="{Binding Item.Id}" ElementStyle="{StaticResource IdColumnElementStyle}" attached:InventoryDataGridColumn.IgnoreReorder="True" />
+                        <DataGridTemplateColumn Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" CellEditingTemplate="{StaticResource NameColumnCellEditingTemplate}" attached:InventoryDataGridColumn.IgnoreReorder="True" attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" />
                         <columns:TextColumn ValuePath="Batch" Header="Batch" Width="125" />
-                        <DataGridTemplateColumn Header="Expiry" Width="125" >
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <local:MaxLinesTextBlock Text="{Binding Expiry}"
-                                 MaxLines="3" FontFamily="Arial"
-                                 Padding="4"
-                                 Width="Auto"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                            <DataGridTemplateColumn.CellEditingTemplate>
-                                <DataTemplate>
-                                    <local:CellAdorner>
-                                        <DatePicker Margin="2" Style="{StaticResource MahApps.Styles.DatePicker}" SelectedDate="{Binding Expiry, UpdateSourceTrigger=Explicit}" mah:TextBoxHelper.ClearTextButton="True">
-                                            <i:Interaction.Behaviors>
-                                                <behaviors:UndoRedoBehavior TargetProperty="{x:Static DatePicker.SelectedDateProperty}"/>
-                                            </i:Interaction.Behaviors>
-                                        </DatePicker>
-                                    </local:CellAdorner>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellEditingTemplate>
-                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
                         <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
                         <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
                         <DataGridTextColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
                         <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" ValuePath="Qty" MinimumPath="QtyMin"/>
                         <DataGridTemplateColumn Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}"  />
-                        <StaticResource ResourceKey="CategoryColumn" />
+                        <DataGridTemplateColumn IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </DataTemplate>

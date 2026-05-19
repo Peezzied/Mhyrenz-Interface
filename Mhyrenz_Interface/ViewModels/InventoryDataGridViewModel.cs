@@ -20,10 +20,7 @@ namespace Mhyrenz_Interface.ViewModels
 {
     public class InventoryDataGridViewModel : BaseViewModel
     {
-        public InventoryDataGridLayout Layout { get; }
-
-        private readonly ICollectionView _inventory;
-        public ICollectionView Inventory => _inventory;
+        public ICollectionView Inventory { get; }
 
         public event Action<ActionType> UndoRedoEvent;
 
@@ -165,23 +162,20 @@ namespace Mhyrenz_Interface.ViewModels
             public bool CanSelect { get; set; }
         }
 
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost, InventoryDataGridLayout layout)
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost)
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
             _productService = productService;
 
-            _inventory = new ListCollectionView(_inventoryStore.Products);
+            Inventory = new ListCollectionView(_inventoryStore.Products);
             ApplyDefaultSort();
-
-            Layout = layout;
-
             DeleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
         }
 
         private void ApplyDefaultSort()
         {
-            if (_inventory is ListCollectionView view)
+            if (Inventory is ListCollectionView view)
             {
                 view.CustomSort = Comparer<ProductDataViewModel>.Create((a, b) =>
                     StringComparer.CurrentCultureIgnoreCase.Compare(a?.Name, b?.Name)

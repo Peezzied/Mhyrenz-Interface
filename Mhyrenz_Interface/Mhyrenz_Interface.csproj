@@ -92,6 +92,9 @@
     <Reference Include="Dragablz, Version=0.0.3.234, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dragablz.0.0.3.234\lib\net45\Dragablz.dll</HintPath>
     </Reference>
+    <Reference Include="GongSolutions.WPF.DragDrop, Version=4.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
+      <HintPath>..\packages\gong-wpf-dragdrop.4.0.0\lib\net462\GongSolutions.WPF.DragDrop.dll</HintPath>
+    </Reference>
     <Reference Include="HandyControl, Version=3.6.0.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
       <HintPath>..\packages\HandyControls.3.6.0\lib\net48\HandyControl.dll</HintPath>
     </Reference>
@@ -515,6 +518,12 @@
     <Compile Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml.cs">
       <DependentUpon>InventoryDataGridTools.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SaleDataGrid.xaml.cs">
+      <DependentUpon>SaleDataGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SaleTabContent.xaml.cs">
+      <DependentUpon>SaleTabContent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
@@ -585,12 +594,14 @@
     <Compile Include="Controls\MenuItem.cs" />
     <Compile Include="ViewModels\OverviewChartViewModel.cs" />
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
+    <Compile Include="ViewModels\SaleTabItem.cs" />
+    <Compile Include="ViewModels\SaleViewModel.cs" />
     <Compile Include="ViewModels\SessionBoxContext.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />
-    <Compile Include="ViewModels\TransactionViewModel.cs" />
     <Compile Include="ViewModels\TransactionDataViewModel.cs" />
+    <Compile Include="ViewModels\TransactionViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
@@ -645,6 +656,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\SaleDataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SaleTabContent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\SearchBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -654,6 +673,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Templates\BarcodeColumn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Templates\DragablzMahApps.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

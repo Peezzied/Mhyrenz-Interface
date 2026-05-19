@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
@@ -158,16 +156,14 @@ namespace Mhyrenz_Interface
                 .AddTransient<AddProductViewModel>()
                 .AddTransient<SessionBoxContext>()
                 .AddTransient<InventoryTabItem>()
+                .AddTransient<SaleTabItem>()
 
-                //.AddSingleton<CreateViewModel<IncomingPanelViewModel>>(s =>
-                //{
-                //    return _ => ActivatorUtilities.CreateInstance<IncomingPanelViewModel>(s);
-                //})
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, TransactionDataViewModelDTO>()
                 .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
                 .AddViewModelFactory<InventoryDataGridViewModel>()
                 .AddViewModelFactory<InventoryTabItem>()
+                .AddViewModelFactory<SaleTabItem>()
                 .AddViewModelFactory<SessionBoxContext>(resolveFromContainer: true)
                 .AddViewModelFactory<AddProductViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)

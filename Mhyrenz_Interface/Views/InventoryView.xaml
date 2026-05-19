@@ -54,19 +54,10 @@
                 x:Name="InventoryTabs"
                 mah:TabControlHelper.Underlined="TabPanel"
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
-            <TabControl.Resources>
-                <DataTemplate x:Key="Detailed" DataType="{x:Type vm:InventoryDataGridViewModel}">
-                    <controls:InventoryDataGrid Layout="Detailed" TabOwner="{Binding SelectedItem,
-                    RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
-                </DataTemplate>
-                <selectors:InventoryDataGridTemplateSelector x:Key="InventoryDataGridTemplateSelector"
-                    DetailedTemplate="{StaticResource Detailed}"/>
-            </TabControl.Resources>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <ContentControl 
-                        Content="{Binding ContentViewModel}" 
-                        ContentTemplateSelector="{StaticResource InventoryDataGridTemplateSelector}"/>
+                    <controls:InventoryDataGrid DataContext="{Binding ContentViewModel}" Layout="Detailed" TabOwner="{Binding SelectedItem,
+                    RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

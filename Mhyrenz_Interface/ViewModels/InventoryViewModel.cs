@@ -99,7 +99,7 @@ namespace Mhyrenz_Interface.ViewModels
                 if (!_initializedTabs.Contains(tabItem.Id))
                 {
                     // First time this tab is opened — create its VM now
-                    var vm = _inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Detailed);
+                    var vm = _inventoryDataGridViewModelFactory(this);
                     vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
                     tabItem.SetViewModel(vm);
                     _initializedTabs.Add(tabItem.Id);

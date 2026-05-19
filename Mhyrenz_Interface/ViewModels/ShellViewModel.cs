@@ -170,17 +170,17 @@ namespace Mhyrenz_Interface.ViewModels
             });
             this.Menu.Add(new MenuItem()
             {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
+                Label = "Transaction",
+                NavigationType = typeof(TransactionsView),
+                NavigationDestination = new Uri("Views/TransactionsView.xaml", UriKind.RelativeOrAbsolute)
+            });
+            this.Menu.Add(new MenuItem()
+            {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
                 Label = "Inventory",
                 NavigationType = typeof(InventoryView),
                 NavigationDestination = new Uri("Views/InventoryView.xaml", UriKind.RelativeOrAbsolute)
-            });
-            this.Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.ClockRotateLeftSolid },
-                Label = "Transactions",
-                NavigationType = typeof(TransactionsView),
-                NavigationDestination = new Uri("Views/TransactionsView.xaml", UriKind.RelativeOrAbsolute)
             });
             this.OptionsMenu.Add(new MenuItem()
             {

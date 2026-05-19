@@ -26,6 +26,9 @@
                 <hc:Theme/>
  
                 <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
+                <ResourceDictionary Source="/Controls/Templates/DragablzMahApps.xaml"/>
+
+
                 <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -108,7 +108,7 @@ namespace Mhyrenz_Interface.ViewModels
             _salesRecordService = salesRecordService;
             _transactionService = transactionsService;
 
-            InventoryDataGridContext = inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Compacted);
+            InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
             IncomingPanelViewModel = incomingPanelViewModel;
 
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
