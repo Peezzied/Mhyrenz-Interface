@@ -35,7 +35,7 @@ namespace Mhyrenz_Interface.Commands
             {
                 if (!Validator.TryValidateObject(_viewModel, new ValidationContext(_viewModel), null, validateAllProperties: true))
                     return;
-                _sessionStore.CurrentSession = await _sessionService.GenerateSession(new Session { Period = DateTime.Now });
+                _sessionStore.CurrentSession = await _sessionService.GenerateSession(TODO);
 
                 Growl.Success(new GrowlInfo
                 {

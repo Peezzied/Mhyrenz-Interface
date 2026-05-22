@@ -20,7 +20,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
 
-        public bool IsDeleted { get; private set;  }
+        public bool IsDeleted { get; private set; }
 
         public int? PharmaDetailsId { get; set; }
         public PharmaDetails PharmaDetails { get; set; }
@@ -32,7 +32,7 @@ namespace Mhyrenz_Interface.Domain.Models
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
             = new List<Transaction>();
-        public int Purchase => Transactions?.Sum(t => t.Amount) ?? 0;
+        public int Purchase { get; set; }
 
         // Calculated
         public int NetQty => Qty - Purchase;
@@ -68,7 +68,7 @@ namespace Mhyrenz_Interface.Domain.Models
                 });
                 return;
             }
-            
+
             existing.IncreaseAmount(amount);
         }
 
@@ -90,6 +90,11 @@ namespace Mhyrenz_Interface.Domain.Models
             }
 
             existing.DecreaseAmount(amount);
+        }
+
+        public void RecalculatePurchase()
+        {
+            Purchase = Transactions.Sum(t => t.Amount);
         }
     }
 }

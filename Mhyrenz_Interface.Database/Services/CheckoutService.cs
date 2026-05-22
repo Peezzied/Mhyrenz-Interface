@@ -66,6 +66,7 @@ namespace Mhyrenz_Interface.Database.Services
                     ?? throw new InvalidOperationException("Product not found.");
 
                 product.AddItem(amount);
+                product.RecalculatePurchase();
 
                 await context.SaveChangesAsync();
 
@@ -82,14 +83,14 @@ namespace Mhyrenz_Interface.Database.Services
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
-                var transaction = await context.Transactions
+                var transactions = await context.Transactions
                     .Include(t => t.Item)
                     .FirstOrDefaultAsync(t =>
                         t.Id == transactionId &&
                         t.SaleId == saleId)
                     ?? throw new InvalidOperationException("Transaction not found.");
 
-                var affectedTransaction = sale.SubtractItem(transaction, amount);
+                transactions = sale.SubtractItem(transactions, amount);
 
                 await context.SaveChangesAsync();
 
@@ -99,9 +100,9 @@ namespace Mhyrenz_Interface.Database.Services
                     .Include(t => t.Item)
                     .LoadAsync();
 
-                if (affectedTransaction != null)
+                if (transactions != null)
                 {
-                    await context.Entry(affectedTransaction)
+                    await context.Entry(transactions)
                         .Reference(t => t.Item)
                         .LoadAsync();
                 }
@@ -109,7 +110,7 @@ namespace Mhyrenz_Interface.Database.Services
                 return new CheckoutResult
                 {
                     Sale = sale,
-                    Transaction = affectedTransaction
+                    Transaction = transactions
                 };
             }
         }
@@ -124,6 +125,7 @@ namespace Mhyrenz_Interface.Database.Services
                     ?? throw new InvalidOperationException("Product not found.");
 
                 product.SubtractItem(amount);
+                product.RecalculatePurchase();
 
                 await context.SaveChangesAsync();
 

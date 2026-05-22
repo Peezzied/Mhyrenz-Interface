@@ -1,0 +1,130 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IdentityModel.Metadata;
+using System.Linq;
+using System.Threading.Tasks;
+using Mhyrenz_Interface.Database;
+using Mhyrenz_Interface.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Mhyrenz_Interface.Domain.Services.ProductService
+{
+    public class ProductService : IProductService
+    {
+        private readonly InventoryDbContextFactory _inventoryDbContextFactory;
+
+        public ProductService(InventoryDbContextFactory inventoryDbContextFactory)
+        {
+            _inventoryDbContextFactory = inventoryDbContextFactory;
+        }
+
+        public async Task<Product> Create(Product entity)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                context.Products.Add(entity);
+                await context.SaveChangesAsync();
+
+                return entity;
+            }
+        }
+
+        public async Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities)
+        {
+            throw new System.NotImplementedException(); // TODO: implement this once bulk add is supported in the UI
+        }
+
+        public async Task<Product> Get(int id)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var product = await context.Products
+                    .Include(p => p.Supplier)
+                    .Include(p => p.Category)
+                    .Include(p => p.PharmaDetails)
+                    .FirstOrDefaultAsync(p => p.Id == id) ?? throw new KeyNotFoundException($"Product with id {id} not found.");
+
+                var purchase = await context.Transactions
+                    .Where(t => t.ProductId == id)
+                    .SumAsync(t => t.Amount);
+                product.Purchase = purchase;
+
+                return product;
+            }
+        }
+
+        public async Task<IReadOnlyList<Product>> GetAll()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var products = await context.Products
+                    .AsNoTracking()
+                    .Include(p => p.Supplier)
+                    .Include(p => p.Category)
+                    .Include(p => p.PharmaDetails)
+                    .ToListAsync();
+
+                var purchases = await context.Transactions
+                    .AsNoTracking()
+                    .GroupBy(t => t.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Purchase = g.Sum(t => t.Amount)
+                    })
+                    .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
+
+                foreach (var product in products)
+                {
+                    product.Purchase = purchases.TryGetValue(product.Id, out var purchase)
+                        ? purchase
+                        : 0;
+                }
+
+                return products;
+            }
+        }
+
+        public async Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<int> productIds)
+        {
+            return await SoftRemove(productIds, p => p.Delete());
+        }
+
+        public async Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<int> productIds)
+        {
+            return await SoftRemove(productIds, p => p.DeleteBack());
+        }
+
+        private async Task<IReadOnlyList<Product>> SoftRemove(IEnumerable<int> productIds, Action<Product> action)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var ids = productIds.ToList();
+
+                var products = await context.Products
+                    .Where(p => ids.Contains(p.Id))
+                    .ToListAsync();
+
+                foreach (var product in products)
+                {
+                    action.Invoke(product);
+                }
+
+                await context.SaveChangesAsync();
+
+                return products;
+            }
+        }
+
+        public async Task<int> RemovePhysical()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var entities = context.Products.Where(p => p.IsDeleted);
+                context.Products.RemoveRange(entities);
+                return entities.Count();
+            }
+        }
+    }
+}

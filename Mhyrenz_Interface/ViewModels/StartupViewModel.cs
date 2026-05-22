@@ -222,7 +222,7 @@ namespace Mhyrenz_Interface.ViewModels
             var oldSession = _sessionStore.CurrentSession.Period;
 
             _sessionStore.CurrentSession.Period = date;
-            var newSession = await _sessionService.EditSession(_sessionStore.CurrentSession.Id, new Session
+            var newSession = await _sessionService.EditSession(TODO, TODO, new Session
             {
                 Period = date,
                 Id = _sessionStore.CurrentSession.Id

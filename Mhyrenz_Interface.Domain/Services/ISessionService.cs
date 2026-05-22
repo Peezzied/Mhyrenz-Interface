@@ -6,9 +6,9 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
 {
     public interface ISessionService
     {
-        Task<Session> GenerateSession(Session session);
+        Task<Session> GenerateSession(Guid id);
         Task DeleteSession(Guid uid);
         Task<Session> GetSession();
-        Task<Session> EditSession(Session session);
+        Task<Session> EditSession(Guid id, DateTime period);
     }
 }

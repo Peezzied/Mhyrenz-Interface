@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Domain.Services
 {
+    [Obsolete("No longer used", true)]
     public interface IReadDataService<T, I>
     {
         Task<IReadOnlyList<T>> GetAll();
