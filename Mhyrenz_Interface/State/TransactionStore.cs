@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
@@ -19,7 +20,6 @@ namespace Mhyrenz_Interface.State
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
         private readonly ITransactionsService _transactionService;
-        private List<PropertyChangeTracker<TransactionDataViewModel>> _trackers = new List<PropertyChangeTracker<TransactionDataViewModel>>();
 
         public event EventHandler RequestTransactionsUpdate;
 
@@ -36,98 +36,50 @@ namespace Mhyrenz_Interface.State
             _categoryStore = categoryStore;
             _transactionService = transactionsService;
 
+            _inventoryStore.PropertyChanged += InventoryStore_PropertyChanged;
+
+            // FIXME: optimize this by only updating transactions of the product that was updated/added/removed
             _inventoryStore.PurchaseEvent += async (s, e) => await InitializeAsync();
             _inventoryStore.AddProductEvent += async (s, e) => await InitializeAsync();
             _inventoryStore.RemoveProductEvent += async (s, e) => await InitializeAsync();
         }
 
+        private async void InventoryStore_PropertyChanged(object sender, InventoryStoreEventArgs e)
+        {
+            if (e.PropertyName == nameof(ProductDataViewModel.RetailPrice))
+            {
+                var transactions = (await _transactionService.GetLatests()).ToList();
+                var product = e.Product.Item;
 
-        private ObservableCollection<ProductDataViewModel> _products => _inventoryStore.Products;
+                var transaction = transactions.FirstOrDefault(x => x.ProductId == product.Id);
+                if (transaction != null && transaction.Sale.Completed_at == null && transaction.Item.RetailPrice != product.RetailPrice)
+                {
+                    transaction.Item.RetailPrice = product.RetailPrice;
+                    transactions.First(x => x.Id == transaction.Id).Item.RetailPrice = product.RetailPrice;
+                    await _transactionService.Update(transaction);
+                }
+
+                LoadTransactions(transactions);
+            }
+        }
 
         public ObservableCollection<TransactionDataViewModel> Transactions { get; } = new ObservableCollection<TransactionDataViewModel>();
 
         public async Task InitializeAsync()
         {
-            var products = await _transactionService.GetLatests();
-            LoadTransactions(products);
+            var transactions = await _transactionService.GetLatests();
+            LoadTransactions(transactions);
         }
 
         public void LoadTransactions(IEnumerable<Transaction> transactions)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _trackers.Clear();
                 Transactions.Clear();
-
-                if (transactions == null)
-                    return;
-
-                var productById = _products.ToDictionary(
-                       p => p.Item.Id,
-                       p => p
-                   ); // TODO: use the lookup table in the inventorystore instead when it's implemented
-
-                var displayTransactions = transactions
-                    .GroupBy(t => t.UniqueId)
-                    .Select(group =>
-                    {
-                        var first = group.First();
-
-                        productById.TryGetValue(first.ProductId, out var product);
-
-                        return _transactionsViewModelFactory(new TransactionDataViewModelDTO()
-                        {
-                            Id = group.Key,
-                            Product = product,
-                            Amount = group.Count(),
-                            Date = group.Max(t => t.Timestamp),
-                            Session = first.Session,
-                        });
-                    });
-
-                foreach (var item in displayTransactions)
-                {
-                    if (!item.Product.Item.IsDeleted)
-                        _trackers.Add(TrackTransactions(item));
-
-                    Transactions.Add(item);
-                }
+                Transactions.AddRange(transactions.Select(x => _transactionsViewModelFactory(x)));
             });
 
 
-        }
-
-        private PropertyChangeTracker<TransactionDataViewModel> TrackTransactions(TransactionDataViewModel viewModel)
-        {
-            void method(PropertyChangeTracker<TransactionDataViewModel> tracker, TargetChangedEventArgs args, object oldValue, object newValue)
-            {
-                HandleBarcodeChange(args);
-            }
-
-            var _tracker = new PropertyChangeTracker<TransactionDataViewModel>(viewModel);
-
-            _tracker
-                .Track(nameof(TransactionDataViewModel.Barcode), viewModel.Barcode, method);
-
-            return _tracker;
-        }
-
-        private void HandleBarcodeChange(TargetChangedEventArgs args)
-        {
-            //var target = (TransactionDataViewModel)args.Target;
-            //var propertyName = args.PropertyOf;
-
-            //var productId = target.Product.Item.Id;
-
-            //var productLookup = _products.ToDictionary(p => p.Item.Id);
-
-            //foreach (var transaction in Transactions)
-            //{
-            //    if (productLookup.TryGetValue(productId, out var product) && transaction.Product.Item.Id == productId)
-            //    {
-            //        transaction.Product = product;
-            //    }
-            //}
         }
 
         public static async Task LoadTransactionStore(IServiceProvider serviceProvider)

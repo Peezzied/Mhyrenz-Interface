@@ -29,7 +29,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         {
             var product = await Get(id);
             update(product);
-            return await _productDataService.MarkChanged(product);
+            return await _productDataService.Update(product);
         }
 
         public async Task<IEnumerable<Product>> EditPropertyRange(IEnumerable<Product> products, UpdateEntity<Product> update)
@@ -38,7 +38,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             {
                 update(product);
             }
-            return await _productDataService.MarkChangedRange(products);
+            return await _productDataService.UpdateMany(products);
         }
 
         public async Task<Product> Get(int id)
@@ -54,7 +54,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         public async Task<Product> Remove(Product entity)
         {
             entity.Delete();
-            return await _productDataService.MarkChanged(entity);
+            return await _productDataService.Update(entity);
         }
 
         public async Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<Product> products)
@@ -63,7 +63,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             {
                 product.Delete();
             }
-            return await _productDataService.MarkChangedRange(products);
+            return await _productDataService.UpdateMany(products);
         }
 
         public async Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<Product> products)
@@ -72,7 +72,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             {
                 product.DeleteBack();
             }
-            return await _productDataService.MarkChangedRange(products);
+            return await _productDataService.UpdateMany(products);
         }
 
         public async Task<int> RemovePhysical()

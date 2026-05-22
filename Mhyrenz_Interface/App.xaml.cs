@@ -136,13 +136,13 @@ namespace Mhyrenz_Interface
 
                 .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ISessionService, SessionService>()
-                .AddSingleton<ISalesRecordDataService, SalesRecordDataService>()
-                .AddSingleton<ISalesRecordService, SalesRecordService>()
+                .AddSingleton<ISalesDataService, SalesDataService>()
+                .AddSingleton<ISalesRecordService, SalesService>()
                 .AddSingleton<ICategoryDataService, CategoryDataService>()
                 .AddSingleton<ICategoryService, CategoryService>()
                 .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
-                .AddSingleton<ITransactionsDataService, TransactionsDataService>()
+                .AddSingleton<ITransactionsDataService, TransactionsService>()
                 .AddSingleton<ITransactionsService, TransactionService>()
 
                 .AddTransient<IncomingPanelViewModel>()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
@@ -12,7 +13,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public int SupplierId { get; set; }
         public Supplier Supplier { get; set; }
 
-        public int Qty { get; set; } = 0;
+        public int Qty { get; set; }
         public decimal RetailPrice { get; set; }
         public decimal ListPrice { get; set; }
         public string Barcode { get; set; }
@@ -30,7 +31,8 @@ namespace Mhyrenz_Interface.Domain.Models
 
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
-        public int Purchase => Transactions?.Count ?? 0;
+            = new List<Transaction>();
+        public int Purchase => Transactions?.Sum(t => t.Amount) ?? 0;
 
         // Calculated
         public int NetQty => Qty - Purchase;
@@ -50,19 +52,44 @@ namespace Mhyrenz_Interface.Domain.Models
             IsDeleted = false;
         }
 
-        public Product Clone()
+        public void AddItem(int amount)
         {
-            return new Product()
+            if (amount <= 0)
+                throw new InvalidOperationException("Amount must be greater than zero.");
+
+            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id);
+            if (existing == null)
             {
-                Name = this.Name,
-                RetailPrice = this.RetailPrice,
-                ListPrice = this.ListPrice,
-                Barcode = this.Barcode,
-                Expiry = this.Expiry,
-                Batch = this.Batch,
-                CategoryId = this.CategoryId,
-                Qty = this.Qty
-            };
+                Transactions.Add(new Transaction
+                {
+                    ProductId = Id,
+                    Amount = amount,
+                    RetailPrice = RetailPrice
+                });
+                return;
+            }
+            
+            existing.IncreaseAmount(amount);
+        }
+
+        public void SubtractItem(int amount)
+        {
+            if (amount <= 0)
+                throw new InvalidOperationException("Amount must be greater than zero.");
+
+            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id);
+            if (existing == null)
+            {
+                Transactions.Add(new Transaction
+                {
+                    ProductId = Id,
+                    Amount = -amount,
+                    RetailPrice = RetailPrice
+                });
+                return;
+            }
+
+            existing.DecreaseAmount(amount);
         }
     }
 }

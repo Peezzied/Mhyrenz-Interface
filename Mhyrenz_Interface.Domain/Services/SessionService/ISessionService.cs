@@ -9,6 +9,6 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
         Task<Session> GenerateSession(Session session);
         Task DeleteSession(Guid uid);
         Task<Session> GetSession();
-        Task<Session> EditSession(Guid id, Session session);
+        Task<Session> EditSession(Session session);
     }
 }

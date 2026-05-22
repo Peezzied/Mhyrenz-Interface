@@ -167,7 +167,6 @@
     <Compile Include="Models\PharmaDetails.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\Sale.cs" />
-    <Compile Include="Models\SalesRecord.cs" />
     <Compile Include="Models\Session.cs" />
     <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\Transaction.cs" />
@@ -179,11 +178,12 @@
     <Compile Include="Services\BarcodeCacheService\ICachePath.cs" />
     <Compile Include="Services\CategoryService\CategoryService.cs" />
     <Compile Include="Services\CategoryService\ICategoryService.cs" />
+    <Compile Include="Services\CheckoutResult.cs" />
     <Compile Include="Services\ICategoryDataService.cs" />
     <Compile Include="Services\IWriteDataService.cs" />
     <Compile Include="Services\IProductDataService.cs" />
     <Compile Include="Services\IReadDataService.cs" />
-    <Compile Include="Services\ISalesRecordDataService.cs" />
+    <Compile Include="Services\ISalesDataService.cs" />
     <Compile Include="Services\ISessionDataService.cs" />
     <Compile Include="Services\IWriteManyDataService.cs" />
     <Compile Include="Services\ProductService\IProductService.cs" />
@@ -191,17 +191,14 @@
     <Compile Include="Services\ITransactionsDataService.cs" />
     <Compile Include="Services\ReportsService\IReportService.cs" />
     <Compile Include="Services\ReportsService\ReportService.cs" />
-    <Compile Include="Services\SalesRecordService\ISalesRecordService.cs" />
-    <Compile Include="Services\SalesRecordService\SalesRecordService.cs" />
+    <Compile Include="Services\ICheckoutService.cs" />
     <Compile Include="Services\SerialBarcodeService\ISerialBarcodeService.cs" />
     <Compile Include="Services\SerialBarcodeService\SerialBarcodeService.cs" />
     <Compile Include="Services\SessionService\ISessionService.cs" />
     <Compile Include="Services\SessionService\SessionService.cs" />
+    <Compile Include="Services\TransactionService\DiscountInfo.cs" />
     <Compile Include="Services\TransactionService\ITransactionsService.cs" />
     <Compile Include="Services\TransactionService\TransactionService.cs" />
-    <Compile Include="State\ISessionStore.cs" />
-    <Compile Include="State\Mediator\IMediator.cs" />
-    <Compile Include="State\Mediator\InventoryMediator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

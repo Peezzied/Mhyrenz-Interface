@@ -248,6 +248,8 @@ namespace Mhyrenz_Interface.State
                     PropertyChanged?.Invoke(vm, new InventoryStoreEventArgs()
                     {
                         ProductId = product.Id,
+                        Product = vm,
+                        PropertyName = args.PropertyOf
                     });
 
                     LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, new[] { product.Id }));
@@ -378,6 +380,7 @@ namespace Mhyrenz_Interface.State
     {
         public int ProductId { get; set; }
         public ProductDataViewModel Product { get; set; }
+        public string PropertyName { get; internal set; }
     }
 }
 

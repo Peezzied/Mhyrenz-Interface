@@ -82,14 +82,23 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Product> Update(int id, Product updatedEntity)
+        public async Task<Product> Update(Product updatedEntity)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                updatedEntity.Id = id;
                 context.Products.Update(updatedEntity);
                 await context.SaveChangesAsync();
                 return updatedEntity;
+            }
+        }
+
+        public async Task<IReadOnlyList<Product>> UpdateMany(IEnumerable<Product> products)
+        {
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                context.Products.UpdateRange(products);
+                await context.SaveChangesAsync();
+                return products.ToList();
             }
         }
 
@@ -109,26 +118,6 @@ namespace Mhyrenz_Interface.Database.Services
             return context.Products
                 .Include(a => a.Transactions)
                 .Include(a => a.Category);
-        }
-
-        public async Task<Product> MarkChanged(Product product)
-        {
-            using (var context = _contextFactory.CreateDbContext())
-            {
-                context.Products.Update(product);
-                await context.SaveChangesAsync();
-                return product;
-            }
-        }
-
-        public async Task<IReadOnlyList<Product>> MarkChangedRange(IEnumerable<Product> products)
-        {
-            using (var context = _contextFactory.CreateDbContext())
-            {
-                context.Products.UpdateRange(products);
-                await context.SaveChangesAsync();
-                return products.ToList();
-            }
         }
     }
 }

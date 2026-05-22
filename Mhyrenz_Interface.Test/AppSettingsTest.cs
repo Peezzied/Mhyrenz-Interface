@@ -51,7 +51,7 @@ namespace Mhyrenz_Interface.Test.AppSettingsTestSetup
 
                         .AddSingleton<ICategoryDataService, CategoryDataService>()
                         .AddSingleton<ICategoryService, CategoryService>()
-                        .AddSingleton<ITransactionsDataService, TransactionsDataService>()
+                        .AddSingleton<ITransactionsDataService, TransactionsService>()
                         .AddSingleton<ITransactionsService, TransactionService>();
                 })
                 .Build();

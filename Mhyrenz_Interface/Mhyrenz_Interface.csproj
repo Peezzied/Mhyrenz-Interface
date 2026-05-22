@@ -557,6 +557,7 @@
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
+    <Compile Include="State\ISessionStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\IUndoManager.cs" />
     <Compile Include="State\SessionStore.cs" />

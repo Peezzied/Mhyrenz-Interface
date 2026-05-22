@@ -13,6 +13,7 @@ namespace Mhyrenz_Interface.Database
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Product> Products { get; set; }    
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Sale> Sales { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<PharmaDetails> PharmaDetails { get; set; }

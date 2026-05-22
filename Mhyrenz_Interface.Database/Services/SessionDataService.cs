@@ -34,7 +34,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                var entity = await LoadSessions(context)
+                var entity = await context.Sessions
                     .FirstOrDefaultAsync((e) => e.Id == id);
                 context.Sessions.Remove(entity);
                 await context.SaveChangesAsync();
@@ -59,23 +59,30 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Session> Update(Guid id, Session updatedEntity)
+        public async Task<Session> Update(Session updatedEntity)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                updatedEntity.Id = id;
-
                 context.Sessions.Update(updatedEntity);
                 await context.SaveChangesAsync();
-
                 return updatedEntity;
             }
         }
 
-        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Session, IEnumerable<Transaction>> LoadSessions(InventoryDbContext context)
+        private static Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Session, IEnumerable<Sale>> LoadSessions(InventoryDbContext context)
         {
             return context.Sessions
-                .Include(a => a.Transactions);
+                .Include(a => a.Sales);
+        }
+
+        public async Task<Session> GetCurrent()
+        {
+            using (InventoryDbContext context = _contextFactory.CreateDbContext())
+            {
+                return await LoadSessions(context)
+                    .OrderByDescending(s => s.Period)
+                    .FirstOrDefaultAsync();
+            }
         }
     }
 }

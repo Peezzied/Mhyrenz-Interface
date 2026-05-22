@@ -55,10 +55,9 @@
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CategoryDataService.cs" />
+    <Compile Include="Services\CheckoutService.cs" />
     <Compile Include="Services\ProductDataService.cs" />
-    <Compile Include="Services\SalesRecordDataService.cs" />
     <Compile Include="Services\SessionDataService.cs" />
-    <Compile Include="Services\TransactionsDataService.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

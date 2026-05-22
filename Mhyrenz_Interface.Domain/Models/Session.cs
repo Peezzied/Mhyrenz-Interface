@@ -7,6 +7,6 @@ namespace Mhyrenz_Interface.Domain.Models
     {
         public Guid Id { get; set; }
         public DateTime Period { get; set; }
-        public IEnumerable<Transaction> Transactions { get; set; }
+        public IEnumerable<Sale> Sales { get; set; }
     }
 }

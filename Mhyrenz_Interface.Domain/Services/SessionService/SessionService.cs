@@ -23,16 +23,14 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             return await _sessionDataService.Create(session);
         }
 
-        public async Task<Session> EditSession(Guid id, Session session)
+        public async Task<Session> EditSession(Session session)
         {
-            return await _sessionDataService.Update(id, session);
+            return await _sessionDataService.Update(session);
         }
 
         public async Task<Session> GetSession()
         {
-            var result = await _sessionDataService.GetAll();
-
-            return result.OrderByDescending(s => s.Period).FirstOrDefault();
+            return await _sessionDataService.GetCurrent();
         }
     }
 }

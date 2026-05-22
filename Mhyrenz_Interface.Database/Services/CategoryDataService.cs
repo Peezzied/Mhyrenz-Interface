@@ -58,11 +58,10 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Category> Update(int id, Category updatedEntity)
+        public async Task<Category> Update(Category updatedEntity)
         {
             using (InventoryDbContext context = _contextFactory.CreateDbContext())
             {
-                updatedEntity.Id = id;
                 context.Categories.Update(updatedEntity);
                 await context.SaveChangesAsync();
                 return updatedEntity;

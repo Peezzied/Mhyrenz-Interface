@@ -1,102 +1,111 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 using Mhyrenz_Interface.Domain.Exceptions;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.State;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 
 namespace Mhyrenz_Interface.Domain.Services.TransactionService
 {
     public class TransactionService : ITransactionsService
     {
         private readonly ITransactionsDataService _transactionsDataService;
-        private readonly ICategoryDataService _categoryDataService;
-        private readonly ISessionDataService _sessionDataService;
-        private readonly ISessionStore _store;
+        private readonly ICheckoutService _salesService;
 
         public TransactionService(
             ITransactionsDataService transactionsDataService,
-            ICategoryDataService categoryDataService,
-            ISessionDataService sessionDataService,
-            ISessionStore store)
+            ICheckoutService salesService)
         {
             _transactionsDataService = transactionsDataService;
-            _categoryDataService = categoryDataService;
-            _store = store;
-            _sessionDataService = sessionDataService;
+            _salesService = salesService;
         }
 
-        public async Task<Product> Add(Product product, DateTime date, int amount = 1, bool withRecent = false)
+        public async Task<Transaction> Add(Product product, Sale sale, DiscountInfo discountInfo, int amount = 1)
         {
-            var detachedEntity = product.Clone();
+            return await Create(new Transaction
+            {
+                ProductId = product.Id,
+                SaleId = sale.Id,
+                Amount = amount,
+                RetailPrice = product.RetailPrice,
+                Discount = discountInfo.Discount,
+                DiscountRate = discountInfo.DiscountRate
+            });
+        }
 
-            if (amount < 0)
-                throw new NegativeException(amount, product);
+        public async Task<Transaction> Add(Transaction transaction, int amount = 1)
+        {
+            transaction.Amount += amount;
+            return await Update(transaction);
+        }
 
-            if (product.Qty <= 0 || product.NetQty <= 0)
-                throw new InsufficientQuantityException(product.Qty, product.NetQty, product);
-
-            if (product.NetQty - amount < 0)
-                throw new InsufficientQuantityException(product.NetQty, amount, product);
-
-            var lastItem = withRecent ? await _transactionsDataService.GetLast() : default;
-            var isNew = lastItem != null && (int)lastItem?.ProductId == (int)product.Id;
-            var newGuid = Guid.NewGuid();
-
-            var session = _store.CurrentSession;
-
-            if (session is null)
-                throw new InvalidSession(session);
-
-            var newTransactions = Enumerable.Range(0, amount)
-                .Select(_ => new Transaction
+        public async Task<Transaction> Add(Product product, int amount = 1)
+        {
+            var transaction = await _transactionsDataService.GetByProductId(product.Id);
+            if (transaction == null)
+            {
+                return await Create(new Transaction
                 {
                     ProductId = product.Id,
-                    UniqueId = isNew ? lastItem.UniqueId : newGuid,
-                    Timestamp = date,
-                    SessionId = session.Id
+                    Amount = amount,
+                    RetailPrice = product.RetailPrice
                 });
+            }
 
-            await _transactionsDataService.CreateMany(newTransactions);
-
-            return detachedEntity;
-        }
-
-        public async Task<IEnumerable<Transaction>> Subtract(Product product, int amount = 1)
-        {
-            var transactions = await _transactionsDataService.GetAllByProduct((int)product.Id);
-
-            var matching = transactions
-                .Take(amount)
-                .ToList();
-
-            await _transactionsDataService.DeleteMany(matching);
-
-            return await Task.FromResult(matching);
+            return await Add(transaction, amount);
         }
 
         public async Task Clear()
         {
-            var transactions = await GetLatests();
+            var transactions = await _transactionsDataService.GetAll();
 
             await _transactionsDataService.DeleteMany(transactions);
 
             await _transactionsDataService.Clean();
         }
 
-        public async Task<IEnumerable<Transaction>> GetLatests()
+        public async Task<Transaction> Create(Transaction transaction)
         {
-            return await Task.Run(() => _transactionsDataService.GetAll());
+            transaction = await _transactionsDataService.Create(transaction);
+            transaction.Sale = await _salesService.Update(transaction.Sale);
+            return transaction;
         }
 
-        public async Task RemoveAll()
+        public async Task<Transaction> Subtract(Product product, int amount = 1)
         {
-            var transactions = await _transactionsDataService.GetAll();
+            var transaction = await _transactionsDataService.GetByProductId(product.Id);
+            if (transaction == null)
+            {
+                return await Create(new Transaction
+                {
+                    ProductId = product.Id,
+                    Amount = -amount,
+                    RetailPrice = product.RetailPrice
+                });
+            }
 
-            if (transactions.Any())
-                await _transactionsDataService.DeleteMany(transactions);
+            return await Subtract(transaction, amount);
         }
 
+        public async Task<Transaction> Subtract(Transaction transaction, int amount = 1)
+        {
+            transaction.Amount -= amount;
+            return await Update(transaction);
+        }
+
+        public Task<Transaction> Update(Transaction transaction)
+        {
+            transaction.RetailPrice = transaction.Item.RetailPrice;
+            return _transactionsDataService.Update(transaction);
+        }
+
+        public async Task<IEnumerable<Transaction>> UpdateRange(IEnumerable<Transaction> transactions)
+        {
+            return await _transactionsDataService.UpdateMany(transactions);
+        }
     }
 }
