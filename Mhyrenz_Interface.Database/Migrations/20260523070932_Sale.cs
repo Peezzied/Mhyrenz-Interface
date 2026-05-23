@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class WithPharmaDetails : Migration
+    public partial class Sale : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -60,6 +60,30 @@ namespace Mhyrenz_Interface.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Sales",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Created_at = table.Column<DateTime>(nullable: false),
+                    Completed_at = table.Column<DateTime>(nullable: true),
+                    SubTotal = table.Column<decimal>(nullable: false),
+                    Total = table.Column<decimal>(nullable: false),
+                    Change = table.Column<decimal>(nullable: false),
+                    SessionId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sales", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Sales_Sessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "Sessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -106,10 +130,12 @@ namespace Mhyrenz_Interface.Database.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UniqueId = table.Column<Guid>(nullable: false),
                     ProductId = table.Column<int>(nullable: false),
-                    Timestamp = table.Column<DateTime>(nullable: false),
-                    SessionId = table.Column<Guid>(nullable: false)
+                    SaleId = table.Column<int>(nullable: true),
+                    Amount = table.Column<int>(nullable: false),
+                    RetailPrice = table.Column<decimal>(nullable: false),
+                    Discount = table.Column<int>(nullable: false),
+                    DiscountRate = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,11 +147,11 @@ namespace Mhyrenz_Interface.Database.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Transactions_Sessions_SessionId",
-                        column: x => x.SessionId,
-                        principalTable: "Sessions",
+                        name: "FK_Transactions_Sales_SaleId",
+                        column: x => x.SaleId,
+                        principalTable: "Sales",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -150,14 +176,19 @@ namespace Mhyrenz_Interface.Database.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Sales_SessionId",
+                table: "Sales",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ProductId",
                 table: "Transactions",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_SessionId",
+                name: "IX_Transactions_SaleId",
                 table: "Transactions",
-                column: "SessionId");
+                column: "SaleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -169,7 +200,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Sessions");
+                name: "Sales");
 
             migrationBuilder.DropTable(
                 name: "Categories");
@@ -179,6 +210,9 @@ namespace Mhyrenz_Interface.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "Suppliers");
+
+            migrationBuilder.DropTable(
+                name: "Sessions");
         }
     }
 }

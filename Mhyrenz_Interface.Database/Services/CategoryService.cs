@@ -8,7 +8,6 @@ namespace Mhyrenz_Interface.Domain.Services.CategoryService
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryDataService _categoryDataService;
         private readonly InventoryDbContextFactory _inventoryDbContextFactory;
 
         public CategoryService(InventoryDbContextFactory inventoryDbContextFactory)

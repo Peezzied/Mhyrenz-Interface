@@ -121,9 +121,16 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                var entities = context.Products.Where(p => p.IsDeleted);
+                var entities = await context.Products
+                    .IgnoreQueryFilters()
+                    .Where(p => p.IsDeleted)
+                    .ToListAsync();
+
                 context.Products.RemoveRange(entities);
-                return entities.Count();
+
+                await context.SaveChangesAsync();
+
+                return entities.Count;
             }
         }
     }

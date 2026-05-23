@@ -9,6 +9,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Mhyrenz_Interface.Database.Services
 {
@@ -83,14 +84,19 @@ namespace Mhyrenz_Interface.Database.Services
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
-                var transactions = await context.Transactions
+                var transaction = await context.Transactions
                     .Include(t => t.Item)
                     .FirstOrDefaultAsync(t =>
                         t.Id == transactionId &&
                         t.SaleId == saleId)
                     ?? throw new InvalidOperationException("Transaction not found.");
 
-                transactions = sale.SubtractItem(transactions, amount);
+                var resultTransaction = sale.SubtractItem(transaction, amount);
+
+                if (resultTransaction == null)
+                {
+                    context.Transactions.Remove(transaction);
+                }
 
                 await context.SaveChangesAsync();
 
@@ -100,9 +106,9 @@ namespace Mhyrenz_Interface.Database.Services
                     .Include(t => t.Item)
                     .LoadAsync();
 
-                if (transactions != null)
+                if (resultTransaction != null)
                 {
-                    await context.Entry(transactions)
+                    await context.Entry(resultTransaction)
                         .Reference(t => t.Item)
                         .LoadAsync();
                 }
@@ -110,7 +116,7 @@ namespace Mhyrenz_Interface.Database.Services
                 return new CheckoutResult
                 {
                     Sale = sale,
-                    Transaction = transactions
+                    Transaction = resultTransaction
                 };
             }
         }

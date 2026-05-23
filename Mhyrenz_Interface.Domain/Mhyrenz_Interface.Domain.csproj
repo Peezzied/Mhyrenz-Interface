@@ -177,23 +177,15 @@
     <Compile Include="Services\BarcodeCacheService\IBarcodeImageCache.cs" />
     <Compile Include="Services\BarcodeCacheService\ICachePath.cs" />
     <Compile Include="Services\ICategoryService.cs" />
-    <Compile Include="Services\CheckoutResult.cs" />
-    <Compile Include="Services\ICategoryDataService.cs" />
-    <Compile Include="Services\IWriteDataService.cs" />
-    <Compile Include="Services\IProductDataService.cs" />
-    <Compile Include="Services\IReadDataService.cs" />
-    <Compile Include="Services\ISalesDataService.cs" />
-    <Compile Include="Services\ISessionDataService.cs" />
-    <Compile Include="Services\IWriteManyDataService.cs" />
+    <Compile Include="Models\CheckoutResult.cs" />
     <Compile Include="Services\IProductService.cs" />
-    <Compile Include="Services\ITransactionsDataService.cs" />
     <Compile Include="Services\ReportsService\IReportService.cs" />
     <Compile Include="Services\ReportsService\ReportService.cs" />
     <Compile Include="Services\ICheckoutService.cs" />
     <Compile Include="Services\SerialBarcodeService\ISerialBarcodeService.cs" />
     <Compile Include="Services\SerialBarcodeService\SerialBarcodeService.cs" />
     <Compile Include="Services\ISessionService.cs" />
-    <Compile Include="Services\DiscountInfo.cs" />
+    <Compile Include="Models\DiscountInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace Mhyrenz_Interface.Domain.Models
@@ -32,6 +33,7 @@ namespace Mhyrenz_Interface.Domain.Models
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
             = new List<Transaction>();
+        [NotMapped]
         public int Purchase { get; set; }
 
         // Calculated

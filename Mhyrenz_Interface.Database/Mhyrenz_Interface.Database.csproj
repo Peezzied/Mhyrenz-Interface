@@ -48,9 +48,9 @@
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20260517113703_WithPharmaDetails.cs" />
-    <Compile Include="Migrations\20260517113703_WithPharmaDetails.Designer.cs">
-      <DependentUpon>20260517113703_WithPharmaDetails.cs</DependentUpon>
+    <Compile Include="Migrations\20260523070932_Sale.cs" />
+    <Compile Include="Migrations\20260523070932_Sale.Designer.cs">
+      <DependentUpon>20260523070932_Sale.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -58,7 +58,6 @@
     <Compile Include="Services\CheckoutService.cs" />
     <Compile Include="Services\ProductService.cs" />
     <Compile Include="Services\SessionService.cs" />
-    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -88,5 +87,6 @@
       <Version>4.5.5</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

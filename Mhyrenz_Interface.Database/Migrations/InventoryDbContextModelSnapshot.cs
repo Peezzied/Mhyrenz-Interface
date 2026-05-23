@@ -100,6 +100,37 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Sale", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Change")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Completed_at")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("Sales");
+                });
+
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Session", b =>
                 {
                     b.Property<Guid>("Id")
@@ -134,23 +165,29 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Discount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("DiscountRate")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("SessionId")
+                    b.Property<decimal>("RetailPrice")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UniqueId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("SaleId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("SessionId");
+                    b.HasIndex("SaleId");
 
                     b.ToTable("Transactions");
                 });
@@ -174,6 +211,15 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Sale", b =>
+                {
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
+                        .WithMany("Sales")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>
                 {
                     b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Item")
@@ -182,11 +228,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Sale", "Sale")
                         .WithMany("Transactions")
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SaleId");
                 });
 #pragma warning restore 612, 618
         }
