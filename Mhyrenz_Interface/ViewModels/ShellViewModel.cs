@@ -161,29 +161,25 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.HouseSolid },
                 Label = "Home",
-                NavigationType = typeof(HomeView),
-                NavigationDestination = new Uri("Views/HomeView.xaml", UriKind.RelativeOrAbsolute)
+                NavigationType = typeof(HomeView)
             });
             this.Menu.Add(new MenuItem()
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
-                Label = "Transaction",
-                NavigationType = typeof(TransactionsView),
-                NavigationDestination = new Uri("Views/TransactionsView.xaml", UriKind.RelativeOrAbsolute)
+                Label = "Checkout",
+                NavigationType = typeof(CheckoutView)
             });
             this.Menu.Add(new MenuItem()
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
                 Label = "Inventory",
-                NavigationType = typeof(InventoryView),
-                NavigationDestination = new Uri("Views/InventoryView.xaml", UriKind.RelativeOrAbsolute)
+                NavigationType = typeof(InventoryView)
             });
             this.OptionsMenu.Add(new MenuItem()
             {
                 Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.GearSolid },
                 Label = "Settings",
-                NavigationType = typeof(SettingsView),
-                NavigationDestination = new Uri("Views/SettingsView.xaml", UriKind.RelativeOrAbsolute)
+                NavigationType = typeof(SettingsView)
             });
 
             _navigationServiceEx.Navigate(typeof(HomeView));
@@ -253,7 +249,7 @@ namespace Mhyrenz_Interface.ViewModels
                 ? parameters.Menu.SelectedItem
                 : parameters.Menu.SelectedOptionsItem;
 
-            if (selectedItem is MenuItem menuItem && menuItem.NavigationType != null && menuItem.IsNavigation)
+            if (selectedItem is MenuItem menuItem && menuItem.NavigationType != null)
             {
                 _navigationServiceEx.Navigate(menuItem.NavigationType);
             }

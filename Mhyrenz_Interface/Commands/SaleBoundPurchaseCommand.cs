@@ -38,7 +38,7 @@ namespace Mhyrenz_Interface.Commands
 
         public override void Execute(object parameter)
         {
-            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, null, typeof(TransactionsView), parameter)))
+            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, null, typeof(CheckoutView), parameter)))
                 base.Execute(parameter);
         }
 

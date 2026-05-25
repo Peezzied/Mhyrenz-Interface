@@ -31,13 +31,13 @@ namespace Mhyrenz_Interface.ViewModels.Factory
     {
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
-        private readonly CreateViewModel<TransactionViewModel> _createTransactionsViewModel;
+        private readonly CreateViewModel<CheckoutViewModel> _createTransactionsViewModel;
         private readonly CreateViewModel<SettingsViewModel> _createSettingsViewModel;
         private readonly Dictionary<Type, (Type viewModelType, Delegate factory)> _viewsSet = new Dictionary<Type, (Type, Delegate)>();
 
         public NavigationViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
             CreateViewModel<InventoryViewModel> createInventoryViewModel,
-            CreateViewModel<TransactionViewModel> createTransactionsViewModel,
+            CreateViewModel<CheckoutViewModel> createTransactionsViewModel,
             CreateViewModel<SettingsViewModel> createSettingsViewModel)
         {
             _createHomeViewModel = createHomeViewModel;
@@ -47,7 +47,7 @@ namespace Mhyrenz_Interface.ViewModels.Factory
 
             _viewsSet[typeof(HomeView)] = (typeof(HomeViewModel), _createHomeViewModel);
             _viewsSet[typeof(InventoryView)] = (typeof(InventoryViewModel), _createInventoryViewModel);
-            _viewsSet[typeof(TransactionsView)] = (typeof(TransactionViewModel), _createTransactionsViewModel);
+            _viewsSet[typeof(CheckoutView)] = (typeof(CheckoutViewModel), _createTransactionsViewModel);
             _viewsSet[typeof(SettingsView)] = (typeof(SettingsViewModel), _createSettingsViewModel);
         }
 

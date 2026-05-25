@@ -10,9 +10,9 @@ using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class TransactionViewModel : NavigationViewModel
+    public class CheckoutViewModel : NavigationViewModel
     {
-        public TransactionViewModel(INavigationServiceEx navigationServiceEx, CreateViewModel<SaleTabItem> saleTabItemFactory, CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory) : base(navigationServiceEx)
+        public CheckoutViewModel(INavigationServiceEx navigationServiceEx, CreateViewModel<SaleTabItem> saleTabItemFactory, CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory) : base(navigationServiceEx)
         {
             _inventoryDataGridFactory = inventoryDataGridFactory;
             _saleTabItemFactory = saleTabItemFactory;

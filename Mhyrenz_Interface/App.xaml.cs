@@ -143,7 +143,7 @@ namespace Mhyrenz_Interface
                 .AddTransient<OverviewChartViewModel>()
                 .AddTransient<HomeViewModel>()
                 .AddTransient<InventoryViewModel>()
-                .AddTransient<TransactionViewModel>()
+                .AddTransient<CheckoutViewModel>()
                 .AddTransient<SettingsViewModel>()
                 .AddTransient<InventoryDataGridViewModel>()
                 .AddTransient<AddProductViewModel>()
@@ -161,7 +161,7 @@ namespace Mhyrenz_Interface
                 .AddViewModelFactory<AddProductViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<InventoryViewModel>(resolveFromContainer: true)
-                .AddViewModelFactory<TransactionViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<CheckoutViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<SettingsViewModel>(resolveFromContainer: true)
 
                 .AddSingleton<StartupViewModel>()

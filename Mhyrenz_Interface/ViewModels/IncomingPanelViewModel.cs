@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
@@ -14,6 +15,7 @@ namespace Mhyrenz_Interface.ViewModels
     public class IncomingPanelViewModel : BaseViewModel
     {
         private readonly IInventoryStore _inventoryStore;
+        private readonly ISessionStore _sessionStore;
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly ShellViewModel _mainViewModel;
         private readonly ICheckoutService _checkoutService;
@@ -23,9 +25,11 @@ namespace Mhyrenz_Interface.ViewModels
             ISerialBarcodeService serialBarcodeService,
             INavigationServiceEx navigationService,
             ICheckoutService checkoutService,
+            ISessionStore sessionStore,
             ShellViewModel mainViewModel)
         {
             _inventoryStore = inventoryStore;
+            _sessionStore = sessionStore;
             _checkoutService = checkoutService;
             _navigationService = navigationService;
             _serialBarcodeService = serialBarcodeService;
@@ -59,7 +63,7 @@ namespace Mhyrenz_Interface.ViewModels
                 oldValue: product.PurchaseDefaultEdit,
                 newValue: 1,
                 tracker: _inventoryStore.GetTrackerByProduct(product),
-                purchaseProductCommand: new DirectPurchaseCommand(_checkoutService));
+                purchaseProductCommand: new DirectPurchaseCommand(_checkoutService, _sessionStore));
         }
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)

@@ -601,7 +601,7 @@
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />
     <Compile Include="ViewModels\TransactionDataViewModel.cs" />
-    <Compile Include="ViewModels\TransactionViewModel.cs" />
+    <Compile Include="ViewModels\CheckoutViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
@@ -617,8 +617,8 @@
     <Compile Include="Views\Startup.xaml.cs">
       <DependentUpon>Startup.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TransactionsView.cs">
-      <DependentUpon>TransactionsView.xaml</DependentUpon>
+    <Compile Include="Views\CheckoutView.cs">
+      <DependentUpon>CheckoutView.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\AddProductDrawer.xaml">
       <SubType>Designer</SubType>
@@ -724,7 +724,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TransactionsView.xaml">
+    <Page Include="Views\CheckoutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
