@@ -7,28 +7,25 @@ using Mhyrenz_Interface.State;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class UpdateProductCommandDTO
-    {
-        public int Id { get; set; }
-        public UpdateEntity<Product> Updater { get; set; }
-    }
     public class UpdateProductCommand : BaseAsyncCommand
     {
         private readonly IProductService _productService;
-        private readonly IInventoryStore _inventroyStore;
 
-        public UpdateProductCommand(IProductService productService, IInventoryStore inventroyStore)
+        public UpdateProductCommand(IProductService productService)
         {
             _productService = productService;
-            _inventroyStore = inventroyStore;
+        }
+
+        public class DTO
+        {
+            public int Id { get; set; }
+            public Product UpdatedProduct { get; set; }
         }
 
         public override async Task ExecuteAsync(object parameter)
         {
-            var DTO = parameter as UpdateProductCommandDTO;
-
-            var updated = await _productService.EditProperty(DTO.Id, DTO.Updater);
-            //Debug.WriteLine($"Updated product {updated.Id} from command.");
+            var DTO = parameter as DTO;
+            await _productService.Update(DTO.Id, DTO.UpdatedProduct);
         }
     }
 }

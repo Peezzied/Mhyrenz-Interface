@@ -9,6 +9,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
 {
     public interface ICheckoutService
     {
+
         /// <summary>
         /// Adds a product to a sale.
         /// </summary>
@@ -66,11 +67,12 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<Product> AddItem(int productId, int amount = 1);
+        Task<Product> AddItem(int productId, Guid sessionId, int amount = 1);
         Task<Sale> CompleteSale(int saleId);
         Task<Sale> Create(Guid sessionId);
         Task DiscardSale(int saleId);
         Task<IReadOnlyList<Sale>> GetActive();
+        Task<bool> HasTransactions();
 
 
         /// <summary>
@@ -127,6 +129,6 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<Product> Subtract(int productId, int amount = 1);
+        Task<Product> Subtract(int productId, Guid sessionId, int amount = 1);
     }
 }

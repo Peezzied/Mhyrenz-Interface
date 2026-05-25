@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using HandyControl.Controls;
 using HandyControl.Data;
 using Mhyrenz_Interface.Core;
@@ -60,7 +59,7 @@ namespace Mhyrenz_Interface.Commands
         public override async Task ExecuteAsync(object parameter)
         {
             CanSubmit = false;
-            var product = await _productService.Add(new Product
+            var product = await _productService.Create(new Product
             {
                 Name = _viewModel.Name,
                 RetailPrice = _viewModel.Price,
@@ -88,7 +87,7 @@ namespace Mhyrenz_Interface.Commands
 
         public async void Redo(object parameter = null)
         {
-            var product = (await _productService.RemoveManyBack(_products.Select(i => i.Item))).First();
+            var product = (await _productService.RemoveManyBack(_products.Select(i => i.Item.Id))).First();
 
             _products = _inventoryStore.AddProduct(new[] { product });
 
@@ -109,14 +108,5 @@ namespace Mhyrenz_Interface.Commands
 
             AllowBack = deleteCmd.AllowBack;
         }
-    }
-
-    public interface IUndoRedoBound : ICommandAsync, ICommand
-    {
-        bool AllowBack { get; }
-
-        void Undo(object parameter);
-        void Redo(object parameter);
-        void ExecuteRaw(object parameter);
     }
 }

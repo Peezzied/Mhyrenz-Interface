@@ -23,15 +23,12 @@ namespace Mhyrenz_Interface.Domain.Models
         public Guid SessionId { get; set; }
         public Session Session { get; set; }
 
-        public Transaction AddItem(Product product, DiscountInfo discountInfo, int amount = 1)
+        public Transaction AddItem(Product product, DiscountInfo discountInfo, Guid sessionId, int amount = 1)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
             
-            var transaction = Transactions.FirstOrDefault(t =>
-                t.ProductId == product.Id &&
-                t.Discount == discountInfo.Discount &&
-                t.DiscountRate == discountInfo.DiscountRate);
+            var transaction = Transactions.FirstOrDefault(t => t.ProductId == product.Id && t.SessionId == sessionId);
 
             if (transaction != null)
             {
@@ -45,7 +42,8 @@ namespace Mhyrenz_Interface.Domain.Models
                     Amount = amount,
                     RetailPrice = product.RetailPrice,
                     Discount = discountInfo.Discount,
-                    DiscountRate = discountInfo.DiscountRate
+                    DiscountRate = discountInfo.DiscountRate,
+                    SessionId = sessionId
                 };
                 Transactions.Add(transaction);
             }

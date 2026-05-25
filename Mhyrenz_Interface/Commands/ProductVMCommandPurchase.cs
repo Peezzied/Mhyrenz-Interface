@@ -31,18 +31,18 @@ namespace Mhyrenz_Interface.Commands
             var newValue = _newValue as int? ?? 0;
             var oldValue = _oldValue as int? ?? 0;
 
-            PurchaseProductCommand.DTO.Type? method;
+            DirectPurchaseCommand.DTO.Type? method;
             if (newValue > oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Subtract : PurchaseProductCommand.DTO.Type.Add;
+                method = intent == ActionType.Undo ? DirectPurchaseCommand.DTO.Type.Subtract : DirectPurchaseCommand.DTO.Type.Add;
             else if (newValue < oldValue)
-                method = intent == ActionType.Undo ? PurchaseProductCommand.DTO.Type.Add : PurchaseProductCommand.DTO.Type.Subtract;
+                method = intent == ActionType.Undo ? DirectPurchaseCommand.DTO.Type.Add : DirectPurchaseCommand.DTO.Type.Subtract;
             else
                 return false;
 
-            _command.Execute(new PurchaseProductCommand.DTO()
+            _command.Execute(new DirectPurchaseCommand.DTO()
             {
                 Amount = Math.Abs(oldValue - newValue),
-                Product = _target.Item,
+                ProductId = _target.Item.Id,
                 Method = method.Value,
             });
 

@@ -15,13 +15,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 {
     public class UndoRedoBehavior : Behavior<Control>
     {
-        private readonly static Dictionary<Control, DataGrid> dataGrid;
-        private static BindingExpression bindingEx;
-
-        static UndoRedoBehavior()
-        {
-            dataGrid = new Dictionary<Control, DataGrid>();
-        }
+        private BindingExpression _bindingEx;
+        private DataGrid _dataGrid;
 
         public DependencyProperty TargetProperty
         {
@@ -36,12 +31,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 typeof(UndoRedoBehavior),
                 new PropertyMetadata(null));
 
-        public static void Renew()
-        {
-            dataGrid.Clear();
-        }
-
-
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -55,10 +44,8 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (dataGrid is null || !dataGrid.TryGetValue(AssociatedObject, out var dg))
-                    dataGrid.Add(AssociatedObject, TreeHelper.TryFindParent<DataGrid>(AssociatedObject));
-
-                bindingEx = AssociatedObject.GetBindingExpression(TargetProperty);
+                _dataGrid = TreeHelper.TryFindParent<DataGrid>(AssociatedObject);
+                _bindingEx = AssociatedObject.GetBindingExpression(TargetProperty);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
@@ -77,7 +64,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
         private void TryUpdateSource(DependencyObject target, DependencyProperty dp)
         {
-            var expression = bindingEx;
+            var expression = _bindingEx;
             var control = target.CastTo<Control>();
             var viewModel = control.DataContext.CastTo<ProductDataViewModel>();
             var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
@@ -107,7 +94,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             }
 
 
-            if (dataGrid[AssociatedObject].DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
+            if (_dataGrid.DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
                 return;
 
             if (!undoRedoManager.CanRedo || controlPropertyValue.ToString() == vmPropertyValue.ToString())

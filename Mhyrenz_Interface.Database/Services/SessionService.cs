@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Metadata;
 using System.Linq;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Database;
@@ -27,15 +28,14 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             }
         }
 
-        public async Task<Session> GenerateSession(Guid id)
+        public async Task<Session> GenerateSession(Session session)
         {
             using (InventoryDbContext context = _inventoryDbContextFactory.CreateDbContext())
             {
-                var entity = await context.Sessions
-                    .FirstOrDefaultAsync((e) => e.Id == id);
-                context.Sessions.Remove(entity);
+                context.Sessions.Add(session);
                 await context.SaveChangesAsync();
-                return entity;
+
+                return session;
             }
         }
 

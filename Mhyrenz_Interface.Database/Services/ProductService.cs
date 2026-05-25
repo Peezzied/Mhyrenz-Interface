@@ -117,6 +117,20 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
+        public async Task<Product> Update(int id, Product product)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                product.Id = id;
+
+                context.Products.Update(product);
+
+                await context.SaveChangesAsync();
+
+                return product;
+            }
+        }
+
         public async Task<int> RemovePhysical()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())

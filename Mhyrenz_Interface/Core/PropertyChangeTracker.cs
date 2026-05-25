@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.Core
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (Core.PropertyChangeTracker.Suppress) return;
+            if (Core.PropertyChangeTracker.Suppress) return; // TODO is this really important?
             if (!(sender is T target)) throw new ArithmeticException("sender");
 
             if (e.PropertyName is null) return;
@@ -93,7 +93,6 @@ namespace Mhyrenz_Interface.Core
                 if (val is PropertyChangeTrackerArgs @this)
                 {
                     var propertyName = @this.Navigator;
-                    //if (val is Propert)
 
                     var property = @this.Owner.GetType().GetProperty(propertyName) ?? throw new NoNullAllowedException("property");
                     var newValue = property.GetValue(target);
@@ -116,10 +115,6 @@ namespace Mhyrenz_Interface.Core
                     PreviousValues[e.PropertyName] = new PropertyChangeTracker.PropertyChangeTrackerGenericArgs<BaseViewModel>(arg.Owner, newValue, propertyName);
                 }
             }
-
-
-            // Update the last known value
-
         }
     }
 

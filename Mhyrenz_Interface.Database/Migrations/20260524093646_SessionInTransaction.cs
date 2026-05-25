@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class Sale : Migration
+    public partial class SessionInTransaction : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -132,6 +132,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ProductId = table.Column<int>(nullable: false),
                     SaleId = table.Column<int>(nullable: true),
+                    SessionId = table.Column<Guid>(nullable: false),
                     Amount = table.Column<int>(nullable: false),
                     RetailPrice = table.Column<decimal>(nullable: false),
                     Discount = table.Column<int>(nullable: false),
@@ -152,6 +153,12 @@ namespace Mhyrenz_Interface.Database.Migrations
                         principalTable: "Sales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transactions_Sessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "Sessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -189,6 +196,11 @@ namespace Mhyrenz_Interface.Database.Migrations
                 name: "IX_Transactions_SaleId",
                 table: "Transactions",
                 column: "SaleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_SessionId",
+                table: "Transactions",
+                column: "SessionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

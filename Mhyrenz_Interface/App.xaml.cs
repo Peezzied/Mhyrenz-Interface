@@ -93,10 +93,10 @@ namespace Mhyrenz_Interface
         private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)
         {
 
-            Action<DbContextOptionsBuilder> inventoryConfig = options =>
+            void inventoryConfig(DbContextOptionsBuilder options)
             {
                 options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")); // FIXME: TEMPORARY, CHANGE LATER
-            };
+            }
 
             services.AddOptions<AppSettingsManager.AppSettings>()
                 .BindConfiguration("AppSettings");
@@ -122,7 +122,6 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ISessionStore, SessionStore>()
                 .AddSingleton<ISessionStore, SessionStore>()
                 .AddSingleton<IInventoryStore, InventoryStore>()
-                .AddSingleton<ITransactionStore, TransactionStore>()
                 .AddSingleton<ICategoryStore, CategoryStore>()
 
                 .AddSingleton<ICachePath, CachePath>()
@@ -134,16 +133,10 @@ namespace Mhyrenz_Interface
                 .AddSingleton<INavigationServiceEx, NavigationServiceEx>()
                 .AddSingleton<NavigationViewModelFactory>()
 
-                .AddSingleton<ISessionDataService, SessionDataService>()
                 .AddSingleton<ISessionService, SessionService>()
-                .AddSingleton<ISalesDataService, SalesDataService>()
-                .AddSingleton<ISalesRecordService, SalesService>()
-                .AddSingleton<ICategoryDataService, CategoryDataService>()
+                .AddSingleton<ICheckoutService, CheckoutService>()
                 .AddSingleton<ICategoryService, CategoryService>()
-                .AddSingleton<IProductDataService, ProductDataService>()
                 .AddSingleton<IProductService, ProductService>()
-                .AddSingleton<ITransactionsDataService, TransactionsService>()
-                .AddSingleton<ITransactionsService, TransactionService>()
 
                 .AddTransient<IncomingPanelViewModel>()
 
@@ -159,7 +152,7 @@ namespace Mhyrenz_Interface
                 .AddTransient<SaleTabItem>()
 
                 .AddViewModelFactory<ProductDataViewModel, Product>()
-                .AddViewModelFactory<TransactionDataViewModel, TransactionDataViewModelDTO>()
+                .AddViewModelFactory<TransactionDataViewModel, Transaction>()
                 .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
                 .AddViewModelFactory<InventoryDataGridViewModel>()
                 .AddViewModelFactory<InventoryTabItem>()

@@ -20,10 +20,9 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private readonly ISessionService _sessionService;
         private readonly ISessionStore _sessionStore;
-        private readonly ITransactionsService _transactionService;
         private readonly IInventoryStore _inventoryStore;
-        private readonly ITransactionStore _transactionStore;
         private readonly IUndoRedoManager _undoRedoManager;
+        private readonly ICheckoutService _checkoutService;
 
         public SessionBoxContext SessionBoxContext { get; set; }
         public ICommand NewButtonCommand { get; set; }
@@ -101,20 +100,16 @@ namespace Mhyrenz_Interface.ViewModels
 
         public StartupViewModel(CreateViewModel<SessionBoxContext> sessionBoxVmFactory,
             ISessionService sessionService,
-            ISalesRecordService salesRecordService,
-            ITransactionStore transactionStore,
-            ITransactionsService transactionsService,
             ISessionStore sessionStore,
             IInventoryStore inventoryStore,
-            IUndoRedoManager undoRedoManager)
+            IUndoRedoManager undoRedoManager,
+            ICheckoutService checkoutService)
         {
             _sessionService = sessionService;
             _sessionStore = sessionStore;
-            _transactionService = transactionsService;
             _inventoryStore = inventoryStore;
-            _transactionStore = transactionStore;
             _undoRedoManager = undoRedoManager;
-
+            this._checkoutService = checkoutService;
             HasTransactions = false;
             CanCreateSession = true;
 
@@ -122,8 +117,8 @@ namespace Mhyrenz_Interface.ViewModels
             SessionBoxContext.SessionCreated += SessionBoxContext_SessionCreated;
 
             NewButtonCommand = new RelayCommand(NewButtonActionCommand);
-            RegisterCommand = new SalesRegisterCommand(this, salesRecordService, transactionStore, transactionsService, sessionStore, inventoryStore);
-            RegisterCommand.Error += RegisterCommand_Error;
+            //TODO RegisterCommand = new SalesRegisterCommand();
+            //RegisterCommand.Error += RegisterCommand_Error;
 
             EditCommand = new RelayCommand(EditSessionActionCommand);
             SaveEditCommand = new AsyncRelayCommand(SaveEditActionCommand);
@@ -167,8 +162,7 @@ namespace Mhyrenz_Interface.ViewModels
                 System.Windows.MessageBoxButton.YesNoCancel,
                 System.Windows.MessageBoxImage.Question);
 
-            var transactions = await _transactionService.GetLatests();
-            if (transactions.Any() && prompt == System.Windows.MessageBoxResult.Yes)
+            if (await _checkoutService.HasTransactions() && prompt == System.Windows.MessageBoxResult.Yes)
             {
                 prompt = MessageBox.Show("Existing transactions has been found in the current session. If you wish to continue, the delete action cannot be reverted.",
                     "Delete Session - Transactions detected",
@@ -184,7 +178,6 @@ namespace Mhyrenz_Interface.ViewModels
             await _sessionService.DeleteSession(_sessionStore.CurrentSession.Id);
             await _sessionStore.UpdateSession();
 
-            await _transactionStore.InitializeAsync();
             await _inventoryStore.InitializeAsync();
 
             await EvaluateConditions();
@@ -216,17 +209,10 @@ namespace Mhyrenz_Interface.ViewModels
 
             ShowCalendar = false;
 
-            var products = await _transactionService.GetLatests();
-            _transactionStore.LoadTransactions(products);
-
             var oldSession = _sessionStore.CurrentSession.Period;
 
             _sessionStore.CurrentSession.Period = date;
-            var newSession = await _sessionService.EditSession(TODO, TODO, new Session
-            {
-                Period = date,
-                Id = _sessionStore.CurrentSession.Id
-            });
+            var newSession = await _sessionService.EditSession(_sessionStore.CurrentSession.Id, date);
             await _sessionStore.UpdateSession();
 
             Growl.Success($"Successfully updated session from \"{oldSession:D}\" to \"{_sessionStore.CurrentSession.Period:D}\".");
@@ -256,9 +242,9 @@ namespace Mhyrenz_Interface.ViewModels
 
         private async Task EvaluateConditions()
         {
-            var session = await _sessionStore.UpdateSession();
+            await _sessionStore.UpdateSession();
 
-            HasTransactions = session?.Transactions?.Any() == true;
+            HasTransactions = await _checkoutService.HasTransactions();
             CanCreateSession = _sessionStore.CurrentSession == null;
             CanStartSession = _sessionStore.CurrentSession != null;
         }

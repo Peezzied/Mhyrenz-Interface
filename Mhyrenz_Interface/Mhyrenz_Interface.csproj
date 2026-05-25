@@ -466,13 +466,15 @@
     </ApplicationDefinition>
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
+    <Compile Include="Commands\IUndoRedoBound.cs" />
+    <Compile Include="Commands\SaleBoundPurchaseCommand.cs" />
     <Compile Include="Commands\ProductVMCommandNestedProp.cs" />
     <Compile Include="Commands\CreateSessionCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Commands\ProductVMCommandCommonProp.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
-    <Compile Include="Commands\PurchaseProductCommand.cs" />
+    <Compile Include="Commands\DirectPurchaseCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
     <Compile Include="Commands\UndoRedoBoundCommand.cs" />
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
@@ -558,10 +560,8 @@
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\ISessionStore.cs" />
-    <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\IUndoManager.cs" />
     <Compile Include="State\SessionStore.cs" />
-    <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Core\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />
@@ -596,7 +596,6 @@
     <Compile Include="ViewModels\OverviewChartViewModel.cs" />
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
     <Compile Include="ViewModels\SaleTabItem.cs" />
-    <Compile Include="ViewModels\SaleViewModel.cs" />
     <Compile Include="ViewModels\SessionBoxContext.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />

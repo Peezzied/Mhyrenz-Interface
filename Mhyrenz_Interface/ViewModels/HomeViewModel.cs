@@ -24,10 +24,7 @@ namespace Mhyrenz_Interface.ViewModels
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
-        private readonly ITransactionStore _transactionStore;
         private readonly OverviewChartViewModel _overviewChartViewModel;
-        private readonly ISalesRecordService _salesRecordService;
-        private readonly ITransactionsService _transactionService;
         private readonly ISessionStore _sessionStore;
         private readonly IDialogCoordinator _dialogCoordinator;
         private readonly InfoPanelViewModel _infoPanelViewModel;
@@ -43,16 +40,6 @@ namespace Mhyrenz_Interface.ViewModels
         }
         public ICommand RegisterCommand { get; private set; }
         public ICommand OpenStartupCommand { get; set; }
-        private ICollectionView _transactions;
-        public ICollectionView Transactions
-        {
-            get => _transactions;
-            set
-            {
-                _transactions = value;
-                OnPropertyChanged(nameof(Transactions));
-            }
-        }
         public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;
         public InfoPanelViewModel InfoPanelViewModel => _infoPanelViewModel;
         public string Bindtest { get; private set; }
@@ -88,9 +75,6 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         public HomeViewModel(
-            ISalesRecordService salesRecordService,
-            ITransactionsService transactionsService,
-            ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             ICategoryStore categoryStore,
             ISessionStore sessionStore,
@@ -103,10 +87,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             _inventoryStore = inventroyStore;
             _categoryStore = categoryStore;
-            _transactionStore = transactionStore;
             _overviewChartViewModel = overviewChartViewModel;
-            _salesRecordService = salesRecordService;
-            _transactionService = transactionsService;
 
             InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
             IncomingPanelViewModel = incomingPanelViewModel;
@@ -124,7 +105,7 @@ namespace Mhyrenz_Interface.ViewModels
             DeferLoad();
 
             OpenStartupCommand = new AsyncRelayCommand(OpenStartupActionCommand);
-            RegisterCommand = new SalesRegisterCommand(this, _salesRecordService, _transactionStore, _transactionService, _sessionStore, inventroyStore);
+            //TODO RegisterCommand = new SalesRegisterCommand();
         }
 
         private void SessionStore_StateChanged(Session obj)
@@ -178,7 +159,6 @@ namespace Mhyrenz_Interface.ViewModels
                     }
 
             }), DispatcherPriority.ContextIdle);
-            Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
         }
 
         private bool FilterProducts(object obj)

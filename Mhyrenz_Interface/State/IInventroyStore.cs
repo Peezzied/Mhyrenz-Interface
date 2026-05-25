@@ -43,7 +43,7 @@ namespace Mhyrenz_Interface.State
         IEnumerable<ProductDataViewModel> AddProduct(IEnumerable<Product> products);
         ProductDataViewModel GetProductByIndex(int index);
         ProductDataViewModel GetProductByBarcode(string obj);
-        void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, PurchaseProductCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null);
+        void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, DirectPurchaseCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null);
         PropertyChangeTracker<ProductDataViewModel> GetTrackerByProduct(ProductDataViewModel product);
         ProductDataViewModel GetProductById(int id);
     }

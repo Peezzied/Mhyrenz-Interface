@@ -20,7 +20,7 @@ namespace Mhyrenz_Interface.Navigation
             set
             {
                 _currentViewModel?.Dispose();
-                App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoBehavior.Renew()), DispatcherPriority.ContextIdle);
+                //App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoBehavior.Renew()), DispatcherPriority.ContextIdle);
 
                 _currentViewModel = value;
             }

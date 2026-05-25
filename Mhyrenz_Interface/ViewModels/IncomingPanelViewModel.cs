@@ -3,6 +3,7 @@ using HandyControl.Controls;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
@@ -15,17 +16,17 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly ShellViewModel _mainViewModel;
-        private readonly ITransactionsService _transactionsService;
+        private readonly ICheckoutService _checkoutService;
         private readonly INavigationServiceEx _navigationService;
 
         public IncomingPanelViewModel(IInventoryStore inventoryStore,
             ISerialBarcodeService serialBarcodeService,
             INavigationServiceEx navigationService,
-            ITransactionsService transactionsService,
+            ICheckoutService checkoutService,
             ShellViewModel mainViewModel)
         {
             _inventoryStore = inventoryStore;
-            _transactionsService = transactionsService;
+            _checkoutService = checkoutService;
             _navigationService = navigationService;
             _serialBarcodeService = serialBarcodeService;
             _mainViewModel = mainViewModel;
@@ -58,7 +59,7 @@ namespace Mhyrenz_Interface.ViewModels
                 oldValue: product.PurchaseDefaultEdit,
                 newValue: 1,
                 tracker: _inventoryStore.GetTrackerByProduct(product),
-                purchaseProductCommand: new PurchaseProductCommand(_transactionsService, _inventoryStore, canCombine: true));
+                purchaseProductCommand: new DirectPurchaseCommand(_checkoutService));
         }
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)

@@ -1,7 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using GongSolutions.Wpf.DragDrop;
+using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Database.Services;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -11,7 +14,6 @@ namespace Mhyrenz_Interface.ViewModels
         {
             Header = header;
             ContentViewModel = viewModel;
-            Sales = new ObservableCollection<SaleViewModel>();
 
             SaleDropHandler = new SaleDropHandler();
             InventoryDragHandler = new InventoryDragHandler(this);
@@ -19,7 +21,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public string Header { get; set; }
 
-        public ObservableCollection<SaleViewModel> Sales { get; }
+        public ObservableDictionary<int, TransactionDataViewModel> Sales { get; } = new ObservableDictionary<int, TransactionDataViewModel>();
 
         private DataGridRowDetailsVisibilityMode _productRowDetailsVisibilityMode =
             DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
@@ -37,6 +39,24 @@ namespace Mhyrenz_Interface.ViewModels
 
         public SaleDropHandler SaleDropHandler { get; }
         public InventoryDragHandler InventoryDragHandler { get; }
+
+        public void UpdateSale(CheckoutResult checkoutResult)
+        {
+            if (checkoutResult.WasRemoved)
+            {
+                Sales.Remove(checkoutResult.TransactionId.Value);
+                return;
+            }
+
+            var transaction = checkoutResult.Transaction;
+
+            if (Sales.TryGetValue(transaction.Id, out var existingVm))
+            {
+            }
+            else
+            {
+            }
+        }
     }
 
     public class InventoryDragHandler : DefaultDragHandler

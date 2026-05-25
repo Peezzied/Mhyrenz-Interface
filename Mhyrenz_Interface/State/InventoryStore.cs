@@ -11,6 +11,7 @@ using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
@@ -26,7 +27,7 @@ namespace Mhyrenz_Interface.State
         private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
-        private readonly ITransactionsService _transactionService;
+        private readonly ICheckoutService _checkoutService;
         private readonly ISessionStore _sessionStore;
         private readonly INavigationServiceEx _navigationService;
         private readonly NavigationViewModelFactory _navigationViewModelFactory;
@@ -52,7 +53,7 @@ namespace Mhyrenz_Interface.State
             InventorySettingsProvider inventorySettingsProvider,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
-            ITransactionsService transactionsService,
+            ICheckoutService checkoutService,
             ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             NavigationViewModelFactory navigationViewModelFactory)
@@ -61,13 +62,13 @@ namespace Mhyrenz_Interface.State
             _inventorySettingsProvider = inventorySettingsProvider;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
-            _transactionService = transactionsService;
+            _checkoutService = checkoutService;
             _sessionStore = sessionStore;
             _navigationService = navigationServiceEx;
             _navigationViewModelFactory = navigationViewModelFactory;
             //_categoryStore = categoryStore;
 
-            UpdateProductCommand = new UpdateProductCommand(_productService, this);
+            UpdateProductCommand = new UpdateProductCommand(_productService);
         }
 
         #region "Lifecycle and Instantiation"
@@ -80,15 +81,6 @@ namespace Mhyrenz_Interface.State
                     kvp => kvp.Key,
                     kvp => kvp.Value.ToDictionary(c => c.Field, c => (object)null)
                 );
-
-            //foreach (var product in products)
-            //{
-            //    if (product.Extras is null &&
-            //        extrasTemplates.TryGetValue(product.CategoryId, out var template))
-            //    {
-            //        product.Extras = template;
-            //    }
-            //}
 
             LoadProducts(products);
         }
@@ -122,15 +114,10 @@ namespace Mhyrenz_Interface.State
         }
         #endregion
 
+        [Obsolete("Not still implemented yet")]
         public async Task Register(IEnumerable<Product> transactions)
         {
-            // FIXME: SLOW TIME COMPLEXITY - RESOLVE LATER
-
-            var tasks = transactions.Select(item =>
-                _productService.EditProperty(item.Id, entity => entity.Qty = item.Qty)
-            );  // FIXME: resolve with batch edit (EditRangeProperty)
-
-            await Task.WhenAll(tasks);
+            // TODO implement registering transaction with trasaction service
 
             var products = await _productService.GetAll();
 
@@ -318,6 +305,8 @@ namespace Mhyrenz_Interface.State
                             ProductId = product.Id,
                             Product = vm
                         });
+                        tracker
+                            .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), viewModel.PurchaseNormalEdit, method);
                     }), System.Windows.Threading.DispatcherPriority.Input);
 
                     LastProductChanged = (product.CategoryId, new ChangedProductInfo(index, new[] { product.Id }));
@@ -328,13 +317,13 @@ namespace Mhyrenz_Interface.State
                     args.PropertyOf,
                     oldValue,
                     newValue,
-                    command: new PurchaseProductCommand(_transactionService, this),
+                    command: new DirectPurchaseCommand(_checkoutService, _sessionStore),
                     propertyChangeHandler: handlePropChange,
                     currentViewIn: typeof(InventoryView)
                 ));
             };
             _tracker
-                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), viewModel.PurchaseDefaultEdit, method)
+                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), viewModel.PurchaseDefaultEdit, (tracker, args, oldValue, newValue) => method(tracker, args, 0, newValue))
                 .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), viewModel.PurchaseNormalEdit, method);
 
             return _tracker;
@@ -345,7 +334,7 @@ namespace Mhyrenz_Interface.State
             return _trackers[product];
         }
 
-        public void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, PurchaseProductCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null)
+        public void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, DirectPurchaseCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null)
         {
 
         }

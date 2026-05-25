@@ -31,9 +31,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
         private readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
         private readonly IInventoryStore _inventoryStore;
-        private readonly ITransactionStore _transactionStore;
         private readonly IProductService _productService;
-        private readonly ITransactionsService _transactionService;
         private readonly IUndoRedoManager _undoRedoManger;
         private readonly IDialogCoordinator _dialogCoordinator;
         private readonly DispatcherTimer _timer;
@@ -129,8 +127,6 @@ namespace Mhyrenz_Interface.ViewModels
             ISessionStore sessionStore,
             IInventoryStore inventroyStore,
             IProductService productService,
-            ITransactionsService transactionService,
-            ITransactionStore transactionStore,
             INavigationServiceEx navigationServiceEx,
             NavigationViewModelFactory viewModelFactory,
             IDialogCoordinator dialogCoordinator,
@@ -192,9 +188,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             _navigationServiceEx.Navigate(typeof(HomeView));
             _inventoryStore = inventroyStore;
-            _transactionStore = transactionStore;
             _productService = productService;
-            _transactionService = transactionService;
 
             _baseTime = DateTime.Now;
             _stopwatch.Start();

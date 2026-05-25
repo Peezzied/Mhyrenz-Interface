@@ -139,7 +139,7 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     if (!SessionRequire()) return;
                     _purchase = value;
-                    //_cachedPurchase += value;
+
                     OnPropertyChanged(nameof(PurchaseDefaultEdit));
                     OnPropertyChanged(nameof(NetQty));
                     OnPropertyChanged(nameof(PurchaseMax));
@@ -159,7 +159,7 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     if (!SessionRequire()) return;
                     _purchaseNormal = value - Item.Purchase;
-                    //_cachedPurchase += value;
+
                     OnPropertyChanged(nameof(PurchaseNormalEdit));
                     OnPropertyChanged(nameof(NetQty));
                     OnPropertyChanged(nameof(PurchaseMaxNormal));

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260523070932_Sale")]
-    partial class Sale
+    [Migration("20260524093646_SessionInTransaction")]
+    partial class SessionInTransaction
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -185,11 +185,16 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<int?>("SaleId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
                     b.HasIndex("SaleId");
+
+                    b.HasIndex("SessionId");
 
                     b.ToTable("Transactions");
                 });
@@ -233,6 +238,12 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasOne("Mhyrenz_Interface.Domain.Models.Sale", "Sale")
                         .WithMany("Transactions")
                         .HasForeignKey("SaleId");
+
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -30,10 +30,12 @@ namespace Mhyrenz_Interface.Commands
 
         public override bool Command(object parameter, ActionType intent)
         {
-            _command.Execute(new UpdateProductCommandDTO()
+            var product = _target.Item;
+            product.GetType().GetProperty(_propertyName).SetValue(product, intent == ActionType.Undo ? _oldValue : _newValue);
+            _command.Execute(new UpdateProductCommand.DTO()
             {
-                Id = _target.Item.Id,
-                Updater = entity => entity.GetType().GetProperty(_propertyName).SetValue(entity, intent == ActionType.Undo ? _oldValue : _newValue)
+                Id = product.Id,
+                UpdatedProduct = product
             });
 
             return true;

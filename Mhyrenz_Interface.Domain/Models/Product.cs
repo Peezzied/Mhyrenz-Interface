@@ -54,19 +54,20 @@ namespace Mhyrenz_Interface.Domain.Models
             IsDeleted = false;
         }
 
-        public void AddItem(int amount)
+        public void AddItem(int amount, Guid sessionId)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
-            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id);
+            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SessionId == sessionId);
             if (existing == null)
             {
                 Transactions.Add(new Transaction
                 {
                     ProductId = Id,
                     Amount = amount,
-                    RetailPrice = RetailPrice
+                    RetailPrice = RetailPrice,
+                    SessionId = sessionId
                 });
                 return;
             }
@@ -74,7 +75,7 @@ namespace Mhyrenz_Interface.Domain.Models
             existing.IncreaseAmount(amount);
         }
 
-        public void SubtractItem(int amount)
+        public Transaction SubtractItem(Guid sessionId, int amount)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
@@ -82,16 +83,23 @@ namespace Mhyrenz_Interface.Domain.Models
             var existing = Transactions.FirstOrDefault(t => t.ProductId == Id);
             if (existing == null)
             {
-                Transactions.Add(new Transaction
+                var transaction = new Transaction
                 {
                     ProductId = Id,
                     Amount = -amount,
-                    RetailPrice = RetailPrice
-                });
-                return;
+                    RetailPrice = RetailPrice,
+                    SessionId = sessionId
+                };
+                Transactions.Add(transaction);
+                return transaction;
             }
 
             existing.DecreaseAmount(amount);
+
+            if (existing.Amount == 0)
+                Transactions.Remove(existing);
+            
+            return existing;
         }
 
         public void RecalculatePurchase()

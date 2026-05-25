@@ -18,7 +18,7 @@ namespace Mhyrenz_Interface.Commands
         private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
         private readonly IUndoRedoManager _undoRedoManager;
-        private IEnumerable<Product> _products;
+        private IEnumerable<int> _products;
 
         public bool AllowBack { get; private set; } = true;
 
@@ -65,9 +65,9 @@ namespace Mhyrenz_Interface.Commands
 
 
             //var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
-            _products = products.Select(i => i.Item).ToList();
+            _products = products.Select(i => i.Item.Id);
 
-            await _productService.RemoveMany(_products);
+            await _productService.RemoveMany(_products); // TODO encapsulate this in inventorystore removeproduct
             _inventoryStore.RemoveProduct(products);
 
         }
@@ -79,15 +79,15 @@ namespace Mhyrenz_Interface.Commands
 
         public void Redo(object parameter)
         {
-            var productsMap = new HashSet<int>(_products.Select(p => p.Id));
+            var productsMap = _products.ToHashSet();
             var products = _inventoryStore.Products.Where(p => productsMap.Contains(p.Item.Id));
             ExecuteRaw(products);
         }
 
         public async void Undo(object parameter = null)
         {
-            _products = await _productService.RemoveManyBack(_products);
-            _inventoryStore.AddProduct(_products);
+            var products = await _productService.RemoveManyBack(_products); // TODO encapsulate this in inventorystore removeproduct
+            _inventoryStore.AddProduct(products);
         }
     }
 }

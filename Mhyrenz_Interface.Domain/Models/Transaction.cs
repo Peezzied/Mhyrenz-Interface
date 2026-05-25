@@ -28,6 +28,10 @@ namespace Mhyrenz_Interface.Domain.Models
         public int? SaleId { get; set; }
 
         public Sale Sale { get; set; }
+
+        public Guid SessionId { get; set; }
+        public Session Session { get; set; }
+
         public int Amount { get; set; }
         public decimal RetailPrice { get; set; }
         public Discount Discount { get; set; }
