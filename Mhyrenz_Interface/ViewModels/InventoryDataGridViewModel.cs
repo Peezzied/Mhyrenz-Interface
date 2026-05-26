@@ -138,7 +138,6 @@ namespace Mhyrenz_Interface.ViewModels
         public event Action SwitchSelectedItem;
         public event Action OnLoad;
 
-        private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
 
         public ICommand ToggleColumnCommand { get; }
@@ -162,15 +161,14 @@ namespace Mhyrenz_Interface.ViewModels
             public bool CanSelect { get; set; }
         }
 
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IProductService productService, IInventoryStore inventoryStore, NavigationViewModel viewHost)
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IInventoryStore inventoryStore, CreateCommand<DeleteCommand> deleteCommand, NavigationViewModel viewHost)
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
-            _productService = productService;
 
             Inventory = new ListCollectionView(_inventoryStore.Products);
             ApplyDefaultSort();
-            DeleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
+            DeleteCommand = deleteCommand();
         }
 
         private void ApplyDefaultSort()

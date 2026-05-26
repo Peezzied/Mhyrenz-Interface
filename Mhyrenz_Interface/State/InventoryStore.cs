@@ -25,6 +25,7 @@ namespace Mhyrenz_Interface.State
     {
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly InventorySettingsProvider _inventorySettingsProvider;
+        private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
         private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
         private readonly ICheckoutService _checkoutService;
@@ -51,6 +52,7 @@ namespace Mhyrenz_Interface.State
         public InventoryStore(
             IUndoRedoManager undoRedoManager,
             InventorySettingsProvider inventorySettingsProvider,
+            CreateCommand<DirectPurchaseCommand> directPurchaseCommand,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService,
             ICheckoutService checkoutService,
@@ -60,6 +62,7 @@ namespace Mhyrenz_Interface.State
         {
             _undoRedoManager = undoRedoManager;
             _inventorySettingsProvider = inventorySettingsProvider;
+            _directPurchaseCommand = directPurchaseCommand;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
             _checkoutService = checkoutService;

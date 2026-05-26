@@ -11,8 +11,6 @@ namespace Mhyrenz_Interface.Database.Services
 
         public Sale Sale { get; set; }
 
-        public int? TransactionId { get; set; }
-
-        public bool WasRemoved => Transaction == null && TransactionId.HasValue;
+        public bool WasRemoved { get; set; } = false;
     }
 }

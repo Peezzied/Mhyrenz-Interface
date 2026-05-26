@@ -171,6 +171,7 @@ namespace Mhyrenz_Interface.ViewModels
             ShellViewModel shellViewModel,
             InventorySettingsProvider inventorySettingsProvider,
             AppSettingsManager appSettingsManager,
+            CreateCommand<DeleteCommand> deleteCommand,
             CreateViewModel<InventoryTabItem> inventoryTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory) : base(navigationServiceEx)
@@ -192,7 +193,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             AddProductCommand = new RelayCommand(ShowProductAdd);
             DeleteProductCommand = new RelayCommand(DeleteCommand);
-            _deleteCommand = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
+            _deleteCommand = deleteCommand();
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
             LoadTabItems();

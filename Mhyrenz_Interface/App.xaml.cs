@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Converters;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
@@ -139,17 +140,12 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IProductService, ProductService>()
 
                 .AddTransient<IncomingPanelViewModel>()
-
                 .AddTransient<OverviewChartViewModel>()
+
                 .AddTransient<HomeViewModel>()
                 .AddTransient<InventoryViewModel>()
                 .AddTransient<CheckoutViewModel>()
                 .AddTransient<SettingsViewModel>()
-                .AddTransient<InventoryDataGridViewModel>()
-                .AddTransient<AddProductViewModel>()
-                .AddTransient<SessionBoxContext>()
-                .AddTransient<InventoryTabItem>()
-                .AddTransient<SaleTabItem>()
 
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
@@ -159,10 +155,18 @@ namespace Mhyrenz_Interface
                 .AddViewModelFactory<SaleTabItem>()
                 .AddViewModelFactory<SessionBoxContext>(resolveFromContainer: true)
                 .AddViewModelFactory<AddProductViewModel>(resolveFromContainer: true)
+
                 .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<InventoryViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<CheckoutViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<SettingsViewModel>(resolveFromContainer: true)
+
+                .AddCommandFactory<DeleteCommand>()
+                .AddCommandFactory<AddCommand>()
+                .AddCommandFactory<DirectPurchaseCommand>()
+                .AddCommandFactory<CreateSessionCommand>()
+                .AddCommandFactory<LoadCategoriesCommand>()
+                .AddCommandFactory<SaleBoundPurchaseCommand>()
 
                 .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()

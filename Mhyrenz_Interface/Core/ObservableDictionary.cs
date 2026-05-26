@@ -163,12 +163,12 @@ namespace Mhyrenz_Interface.Core
 
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(
-                        NotifyCollectionChangedAction.Remove,
-                        new KeyValuePair<TKey, TValue>(key, value)
-                    )
-                );
+                        NotifyCollectionChangedAction.Reset));
 
                 OnPropertyChanged(nameof(Count));
+                OnPropertyChanged(nameof(Keys));
+                OnPropertyChanged(nameof(Values));
+
                 return true;
             }
 

@@ -8,17 +8,15 @@ namespace Mhyrenz_Interface.Commands
 {
     public class UndoRedoBoundCommand : IUndoableCommand
     {
-        private readonly IUndoRedoBound _command;
-
+        public IUndoRedoBound Command { get; private set; }
         public Action<NavigationViewModel> SideEffect { get; }
         public Type CurrentViewIn { get; }
 
         private readonly object _commandParameter;
-        private readonly IUndoRedoManager _undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
 
         public UndoRedoBoundCommand(IUndoRedoBound command, Action<NavigationViewModel> sideEffect, Type view, object commandParameter = null)
         {
-            _command = command;
+            Command = command;
             SideEffect = sideEffect;
             CurrentViewIn = view;
             _commandParameter = commandParameter;
@@ -27,19 +25,19 @@ namespace Mhyrenz_Interface.Commands
 
         public void Execute()
         {
-            _command.Execute(_commandParameter);
+            Command.Execute(_commandParameter);
         }
 
         public bool Redo()
         {
-            _command.Redo(_commandParameter);
-            return _command.AllowBack;
+            Command.Redo(_commandParameter);
+            return Command.AllowBack;
         }
 
         public bool Undo()
         {
-            _command.Undo(_commandParameter);
-            return _command.AllowBack;
+            Command.Undo(_commandParameter);
+            return Command.AllowBack;
         }
     }
 }

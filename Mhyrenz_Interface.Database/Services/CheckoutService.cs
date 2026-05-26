@@ -39,7 +39,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<CheckoutResult> AddItem(int saleId, int productId, DiscountInfo discountInfo, int amount = 1)
+        public async Task<CheckoutResult> AddItem(int saleId, int productId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -53,18 +53,21 @@ namespace Mhyrenz_Interface.Database.Services
                     .FirstOrDefaultAsync(p => p.Id == productId)
                     ?? throw new InvalidOperationException("Product not found.");
 
-                var transaction = sale.AddItem(product, discountInfo, sale.SessionId, amount);
+                var transaction = sale.AddItem(product, sale.SessionId, amount);
 
                 await context.SaveChangesAsync();
 
                 await context.Entry(transaction)
-                    .Reference(t => t.Item)
+                    .Reference(t => t.Product)
+                    .Query()
+                    .Include(t => t.Category)
                     .LoadAsync();
 
                 await context.Entry(sale)
                     .Collection(s => s.Transactions)
                     .Query()
-                    .Include(t => t.Item)
+                    .Include(t => t.Product)
+                        .ThenInclude(t => t.Category)
                     .LoadAsync();
 
                 return new CheckoutResult
@@ -104,7 +107,7 @@ namespace Mhyrenz_Interface.Database.Services
                     ?? throw new InvalidOperationException("Sale not found.");
 
                 var transaction = await context.Transactions
-                    .Include(t => t.Item)
+                    .Include(t => t.Product)
                     .Where(t => t.Session.Id == sale.Session.Id)
                     .FirstOrDefaultAsync(t =>
                         t.Id == transactionId &&
@@ -123,24 +126,27 @@ namespace Mhyrenz_Interface.Database.Services
                 await context.Entry(sale)
                     .Collection(s => s.Transactions)
                     .Query()
-                    .Include(t => t.Item)
+                    .Include(t => t.Product)
                     .LoadAsync();
 
                 var checkoutResult = new CheckoutResult
                 {
                     Sale = sale,
-                    Transaction = resultTransaction
+                    Transaction = resultTransaction,
                 };
 
-                if (resultTransaction != null)
+                if (resultTransaction == null)
                 {
-                    await context.Entry(resultTransaction)
-                        .Reference(t => t.Item)
-                        .LoadAsync();
+                    checkoutResult.WasRemoved = true;
+                    checkoutResult.Transaction = transaction;
                 }
                 else
                 {
-                    checkoutResult.TransactionId = resultTransaction.Id;
+                    await context.Entry(resultTransaction)
+                       .Reference(t => t.Product)
+                       .Query()
+                       .Include(p => p.Category)
+                       .LoadAsync();
                 }
 
                 return checkoutResult;
@@ -178,10 +184,10 @@ namespace Mhyrenz_Interface.Database.Services
                 return await context.Sales
                     .AsNoTracking()
                     .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Item)
+                        .ThenInclude(t => t.Product)
                             .ThenInclude(i => i.Category)
                     .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Item)
+                        .ThenInclude(t => t.Product)
                             .ThenInclude(i => i.PharmaDetails)
                     .Where(s => s.Completed_at == null)
                     .ToListAsync();

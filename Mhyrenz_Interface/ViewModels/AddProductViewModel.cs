@@ -25,13 +25,13 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ICategoryStore _categoryStore;
         private readonly IInventoryStore _inventoryStore;
 
-        public AddProductViewModel(ICategoryStore categoryStore, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager)
+        public AddProductViewModel(ICategoryStore categoryStore, IInventoryStore inventoryStore, CreateCommand<AddCommand> addCommand)
         {
             ClearValidations = InvokeClearValidations;
             _categoryStore = categoryStore;
             _inventoryStore = inventoryStore;
 
-            base.SubmitActionCommand = new AddCommand(this, productService, inventoryStore, undoRedoManager);
+            base.SubmitActionCommand = addCommand();
         }
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();

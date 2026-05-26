@@ -23,7 +23,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public Guid SessionId { get; set; }
         public Session Session { get; set; }
 
-        public Transaction AddItem(Product product, DiscountInfo discountInfo, Guid sessionId, int amount = 1)
+        public Transaction AddItem(Product product, Guid sessionId, int amount = 1)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
@@ -41,8 +41,6 @@ namespace Mhyrenz_Interface.Domain.Models
                     ProductId = product.Id,
                     Amount = amount,
                     RetailPrice = product.RetailPrice,
-                    Discount = discountInfo.Discount,
-                    DiscountRate = discountInfo.DiscountRate,
                     SessionId = sessionId
                 };
                 Transactions.Add(transaction);
@@ -63,8 +61,8 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public void RecalculateTotals()
         {
-            SubTotal = Transactions.Sum(t => t.GetSubTotal());
-            Total = Transactions.Sum(t => t.GetLineTotal());
+            SubTotal = Transactions.Sum(t => t.SubTotal);
+            Total = Transactions.Sum(t => t.LineTotal);
         }
 
         public Transaction SubtractItem(Transaction transaction, int amount)

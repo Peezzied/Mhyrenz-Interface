@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.ViewModels;
@@ -33,14 +34,14 @@ namespace Mhyrenz_Interface.State
 
         public ICommand LoadCategoriesCommand { get; }
 
-        public CategoryStore(ICategoryService categoryService, IInventoryStore inventoryStore)
+        public CategoryStore(ICategoryService categoryService, IInventoryStore inventoryStore, CreateCommand<LoadCategoriesCommand> loadCategoriesCommand)
         {
             _inventoryStore = inventoryStore;
             _categoryService = categoryService;
 
             //_inventoryStore.AddProductEvent += OnAddProduct;
 
-            LoadCategoriesCommand = new LoadCategoriesCommand(this, _categoryService, _inventoryStore);
+            LoadCategoriesCommand = loadCategoriesCommand(this);
         }
 
         //private void OnAddProduct(object sender, ProductDataViewModel vm)

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 
 namespace Mhyrenz_Interface.Views
 {
@@ -8,6 +9,14 @@ namespace Mhyrenz_Interface.Views
         public CheckoutView()
         {
             InitializeComponent();
+        }
+
+        private void TabablzControl_Unloaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (TabControl.SelectedItem is IDisposable item)
+            {
+                item.Dispose();
+            }
         }
     }
 }

@@ -26,6 +26,8 @@ namespace Mhyrenz_Interface.Domain.Models
         public int? PharmaDetailsId { get; set; }
         public PharmaDetails PharmaDetails { get; set; }
 
+        public bool IsPharma => PharmaDetails != null;
+
         // Category
         public int CategoryId { get; set; }
         public Category Category { get; set; }

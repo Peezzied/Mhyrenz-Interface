@@ -4,6 +4,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Core
 {
+    public delegate TCommand CreateCommand<out TCommand>(params object[] parameters);
     public abstract class BaseAsyncCommand : ICommandAsync, IRaiseCanExecuteChanged
     {
         private bool _isExecuting;

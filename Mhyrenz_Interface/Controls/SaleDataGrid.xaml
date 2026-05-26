@@ -13,26 +13,40 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
+              ItemsSource="{Binding Sales}"
+              AutoGenerateColumns="False"
+              RowHeight="32"
               dd:DragDrop.IsDropTarget="True"
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
               dd:DragDrop.UseDropTargetHint="True">
-        <DataGridTextColumn Header="Qty" Width="Auto" Binding="{Binding Qty}"/>
-        <DataGridTextColumn Header="Item Name" Width="*" Binding="{Binding Name}"/>
-        <columns:NumberColumn Header="Price" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C"/>
-        <columns:NumberColumn Header="Total" Width="100" ValuePath="TotalPrice" Minimum="0" StringFormat="C"/>
-        <DataGridTemplateColumn Header="Actions">
-            <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                    <hc:UniformSpacingPanel Spacing="5" HorizontalAlignment="Center">
-                        <CheckBox/>
-                        <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
-                            <controls:IconButtonWithTip.IconContent>
-                                <iconPacks:PackIconMaterial Kind="Cross" />
-                            </controls:IconButtonWithTip.IconContent>
-                        </controls:IconButtonWithTip>
-                    </hc:UniformSpacingPanel>
-                </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-        </DataGridTemplateColumn>
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Qty" Width="Auto" FontSize="16" Binding="{Binding Value.Qty, StringFormat={}{0}x}">
+                <DataGridTextColumn.ElementStyle>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextAlignment"
+                    Value="Center" />
+                        <Setter Property="HorizontalAlignment"
+                    Value="Center" />
+                    </Style>
+                </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+            <DataGridTextColumn Header="Item Name" Width="*" FontSize="16" Binding="{Binding Value.Product.Name}"/>
+            <columns:NumberColumn Header="Price" Width="100" ValuePath="Value.RetailPrice" Minimum="0" StringFormat="C"/>
+            <columns:NumberColumn Header="Total" Width="100" ValuePath="Value.TotalPrice" Minimum="0" StringFormat="C"/>
+            <DataGridTemplateColumn Header="Actions">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <hc:UniformSpacingPanel Spacing="8" HorizontalAlignment="Center">
+                            <CheckBox/>
+                            <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
+                                <controls:IconButtonWithTip.IconContent>
+                                    <iconPacks:PackIconMaterial Kind="Close" />
+                                </controls:IconButtonWithTip.IconContent>
+                            </controls:IconButtonWithTip>
+                        </hc:UniformSpacingPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
     </DataGrid>
 </UserControl>

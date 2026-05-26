@@ -15,7 +15,7 @@ namespace Mhyrenz_Interface.Domain.Models
     {
         public int Id { get; set; }
         public int ProductId { get; set; }
-        public Product Item { get; set; }
+        public Product Product { get; set; }
 
         /// <summary>
         /// Empty SaleId is populated  once the session has ended.
@@ -41,20 +41,11 @@ namespace Mhyrenz_Interface.Domain.Models
         /// </summary>
         public decimal DiscountRate { get; set; }
 
-        public decimal GetSubTotal()
-        {
-            return RetailPrice * Amount;
-        }
+        public decimal SubTotal => RetailPrice * Amount;
 
-        public decimal GetDiscountAmount()
-        {
-            return GetSubTotal() * DiscountRate;
-        }
+        public decimal DiscountAmount => SubTotal * DiscountRate;
 
-        public decimal GetLineTotal()
-        {
-            return GetSubTotal() - GetDiscountAmount();
-        }
+        public decimal LineTotal => SubTotal - DiscountAmount;
 
         public void IncreaseAmount(int amount)
         {

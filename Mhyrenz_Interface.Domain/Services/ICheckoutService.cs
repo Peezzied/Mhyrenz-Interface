@@ -42,7 +42,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// A hydrated <see cref="CheckoutResult"/> containing
         /// the updated sale and the affected transaction.
         /// </returns>
-        Task<CheckoutResult> AddItem(int saleId, int productId, DiscountInfo discountInfo, int amount = 1);
+        Task<CheckoutResult> AddItem(int saleId, int productId, int amount = 1);
 
 
         /// <summary>

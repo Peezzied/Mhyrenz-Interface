@@ -10,7 +10,8 @@ namespace Mhyrenz_Interface.State
 {
     public class UndoRedoEventArgs
     {
-        public NavigationViewModel CurrentView { get; set; }
+        public NavigationViewModel CurrentView { get; internal set; }
+        public IUndoableCommand Command { get; internal set; }
     }
 
     public class UndoRedoManager : IUndoRedoManager
@@ -81,6 +82,7 @@ namespace Mhyrenz_Interface.State
             App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoEvent?.Invoke(intent, new UndoRedoEventArgs
             {
                 CurrentView = _navigationService.CurrentViewModel,
+                Command = command
             })));
 
         }

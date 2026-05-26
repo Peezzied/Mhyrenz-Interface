@@ -17,6 +17,7 @@ namespace Mhyrenz_Interface.Commands
 {
     public class AddCommand : BaseAsyncCommand, IUndoRedoBound
     {
+        private readonly CreateCommand<DeleteCommand> _deleteCommand;
         private readonly AddProductViewModel _viewModel;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly IProductService _productService;
@@ -24,15 +25,14 @@ namespace Mhyrenz_Interface.Commands
         private bool CanSubmit = true;
         private IEnumerable<ProductDataViewModel> _products;
 
-        public AddCommand(AddProductViewModel vm, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager)
+        public AddCommand(AddProductViewModel vm, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager, CreateCommand<DeleteCommand> deleteCommand)
         {
             _viewModel = vm;
+            _deleteCommand = deleteCommand;
             _undoRedoManager = undoRedoManager;
             _productService = productService;
             _inventoryStore = inventoryStore;
         }
-
-        public Type CurrentViewIn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public bool AllowBack { get; private set; } = true;
 
@@ -52,8 +52,8 @@ namespace Mhyrenz_Interface.Commands
 
         public override void Execute(object parameter)
         {
-            if (_undoRedoManager.Push(new UndoRedoBoundCommand(this, SideEffect, typeof(InventoryView), parameter)))
-                base.Execute(parameter);
+            _undoRedoManager.Push(new UndoRedoBoundCommand(this, SideEffect, typeof(InventoryView), parameter));
+            base.Execute(parameter);
         }
 
         public override async Task ExecuteAsync(object parameter)
@@ -102,7 +102,7 @@ namespace Mhyrenz_Interface.Commands
 
         public void Undo(object parameter = null)
         {
-            var deleteCmd = new DeleteCommand(_productService, _inventoryStore, _undoRedoManager);
+            var deleteCmd = _deleteCommand();
 
             deleteCmd.ExecuteRaw(_products);
 

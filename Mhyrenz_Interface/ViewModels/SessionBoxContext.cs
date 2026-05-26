@@ -56,11 +56,11 @@ namespace Mhyrenz_Interface.ViewModels
 
         public ICommand CloseButtonCommand { get; set; }
         public BaseAsyncCommand OkButtonCommand { get; set; }
-        public SessionBoxContext(ISessionStore sessionStore, ISessionService sessionService)
+        public SessionBoxContext(ISessionStore sessionStore, CreateCommand<CreateSessionCommand> createSessionCommand)
         {
             _sessionStore = sessionStore;
 
-            OkButtonCommand = new CreateSessionCommand(this, sessionService, sessionStore);
+            OkButtonCommand = createSessionCommand(this);
             CloseButtonCommand = new RelayCommand(CloseActionCommand);
 
             base.SubmitActionCommand = OkButtonCommand;

@@ -10,12 +10,42 @@ namespace Mhyrenz_Interface.ViewModels
 
     public class TransactionDataViewModel : BaseViewModel
     {
-        public int Qty { get; set; }
+        public TransactionDataViewModel(Transaction transaction)
+        {
+            Transaction = transaction;
+        }
 
-        public string Name { get; set; }
+        private Transaction _transaction;
+		public Transaction Transaction
+		{
+			get => _transaction;
+			set
+			{
+				_transaction = value;
+				_qty = _transaction.Amount;
+				OnPropertyChanged(null);
+			}
+		}
 
-        public decimal RetailPrice { get; set; }
+		private int _qty;
+		public int Qty
+		{
+			get => _qty;
+			set
+			{
+				_qty = value;
+				OnPropertyChanged(nameof(Qty));
+			}
+		}
 
-        public decimal TotalPrice => RetailPrice * Qty;
+		public bool IsPharma => Transaction.Product.IsPharma;
+
+        public bool IsPrescribed { get; set; }
+
+		public Product Product => Transaction.Product; 
+
+        public decimal RetailPrice => Transaction.RetailPrice;
+
+        public decimal TotalPrice => Transaction.LineTotal;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mhyrenz_Interface.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Core
@@ -51,6 +52,20 @@ namespace Mhyrenz_Interface.Core
         {
             services.AddSingleton<CreateViewModel<TViewModel>>(s =>
                 _ => ActivatorUtilities.CreateInstance<TViewModel>(s));
+
+            return services;
+        }
+
+        public static IServiceCollection AddCommandFactory<TCommand>(
+            this IServiceCollection services)
+            where TCommand : class
+        {
+            services.AddSingleton<CreateCommand<TCommand>>(s =>
+            {
+                return parameters =>
+                    ActivatorUtilities.CreateInstance<TCommand>(
+                        s, parameters ?? Array.Empty<object>());
+            });
 
             return services;
         }

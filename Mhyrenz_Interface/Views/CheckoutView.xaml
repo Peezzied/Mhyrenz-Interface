@@ -31,5 +31,5 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <dragablz:TabablzControl ItemsSource="{Binding SaleTabItems}" />
+    <dragablz:TabablzControl x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem}" ItemsSource="{Binding SaleTabItems}" />
 </UserControl>
