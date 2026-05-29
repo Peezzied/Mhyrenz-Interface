@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace Mhyrenz_Interface.Controls.Columns
 {
-    public class TextColumn : BaseTemplateColumn
+    public class TextColumn : DataGridTextColumn
     {
         public TextAlignment TextAlignment
         {
@@ -13,25 +13,10 @@ namespace Mhyrenz_Interface.Controls.Columns
             set { SetValue(TextAlignmentProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for TextAlignment.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty TextAlignmentProperty =
             DependencyProperty.Register(nameof(TextAlignment), typeof(TextAlignment), typeof(TextColumn), new PropertyMetadata(TextAlignment.Left));
 
-
-        protected override (FrameworkElement Element, DependencyProperty Property) EditingElement()
-        {
-            var textBox = new TextBox
-            {
-                Margin = new Thickness(2),
-                Style = Application.Current.TryFindResource("MahApps.Styles.TextBox.DataGrid.Editing") as Style ?? default
-            };
-
-            if (ValuePath != null)
-                textBox.SetBinding(TextBox.TextProperty, new Binding(ValuePath) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.Explicit });
-
-            return (textBox, TextBox.TextProperty);
-        }
-        protected override FrameworkElement Element()
+        protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
         {
             var textBlock = new MaxLinesTextBlock
             {
@@ -41,12 +26,8 @@ namespace Mhyrenz_Interface.Controls.Columns
                 Padding = new Thickness(4),
                 Width = Double.NaN
             };
-
-            if (ValuePath != null)
-                textBlock.SetBinding(TextBlock.TextProperty, new Binding(ValuePath));
-
+            textBlock.SetBinding(TextBlock.TextProperty, Binding);
             return textBlock;
         }
-
     }
 }

@@ -2,12 +2,14 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls.Columns"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Controls.Columns"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
+             xmlns:attached="clr-namespace:Mhyrenz_Interface.Controls.Attached"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
              mc:Ignorable="d" 
@@ -16,24 +18,17 @@
               ItemsSource="{Binding Sales}"
               AutoGenerateColumns="False"
               RowHeight="32"
+              attached:DataGridFlashBehavior.Enabled="True"
+              EnableRowVirtualization="True"
               dd:DragDrop.IsDropTarget="True"
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
               dd:DragDrop.UseDropTargetHint="True">
         <DataGrid.Columns>
-            <DataGridTextColumn Header="Qty" Width="Auto" FontSize="16" Binding="{Binding Value.Qty, StringFormat={}{0}x}">
-                <DataGridTextColumn.ElementStyle>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="TextAlignment"
-                    Value="Center" />
-                        <Setter Property="HorizontalAlignment"
-                    Value="Center" />
-                    </Style>
-                </DataGridTextColumn.ElementStyle>
-            </DataGridTextColumn>
-            <DataGridTextColumn Header="Item Name" Width="*" FontSize="16" Binding="{Binding Value.Product.Name}"/>
-            <columns:NumberColumn Header="Price" Width="100" ValuePath="Value.RetailPrice" Minimum="0" StringFormat="C"/>
-            <columns:NumberColumn Header="Total" Width="100" ValuePath="Value.TotalPrice" Minimum="0" StringFormat="C"/>
-            <DataGridTemplateColumn Header="Actions">
+            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" Maximum="{Binding Product.NetQty}" Binding="{Binding Qty, StringFormat={}{0}x, UpdateSourceTrigger=Explicit}"/>
+            <DataGridTextColumn IsReadOnly="True" Header="Item Name" Width="*" FontSize="16" Binding="{Binding Product.Name}"/>
+            <columns:NumberColumn IsReadOnly="True" Header="Price" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
+            <columns:NumberColumn IsReadOnly="True" Header="Total" Width="100" Binding="{Binding TotalPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
+            <DataGridTemplateColumn Header="Actions" IsReadOnly="True">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <hc:UniformSpacingPanel Spacing="8" HorizontalAlignment="Center">

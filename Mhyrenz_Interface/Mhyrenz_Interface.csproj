@@ -480,6 +480,7 @@
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Attached\DataGridRowFlashBehavior.cs" />
     <Compile Include="Controls\Attached\InventoryDataGridColumn.cs" />
     <Compile Include="Controls\Attached\ValidationHelper.cs" />
     <Compile Include="Controls\Behaviors\BarcodeCellBehavior.cs" />
@@ -491,10 +492,11 @@
     <Compile Include="Controls\Behaviors\UndoRedoBehavior.cs" />
     <Compile Include="Controls\CategoryTag.cs" />
     <Compile Include="Controls\CellAdorner.cs" />
+    <Compile Include="Controls\IEditCancelState.cs" />
     <Compile Include="Controls\ColumnList.xaml.cs">
       <DependentUpon>ColumnList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Columns\BaseTemplateColumn.cs" />
+    <Compile Include="Controls\Columns\CellAdornerHelper.cs" />
     <Compile Include="Controls\Columns\NumberColumn.cs" />
     <Compile Include="Controls\Columns\TextColumn.cs" />
     <Compile Include="Controls\IconButtonWithTip.cs" />

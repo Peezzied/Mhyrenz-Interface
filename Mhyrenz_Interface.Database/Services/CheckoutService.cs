@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
@@ -63,18 +64,27 @@ namespace Mhyrenz_Interface.Database.Services
                     .Include(t => t.Category)
                     .LoadAsync();
 
-                await context.Entry(sale)
-                    .Collection(s => s.Transactions)
-                    .Query()
-                    .Include(t => t.Product)
-                        .ThenInclude(t => t.Category)
-                    .LoadAsync();
+                await LoadSale(context, sale);
+
+                await ApplyProductPurchase(context, new List<Sale> { sale });
 
                 return new CheckoutResult
                 {
                     Sale = sale,
                     Transaction = transaction
                 };
+            }
+        }
+
+
+        public async Task<int> InactiveTransactionsCount()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var session = await _sessionService.GetSession();
+                return await context.Transactions
+                    .Where(t => t.SessionId != session.Id)
+                    .CountAsync();
             }
         }
 
@@ -123,11 +133,9 @@ namespace Mhyrenz_Interface.Database.Services
 
                 await context.SaveChangesAsync();
 
-                await context.Entry(sale)
-                    .Collection(s => s.Transactions)
-                    .Query()
-                    .Include(t => t.Product)
-                    .LoadAsync();
+                await LoadSale(context, sale);
+
+                await ApplyProductPurchase(context, new List<Sale> { sale });
 
                 var checkoutResult = new CheckoutResult
                 {
@@ -181,18 +189,23 @@ namespace Mhyrenz_Interface.Database.Services
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                return await context.Sales
-                    .AsNoTracking()
-                    .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Product)
-                            .ThenInclude(i => i.Category)
-                    .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Product)
-                            .ThenInclude(i => i.PharmaDetails)
-                    .Where(s => s.Completed_at == null)
-                    .ToListAsync();
+                var sales = await context.Sales
+                .AsNoTracking()
+                .Include(s => s.Transactions)
+                    .ThenInclude(t => t.Product)
+                        .ThenInclude(p => p.Category)
+                .Include(s => s.Transactions)
+                    .ThenInclude(t => t.Product)
+                        .ThenInclude(p => p.PharmaDetails)
+                .Where(s => s.Completed_at == null)
+                .ToListAsync();
+
+                await ApplyProductPurchase(context, sales);
+
+                return sales;
             }
         }
+
 
         public async Task DiscardSale(int saleId)
         {
@@ -245,5 +258,42 @@ namespace Mhyrenz_Interface.Database.Services
                 return sale;
             }
         }
+
+        private static async Task LoadSale(InventoryDbContext context, Sale sale)
+        {
+            await context.Entry(sale)
+                .Collection(s => s.Transactions)
+                .Query()
+                .Include(t => t.Product)
+                .LoadAsync();
+        }
+        private static async Task ApplyProductPurchase(InventoryDbContext context, List<Sale> sales)
+        {
+            var productIds = sales
+                .SelectMany(s => s.Transactions)
+                .Select(t => t.ProductId)
+                .Distinct()
+                .ToList();
+
+            var purchasesByProductId = await context.Transactions
+                .AsNoTracking()
+                .Where(t => productIds.Contains(t.ProductId))
+                .GroupBy(t => t.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    Purchase = g.Sum(t => t.Amount)
+                })
+                .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
+
+            foreach (var transaction in sales.SelectMany(s => s.Transactions))
+            {
+                if (purchasesByProductId.TryGetValue(transaction.ProductId, out var purchase))
+                {
+                    transaction.Product.Purchase = purchase;
+                }
+            }
+        }
+
     }
 }

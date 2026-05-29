@@ -16,7 +16,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
     public class UndoRedoBehavior : Behavior<Control>
     {
         private BindingExpression _bindingEx;
-        private DataGrid _dataGrid;
 
         public DependencyProperty TargetProperty
         {
@@ -28,6 +27,32 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             DependencyProperty.Register(
                 nameof(TargetProperty),
                 typeof(DependencyProperty),
+                typeof(UndoRedoBehavior),
+                new PropertyMetadata(null));
+
+        public object ExpectedRowViewModel
+        {
+            get => GetValue(ExpectedRowViewModelProperty);
+            set => SetValue(ExpectedRowViewModelProperty, value);
+        }
+
+        public static readonly DependencyProperty ExpectedRowViewModelProperty =
+            DependencyProperty.Register(
+                nameof(ExpectedRowViewModel),
+                typeof(object),
+                typeof(UndoRedoBehavior),
+                new PropertyMetadata(null));
+
+        public object ExpectedGridViewModel
+        {
+            get => GetValue(ExpectedGridViewModelProperty);
+            set => SetValue(ExpectedGridViewModelProperty, value);
+        }
+
+        public static readonly DependencyProperty ExpectedGridViewModelProperty =
+            DependencyProperty.Register(
+                nameof(ExpectedGridViewModel),
+                typeof(object),
                 typeof(UndoRedoBehavior),
                 new PropertyMetadata(null));
 
@@ -44,7 +69,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                _dataGrid = TreeHelper.TryFindParent<DataGrid>(AssociatedObject);
                 _bindingEx = AssociatedObject.GetBindingExpression(TargetProperty);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -65,13 +89,17 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         private void TryUpdateSource(DependencyObject target, DependencyProperty dp)
         {
             var expression = _bindingEx;
+            if (expression == null)
+                return;
+
             var control = target.CastTo<Control>();
-            var viewModel = control.DataContext.CastTo<ProductDataViewModel>();
-            var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>();
+            var viewModel = ExpectedRowViewModel ?? control.DataContext;
+            var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>(); // FIXME: anti-pattern
             var controlPropertyValue = control.GetValue(dp);
 
             var bindingPath = expression.ParentBinding.Path.Path;
             var match = Regex.Match(bindingPath, @"^(?<prop>\w+)\[(?<key>[^\]]+)\](?:\..*)?$");
+
             object vmPropertyValue;
 
             if (match.Success)
@@ -79,27 +107,38 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 var prop = match.Groups["prop"].Value;
                 var key = match.Groups["key"].Value;
 
-                var dictObj = expression.DataItem.GetType().GetProperty(prop).GetValue(viewModel);
+                var dictObj = viewModel.GetType()
+                    .GetProperty(prop)
+                    .GetValue(viewModel);
+
                 var dictType = dictObj.GetType();
 
                 var containsMethod = dictType.GetMethod("ContainsKey");
                 bool exists = (bool)containsMethod.Invoke(dictObj, new object[] { key });
+
+                if (!exists)
+                    return;
 
                 var indexer = dictType.GetProperty("Item");
                 vmPropertyValue = indexer.GetValue(dictObj, new object[] { key });
             }
             else
             {
-                vmPropertyValue = expression.DataItem.GetType().GetProperty(expression.ResolvedSourcePropertyName).GetValue(viewModel);
+                vmPropertyValue = viewModel.GetType()
+                    .GetProperty(expression.ResolvedSourcePropertyName)
+                    .GetValue(viewModel);
             }
 
-
-            if (_dataGrid.DataContext.CastTo<InventoryDataGridViewModel>().IsEditCancelled)
-                return;
-
-            if (!undoRedoManager.CanRedo || controlPropertyValue.ToString() == vmPropertyValue.ToString())
+            if (ExpectedGridViewModel is IEditCancelState editState &&
+                editState.IsEditCancelled)
             {
-                expression?.UpdateSource();
+                return;
+            }
+
+            if (!undoRedoManager.CanRedo ||
+                Equals(controlPropertyValue?.ToString(), vmPropertyValue?.ToString()))
+            {
+                expression.UpdateSource();
                 return;
             }
 
@@ -107,23 +146,22 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
             try
             {
-                var targetType = Nullable.GetUnderlyingType(dp.PropertyType) ?? dp.PropertyType;
+                var targetType =
+                    Nullable.GetUnderlyingType(dp.PropertyType) ??
+                    dp.PropertyType;
 
-                if (vmPropertyValue == null || targetType.IsInstanceOfType(vmPropertyValue))
-                {
-                    convertedValue = vmPropertyValue;
-                }
-                else
-                {
-                    convertedValue = Convert.ChangeType(vmPropertyValue, targetType);
-                }
+                convertedValue =
+                    vmPropertyValue == null ||
+                    targetType.IsInstanceOfType(vmPropertyValue)
+                        ? vmPropertyValue
+                        : Convert.ChangeType(vmPropertyValue, targetType);
             }
             catch
             {
                 convertedValue = vmPropertyValue;
             }
 
-            if (controlPropertyValue == vmPropertyValue)
+            if (Equals(controlPropertyValue, vmPropertyValue))
             {
                 control.SetValue(dp, convertedValue);
                 return;
@@ -135,7 +173,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             });
 
             if (prompt)
-                expression?.UpdateSource();
+                expression.UpdateSource();
         }
     }
 }

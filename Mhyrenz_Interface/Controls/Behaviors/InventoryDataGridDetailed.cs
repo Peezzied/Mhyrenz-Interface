@@ -107,7 +107,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                         var column = new TextColumn
                         {
                             Header = item.Value.Name,
-                            ValuePath = $"{nameof(ProductDataViewModel.Extras)}[{item.Value.Field}].Value",
+                            Binding = new Binding($"{nameof(ProductDataViewModel.Extras)}[{item.Value.Field}].Value")
                         };
                         AssociatedObject.Columns.Add(column);
                         InventoryDataGridColumn.SetColumnPath(column, item.Value.Field);

@@ -16,7 +16,7 @@ namespace Mhyrenz_Interface.Commands
         private readonly ICheckoutService _checkoutService;
         private DateTime _dateTime;
 
-        public CheckoutResult CheckoutResult { get; private set; }
+        public (CheckoutResult Checkout, DTO.Type Method) Result { get; private set; }
 
         private int _transactionId;
 
@@ -56,12 +56,13 @@ namespace Mhyrenz_Interface.Commands
         {
             switch (DTO.Method)
             {
+                case DTO.Type.AddNew:
                 case DTO.Type.Add:
-                    CheckoutResult = await _checkoutService.AddItem(DTO.SaleId, DTO.ProductId, DTO.Amount);
-                    _transactionId = CheckoutResult.Transaction.Id;
+                    Result = (await _checkoutService.AddItem(DTO.SaleId, DTO.ProductId, DTO.Amount), DTO.Method);
+                    _transactionId = Result.Checkout.Transaction.Id;
                     break;
                 case DTO.Type.Subtract:
-                    CheckoutResult = await _checkoutService.Subtract(DTO.SaleId, _transactionId, DTO.Amount);
+                    Result = (await _checkoutService.Subtract(DTO.SaleId, _transactionId, DTO.Amount), DTO.Method);
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported method: {DTO.Method}");

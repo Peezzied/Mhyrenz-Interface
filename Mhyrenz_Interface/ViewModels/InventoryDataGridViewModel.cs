@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class InventoryDataGridViewModel : BaseViewModel
+    public class InventoryDataGridViewModel : BaseViewModel, IEditCancelState
     {
         public ICollectionView Inventory { get; }
 

@@ -7,122 +7,66 @@ using Style = System.Windows.Style;
 
 namespace Mhyrenz_Interface.Controls.Columns
 {
-    public class NumberColumn : BaseTemplateColumn
+    public class NumberColumn : DataGridNumericUpDownColumn
     {
-        public string DisplayPath
-        {
-            get { return (string)GetValue(DisplayPathProperty); }
-            set { SetValue(DisplayPathProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for DisplayPath.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty DisplayPathProperty =
-            DependencyProperty.Register(nameof(DisplayPath), typeof(string), typeof(NumberColumn), new PropertyMetadata(null));
-
-
-        public string MinimumPath
-        {
-            get { return (string)GetValue(MinimumPathProperty); }
-            set { SetValue(MinimumPathProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for MinimumPath.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty MinimumPathProperty =
-            DependencyProperty.Register(nameof(MinimumPath), typeof(string), typeof(NumberColumn), new PropertyMetadata(null));
-
-
         public Style NumberControlStyle
         {
             get { return (Style)GetValue(NumberControlStyleProperty); }
             set { SetValue(NumberControlStyleProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for NumberControlStyle.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty NumberControlStyleProperty =
             DependencyProperty.Register(nameof(NumberControlStyle), typeof(Style), typeof(NumberColumn), new PropertyMetadata(null));
 
 
-        public double Minimum
+        private BindingBase _binding;
+        public virtual BindingBase DisplayBinding
         {
-            get { return (double)GetValue(MinimumProperty); }
-            set { SetValue(MinimumProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for Minimum.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty MinimumProperty =
-            DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumberColumn), new FrameworkPropertyMetadata(0.00));
-
-
-        public ButtonsAlignment ButtonsAlignment
-        {
-            get { return (ButtonsAlignment)GetValue(ButtonsAlignmentProperty); }
-            set { SetValue(ButtonsAlignmentProperty, value); }
-        }
-
-        public static readonly DependencyProperty ButtonsAlignmentProperty =
-            DependencyProperty.Register(
-                nameof(ButtonsAlignment),
-                typeof(ButtonsAlignment),
-                typeof(NumberColumn),
-                new FrameworkPropertyMetadata(ButtonsAlignment.Right, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure));
-
-
-        public string StringFormat
-        {
-            get { return (string)GetValue(StringFormatProperty); }
-            set { SetValue(StringFormatProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for StringFormat.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty StringFormatProperty =
-            DependencyProperty.Register(nameof(StringFormat), typeof(string), typeof(NumberColumn), new PropertyMetadata(string.Empty));
-
-        protected override (FrameworkElement Element, DependencyProperty Property) EditingElement()
-        {
-            var numeric = new NumericUpDown
+            get
             {
-                NumericInputMode = NumericInput.Numbers,
-                TextAlignment = TextAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                StringFormat = StringFormat ?? default,
-                Style = NumberControlStyle ?? default,
-                Culture = new CultureInfo("en-PH")
-            };
-
-            if (ValuePath != null)
-                numeric.SetBinding(NumericUpDown.ValueProperty, new Binding(ValuePath) { UpdateSourceTrigger = UpdateSourceTrigger.Explicit });
-
-            if (MinimumPath != null)
-                numeric.SetBinding(NumericUpDown.MinimumProperty, new Binding(MinimumPath));
-            else
-                numeric.SetValue(NumericUpDown.MinimumProperty, Minimum);
-
-            numeric.SetBinding(NumericUpDown.ButtonsAlignmentProperty, new Binding(nameof(ButtonsAlignment)) { Source = this });
-            numeric.SetBinding(NumericUpDown.StringFormatProperty, new Binding(nameof(StringFormat)) { Source = this });
-
-            return (numeric, NumericUpDown.ValueProperty);
+                return _binding;
+            }
+            set
+            {
+                if (_binding != value)
+                {
+                    BindingBase binding = _binding;
+                    _binding = value;
+                    CoerceValue(DataGridColumn.IsReadOnlyProperty);
+                    CoerceValue(DataGridColumn.SortMemberPathProperty);
+                    OnBindingChanged(binding, _binding);
+                }
+            }
         }
 
-        protected override FrameworkElement Element()
+        public NumberColumn()
+        {
+            TextAlignment = TextAlignment.Center;
+            Culture = new CultureInfo("en-Ph");
+        }
+
+
+        protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
+        {
+            var numericUpDown = base.GenerateEditingElement(cell, dataItem) as NumericUpDown;
+            numericUpDown.Style = NumberControlStyle ?? default;
+            return CellAdornerHelper.ApplyAdorner(numericUpDown, NumericUpDown.ValueProperty, 
+                TreeHelper.TryFindParent<DataGrid>(cell).DataContext);
+        }
+
+        protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
         {
             var textBlock = new TextBlock
             {
                 TextAlignment = TextAlignment.Center,
+                FontSize = FontSize,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Style = Application.Current.TryFindResource("MahApps.Styles.TextBlock.DataGrid") as Style ?? default
             };
 
-            if (ValuePath != null || DisplayPath != null)
-            {
-                textBlock.SetBinding(TextBlock.TextProperty, new Binding(ValuePath ?? DisplayPath)
-                {
-                    StringFormat = StringFormat ?? default,
-                    ConverterCulture = new CultureInfo("en-PH"), // REFACTOR THIS TO BE SOURCED FROM GLOBAL CONFIG
-                });
-            }
+            textBlock.SetBinding(TextBlock.TextProperty, Binding ?? DisplayBinding);
 
             return textBlock;
         }
-
     }
 }

@@ -6,6 +6,7 @@ using ClosedXML.Report.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
+using MoreLinq;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
@@ -82,6 +83,11 @@ namespace Mhyrenz_Interface.Domain.Models
             }
             RecalculateTotals();
             return transaction;
+        }
+
+        public string FromStartCount(int startSaleCount)
+        {
+            return (Id - startSaleCount).ToString("D3");
         }
     }
 }

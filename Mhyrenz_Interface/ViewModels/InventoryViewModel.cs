@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.ViewModels
         /// <summary>
         /// Selected tab.
         /// </summary>
-        public object SelectedItem
+        public object SelectedItem // TODO set object to InventoryTabItem
         {
             get => _selectedItem;
             set

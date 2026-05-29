@@ -14,6 +14,7 @@
              xmlns:attached="clr-namespace:Mhyrenz_Interface.Controls.Attached"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
+             x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -127,7 +128,9 @@
 
                         <i:Interaction.Behaviors>
                             <behaviors:UndoRedoBehavior
-                    TargetProperty="{x:Static TextBox.TextProperty}" />
+                                TargetProperty="{x:Static TextBox.TextProperty}"
+                                ExpectedGridViewModel="{Binding ElementName=Root}"
+                                ExpectedRowViewModel="{Binding}"/>
                         </i:Interaction.Behaviors>
 
                     </TextBox>
@@ -161,7 +164,9 @@
 
                         <i:Interaction.Behaviors>
                             <behaviors:UndoRedoBehavior
-                    TargetProperty="{x:Static DatePicker.SelectedDateProperty}" />
+                                TargetProperty="{x:Static DatePicker.SelectedDateProperty}"
+                                ExpectedGridViewModel="{Binding ElementName=Root}"
+                                ExpectedRowViewModel="{Binding}"/>
                         </i:Interaction.Behaviors>
 
                     </DatePicker>
@@ -316,8 +321,8 @@
                     </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTemplateColumn IsReadOnly="True" Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" />
-                        <columns:NumberColumn IsReadOnly="True" Header="Retail" Width="100" ValuePath="RetailPrice" StringFormat="C"/>
-                        <columns:NumberColumn IsReadOnly="True" Header="Qty" Width="85" ValuePath="Qty"/>
+                        <columns:NumberColumn IsReadOnly="True" Header="Retail" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit}" StringFormat="C"/>
+                        <columns:NumberColumn IsReadOnly="True" Header="Qty" Width="85" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}"/>
                         <DataGridTemplateColumn IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
                     <DataGrid.RowHeaderTemplate>
@@ -397,12 +402,12 @@
                         <DataGridCheckBoxColumn Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
                         <DataGridTextColumn Header="Id" Width="Auto" IsReadOnly="True" Binding="{Binding Item.Id}" ElementStyle="{StaticResource IdColumnElementStyle}" attached:InventoryDataGridColumn.IgnoreReorder="True" />
                         <DataGridTemplateColumn Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" CellEditingTemplate="{StaticResource NameColumnCellEditingTemplate}" attached:InventoryDataGridColumn.IgnoreReorder="True" attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" />
-                        <columns:TextColumn ValuePath="Batch" Header="Batch" Width="125" />
+                        <columns:TextColumn Binding="{Binding Batch, UpdateSourceTrigger=Explicit}" Header="Batch" Width="125" />
                         <DataGridTemplateColumn Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
-                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" ValuePath="RetailPrice" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayPath="Purchase" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
+                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
                         <DataGridTextColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
-                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" ValuePath="Qty" MinimumPath="QtyMin"/>
+                        <columns:NumberColumn attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"/>
                         <DataGridTemplateColumn Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}"  />
                         <DataGridTemplateColumn IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
@@ -414,10 +419,10 @@
         <ContentControl.Style>
             <Style TargetType="ContentControl">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Layout, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Static controls:InventoryDataGridLayout.Detailed}">
+                    <DataTrigger Binding="{Binding Layout, ElementName=Root}" Value="{x:Static controls:InventoryDataGridLayout.Detailed}">
                         <Setter Property="ContentTemplate" Value="{StaticResource DataGridDetailedLayout}"/>
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding Layout, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Static controls:InventoryDataGridLayout.Compacted}">
+                    <DataTrigger Binding="{Binding Layout, ElementName=Root}" Value="{x:Static controls:InventoryDataGridLayout.Compacted}">
                         <Setter Property="ContentTemplate" Value="{StaticResource DataGridCompactLayout}"/>
                     </DataTrigger>
                 </Style.Triggers>
