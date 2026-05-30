@@ -69,7 +69,6 @@ namespace Mhyrenz_Interface.ViewModels
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
 
-                _inventoryStore.ProductsCollectionView.Refresh();
                 currentCount = 0;
             }
         }
@@ -89,7 +88,7 @@ namespace Mhyrenz_Interface.ViewModels
             _categoryStore = categoryStore;
             _overviewChartViewModel = overviewChartViewModel;
 
-            InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
+            //InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
             IncomingPanelViewModel = incomingPanelViewModel;
 
             _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
@@ -125,12 +124,11 @@ namespace Mhyrenz_Interface.ViewModels
 
         public override void Dispose()
         {
-            InventoryDataGridContext.Dispose();
+            //InventoryDataGridContext.Dispose();
 
             _overviewChartViewModel.Dispose();
             _infoPanelViewModel.Dispose();
             base.TransitionCompleted -= OnTransitionComplete;
-            _inventoryStore.ProductsCollectionView.Filter -= FilterProducts;
         }
 
         private void OnTransitionComplete()

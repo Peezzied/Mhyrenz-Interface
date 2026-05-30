@@ -26,20 +26,21 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
         {
             return Task.Run(() =>
             {
-                var parallelOptions = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
-                };
+                Directory.CreateDirectory(_cacheDir);
 
-                Parallel.ForEach(codes, parallelOptions, code =>
+                foreach (var code in codes
+                    .Where(c => !string.IsNullOrWhiteSpace(c))
+                    .Distinct())
                 {
-                    if (string.IsNullOrWhiteSpace(code))
-                        return;
-
-                    var image = GetOrCreate(code);
-                    if (image != null)
-                        _memoryCache[code] = image;
-                });
+                    try
+                    {
+                        GetOrCreate(code);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to preload barcode '{code}': {ex}");
+                    }
+                }
 
                 FlushUncached();
             });
@@ -85,6 +86,9 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
 
         public BitmapImage GetOrCreate(string code)
         {
+            if (string.IsNullOrWhiteSpace(code))
+                return null;
+
             if (_memoryCache.TryGetValue(code, out var cached))
                 return cached;
 
@@ -95,28 +99,30 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
                 if (_memoryCache.TryGetValue(code, out cached))
                     return cached;
 
-                string cachePath = GetCacheFilePath(code);
-                BitmapImage bitmap;
+                try
+                {
+                    string cachePath = GetCacheFilePath(code);
 
-                if (File.Exists(cachePath))
-                {
-                    bitmap = LoadBitmapImageFromCache(cachePath);
-                }
-                else
-                {
-                    try
+                    BitmapImage bitmap;
+
+                    if (File.Exists(cachePath))
+                    {
+                        bitmap = LoadBitmapImageFromCache(cachePath);
+                    }
+                    else
                     {
                         bitmap = GenerateBarcodeImage(code);
                         CacheBitmapImage(bitmap, cachePath);
                     }
-                    catch
-                    {
-                        return null;
-                    }
-                }
 
-                _memoryCache[code] = bitmap;
-                return bitmap;
+                    _memoryCache[code] = bitmap;
+                    return bitmap;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to create barcode '{code}': {ex}");
+                    return null;
+                }
             }
         }
 
@@ -145,7 +151,11 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
         {
             var image = new BitmapImage();
 
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var stream = new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite))
             {
                 image.BeginInit();
                 image.CacheOption = BitmapCacheOption.OnLoad;

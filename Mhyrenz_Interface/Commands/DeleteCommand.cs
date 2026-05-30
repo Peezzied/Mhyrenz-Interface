@@ -18,7 +18,8 @@ namespace Mhyrenz_Interface.Commands
         private readonly IProductService _productService;
         private readonly IInventoryStore _inventoryStore;
         private readonly IUndoRedoManager _undoRedoManager;
-        private IEnumerable<int> _products;
+        private ICollection<int> _products;
+        private ProductVMRowInfo _rowInfo;
 
         public bool AllowBack { get; private set; } = true;
 
@@ -33,7 +34,7 @@ namespace Mhyrenz_Interface.Commands
         {
             var view = vm as InventoryViewModel;
 
-            view.RowIntoView(_inventoryStore.LastProductChanged.Category, _inventoryStore.LastProductChanged.ChangedProductInfo.Value.Products);
+            view.RowIntoView(_rowInfo.Category, _rowInfo.Products);
         }
 
         public override void Execute(object parameter)
@@ -54,7 +55,7 @@ namespace Mhyrenz_Interface.Commands
         {
             AllowBack = true;
 
-            var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
+            var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>().ToList();
             var prompt = MessageBox.Show($"Do you really want to remove {products.Count()} items?", "Remove Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (prompt == MessageBoxResult.No)
@@ -65,10 +66,17 @@ namespace Mhyrenz_Interface.Commands
 
 
             //var products = parameter.CastTo<IEnumerable<ProductDataViewModel>>();
-            _products = products.Select(i => i.Item.Id);
+            _products = products.Select(i => i.Item.Id).ToList();
+
+            _rowInfo = new ProductVMRowInfo
+            {
+                Category = products.First().CategoryId,
+                Products = _products.ToArray()
+            };
 
             await _productService.RemoveMany(_products); // TODO encapsulate this in inventorystore removeproduct
             _inventoryStore.RemoveProduct(products);
+
 
         }
 
@@ -86,8 +94,10 @@ namespace Mhyrenz_Interface.Commands
 
         public async void Undo(object parameter = null)
         {
-            var products = await _productService.RemoveManyBack(_products); // TODO encapsulate this in inventorystore removeproduct
-            _inventoryStore.AddProduct(products);
+            // TODO use the AddCommand once it supports multiple products
+            var products = await _productService.RemoveManyBack(_products);
+
+            _inventoryStore.AddProduct(products.ToList());
         }
     }
 }

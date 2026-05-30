@@ -12,7 +12,7 @@
              d:DesignHeight="50" d:DesignWidth="800">
     <hc:UniformSpacingPanel Spacing="10" Orientation="Horizontal" ItemVerticalAlignment="Center">
         <controls:CategoryTag CategoryName="{Binding Name}" CategoryColor="{Binding Color}" d:CategoryColor="Green" d:CategoryName="Generic"/>
-        <ToggleButton x:Name="ColumnListOpener" HorizontalAlignment="Left" IsChecked="True" Style="{StaticResource ToggleButtonIcon.Small}" hc:IconSwitchElement.Geometry="{StaticResource LeftGeometry}" hc:IconSwitchElement.GeometrySelected="{StaticResource RightGeometry}"/>
+        <ToggleButton x:Name="ColumnListOpener" HorizontalAlignment="Left" Style="{StaticResource ToggleButtonIcon.Small}" hc:IconSwitchElement.Geometry="{StaticResource LeftGeometry}" hc:IconSwitchElement.GeometrySelected="{StaticResource RightGeometry}"/>
         <Popup VerticalAlignment="Stretch" PlacementTarget="{Binding ElementName=ColumnListOpener}" AllowsTransparency="True" IsOpen="{Binding IsChecked, ElementName=ColumnListOpener}">
             <Border VerticalAlignment="Stretch" Padding="0,7" Effect="{StaticResource EffectShadow3}" Margin="24">
                 <controls:ColumnList/>

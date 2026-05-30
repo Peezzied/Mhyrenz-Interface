@@ -8,27 +8,15 @@ using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.ViewModels;
+using ObservableCollections;
 using static Mhyrenz_Interface.State.InventoryStore;
 
 namespace Mhyrenz_Interface.State
 {
-    public readonly struct ChangedProductInfo
-    {
-        public ChangedProductInfo(int index, int[] products)
-        {
-            Index = index;
-            Products = products;
-        }
-        public int Index { get; }
-        public int[] Products { get; }
-    }
-
     public interface IInventoryStore
     {
-        ObservableCollection<ProductDataViewModel> Products { get; }
-        ICollectionView ProductsCollectionView { get; }
+        SourceCollection<int, ProductDataViewModel> Products { get; }
         ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; }
-        (int Category, ChangedProductInfo? ChangedProductInfo) LastProductChanged { get; }
 
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
@@ -40,11 +28,6 @@ namespace Mhyrenz_Interface.State
         void LoadProducts(IEnumerable<Product> products);
         Task InitializeAsync();
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);
-        IEnumerable<ProductDataViewModel> AddProduct(IEnumerable<Product> products);
-        ProductDataViewModel GetProductByIndex(int index);
-        ProductDataViewModel GetProductByBarcode(string obj);
-        void PurchaseProduct(ProductDataViewModel viewModel, TargetChangedEventArgs args, object oldValue, object newValue, DirectPurchaseCommand purchaseProductCommand, PropertyChangeTracker<ProductDataViewModel> tracker = null);
-        PropertyChangeTracker<ProductDataViewModel> GetTrackerByProduct(ProductDataViewModel product);
-        ProductDataViewModel GetProductById(int id);
+        IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products);
     }
 }

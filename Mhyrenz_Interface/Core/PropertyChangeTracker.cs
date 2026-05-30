@@ -6,6 +6,7 @@ using System.Windows;
 
 namespace Mhyrenz_Interface.Core
 {
+    [Obsolete]
     public class TargetChangedEventArgs : EventArgs
     {
         public object Target { get; }
@@ -18,6 +19,7 @@ namespace Mhyrenz_Interface.Core
         }
     }
 
+    [Obsolete]
     public interface IBasePropertyChangeTrackerArgs<out VM> where VM : BaseViewModel
     {
         VM Owner { get; }
@@ -25,6 +27,7 @@ namespace Mhyrenz_Interface.Core
         string Navigator { get; }
     }
 
+    [Obsolete]
     public abstract class BasePropertyChangeTrackerArgs<VM> : IBasePropertyChangeTrackerArgs<VM> where VM : BaseViewModel
     {
         public VM Owner { get; }
@@ -39,6 +42,7 @@ namespace Mhyrenz_Interface.Core
         }
     }
 
+    [Obsolete]
     public class PropertyChangeTracker
     {
         public static bool Suppress { get; set; }
@@ -49,6 +53,7 @@ namespace Mhyrenz_Interface.Core
         }
     }
 
+    [Obsolete]
     public class PropertyChangeTracker<T> where T : BaseViewModel
     {
 

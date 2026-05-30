@@ -49,9 +49,11 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
 
         public string Bindtest { get; set; } = "Hello, World! from OverviewChartViewModel!";
-        public ObservableCollection<PieSeries<ObservableValue>> SalesByCategory { get; private set; } = new ObservableCollection<PieSeries<ObservableValue>>();
+        public ObservableCollection<PieSeries<ObservableValue>> SalesByCategory { get; private set; }
+            = new ObservableCollection<PieSeries<ObservableValue>>();
 
-        public ObservableCollection<CategoryChartViewModel> CategoryChartData = new ObservableCollection<CategoryChartViewModel>();
+        public ObservableCollection<CategoryChartViewModel> CategoryChartData
+            = new ObservableCollection<CategoryChartViewModel>();
 
         public OverviewChartViewModel(ICategoryStore categoryStore, IInventoryStore inventoryStore)
         {
@@ -63,27 +65,31 @@ namespace Mhyrenz_Interface.ViewModels
 
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                LoadChart(GetCategoriesView());
+                LoadChart();
             }));
         }
 
-        private Dictionary<Category, ICollectionView> GetCategoriesView()
+        // No longer needs to create ICollectionView per category —
+        // just filter the dictionary values directly
+        private IEnumerable<ProductDataViewModel> GetProductsByCategory(Category category)
         {
-            return _categoryStore.CategoriesFilter.ToDictionary(
-                x => x.Key,
-                x =>
-                {
-                    ICollectionView view = new ListCollectionView(_inventoryStore.Products)
-                        {
-                            Filter = x.Value
-                        };
-                    return view;
-                });
+            return _inventoryStore.Products
+                .Where(p => p.CategoryId == category.Id);
+        }
+
+        private decimal GetSalesForCategory(Category category)
+        {
+            return GetProductsByCategory(category)
+                .Where(p => p.Purchase > 0)
+                .Sum(x => x.NetRetailPrice);
         }
 
         private void Item_PointCreated(ChartPoint<ObservableValue, LiveChartsCore.SkiaSharpView.Drawing.Geometries.DoughnutGeometry, LiveChartsCore.SkiaSharpView.Drawing.Geometries.LabelGeometry> obj)
         {
-            _categoryStore.Colors[obj.Context.Series.Tag.CastTo<int>()] = new BrushConverter().ConvertFromString((obj.Context.Series as PieSeries<ObservableValue>).Fill.CastTo<SolidColorPaint>().Color.ToString()).CastTo<SolidColorBrush>();
+            _categoryStore.Colors[obj.Context.Series.Tag.CastTo<int>()] = new BrushConverter()
+                .ConvertFromString((obj.Context.Series as PieSeries<ObservableValue>).Fill
+                    .CastTo<SolidColorPaint>().Color.ToString())
+                .CastTo<SolidColorBrush>();
         }
 
         private void InventoryStore_Loaded()
@@ -96,6 +102,7 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
             _inventoryStore.Loaded -= InventoryStore_Loaded;
         }
+
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
         {
             RefreshChart();
@@ -105,24 +112,19 @@ namespace Mhyrenz_Interface.ViewModels
         {
             foreach (var item in CategoryChartData)
             {
-                item.Sales.Value = (double)GetCategoriesView()[item.Category].Cast<ProductDataViewModel>()
-                    .Where(p => p.Purchase > 0)
-                    .Sum(x => x.NetRetailPrice);
+                item.Sales.Value = (double)GetSalesForCategory(item.Category);
             }
         }
 
-        private void LoadChart(Dictionary<Category, ICollectionView> categories)
+        private void LoadChart()
         {
             CategoryChartData.Clear();
-            //SalesByCategory.Clear();
 
-            var chartData = categories.Select(c => new CategoryChartViewModel()
+            var chartData = _categoryStore.Categories.Select(category => new CategoryChartViewModel
             {
-                Category = c.Key,
-                Name = c.Key.Name,
-                Sales = new ObservableValue((double)c.Value.Cast<ProductDataViewModel>()
-                    .Where(p => p.Purchase > 0)
-                    .Sum(x => x.NetRetailPrice))
+                Category = category.Value,
+                Name = category.Value.Name,
+                Sales = new ObservableValue((double)GetSalesForCategory(category.Value))
             });
 
             CategoryChartData.AddRange(chartData);
@@ -130,30 +132,22 @@ namespace Mhyrenz_Interface.ViewModels
             if (SalesByCategory.Any())
                 return;
 
-            var pieSeries = CategoryChartData.Select(c =>
+            var pieSeries = CategoryChartData.Select(c => new PieSeries<ObservableValue>
             {
-
-                return new PieSeries<ObservableValue>()
+                Values = new ObservableCollection<ObservableValue> { c.Sales },
+                Name = c.Name,
+                Tag = c.Category.Id,
+                IsVisibleAtLegend = c.Sales.Value > 0,
+                InnerRadius = 50,
+                ToolTipLabelFormatter = point => $"{point.Label.Text} {point.Model.Value:C}",
+                DataLabelsPaint = new SolidColorPaint(SKColors.Black),
+                DataLabelsSize = c.Sales.Value > 0 ? 14 : 0,
+                DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                DataLabelsFormatter = point =>
                 {
-                    Values = new ObservableCollection<ObservableValue> { c.Sales },
-                    Name = c.Name,
-                    Tag = c.Category.Id,
-                    IsVisibleAtLegend = !(c.Sales.Value <= 0),
-                    InnerRadius = 50,
-                    ToolTipLabelFormatter = point => $"{point.Label.Text} {point.Model.Value:C}",
-                    DataLabelsPaint = new SolidColorPaint(SKColors.Black),
-                    DataLabelsSize = !(c.Sales.Value <= 0) ? 14 : 0,
-                    DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                    DataLabelsFormatter =
-                        point =>
-                        {
-                            var pv = point.Coordinate.PrimaryValue;
-                            var sv = point.StackedValue;
-
-                            var a = $"{sv.Share:P2}{Environment.NewLine}{point.Model.Value:C}";
-                            return a;
-                        }
-                };
+                    var sv = point.StackedValue;
+                    return $"{sv.Share:P2}{Environment.NewLine}{point.Model.Value:C}";
+                }
             });
 
             SalesByCategory.AddRange(pieSeries);

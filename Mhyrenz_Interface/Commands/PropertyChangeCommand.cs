@@ -7,55 +7,42 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public abstract class PropertyChangeCommand<T> : IUndoableCommand
+
+    public abstract class PropertyChangeCommand<R> : IUndoableCommand, IPropertyChangedCommand
     {
-        private readonly T _target;
-        private readonly string _propertyName;
-        private readonly object _oldValue;
-        private readonly object _newValue;
+        private readonly TrackPropertyHelper.Setter _setter;
         private readonly Action _propertyChangeHandler;
 
         public Action<NavigationViewModel> SideEffect { get; set; }
         public Type CurrentViewIn { get; }
 
-        public PropertyChangeCommand(T target, string propertyName, object oldValue, object newValue, Action propertyChangeHandler, Type currentViewIn)
+        public ChangedArgs PropertyChangedArgs { get; set; }
+
+        public PropertyChangeCommand(ChangedArgs args, TrackPropertyHelper.Setter setter, Action propertyChangeHandler, Type currentViewIn)
         {
-            _target = target;
-            _propertyName = propertyName;
-            _oldValue = oldValue;
-            _newValue = newValue;
+            PropertyChangedArgs = args;
+            _setter = setter;
             _propertyChangeHandler = propertyChangeHandler;
 
             CurrentViewIn = currentViewIn;
-            SideEffect = SideEffectAction;
-        }
-
-        private void SideEffectAction(NavigationViewModel vm)
-        {
-            var view = vm as InventoryViewModel;
-
-            var lastProductChanged = App.ServiceProvider.GetRequiredService<IInventoryStore>().LastProductChanged;
-            // FIXME anti pattern, but it works for now.
-            view.RowIntoView(lastProductChanged.Category, lastProductChanged.ChangedProductInfo.Value.Products);
         }
 
         public void Execute()
         {
-            //SetProperty(_newValue);
-            CommandHandler(_newValue, ActionType.Normal);
+            CommandHandler(PropertyChangedArgs.NewValue, ActionType.Normal);
         }
 
         public bool Undo()
         {
-            SetProperty(_oldValue);
-            CommandHandler(_oldValue, ActionType.Undo);
+            _setter(PropertyChangedArgs.OldValue, PropertyChangeOrigin.UndoRedo);
+            CommandHandler(PropertyChangedArgs.OldValue, ActionType.Undo);
             return true;
         }
 
         public bool Redo()
         {
-            SetProperty(_newValue);
-            CommandHandler(_newValue, ActionType.Redo);
+            _setter(PropertyChangedArgs.NewValue, PropertyChangeOrigin.UndoRedo);
+            CommandHandler(PropertyChangedArgs.NewValue, ActionType.Redo);
             return true;
         }
 
@@ -67,17 +54,15 @@ namespace Mhyrenz_Interface.Commands
 
         public abstract bool Command(object parameter, ActionType intent);
 
-        private void SetProperty(object value)
+        public class ChangedArgs
         {
-            var prop = _target.GetType().GetProperty(_propertyName);
-            if (prop != null && prop.CanWrite)
-            {
-                PropertyChangeTracker.Suppress = true;
-                prop.SetValue(_target, value);
-                PropertyChangeTracker.Suppress = false;
-            }
+            public object OldValue { get; set; }
+            public object NewValue { get; set; }
+            public R RowInfo { get; set; }
         }
-
     }
 
+    public interface IPropertyChangedCommand
+    {
+    }
 }

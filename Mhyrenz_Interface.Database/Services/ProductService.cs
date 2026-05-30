@@ -103,6 +103,8 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                 var ids = productIds.ToList();
 
                 var products = await context.Products
+                    .IgnoreQueryFilters()
+                    .Include(p => p.Category)
                     .Where(p => ids.Contains(p.Id))
                     .ToListAsync();
 

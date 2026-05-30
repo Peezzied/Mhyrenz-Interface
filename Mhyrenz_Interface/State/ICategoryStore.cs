@@ -14,7 +14,7 @@ namespace Mhyrenz_Interface.State
     {
         event Action Updated;
         ICommand LoadCategoriesCommand { get; }
-        Dictionary<Category, Predicate<object>> CategoriesFilter { get; }
+        Dictionary<Category, Predicate<ProductDataViewModel>> CategoriesFilter { get; }
         Dictionary<int, Brush> Colors { get; set; }
         Dictionary<int, Category> Categories { get; }
 

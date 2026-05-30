@@ -41,27 +41,27 @@ namespace Mhyrenz_Interface.ViewModels
 
         private void SerialBarcodeService_OnBarcodeReceived(string obj)
         {
-            if (!_mainViewModel.CanMainBarcodeReceive)
-                return;
+            //if (!_mainViewModel.CanMainBarcodeReceive)
+            //    return;
 
-            var product = _inventoryStore.GetProductByBarcode(obj);
+            //var product = _inventoryStore.GetProductByBarcode(obj);
 
-            if (product.NetQty == 0)
-            {
-                Growl.Error($"Unable to complete the operation because of insufficient stock of product \"{product.Name}\"");
-                return;
-            }
+            //if (product.NetQty == 0)
+            //{
+            //    Growl.Error($"Unable to complete the operation because of insufficient stock of product \"{product.Name}\"");
+            //    return;
+            //}
 
-            TransactionType = "Barcode";
-            _isIncomingScan = true;
-            App.Current.Dispatcher.Invoke(() => _navigationService.Navigate(typeof(HomeView)));
+            //TransactionType = "Barcode";
+            //_isIncomingScan = true;
+            //App.Current.Dispatcher.Invoke(() => _navigationService.Navigate(typeof(HomeView)));
 
-            _inventoryStore.PurchaseProduct(product,
-                new Core.TargetChangedEventArgs(product, nameof(ProductDataViewModel.PurchaseDefaultEdit)),
-                oldValue: product.PurchaseDefaultEdit,
-                newValue: 1,
-                tracker: _inventoryStore.GetTrackerByProduct(product),
-                purchaseProductCommand: _directPurchaseCommand());
+            //_inventoryStore.PurchaseProduct(product,
+            //    new Core.TargetChangedEventArgs(product, nameof(ProductDataViewModel.PurchaseDefaultEdit)),
+            //    oldValue: product.PurchaseDefaultEdit,
+            //    newValue: 1,
+            //    tracker: _inventoryStore.GetTrackerByProduct(product),
+            //    purchaseProductCommand: _directPurchaseCommand());
         }
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)

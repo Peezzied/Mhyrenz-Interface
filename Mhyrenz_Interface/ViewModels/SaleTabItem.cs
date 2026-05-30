@@ -14,17 +14,13 @@ using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.State;
+using ObservableCollections;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Mhyrenz_Interface.ViewModels
 {
     public class SaleTabItem : BaseViewModel, IEditCancelState
     {
-        private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
-        private readonly IUndoRedoManager _undoRedoManager;
-
-        private readonly Dictionary<int, TransactionDataViewModel> _salesByTransactionId =
-            new Dictionary<int, TransactionDataViewModel>();
 
         public SaleTabItem(
             string header,
@@ -44,15 +40,19 @@ namespace Mhyrenz_Interface.ViewModels
             SaleDropHandler = new SaleDropHandler(this, saleBoundPurchaseCommand);
             InventoryDragHandler = new InventoryDragHandler(this);
 
+            _salesView = _sales.CreateView(kvp => kvp.Value);
+
+            Sales = _salesView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
+
             _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
         }
+
+        public NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> Sales { get; private set; }
 
         public Sale Sale { get; private set; }
 
         public string Header { get; set; }
-
-        public ObservableCollection<TransactionDataViewModel> Sales { get; } =
-            new ObservableCollection<TransactionDataViewModel>();
 
         public InventoryDataGridViewModel ContentViewModel { get; }
 
@@ -60,8 +60,16 @@ namespace Mhyrenz_Interface.ViewModels
 
         public InventoryDragHandler InventoryDragHandler { get; }
 
+        private ISynchronizedView<KeyValuePair<int, TransactionDataViewModel>, TransactionDataViewModel> _salesView;
+
         private DataGridRowDetailsVisibilityMode _productRowDetailsVisibilityMode =
             DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+
+        private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
+        private readonly IUndoRedoManager _undoRedoManager;
+
+        private readonly ObservableDictionary<int, TransactionDataViewModel> _sales =
+            new ObservableDictionary<int, TransactionDataViewModel>();
 
         public DataGridRowDetailsVisibilityMode ProductRowDetailsVisibilityMode
         {
@@ -77,21 +85,17 @@ namespace Mhyrenz_Interface.ViewModels
 
         public void LoadTransactions()
         {
-            Sales.Clear();
-            _salesByTransactionId.Clear();
+            _sales.Clear();
 
             foreach (var transaction in Sale.Transactions)
             {
-                var vm = _transactionDataViewModel(transaction);
-
-                _salesByTransactionId[transaction.Id] = vm;
-                Sales.Add(vm);
+                _sales[transaction.Id] = _transactionDataViewModel(transaction);
             }
         }
 
         public bool HasTransaction(int transactionId)
         {
-            return _salesByTransactionId.ContainsKey(transactionId);
+            return _sales.ContainsKey(transactionId);
         }
 
         public async void AddToSale((CheckoutResult result, SaleBoundPurchaseCommand.DTO.Type method) checkout)
@@ -104,13 +108,11 @@ namespace Mhyrenz_Interface.ViewModels
             if (checkoutResult.WasRemoved)
             {
                 var transactionId = checkoutResult.Transaction.Id;
-                if (_salesByTransactionId.TryGetValue(transactionId, out var vm))
+                if (_sales.TryGetValue(transactionId, out var vm))
                 {
                     await vm.RequestFlash(checkout.method);
-                    _salesByTransactionId.Remove(transactionId);
-                    Sales.Remove(vm);
+                    _sales.Remove(transactionId);
                 }
-
                 return;
             }
 
@@ -119,7 +121,7 @@ namespace Mhyrenz_Interface.ViewModels
             if (transaction == null)
                 return;
 
-            if (_salesByTransactionId.TryGetValue(transaction.Id, out var existingVm))
+            if (_sales.TryGetValue(transaction.Id, out var existingVm))
             {
                 checkout.method = SaleBoundPurchaseCommand.DTO.Type.Add;
                 existingVm.Transaction = transaction;
@@ -128,9 +130,7 @@ namespace Mhyrenz_Interface.ViewModels
             else
             {
                 var vm = _transactionDataViewModel(transaction);
-
-                _salesByTransactionId[transaction.Id] = vm;
-                Sales.Add(vm);
+                _sales[transaction.Id] = vm;
 
                 checkout.method = SaleBoundPurchaseCommand.DTO.Type.AddNew;
                 App.Current.BeginInvoke(new Action(() => vm.RequestFlash(checkout.method)));

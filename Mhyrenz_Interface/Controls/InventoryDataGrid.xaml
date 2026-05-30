@@ -178,7 +178,7 @@
                 <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
                 <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsCtrlClicked}" Value="True">
+                    <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
                         <DataTrigger.Setters>
                             <Setter Property="Maximum" Value="{Binding PurchaseMaxNormal}"/>
                             <Setter Property="HideUpDownButtons" Value="True"/>

@@ -9,6 +9,7 @@ using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
+using ObservableCollections;
 using RelayCommand = Mhyrenz_Interface.Core.RelayCommand;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -21,7 +22,7 @@ namespace Mhyrenz_Interface.ViewModels
         void LoadReceiver();
     }
 
-    public class ProductDataViewModel : BaseViewModel, IBarcodeBound
+    public class ProductDataViewModel : TrackedViewModel, IBarcodeBound
     {
         private readonly ISessionStore _sessionStore;
         private readonly ICategoryStore _categoryStore;
@@ -64,11 +65,6 @@ namespace Mhyrenz_Interface.ViewModels
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
         }
 
-        private void Extras_ValueChanged(object sender, ValueChangedEventArgs<string, PrimativeNotifyProperty<object>> e)
-        {
-            OnPropertyChanged(e.Key);
-        }
-
         private void GoToItemActionCommand(object obj)
         {
             _navigationService.Navigate(typeof(InventoryView), vm =>
@@ -88,7 +84,6 @@ namespace Mhyrenz_Interface.ViewModels
         public override void Dispose()
         {
             _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
-            if (Extras != null) Extras.ValueChanged -= Extras_ValueChanged;
             BarcodeReceived = null;
         }
 
@@ -110,14 +105,14 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        private bool _isCtrlClicked = false;
-        public bool IsCtrlClicked
+        private bool _isRightClicked = false;
+        public bool IsRightClicked
         {
-            get => _isCtrlClicked;
+            get => _isRightClicked;
             set
             {
-                _isCtrlClicked = value;
-                OnPropertyChanged(nameof(IsCtrlClicked));
+                _isRightClicked = value;
+                OnPropertyChanged(nameof(IsRightClicked));
             }
         }
 
@@ -137,10 +132,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (_purchase != value)
                 {
-                    if (!SessionRequire()) return;
-                    _purchase = value;
+                    SetTrackedProperty(ref _purchase, value, nameof(PurchaseDefaultEdit));
 
-                    OnPropertyChanged(nameof(PurchaseDefaultEdit));
                     OnPropertyChanged(nameof(NetQty));
                     OnPropertyChanged(nameof(PurchaseMax));
                 }
@@ -157,10 +150,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Purchase != value)
                 {
-                    if (!SessionRequire()) return;
-                    _purchaseNormal = value - Item.Purchase;
+                    SetTrackedProperty(ref _purchaseNormal, value - Item.Purchase, nameof(PurchaseNormalEdit));
 
-                    OnPropertyChanged(nameof(PurchaseNormalEdit));
                     OnPropertyChanged(nameof(NetQty));
                     OnPropertyChanged(nameof(PurchaseMaxNormal));
                 }
@@ -178,8 +169,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Name != value)
                 {
-                    Item.Name = value;
-                    OnPropertyChanged(nameof(Name));
+                    SetTrackedProperty(Item.Name, value, 
+                        v => Item.Name = v, nameof(Name));
                 }
             }
         }
@@ -190,8 +181,7 @@ namespace Mhyrenz_Interface.ViewModels
             get => _supplier;
             set
             {
-                _supplier = value;
-                OnPropertyChanged(nameof(Supplier));
+                SetTrackedProperty(ref _supplier, value, nameof(Supplier));
             }
         }
 
@@ -203,9 +193,9 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Qty != value)
                 {
-                    if (!SessionRequire()) return;
-                    Item.Qty = value;
-                    OnPropertyChanged(nameof(Qty));
+                    SetTrackedProperty(Item.Qty, value,
+                        v => Item.Qty = v, nameof(Qty));
+
                     OnPropertyChanged(nameof(NetQty));
                 }
             }
@@ -219,9 +209,9 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.RetailPrice != value)
                 {
-                    if (!SessionRequire()) return;
-                    Item.RetailPrice = value;
-                    OnPropertyChanged(nameof(RetailPrice));
+                    SetTrackedProperty(Item.RetailPrice, value,
+                       v => Item.RetailPrice = v, nameof(RetailPrice));
+
                     OnPropertyChanged(nameof(NetRetailPrice));
                 }
             }
@@ -236,8 +226,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Barcode != value)
                 {
-                    Item.Barcode = value;
-                    OnPropertyChanged(nameof(Barcode));
+                    SetTrackedProperty(Item.Barcode, value,
+                        v => Item.Barcode = v, nameof(Barcode));
                 }
             }
         }
@@ -249,8 +239,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Expiry != value)
                 {
-                    Item.Expiry = value;
-                    OnPropertyChanged(nameof(Expiry));
+                    SetTrackedProperty(Item.Expiry, value,
+                        v => Item.Expiry = v, nameof(Expiry));
                 }
             }
         }
@@ -262,8 +252,8 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Batch != value)
                 {
-                    Item.Batch = value;
-                    OnPropertyChanged(nameof(Batch));
+                    SetTrackedProperty(Item.Batch, value,
+                        v => Item.Batch = v, nameof(Batch));
                 }
             }
         }
@@ -290,17 +280,6 @@ namespace Mhyrenz_Interface.ViewModels
         public ObservableDictionary<string, PrimativeNotifyProperty<object>> Extras { get; private set; }
 
         public ICommand GoToItemCommand { get; }
-
-        private bool SessionRequire()
-        {
-            if (_sessionStore.CurrentSession is Session)
-                return true;
-            else
-            {
-                _requireSession?.Invoke();
-                return false;
-            }
-        }
 
     }
 }

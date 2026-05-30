@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using MahApps.Metro.Controls;
+using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls.Behaviors;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
+using Mhyrenz_Interface.Views;
+using ObservableCollections;
+using static Mhyrenz_Interface.Core.TrackPropertyHelper;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -21,9 +27,12 @@ namespace Mhyrenz_Interface.ViewModels
         public int Id => _category.Id;
 
         public ObservableDictionary<string, ColumnSettingViewModel> Columns { get; set; }
+
+        private readonly CreateCommand<UpdateProductCommand> _updateProductCommand;
+
         public ObservableCollection<ColumnSettingViewModel> ColumnsView { get; set; }
 
-        private Predicate<object> _originalFilter;
+        private readonly Predicate<object> _originalFilter;
 
         private InventoryDataGridViewModel _contentViewModel;
         public InventoryDataGridViewModel ContentViewModel
@@ -39,31 +48,41 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        private ICollectionView _view;
+        private readonly ICollectionView _view;
+        private readonly IProductService _productService;
+        private readonly IUndoRedoManager _undoRedoManager;
         private readonly ICategoryStore _categoryStore;
         private readonly Category _category;
-        private readonly Func<ProductDataViewModel, bool> _searchFilter;
-        private readonly Predicate<object> _filter;
+        private readonly Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> _searchFilter;
+        private readonly Predicate<ProductDataViewModel> _filter;
         private readonly CreateViewModel<ColumnSettingViewModel> _columnSettingViewModelFactory;
         private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly InventoryDataGridSettingsProvider _inventoryDataGridSettingsProvider;
+        private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
 
         public ICommand ToggleColumnCommand { get; }
 
         public InventoryTabItem(
             //InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
-            Predicate<object> filter,
+            Predicate<ProductDataViewModel> filter,
             InventorySettingsProvider inventorySettingsProvider,
             CreateViewModel<ColumnSettingViewModel> columnSettingViewModelFactory,
             InventoryDataGridSettingsProvider inventoryDataGridSettingsProvider,
             ICategoryStore categoryStore,
-            Func<ProductDataViewModel, bool> searchFilter)
+            CreateCommand<UpdateProductCommand> updateProductCommandFactory,
+            CreateCommand<DirectPurchaseCommand> directPurchaseCommandFactory,
+            IUndoRedoManager undoRedoManager,
+            IProductService productService
+            //Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> searchFilter
+            )
         {
+            _productService = productService;
+            _undoRedoManager = undoRedoManager;
             _categoryStore = categoryStore;
             _category = category;
 
-            _searchFilter = searchFilter;
+            //_searchFilter = searchFilter;
             _filter = filter;
 
             _columnSettingViewModelFactory = columnSettingViewModelFactory;
@@ -73,15 +92,112 @@ namespace Mhyrenz_Interface.ViewModels
             ColumnsView = new ObservableCollection<ColumnSettingViewModel>();
             Columns = new ObservableDictionary<string, ColumnSettingViewModel>();
 
+            _updateProductCommand = updateProductCommandFactory;
+            _directPurchaseCommand = directPurchaseCommandFactory;
         }
 
         public void SetViewModel(InventoryDataGridViewModel inventoryDataGridViewModel)
         {
-            _view = inventoryDataGridViewModel.Inventory;
-            _view.Filter = _filter;
+            var inventoryView = inventoryDataGridViewModel.InventoryView;
+            inventoryView.AttachFilter(InventoryFilter);
+
+            foreach (var (Value, View) in inventoryView.Filtered)
+            {
+                View.TrackedPropertyChanged += Product_PropertyChanged;
+            }
+
+            inventoryView.ViewChanged += InventoryView_ViewChanged;
 
             ContentViewModel = inventoryDataGridViewModel;
             ContentViewModel.ColumnsSettings = Columns;
+        }
+
+        private void InventoryView_ViewChanged(in SynchronizedViewChangedEventArgs<ProductDataViewModel, ProductDataViewModel> e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+                e.NewItem.View.TrackedPropertyChanged += Product_PropertyChanged;
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+                e.OldItem.View.TrackedPropertyChanged -= Product_PropertyChanged;
+        }
+
+        private bool InventoryFilter(ProductDataViewModel vm)
+        {
+            return _filter(vm);
+        }
+
+        private void Product_PropertyChanged(object sender, TrackedPropertyChangedEventArgs args)
+        {
+            if (args.Origin == PropertyChangeOrigin.UndoRedo)
+                return;
+
+            var viewModel = sender as ProductDataViewModel;
+
+            PropertyChangeCommand<ProductVMRowInfo>.ChangedArgs changedArgs(object newVal)
+            {
+                return new PropertyChangeCommand<ProductVMRowInfo>.ChangedArgs
+                {
+                    OldValue = args.OldValue,
+                    NewValue = newVal,
+                    RowInfo = new ProductVMRowInfo
+                    {
+                        Category = viewModel.Item.CategoryId,
+                        Products = new[] { viewModel.Item.Id }
+                    }
+                };
+            }
+
+            void commonPropHandler(Setter setter, Getter getter, string propertyName)
+            {
+
+                void handlePropChange()
+                {
+                    // TODO event changed hook
+                }
+
+                _undoRedoManager.Execute(new ProductVMCommandCommonProp(
+                    viewModel,
+                    args: changedArgs(getter()),
+                    setter: setter,
+                    command: _updateProductCommand(),
+                    propertyChangeHandler: handlePropChange,
+                    currentViewIn: typeof(InventoryView)
+                ));
+            }
+
+            void purchasePropHandler(Setter setter, Getter getter, string propertyName)
+            {
+
+                void handlePropChange()
+                {
+                    App.Current.BeginInvoke(new Action(async () =>
+                    {
+                        viewModel.Item = await _productService.Get(viewModel.Item.Id);
+                    }));
+                }
+
+                _undoRedoManager.Execute(new ProductVMCommandPurchase(
+                    viewModel,
+                    args: changedArgs(getter()),
+                    setter: setter,
+                    command: _directPurchaseCommand(),
+                    propertyChangeHandler: handlePropChange,
+                    currentViewIn: typeof(InventoryView)
+                ));
+            }
+
+            TrackPropertyHelper.Build(sender as TrackedViewModel, args.PropertyName)
+                .Track(nameof(ProductDataViewModel.Qty), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.Name), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.RetailPrice), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.Barcode), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.Expiry), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.Batch), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, propertyName) =>
+                {
+                    args.OldValue = 0;
+                    purchasePropHandler(setter, getter, propertyName);
+                })
+                .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler);
         }
 
         public void LoadColumns(IEnumerable<ColumnInfo> columns)
@@ -160,60 +276,6 @@ namespace Mhyrenz_Interface.ViewModels
 
             Columns.Clear();
             ColumnsView.Clear();
-        }
-
-        private void DeferInventoryInitialization()
-        {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _originalFilter = ContentViewModel.Inventory.Filter;
-
-                ContentViewModel.Inventory.Filter = item =>
-                {
-                    if (_originalFilter != null && !_originalFilter(item))
-                        return false;
-
-                    return _searchFilter(item as ProductDataViewModel);
-                };
-            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
-        }
-
-        public void Refresh() => ContentViewModel.Inventory?.Refresh();
-
-        /// <summary>
-        /// Gets the relative row index from this tab.
-        /// </summary>
-        /// <param name="product">product id</param>
-        /// <returns>relative index</returns>
-        public int ProductIndexOf(int product)
-        {
-            var relativeInventoryMap = _view.Cast<ProductDataViewModel>()
-                .Select((p, index) => new { p.Item.Id, Index = index })
-                .ToDictionary(i => i.Id, i => i.Index);
-
-            if (relativeInventoryMap.TryGetValue(product, out var value))
-            {
-                return value;
-            }
-            return -1;
-
-            //int targetId = product.Item.Id;
-            //int closestId = -1;
-            //int minDifference = int.MaxValue;
-
-            //foreach (var item in _allProducts.SourceCollection.Cast<ProductDataViewModel>().Where(i => i.CategoryId == Id))
-            //{
-            //    int currentId = item.Item.Id;
-            //    int diff = Math.Abs(currentId - targetId);
-
-            //    if (diff < minDifference)
-            //    {
-            //        minDifference = diff;
-            //        closestId = currentId;
-            //    }
-            //}
-
-            //    return relativeInventoryMap[closestId]; // -1 if nothing is smaller than target
         }
     }
 }

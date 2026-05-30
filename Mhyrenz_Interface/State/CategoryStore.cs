@@ -24,7 +24,8 @@ namespace Mhyrenz_Interface.State
         public event Action Updated;
 
         public Dictionary<int, Brush> Colors { get; set; } = new Dictionary<int, Brush>();
-        public Dictionary<Category, Predicate<object>> CategoriesFilter { get; private set; } = new Dictionary<Category, Predicate<object>>();
+        public Dictionary<Category, Predicate<ProductDataViewModel>> CategoriesFilter { get; private set; } 
+            = new Dictionary<Category, Predicate<ProductDataViewModel>>();
         public Dictionary<int, Category> Categories { get; private set; } = new Dictionary<int, Category>();
 
         private void OnChange()
@@ -58,8 +59,7 @@ namespace Mhyrenz_Interface.State
             foreach (var item in result)
             {
                 Categories[item.Id] = item;
-                CategoriesFilter[item] = obj => obj is ProductDataViewModel vm
-                    && vm.CategoryId == item.Id;
+                CategoriesFilter[item] = vm => vm.CategoryId == item.Id;
             }
         }
 

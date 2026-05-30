@@ -15,12 +15,13 @@ using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Internal;
+using ObservableCollections;
 
 namespace Mhyrenz_Interface.ViewModels
 {
     public class InventoryDataGridViewModel : BaseViewModel, IEditCancelState
     {
-        public ICollectionView Inventory { get; }
+        public NotifyCollectionChangedSynchronizedViewList<ProductDataViewModel> Inventory { get; }
 
         public event Action<ActionType> UndoRedoEvent;
 
@@ -140,6 +141,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private readonly IInventoryStore _inventoryStore;
 
+        public ISynchronizedView<ProductDataViewModel, ProductDataViewModel> InventoryView { get; private set; }
         public ICommand ToggleColumnCommand { get; }
         public bool IsEditCancelled { get; private set; }
 
@@ -147,17 +149,12 @@ namespace Mhyrenz_Interface.ViewModels
 
         public class SelectionRowsInfo
         {
-            public SelectionRowsInfo(int index, int[] items, bool isDifferent, bool canSelect = true)
+            public SelectionRowsInfo(int[] items, bool canSelectTab = true)
             {
-                Index = index;
                 Items = items;
-                IsDifferent = isDifferent;
-                CanSelect = canSelect;
+                CanSelect = canSelectTab;
             }
-
-            public int Index { get; set; }
             public int[] Items { get; set; }
-            public bool IsDifferent { get; set; }
             public bool CanSelect { get; set; }
         }
 
@@ -166,21 +163,11 @@ namespace Mhyrenz_Interface.ViewModels
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
 
-            Inventory = new ListCollectionView(_inventoryStore.Products);
-            ApplyDefaultSort();
+            InventoryView = _inventoryStore.Products.Source.CreateView(v => v);
+            Inventory = InventoryView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
+
             DeleteCommand = deleteCommand();
-        }
-
-        private void ApplyDefaultSort()
-        {
-            if (Inventory is ListCollectionView view)
-            {
-                view.CustomSort = Comparer<ProductDataViewModel>.Create((a, b) =>
-                    StringComparer.CurrentCultureIgnoreCase.Compare(a?.Name, b?.Name)
-                );
-
-                view.Refresh();
-            }
         }
 
         public void Load()
@@ -198,11 +185,12 @@ namespace Mhyrenz_Interface.ViewModels
             CommitEdits?.Invoke();
             _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
             _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;  
+
         }
 
-        public void SelectItem(bool isDiff, int index, int[] selection)
+        public void SelectItem(bool canSelectTab, int[] selection)
         {
-            SelectionInfo = new SelectionRowsInfo(index, selection, isDiff);
+            SelectionInfo = new SelectionRowsInfo(selection, canSelectTab);
 
             SwitchSelectedItem?.Invoke();
         }
@@ -210,11 +198,12 @@ namespace Mhyrenz_Interface.ViewModels
         #region "Event handlers"
         private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
         {
-            if (e.CurrentView is InventoryViewModel inventoryGridHost)
+            // TODO apply and evaluate IsReadonly flag
+            if (e.CurrentView is NavigationViewModel inventoryGridHost)
             {
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    inventoryGridHost.RowIntoView(_inventoryStore.LastProductChanged.Category, _inventoryStore.LastProductChanged.ChangedProductInfo.Value.Products);
+                    e.Command.SideEffect?.Invoke(inventoryGridHost);
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }

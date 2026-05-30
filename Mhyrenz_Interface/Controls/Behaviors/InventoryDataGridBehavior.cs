@@ -59,7 +59,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
             if (cell != null && cell.DataContext is ProductDataViewModel vm)
             {
                 sender.CastTo<DataGrid>().SelectedItem = vm;
-                vm.IsCtrlClicked = true;
+                vm.IsRightClicked = true;
             }
 
             _state = true;
@@ -91,7 +91,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
             var cell = TreeHelper.TryFindParent<DataGridCell>(e.OriginalSource as DependencyObject);
             if (cell != null && cell.DataContext is ProductDataViewModel vm)
-                vm.IsCtrlClicked = false;
+                vm.IsRightClicked = false;
 
             ClickHandler(sender, e);
         }
@@ -118,7 +118,7 @@ namespace Mhyrenz_Interface.Controls.Behaviors
 
             if (e.Row.Item is ProductDataViewModel vm)
             {
-                vm.IsCtrlClicked = false;
+                vm.IsRightClicked = false;
             }
         }
 

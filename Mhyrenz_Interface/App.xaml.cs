@@ -163,6 +163,7 @@ namespace Mhyrenz_Interface
 
                 .AddCommandFactory<DeleteCommand>()
                 .AddCommandFactory<AddCommand>()
+                .AddCommandFactory<UpdateProductCommand>()
                 .AddCommandFactory<DirectPurchaseCommand>()
                 .AddCommandFactory<CreateSessionCommand>()
                 .AddCommandFactory<LoadCategoriesCommand>()

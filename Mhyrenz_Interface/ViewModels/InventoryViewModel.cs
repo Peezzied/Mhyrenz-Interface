@@ -42,12 +42,12 @@ namespace Mhyrenz_Interface.ViewModels
             return ValidationResult.ValidResult;
         }
     }
-    public interface InventoryGridHost
+    public interface IInventoryGridHost
     {
-        void RowIntoView(IEnumerable<ProductDataViewModel> products);
+        void RowIntoView(int category, int[] products);
     }
 
-    public class InventoryViewModel : NavigationViewModel
+    public class InventoryViewModel : NavigationViewModel, IInventoryGridHost
     {
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
@@ -73,7 +73,6 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
-                ((InventoryTabItem)SelectedItem).Refresh(); // FIXME: OFTEN THROWS AN EXCEPTION WHEN CATEGORIES IS EMPTY
 
             }
         }
@@ -108,7 +107,6 @@ namespace Mhyrenz_Interface.ViewModels
                 tabItem.ContentViewModel.Load();
                 _mainViewModel.RibbonBarViewModel = tabItem;
 
-                if (!SearchBar.IsNullOrEmpty()) tabItem.Refresh();
                 OnPropertyChanged(nameof(SelectedItem));
 
                 CanDelete = tabItem.ContentViewModel.SelectedItems?.Any() == true;
@@ -239,25 +237,17 @@ namespace Mhyrenz_Interface.ViewModels
 
                 InventoryTabItem newTab = tabItems[category];
                 var vm = newTab.ContentViewModel;
-                bool isDiff = false;
+                bool canSelectTab = false;
                 if (newTab != SelectedItem)
                 {
                     SelectedItem = newTab;
-                    isDiff = true;
+                    canSelectTab = true;
                 }
 
                 if (SearchBar != string.Empty)
                     SearchBar = string.Empty;
 
-                var changedProductInfo = _inventoryStore.LastProductChanged.ChangedProductInfo;
-                var selectIndex = changedProductInfo != null ? changedProductInfo.Value.Index : newTab.ProductIndexOf(products.First());
-
-                if (selectIndex < 0)
-                {
-                    // TODO: show alert only if the index is out of range
-                    return;
-                }
-                vm.SelectItem(isDiff, selectIndex, products);
+                vm.SelectItem(canSelectTab, products);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
 
         }
@@ -287,16 +277,20 @@ namespace Mhyrenz_Interface.ViewModels
         }
 
         // for each category, create a tab item with a datagrid and filter for the category
-        private void AddTabItem(Category category, Predicate<object> filter)
+        private void AddTabItem(Category category, Predicate<ProductDataViewModel> filter)
         {
             //var vm = _inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Detailed);
             //vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
 
-            var tab = _inventoryTabItemFactory(category, filter,
-                (Func<ProductDataViewModel, bool>)(product =>
-                    string.IsNullOrWhiteSpace(SearchBar) ||
-                    product.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0)
-            );
+            bool searchFilter(ProductDataViewModel vm)
+            {
+                if (string.IsNullOrWhiteSpace(SearchBar))
+                    return true;
+
+                return vm.Name.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0;
+            }
+
+            var tab = _inventoryTabItemFactory(category, filter);
 
             TabItems.Add(tab);
         }

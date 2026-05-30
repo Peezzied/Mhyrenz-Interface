@@ -2,36 +2,32 @@
 using System.Windows.Input;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class ProductVMCommandPurchase : PropertyChangeCommand<ProductDataViewModel>
+    public class ProductVMCommandPurchase : ProductVMPropertyChangeCommand
     {
         private readonly ProductDataViewModel _target;
-        private readonly object _oldValue;
-        private readonly object _newValue;
         private readonly ICommand _command;
 
         public ProductVMCommandPurchase(ProductDataViewModel target,
-            string propertyName,
-            object oldValue,
-            object newValue,
+            ChangedArgs args,
+            TrackPropertyHelper.Setter setter,
             ICommand command,
             Action propertyChangeHandler,
-            Type currentViewIn) : base(target, propertyName, oldValue, newValue, propertyChangeHandler, currentViewIn)
+            Type currentViewIn) : base(args, setter, propertyChangeHandler, currentViewIn)
         {
             _target = target;
-            _oldValue = oldValue;
-            _newValue = newValue;
             _command = command;
         }
 
         public override bool Command(object parameter, ActionType intent)
         {
-            var newValue = _newValue as int? ?? 0;
-            var oldValue = _oldValue as int? ?? 0;
+            var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
+            var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
-            DirectPurchaseCommand.DTO.Type? method;
+            DirectPurchaseCommand.DTO.Type method;
             if (newValue > oldValue)
                 method = intent == ActionType.Undo ? DirectPurchaseCommand.DTO.Type.Subtract : DirectPurchaseCommand.DTO.Type.Add;
             else if (newValue < oldValue)
@@ -43,7 +39,7 @@ namespace Mhyrenz_Interface.Commands
             {
                 Amount = Math.Abs(oldValue - newValue),
                 ProductId = _target.Item.Id,
-                Method = method.Value,
+                Method = method,
             });
 
             return true;

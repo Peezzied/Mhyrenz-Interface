@@ -24,6 +24,7 @@ namespace Mhyrenz_Interface.Commands
         private readonly IInventoryStore _inventoryStore;
         private bool CanSubmit = true;
         private IEnumerable<ProductDataViewModel> _products;
+        private ProductVMRowInfo _rowInfo;
 
         public AddCommand(AddProductViewModel vm, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager, CreateCommand<DeleteCommand> deleteCommand)
         {
@@ -46,8 +47,7 @@ namespace Mhyrenz_Interface.Commands
         private void SideEffect(NavigationViewModel vm)
         {
             var view = vm as InventoryViewModel;
-
-            view.RowIntoView(_inventoryStore.LastProductChanged.Category, _inventoryStore.LastProductChanged.ChangedProductInfo.Value.Products);
+            view.RowIntoView(_rowInfo.Category, _rowInfo.Products);
         }
 
         public override void Execute(object parameter)
@@ -59,7 +59,7 @@ namespace Mhyrenz_Interface.Commands
         public override async Task ExecuteAsync(object parameter)
         {
             CanSubmit = false;
-            var product = await _productService.Create(new Product
+            var productVm = await _productService.Create(new Product
             {
                 Name = _viewModel.Name,
                 RetailPrice = _viewModel.Price,
@@ -70,7 +70,13 @@ namespace Mhyrenz_Interface.Commands
                 Barcode = _viewModel.Barcode
             });
 
-            _products = _inventoryStore.AddProduct(new[] { await _productService.Get(product.Id) });
+            var product = await _productService.Get(productVm.Id);
+            _products = _inventoryStore.AddProduct(new[] { product });
+            _rowInfo = new ProductVMRowInfo
+            {
+                Category = product.CategoryId,
+                Products = new int[] { product.Id }
+            };
 
             Growl.Success(new GrowlInfo
             {
@@ -87,9 +93,15 @@ namespace Mhyrenz_Interface.Commands
 
         public async void Redo(object parameter = null)
         {
+            // TODO utilize ExecuteRaw. Use the parameter
             var product = (await _productService.RemoveManyBack(_products.Select(i => i.Item.Id))).First();
 
             _products = _inventoryStore.AddProduct(new[] { product });
+            _rowInfo = new ProductVMRowInfo
+            {
+                Category = product.CategoryId,
+                Products = new int[] { product.Id }
+            };
 
             Growl.Success(new GrowlInfo
             {

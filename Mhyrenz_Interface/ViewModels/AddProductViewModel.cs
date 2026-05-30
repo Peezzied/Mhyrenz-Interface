@@ -31,7 +31,7 @@ namespace Mhyrenz_Interface.ViewModels
             _categoryStore = categoryStore;
             _inventoryStore = inventoryStore;
 
-            base.SubmitActionCommand = addCommand();
+            base.SubmitActionCommand = addCommand(this);
         }
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();

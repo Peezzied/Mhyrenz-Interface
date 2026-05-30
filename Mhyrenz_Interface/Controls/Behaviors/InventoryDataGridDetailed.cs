@@ -163,6 +163,12 @@ namespace Mhyrenz_Interface.Controls.Behaviors
         {
             var vm = (InventoryDataGridViewModel)AssociatedObject.DataContext;
             vm.SelectedItems = AssociatedObject.SelectedItems.Cast<ProductDataViewModel>();
+
+            if (AssociatedObject.SelectedItems.Count <= 1){
+                AssociatedObject.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+                return;
+            }
+            AssociatedObject.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
         }
 
         private void InventoryDataGridSelect_SwitchSelectedItem()

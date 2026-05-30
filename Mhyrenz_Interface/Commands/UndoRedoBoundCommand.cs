@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Commands
 {
+   
     public class UndoRedoBoundCommand : IUndoableCommand
     {
         public IUndoRedoBound Command { get; private set; }

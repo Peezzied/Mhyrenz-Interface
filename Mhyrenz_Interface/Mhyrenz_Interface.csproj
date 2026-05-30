@@ -85,6 +85,11 @@
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
@@ -359,6 +364,9 @@
     <Reference Include="nunit.framework.legacy, Version=4.4.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.4.4.0\lib\net462\nunit.framework.legacy.dll</HintPath>
     </Reference>
+    <Reference Include="ObservableCollections, Version=3.3.4.0, Culture=neutral, PublicKeyToken=df4c250b14d82627, processorArchitecture=MSIL">
+      <HintPath>..\packages\ObservableCollections.3.3.4\lib\netstandard2.0\ObservableCollections.dll</HintPath>
+    </Reference>
     <Reference Include="SkiaSharp, Version=2.88.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.2.88.9\lib\net462\SkiaSharp.dll</HintPath>
     </Reference>
@@ -467,6 +475,7 @@
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
     <Compile Include="Commands\IUndoRedoBound.cs" />
+    <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
     <Compile Include="Commands\SaleBoundPurchaseCommand.cs" />
     <Compile Include="Commands\ProductVMCommandNestedProp.cs" />
     <Compile Include="Commands\CreateSessionCommand.cs" />
@@ -547,11 +556,14 @@
     <Compile Include="Core\BaseAsyncCommand.cs" />
     <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Controls\Columns\ColumnType.cs" />
+    <Compile Include="Core\ITrackPropertyChanged.cs" />
     <Compile Include="Core\ServiceCollectionExtensions.cs" />
     <Compile Include="Core\InventoryDataGridSettingsProvider.cs" />
-    <Compile Include="Core\ObservableDictionary.cs" />
     <Compile Include="Core\InventorySettingsProvider.cs" />
     <Compile Include="Core\PrimativeNotifyProperty.cs" />
+    <Compile Include="Core\SourceCollection.cs" />
+    <Compile Include="Core\TrackedViewModel.cs" />
+    <Compile Include="Core\TrackPropertyHelper.cs" />
     <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\SmartObservableCollection.cs" />
     <Compile Include="Core\ValidationAttributes.cs" />
@@ -751,6 +763,7 @@
     </EmbeddedResource>
     <Resource Include="Fonts\Geist.ttf" />
     <Resource Include="Fonts\Inter.ttf" />
+    <None Include=".editorconfig" />
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -781,6 +794,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\Splash.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.resources.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />
