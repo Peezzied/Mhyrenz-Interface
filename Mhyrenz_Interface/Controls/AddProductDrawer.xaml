@@ -24,7 +24,6 @@
             <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}, IsAsync=True}" Height="31"/>
         </DataTemplate>
 
-        <converters:DoubleToCurrencyStringConverter x:Key="DoubleToCurrencyStringConverter"/>
         <Style x:Key="NumericUpDownExtendBaseStyle" BasedOn="{StaticResource NumericUpDownBaseStyle}" TargetType="hc:NumericUpDown">
             <Setter Property="hc:InfoElement.ContentHeight" Value="{x:Static system:Double.NaN}"/>
             <Setter Property="hc:InfoElement.MinContentHeight" Value="{StaticResource DefaultControlHeight}"/>
@@ -45,7 +44,7 @@
                                 <TextBlock hc:TextBlockAttach.AutoTooltip="True" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="{Binding Path=(hc:InfoElement.Title),RelativeSource={RelativeSource TemplatedParent}}"/>
                             </DockPanel>
                             <Grid Grid.Row="1" SnapsToDevicePixels="true" x:Name="root" >
-                                <mah:NumericUpDown attach:ValidationHelper.HasError="{Binding Path=(attach:ParentValidationHelper.HasError), RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}" TextAlignment="Center" Culture="en-PH" StringFormat="{Binding Path=(local:NumericUpDownEx.StringFormat),RelativeSource={RelativeSource TemplatedParent}}" Minimum="0">
+                                <mah:NumericUpDown attach:ValidationHelper.HasError="{Binding Path=(attach:ParentValidationHelper.HasError), RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}" TextAlignment="Center" StringFormat="{Binding Path=(local:NumericUpDownEx.StringFormat),RelativeSource={RelativeSource TemplatedParent}}" Minimum="0">
                                     <mah:NumericUpDown.Value>
                                         <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" NotifyOnValidationError="True">
                                             <Binding.ValidationRules>

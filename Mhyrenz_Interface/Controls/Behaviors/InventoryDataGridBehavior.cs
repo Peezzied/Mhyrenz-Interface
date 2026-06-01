@@ -74,8 +74,6 @@ namespace Mhyrenz_Interface.Controls.Behaviors
                 {
                     inputBox.Focus();
                     Keyboard.Focus(inputBox);
-
-                    AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>().GetCell = () => cell;
                 }
 
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);

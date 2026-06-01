@@ -19,6 +19,6 @@
             </Grid.RowDefinitions>
             <local:SaleDataGrid Grid.Row="0"/>
         </Grid>
-        <local:InventoryDataGrid DataContext="{Binding ContentViewModel}" Grid.Column="1" Layout="Compacted" />
+        <local:InventoryDataGrid DataContext="{Binding InventoryDataGridViewModel}" Grid.Column="1" Layout="Compacted" />
     </Grid>
 </UserControl>

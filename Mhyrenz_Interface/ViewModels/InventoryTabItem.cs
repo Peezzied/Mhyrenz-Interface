@@ -187,7 +187,7 @@ namespace Mhyrenz_Interface.ViewModels
                     command: _directPurchaseCommand(),
                     propertyChangeHandler: handlePropChange,
                     currentViewIn: typeof(InventoryView)
-                ));
+                )); 
             }
 
             TrackPropertyHelper.Build(_inventoryStore, viewModel.Item.Id, args.PropertyName)

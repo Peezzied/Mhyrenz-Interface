@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Data;
-using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
-using Mhyrenz_Interface.Domain.Services.SalesRecordService;
-using Mhyrenz_Interface.Domain.State;
-using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.ViewModels;
-using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.Extensions.DependencyInjection;
-using ObservableCollections;
 
 namespace Mhyrenz_Interface.State
 {
@@ -22,13 +14,8 @@ namespace Mhyrenz_Interface.State
     {
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly InventorySettingsProvider _inventorySettingsProvider;
-        private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
         private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
-        private readonly ICheckoutService _checkoutService;
-        private readonly ISessionStore _sessionStore;
-        private readonly INavigationServiceEx _navigationService;
-        private readonly NavigationViewModelFactory _navigationViewModelFactory;
 
         public SourceCollection<int, ProductDataViewModel> Store { get; } = new SourceCollection<int, ProductDataViewModel>(
             v => v.Item.Id);
@@ -42,23 +29,13 @@ namespace Mhyrenz_Interface.State
         public InventoryStore(
             IUndoRedoManager undoRedoManager,
             InventorySettingsProvider inventorySettingsProvider,
-            CreateCommand<DirectPurchaseCommand> directPurchaseCommand,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
-            IProductService productService,
-            ICheckoutService checkoutService,
-            ISessionStore sessionStore,
-            INavigationServiceEx navigationServiceEx,
-            NavigationViewModelFactory navigationViewModelFactory)
+            IProductService productService)
         {
             _undoRedoManager = undoRedoManager;
             _inventorySettingsProvider = inventorySettingsProvider;
-            _directPurchaseCommand = directPurchaseCommand;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
-            _checkoutService = checkoutService;
-            _sessionStore = sessionStore;
-            _navigationService = navigationServiceEx;
-            _navigationViewModelFactory = navigationViewModelFactory;
         }
 
         #region "Lifecycle and Instantiation"
@@ -123,13 +100,26 @@ namespace Mhyrenz_Interface.State
             return displayProducts;
         }
 
+        public void PurchaseProduct(int productId, int amount)
+        {
+            if (Store.TryGetValue(productId, out var product))
+            {
+                product.Purchase = amount;
+
+                PurchaseEvent?.Invoke(this, new InventoryStoreEventArgs
+                {
+                    ProductId = productId,
+                    Product = product
+                });
+            }
+        }
+
     }
 
     public class InventoryStoreEventArgs
     {
         public int ProductId { get; set; }
         public ProductDataViewModel Product { get; set; }
-        public string PropertyName { get; internal set; }
     }
 }
 

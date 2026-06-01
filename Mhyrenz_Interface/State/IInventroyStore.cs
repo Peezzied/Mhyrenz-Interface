@@ -26,5 +26,6 @@ namespace Mhyrenz_Interface.State
         Task InitializeAsync();
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);
         IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products);
+        void PurchaseProduct(int productId, int amount);
     }
 }

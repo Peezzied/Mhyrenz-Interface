@@ -52,7 +52,7 @@
                                             <hc:Col Span="8">
                                                 <hc:UniformSpacingPanel Spacing="7">
                                                     <iconPacks:PackIconMaterial Kind="Cash"/>
-                                                    <TextBlock d:Text="P100" Text="{Binding Price, StringFormat=C, ConverterCulture=en-PH}" FontSize="16"/>
+                                                    <TextBlock d:Text="P100" Text="{Binding Price, StringFormat=C}" FontSize="16"/>
                                                 </hc:UniformSpacingPanel>
                                             </hc:Col>
                                             <hc:Col Span="8">
@@ -104,8 +104,8 @@
                             <Setter Property="FontFamily" Value="{StaticResource Geist}"/>
                         </Style>
                     </hc:SimpleStackPanel.Resources>
-                    <TextBlock d:Text="P0" Text="{Binding LastTotalPrice, StringFormat=C, ConverterCulture=en-PH}" FontSize="16"/>
-                    <TextBlock d:Text="P100" Text="{Binding CurrentTotalPrice, StringFormat=C, ConverterCulture=en-PH}" FontSize="28"/>
+                    <TextBlock d:Text="P0" Text="{Binding LastTotalPrice, StringFormat=C}" FontSize="16"/>
+                    <TextBlock d:Text="P100" Text="{Binding CurrentTotalPrice, StringFormat=C}" FontSize="28"/>
                 </hc:SimpleStackPanel>
             </hc:UniformSpacingPanel>
         </Grid>

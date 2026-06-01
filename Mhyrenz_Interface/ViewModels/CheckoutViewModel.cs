@@ -4,20 +4,18 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Dragablz;
-using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels.Factory;
 using Microsoft.EntityFrameworkCore.Internal;
+using ObservableCollections;
 using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -27,11 +25,13 @@ namespace Mhyrenz_Interface.ViewModels
 
         public CheckoutViewModel(INavigationServiceEx navigationServiceEx, ICheckoutService checkoutService,
             ISessionStore sessionStore,
+            IInventoryStore inventoryStore,
             CreateViewModel<SaleTabItem> saleTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory) : base(navigationServiceEx)
         {
             _inventoryDataGridFactory = inventoryDataGridFactory;
             _sessionStore = sessionStore;
+            _inventoryStore = inventoryStore;
             _checkoutService = checkoutService;
             _saleTabItemFactory = saleTabItemFactory;
 
@@ -60,6 +60,10 @@ namespace Mhyrenz_Interface.ViewModels
             }
 
             var inventoryDataGrid = _inventoryDataGridFactory(this);
+            inventoryDataGrid.InventoryView.AttachFilter(e => e.NetQty > 0);
+            inventoryDataGrid.IsReadOnly = true;
+
+            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
 
             SaleTabItems.AddRange(sales.Select(s =>
             {
@@ -72,9 +76,16 @@ namespace Mhyrenz_Interface.ViewModels
             }));
         }
 
+        private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
+        {
+            SelectedItem.InventoryDataGridViewModel.InventoryView
+                .AttachFilter(p => p.NetQty > 0);
+        }
+
         private readonly HashSet<int> _initializedTabs = new HashSet<int>();
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridFactory;
         private readonly ISessionStore _sessionStore;
+        private readonly IInventoryStore _inventoryStore;
         private readonly ICheckoutService _checkoutService;
         private readonly CreateViewModel<SaleTabItem> _saleTabItemFactory;
 
@@ -93,12 +104,11 @@ namespace Mhyrenz_Interface.ViewModels
                 _selectedItem = value;
 
                 if (_selectedItem != null
-                    && !_initializedTabs.Contains(_selectedItem.Sale.Id)
-                    && _selectedItem.Sale.Transactions.Count > 0)
+                    && !_initializedTabs.Contains(_selectedItem.Sale.Id))
                 {
                     App.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _selectedItem.LoadTransactions(); // FIXME delayed Transactions binding
+                        _selectedItem.LoadTransactions();
                     }), DispatcherPriority.Background);
                     _initializedTabs.Add(_selectedItem.Sale.Id);
                 }
@@ -159,6 +169,11 @@ namespace Mhyrenz_Interface.ViewModels
 
             SaleTabItems.Add(item);
             SelectedItem = item;
+        }
+
+        public override void Dispose()
+        {
+            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
         }
     }
 }

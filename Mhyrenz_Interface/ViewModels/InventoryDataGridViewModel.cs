@@ -23,8 +23,6 @@ namespace Mhyrenz_Interface.ViewModels
     {
         public NotifyCollectionChangedSynchronizedViewList<ProductDataViewModel> Inventory { get; }
 
-        public event Action<ActionType> UndoRedoEvent;
-
         public event Action CommitEdits;
         public ICommand DeleteCommand { get; set; }
 
@@ -43,98 +41,12 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public IEnumerable<DataGridColumn> DataGridColumnOwner { get; set; }
-
-        private object _selectedItem;
-        public object SelectedItem
-        {
-            get => _selectedItem;
-            set
-            {
-                _selectedItem = value;
-                OnPropertyChanged(nameof(SelectedItem));
-            }
-        }
-
         public ObservableDictionary<string, ColumnSettingViewModel> ColumnsSettings { get; set; }
-
-        private bool _idColumn;
-        public bool IdColumn
-        {
-            get => _idColumn;
-            set
-            {
-                _idColumn = value;
-                OnPropertyChanged(nameof(IdColumn));
-            }
-        }
-
-        private bool _genericNameColumn;
-        public bool GenericNameColumn
-        {
-            get => _genericNameColumn;
-            set
-            {
-                _genericNameColumn = value;
-                OnPropertyChanged(nameof(GenericNameColumn));
-            }
-        }
-
-        private bool _batchColumn;
-        public bool BatchColumn
-        {
-            get => _batchColumn;
-            set
-            {
-                _batchColumn = value;
-                OnPropertyChanged(nameof(BatchColumn));
-            }
-        }
-
-        private bool _expiryColumn;
-        public bool ExpiryDateColumn
-        {
-            get => _expiryColumn;
-            set
-            {
-                _expiryColumn = value;
-                OnPropertyChanged(nameof(ExpiryDateColumn));
-            }
-        }
-
-        private bool _supplierColumn;
-        public bool SupplierColumn
-        {
-            get => _supplierColumn;
-            set
-            {
-                _supplierColumn = value;
-                OnPropertyChanged(nameof(SupplierColumn));
-            }
-        }
-
-        private bool _barcodeColumn;
-        public bool BarcodeColumn
-        {
-            get
-            {
-                return _barcodeColumn;
-            }
-            set
-            {
-                _barcodeColumn = value;
-                OnPropertyChanged(nameof(BarcodeColumn));
-            }
-        }
-
 
         public ObservableDictionary<string, InventorySettings.ColumnSchema> ColumnExtras { get; set; }
 
         public SelectionRowsInfo SelectionInfo { get; set; }
 
-        public Func<DataGridCell> GetCell { get; set; }
-
-        public event Action<ProductDataViewModel> Purchased;
         public event Action<bool> SelectedItemsChanged;
         public event Action SwitchSelectedItem;
         public event Action OnLoad;
@@ -142,21 +54,9 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
 
         public ISynchronizedView<ProductDataViewModel, ProductDataViewModel> InventoryView { get; private set; }
-        public ICommand ToggleColumnCommand { get; }
         public bool IsEditCancelled { get; private set; }
 
         private readonly IUndoRedoManager _undoRedoManager;
-
-        public class SelectionRowsInfo
-        {
-            public SelectionRowsInfo(int[] items, bool canSelectTab = true)
-            {
-                Items = items;
-                CanSelect = canSelectTab;
-            }
-            public int[] Items { get; set; }
-            public bool CanSelect { get; set; }
-        }
 
         public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IInventoryStore inventoryStore, CreateCommand<DeleteCommand> deleteCommand, NavigationViewModel viewHost)
         {
@@ -170,11 +70,21 @@ namespace Mhyrenz_Interface.ViewModels
             DeleteCommand = deleteCommand();
         }
 
+        private bool _isReadOnly = false;
+        public bool IsReadOnly
+        {
+            get => _isReadOnly;
+            set
+            {
+                _isReadOnly = value;
+                OnPropertyChanged(nameof(IsReadOnly));
+            }
+        }
+
         public void Load()
         {
             // FIXME: the subscription may cause the lag
             _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
-            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
             IsEditCancelled = false;
             OnLoad?.Invoke();
         }
@@ -184,7 +94,6 @@ namespace Mhyrenz_Interface.ViewModels
             IsEditCancelled = true;
             CommitEdits?.Invoke();
             _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
-            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;  
 
         }
 
@@ -198,8 +107,7 @@ namespace Mhyrenz_Interface.ViewModels
         #region "Event handlers"
         private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
         {
-            // TODO apply and evaluate IsReadonly flag
-            if (e.CurrentView is NavigationViewModel inventoryGridHost)
+            if (e.CurrentView is NavigationViewModel inventoryGridHost && !IsReadOnly)
             {
                 App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -207,14 +115,17 @@ namespace Mhyrenz_Interface.ViewModels
                 }), System.Windows.Threading.DispatcherPriority.Input);
             }
         }
-
-        private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
-        {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Purchased?.Invoke(e.Product);
-            }), System.Windows.Threading.DispatcherPriority.Background);
-        }
         #endregion
+
+        public class SelectionRowsInfo
+        {
+            public SelectionRowsInfo(int[] items, bool canSelectTab = true)
+            {
+                Items = items;
+                CanSelect = canSelectTab;
+            }
+            public int[] Items { get; set; }
+            public bool CanSelect { get; set; }
+        }
     }
 }

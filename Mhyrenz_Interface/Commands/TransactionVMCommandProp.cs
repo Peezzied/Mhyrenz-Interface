@@ -23,12 +23,14 @@ namespace Mhyrenz_Interface.Commands
         private readonly ICommand _command;
         private int _productId;
         private readonly int _saleId;
+        private readonly int? _transactionId;
 
-        public TransactionVMCommandProp(int saleId, int productId, ChangedArgs args, TrackPropertyHelper.Setter setter, ICommand command, Action propertyChangeHandler, Type currentViewIn) : 
+        public TransactionVMCommandProp(int saleId, int productId, ChangedArgs args, TrackPropertyHelper.Setter setter, ICommand command, Action propertyChangeHandler, Type currentViewIn, int? transactionId) : 
             base(args, setter, propertyChangeHandler, currentViewIn)
         {
             _productId = productId;
             _saleId = saleId;
+            _transactionId = transactionId;
             _command = command;
             SideEffect = SideEffectHandler;
         }
@@ -53,10 +55,11 @@ namespace Mhyrenz_Interface.Commands
                 return false;
 
             _command.Execute(new SaleBoundPurchaseCommand.DTO()
-            {
+            { 
                 Amount = Math.Abs(oldValue - newValue),
                 SaleId = _saleId,
                 ProductId = _productId,
+                TransactionId = _transactionId,
                 Method = method,
             });
 

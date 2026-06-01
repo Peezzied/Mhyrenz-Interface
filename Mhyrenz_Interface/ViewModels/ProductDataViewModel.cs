@@ -122,7 +122,6 @@ namespace Mhyrenz_Interface.ViewModels
 
         public int QtyMin => Purchase;
 
-        //private int _cachedPurchase;
         private int _purchase;
         public int PurchaseDefaultEdit
         {
@@ -133,9 +132,7 @@ namespace Mhyrenz_Interface.ViewModels
                 if (_purchase != value)
                 {
                     SetTrackedProperty(ref _purchase, value, nameof(PurchaseDefaultEdit));
-
-                    OnPropertyChanged(nameof(NetQty));
-                    OnPropertyChanged(nameof(PurchaseMax));
+                    OnPropertyChanged(null);
                 }
                 _purchase = 0;
             }
@@ -150,16 +147,25 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (Item.Purchase != value)
                 {
-                    SetTrackedProperty(ref _purchaseNormal, value - Item.Purchase, nameof(PurchaseNormalEdit));
-
-                    OnPropertyChanged(nameof(NetQty));
-                    OnPropertyChanged(nameof(PurchaseMaxNormal));
+                    SetTrackedProperty(_purchaseNormal + Item.Purchase, value - Item.Purchase, 
+                        v => _purchaseNormal = v, nameof(PurchaseNormalEdit));
+                    OnPropertyChanged(null);
                 }
             }
         }
 
-        public int Purchase => Item.Purchase;
-
+        public int Purchase
+        {
+            get => Item.Purchase;
+            internal set
+            {
+                if (Item.Purchase != value)
+                {
+                    Item.Purchase = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
 
         public string Name
         {

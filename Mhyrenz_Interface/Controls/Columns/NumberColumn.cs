@@ -18,9 +18,9 @@ namespace Mhyrenz_Interface.Controls.Columns
         public static readonly DependencyProperty NumberControlStyleProperty =
             DependencyProperty.Register(nameof(NumberControlStyle), typeof(Style), typeof(NumberColumn), new PropertyMetadata(null));
 
-
+        
         private BindingBase _binding;
-        public virtual BindingBase DisplayBinding
+        public BindingBase DisplayBinding
         {
             get
             {
@@ -42,7 +42,6 @@ namespace Mhyrenz_Interface.Controls.Columns
         public NumberColumn()
         {
             TextAlignment = TextAlignment.Center;
-            Culture = new CultureInfo("en-Ph");
         }
 
 
@@ -58,7 +57,7 @@ namespace Mhyrenz_Interface.Controls.Columns
         {
             var textBlock = new TextBlock
             {
-                TextAlignment = TextAlignment.Center,
+                TextAlignment = TextAlignment,
                 FontSize = FontSize,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Style = Application.Current.TryFindResource("MahApps.Styles.TextBlock.DataGrid") as Style ?? default

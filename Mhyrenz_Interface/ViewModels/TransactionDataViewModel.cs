@@ -49,16 +49,40 @@ namespace Mhyrenz_Interface.ViewModels
 			get => _qty;
 			set
 			{
-                SetTrackedProperty(ref _qty, value, nameof(Qty));
-                OnPropertyChanged(null);
+                if (_qty != value)
+                {
+                    SetTrackedProperty(ref _qty, value, nameof(Qty));
+                    OnPropertyChanged(null);
+                }
             }
 		}
 
-		public bool IsPharma => Transaction.Product.IsPharma;
+        private int _qtyIncrementEdit;
+        public int QtyIncrementEdit
+        {
+            get => _qtyIncrementEdit;
+
+            set
+            {
+                if (_qtyIncrementEdit != value)
+                {
+                    SetTrackedProperty(ref _qtyIncrementEdit, value, nameof(QtyIncrementEdit));
+                    OnPropertyChanged(null);
+                }
+                _qtyIncrementEdit = 0;
+            }
+        }
+
+        public int MaxQty => Product.NetQty;
+
+        public int MaxIncrementQty => Product.NetQty;
+
+        public bool IsPharma => Transaction.Product.IsPharma;
 
         public bool IsPrescribed { get; set; }
 
-		public Product Product => Transaction.Product; 
+		public Product Product => Transaction.Product;
+
 
         public decimal RetailPrice => Transaction.RetailPrice;
 

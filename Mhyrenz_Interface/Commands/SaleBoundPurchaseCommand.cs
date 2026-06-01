@@ -31,6 +31,7 @@ namespace Mhyrenz_Interface.Commands
             public int SaleId { get; set; }
             public int ProductId { get; set; }
             public Type Method { get; set; }
+            public int? TransactionId { get; internal set; }
         }
 
         public override async Task ExecuteAsync(object parameter)
@@ -48,7 +49,7 @@ namespace Mhyrenz_Interface.Commands
                     _transactionId = result.Transaction.Id;
                     break;
                 case DTO.Type.Subtract:
-                    _transactionStore.AddToSale(await _checkoutService.Subtract(DTO.SaleId, _transactionId, DTO.Amount));
+                    _transactionStore.AddToSale(await _checkoutService.Subtract(DTO.SaleId, DTO.TransactionId ?? _transactionId, DTO.Amount));
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported method: {DTO.Method}");

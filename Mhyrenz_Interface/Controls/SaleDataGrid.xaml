@@ -6,10 +6,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Controls.Columns"
+             xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Controls.Columns"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
              xmlns:attached="clr-namespace:Mhyrenz_Interface.Controls.Attached"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
              mc:Ignorable="d" 
@@ -23,8 +25,25 @@
               dd:DragDrop.IsDropTarget="True"
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
               dd:DragDrop.UseDropTargetHint="True">
+        <DataGrid.Resources>
+            <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
+            
+            <Style x:Key="QtyStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+                <Setter Property="Value" Value="{Binding QtyIncrementEdit, UpdateSourceTrigger=Explicit}"/>
+                <Setter Property="Maximum" Value="{Binding MaxIncrementQty}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
+                        <DataTrigger.Setters>
+                            <Setter Property="Maximum" Value="{Binding MaxQty}"/>
+                            <Setter Property="HideUpDownButtons" Value="True"/>
+                            <Setter Property="Value" Value="{Binding Qty, StringFormat={}{0}x, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.Resources>
         <DataGrid.Columns>
-            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" Maximum="{Binding Product.NetQty}" Binding="{Binding Qty, StringFormat={}{0}x, UpdateSourceTrigger=Explicit}"/>
+            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}" NumberControlStyle="{StaticResource QtyStyle}"/>
             <DataGridTextColumn IsReadOnly="True" Header="Item Name" Width="*" FontSize="16" Binding="{Binding Product.Name}"/>
             <columns:NumberColumn IsReadOnly="True" Header="Price" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
             <columns:NumberColumn IsReadOnly="True" Header="Total" Width="100" Binding="{Binding TotalPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>

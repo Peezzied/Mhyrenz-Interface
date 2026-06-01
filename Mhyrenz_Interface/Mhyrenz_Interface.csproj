@@ -549,7 +549,6 @@
     </Compile>
     <Compile Include="Converters\BarcodeToImageConverter.cs" />
     <Compile Include="Converters\OrConverter.cs" />
-    <Compile Include="Converters\DoubleToCurrencyStringConverter.cs" />
     <Compile Include="Converters\DetailsTextNoneConverter.cs" />
     <Compile Include="Converters\EmptyStringToZero.cs" />
     <Compile Include="Converters\PurchaseToGreenConverter.cs" />

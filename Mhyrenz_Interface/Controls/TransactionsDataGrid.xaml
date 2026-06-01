@@ -57,7 +57,7 @@
                     <hc:UniformSpacingPanel Margin="12,0" Grid.Row="2" Spacing="10">
                         <hc:UniformSpacingPanel Spacing="5" Width="70">
                             <iconPacks:PackIconMaterial Kind="Cash"/>
-                            <TextBlock Text="{Binding Price, StringFormat=C, ConverterCulture=en-Ph}" />
+                            <TextBlock Text="{Binding Price, StringFormat=C}" />
                         </hc:UniformSpacingPanel>
                         <hc:UniformSpacingPanel Spacing="5" Width="65">
                             <iconPacks:PackIconMaterial Kind="Cart"/>

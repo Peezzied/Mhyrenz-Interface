@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Web.Util;
+﻿using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using GongSolutions.Wpf.DragDrop;
-using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls;
 using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.Views;
 using ObservableCollections;
 using static Mhyrenz_Interface.Core.TrackPropertyHelper;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Setter = Mhyrenz_Interface.Core.TrackPropertyHelper.Setter;
 
 namespace Mhyrenz_Interface.ViewModels
@@ -29,7 +20,7 @@ namespace Mhyrenz_Interface.ViewModels
         public SaleTabItem(
             string header,
             Sale sale,
-            InventoryDataGridViewModel viewModel,
+            InventoryDataGridViewModel inventoryDataGridViewModel,
             IUndoRedoManager undoRedoManager,
             ITransactionStore transactionStore,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
@@ -40,7 +31,8 @@ namespace Mhyrenz_Interface.ViewModels
             _transactionStore = transactionStore;
             Sale = sale;
             Header = header;
-            ContentViewModel = viewModel;
+
+            InventoryDataGridViewModel = inventoryDataGridViewModel;
 
             _saleBoundPurchaseCommand = saleBoundPurchaseCommand;
 
@@ -63,7 +55,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public string Header { get; set; }
 
-        public InventoryDataGridViewModel ContentViewModel { get; }
+        public InventoryDataGridViewModel InventoryDataGridViewModel { get; }
 
         private readonly CreateCommand<SaleBoundPurchaseCommand> _saleBoundPurchaseCommand;
 
@@ -71,7 +63,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public InventoryDragHandler InventoryDragHandler { get; }
 
-        private CreateCommand<TransactionVMCommandQty> _updateTransactionCommand;
+        private readonly CreateCommand<TransactionVMCommandQty> _updateTransactionCommand;
         private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
@@ -102,7 +94,7 @@ namespace Mhyrenz_Interface.ViewModels
             foreach (var (Value, View) in view.Filtered)
             {
                 View.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
-            } 
+            }
         }
 
         private void View_ViewChanged(in SynchronizedViewChangedEventArgs<TransactionDataViewModel, TransactionDataViewModel> e)
@@ -124,11 +116,19 @@ namespace Mhyrenz_Interface.ViewModels
                 return;
 
             var viewModel = sender as TransactionDataViewModel;
-            NewMethod(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue);
+            NewMethod(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id);
         }
 
-        public void NewMethod(string propertyName, int productId, object oldValue, object newValue = null)
+        public void NewMethod(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
         {
+            TrackPropertyHelper.Build(_transactionStore, productId, propertyName)
+                .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, getter, key) =>
+                {
+                    oldValue = 0;
+                    method(setter, getter, key);
+                })
+                .Track(nameof(TransactionDataViewModel.Qty), method);
+
             void method(Setter setter, Getter getter, int key)
             {
                 void handlePropChange()
@@ -139,6 +139,7 @@ namespace Mhyrenz_Interface.ViewModels
                 _undoRedoManager.Execute(new TransactionVMCommandProp(
                     saleId: Sale.Id,
                     productId: productId,
+                    transactionId: transactionId,
                     args: new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
                     {
                         OldValue = oldValue,
@@ -154,9 +155,6 @@ namespace Mhyrenz_Interface.ViewModels
                     currentViewIn: typeof(CheckoutView)
                 ));
             }
-
-            TrackPropertyHelper.Build(_transactionStore, productId, propertyName)
-                .Track(nameof(TransactionDataViewModel.Qty), method);
         }
     }
 
