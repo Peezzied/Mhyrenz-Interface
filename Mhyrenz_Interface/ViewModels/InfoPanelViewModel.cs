@@ -17,9 +17,9 @@ namespace Mhyrenz_Interface.ViewModels
             _inventoryStore.Loaded += InventoryStore_Loaded;
 
             LoadCards(
-                sales: (double)_inventoryStore.Products.Sum(p => p.NetRetailPrice),
-                profit: (double)_inventoryStore.Products.Sum(p => p.Item.Profit),
-                purchase: _inventoryStore.Products.Sum(p => p.Purchase));
+                sales: (double)_inventoryStore.Store.Sum(p => p.NetRetailPrice),
+                profit: (double)_inventoryStore.Store.Sum(p => p.Item.Profit),
+                purchase: _inventoryStore.Store.Sum(p => p.Purchase));
         }
 
 
@@ -63,13 +63,13 @@ namespace Mhyrenz_Interface.ViewModels
                 switch (item.Type)
                 {
                     case InfoCard.CardType.Sales:
-                        item.Content = ((double)_inventoryStore.Products.Sum(p => p.NetRetailPrice)).ToString("C");
+                        item.Content = ((double)_inventoryStore.Store.Sum(p => p.NetRetailPrice)).ToString("C");
                         break;
                     case InfoCard.CardType.Profit:
-                        item.Content = ((double)_inventoryStore.Products.Sum(p => p.Item.Profit)).ToString("C");
+                        item.Content = ((double)_inventoryStore.Store.Sum(p => p.Item.Profit)).ToString("C");
                         break;
                     case InfoCard.CardType.Purchases:
-                        item.Content = _inventoryStore.Products.Sum(p => p.Purchase).ToString("N0");
+                        item.Content = _inventoryStore.Store.Sum(p => p.Purchase).ToString("N0");
                         break;
                     default:
                         break;

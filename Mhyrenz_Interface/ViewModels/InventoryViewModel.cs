@@ -343,7 +343,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             await Task.Run(() =>
             {
-                _reportService.Export(_inventoryStore.Products.Select(p => p.Item), _sessionStore.CurrentSession, App.Current.Dispatcher);
+                _reportService.Export(_inventoryStore.Store.Select(p => p.Item), _sessionStore.CurrentSession, App.Current.Dispatcher);
             });
 
             Growl.Info(new GrowlInfo

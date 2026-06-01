@@ -98,7 +98,7 @@ namespace Mhyrenz_Interface.ViewModels
                 {
                     App.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _selectedItem.LoadTransactions();
+                        _selectedItem.LoadTransactions(); // FIXME delayed Transactions binding
                     }), DispatcherPriority.Background);
                     _initializedTabs.Add(_selectedItem.Sale.Id);
                 }
@@ -127,7 +127,7 @@ namespace Mhyrenz_Interface.ViewModels
                     return;
                 }
 
-                if (saleTabItem.Sales.Count > 0)
+                if (saleTabItem.Transactions.Count > 0)
                 {
                     MessageBoxResult secondPrompt = MessageBox.Show(
                         "This action cannot be undone.  \nAre you sure you want to permanently discard this sale?",

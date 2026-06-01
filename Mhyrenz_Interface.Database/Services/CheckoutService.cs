@@ -259,6 +259,20 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
+        public async Task<Transaction> Update(int id, Transaction product)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                product.Id = id;
+
+                context.Transactions.Update(product);
+
+                await context.SaveChangesAsync();
+
+                return product;
+            }
+        }
+
         private static async Task LoadSale(InventoryDbContext context, Sale sale)
         {
             await context.Entry(sale)

@@ -78,7 +78,7 @@ namespace Mhyrenz_Interface.ViewModels
         {
             Item = product;
 
-            var newTotal = (double)_inventoryStore.Products.Sum(i => i.NetRetailPrice);
+            var newTotal = (double)_inventoryStore.Store.Sum(i => i.NetRetailPrice);
             if (newTotal != CurrentTotalPrice)
                 LastTotalPrice = CurrentTotalPrice;
             CurrentTotalPrice = newTotal;

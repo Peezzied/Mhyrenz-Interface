@@ -22,6 +22,7 @@ namespace Mhyrenz_Interface
         {
             _serviceProvider = serviceProvider;
             StartupManager.Register(new StartupManager.Action("Inventory Store", "Fetching data from database", async (sp) => await InventoryStore.LoadInventoryStore(sp)));
+            StartupManager.Register(new StartupManager.Action("Transaction Store", "Fetching data from database", async (sp) => await TransactionStore.LoadTransactionStore(sp)));
             StartupManager.Register(new StartupManager.Action("Categories Store", "Categorizing inventory from cache", async (sp) => await CategoryStore.LoadCategoryStore(sp)));
             StartupManager.Register(new StartupManager.Action("Utility", "Deleting items",
                 async (sp) =>
@@ -32,7 +33,7 @@ namespace Mhyrenz_Interface
             StartupManager.Register(new StartupManager.Action("Barcode Image Caching", "Caching barcodes",
                 async (sp) =>
                 {
-                    var products = sp.GetRequiredService<IInventoryStore>().Products.Select(p => p.Item);
+                    var products = sp.GetRequiredService<IInventoryStore>().Store.Select(p => p.Item);
                     var barcodeCache = sp.GetRequiredService<IBarcodeImageCache>();
                     await BarcodeImageCache.LoadBarcodeImageCache(products, barcodeCache);
                 }));

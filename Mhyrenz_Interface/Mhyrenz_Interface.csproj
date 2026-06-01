@@ -485,7 +485,9 @@
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\DirectPurchaseCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
+    <Compile Include="Commands\TransactionVMCommandProp.cs" />
     <Compile Include="Commands\UndoRedoBoundCommand.cs" />
+    <Compile Include="Commands\UpdateTransactionCommand.cs" />
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
@@ -574,8 +576,11 @@
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
     <Compile Include="State\ISessionStore.cs" />
+    <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\IUndoManager.cs" />
+    <Compile Include="State\IViewModelStore.cs" />
     <Compile Include="State\SessionStore.cs" />
+    <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
     <Compile Include="Core\IUndoableCommand.cs" />
     <Compile Include="Commands\PropertyChangeCommand.cs" />

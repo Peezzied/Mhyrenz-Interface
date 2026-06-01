@@ -59,6 +59,7 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly InventoryDataGridSettingsProvider _inventoryDataGridSettingsProvider;
         private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
+        private readonly IInventoryStore _inventoryStore;
 
         public ICommand ToggleColumnCommand { get; }
 
@@ -72,6 +73,7 @@ namespace Mhyrenz_Interface.ViewModels
             ICategoryStore categoryStore,
             CreateCommand<UpdateProductCommand> updateProductCommandFactory,
             CreateCommand<DirectPurchaseCommand> directPurchaseCommandFactory,
+            IInventoryStore inventoryStore,
             IUndoRedoManager undoRedoManager,
             IProductService productService
             //Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> searchFilter
@@ -94,6 +96,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             _updateProductCommand = updateProductCommandFactory;
             _directPurchaseCommand = directPurchaseCommandFactory;
+            _inventoryStore = inventoryStore;
         }
 
         public void SetViewModel(InventoryDataGridViewModel inventoryDataGridViewModel)
@@ -146,7 +149,7 @@ namespace Mhyrenz_Interface.ViewModels
                 };
             }
 
-            void commonPropHandler(Setter setter, Getter getter, string propertyName)
+            void commonPropHandler(Setter setter, Getter getter, int key)
             {
 
                 void handlePropChange()
@@ -164,19 +167,21 @@ namespace Mhyrenz_Interface.ViewModels
                 ));
             }
 
-            void purchasePropHandler(Setter setter, Getter getter, string propertyName)
+            void purchasePropHandler(Setter setter, Getter getter, int key)
             {
 
                 void handlePropChange()
                 {
                     App.Current.BeginInvoke(new Action(async () =>
                     {
-                        viewModel.Item = await _productService.Get(viewModel.Item.Id);
+                        if (!_inventoryStore.Store.TryGetValue(key, out var vm))
+                            return;
+                        vm.Item = await _productService.Get(key);
                     }));
                 }
 
                 _undoRedoManager.Execute(new ProductVMCommandPurchase(
-                    viewModel,
+                    key,
                     args: changedArgs(getter()),
                     setter: setter,
                     command: _directPurchaseCommand(),
@@ -185,7 +190,7 @@ namespace Mhyrenz_Interface.ViewModels
                 ));
             }
 
-            TrackPropertyHelper.Build(sender as TrackedViewModel, args.PropertyName)
+            TrackPropertyHelper.Build(_inventoryStore, viewModel.Item.Id, args.PropertyName)
                 .Track(nameof(ProductDataViewModel.Qty), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Name), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.RetailPrice), commonPropHandler)

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Threading;
 using GongSolutions.Wpf.DragDrop.Utilities;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.ViewModels;
 using ZXing.PDF417.Internal;
 
 namespace Mhyrenz_Interface.Controls.Attached
@@ -75,6 +77,12 @@ namespace Mhyrenz_Interface.Controls.Attached
                 typeof(EventHandler<RowFlashRequestedEventArgs>),
                 typeof(DataGridFlashBehavior));
 
+        private static readonly DependencyProperty DataContextPropertyChangedHandlerProperty =
+            DependencyProperty.RegisterAttached(
+                "DataContextPropertyChangedHandler",
+                typeof(PropertyChangedEventHandler),
+                typeof(DataGridFlashBehavior));
+
         private static void OnEnabledChanged(
             DependencyObject d,
             DependencyPropertyChangedEventArgs e)
@@ -86,26 +94,95 @@ namespace Mhyrenz_Interface.Controls.Attached
             {
                 grid.Loaded += Grid_Loaded;
                 grid.Unloaded += Grid_Unloaded;
+                grid.DataContextChanged += Grid_DataContextChanged;
 
+                SubscribeDataContext(grid);
                 Subscribe(grid);
             }
             else
             {
                 grid.Loaded -= Grid_Loaded;
                 grid.Unloaded -= Grid_Unloaded;
+                grid.DataContextChanged -= Grid_DataContextChanged;
 
+                UnsubscribeDataContext(grid);
                 Unsubscribe(grid);
             }
         }
 
+        private static void Grid_DataContextChanged(
+            object sender,
+            DependencyPropertyChangedEventArgs e)
+        {
+            var grid = (DataGrid)sender;
+
+            UnsubscribeDataContext(grid, e.OldValue);
+            SubscribeDataContext(grid);
+
+            Subscribe(grid);
+        }
+
+        private static void SubscribeDataContext(DataGrid grid)
+        {
+            UnsubscribeDataContext(grid);
+
+            if (!(grid.DataContext is INotifyPropertyChanged notify))
+                return;
+
+            PropertyChangedEventHandler handler = (sender, e) =>
+            {
+                if (e.PropertyName != nameof(SaleTabItem.Transactions))
+                    return;
+
+                grid.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Subscribe(grid);
+                }), DispatcherPriority.Loaded);
+            };
+
+            notify.PropertyChanged += handler;
+
+            grid.SetValue(
+                DataContextPropertyChangedHandlerProperty,
+                handler);
+        }
+
+        private static void UnsubscribeDataContext(DataGrid grid)
+        {
+            UnsubscribeDataContext(grid, grid.DataContext);
+        }
+
+        private static void UnsubscribeDataContext(
+            DataGrid grid,
+            object dataContext)
+        {
+            var handler =
+                grid.GetValue(DataContextPropertyChangedHandlerProperty)
+                as PropertyChangedEventHandler;
+
+            if (handler != null &&
+                dataContext is INotifyPropertyChanged notify)
+            {
+                notify.PropertyChanged -= handler;
+            }
+
+            grid.ClearValue(DataContextPropertyChangedHandlerProperty);
+        }
+
         private static void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            Subscribe((DataGrid)sender);
+            var grid = (DataGrid)sender;
+
+            SubscribeDataContext(grid);
+            Subscribe(grid);
         }
 
         private static void Grid_Unloaded(object sender, RoutedEventArgs e)
         {
-            Unsubscribe((DataGrid)sender);
+            var grid = (DataGrid)sender;
+
+            UnsubscribeDataContext(grid);
+            Unsubscribe(grid);
         }
 
         private static void Subscribe(DataGrid grid)
@@ -227,7 +304,7 @@ namespace Mhyrenz_Interface.Controls.Attached
             if (row != null)
             {
                 row.IsSelected = true;
-                row.Focus(); 
+                row.Focus();
 
                 row.BringIntoView();
                 Flash(row, e);
@@ -260,7 +337,7 @@ namespace Mhyrenz_Interface.Controls.Attached
                 case SaleBoundPurchaseCommand.DTO.Type.Subtract:
                     color = Color.FromRgb(244, 67, 54);
                     break;
-                default: 
+                default:
                     throw new ArgumentOutOfRangeException(nameof(args.Method));
             }
 

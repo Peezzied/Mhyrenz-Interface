@@ -13,11 +13,8 @@ using static Mhyrenz_Interface.State.InventoryStore;
 
 namespace Mhyrenz_Interface.State
 {
-    public interface IInventoryStore
+    public interface IInventoryStore: IViewModelStore<int, ProductDataViewModel>
     {
-        SourceCollection<int, ProductDataViewModel> Products { get; }
-        ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; }
-
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
         event EventHandler<IEnumerable<ProductDataViewModel>> AddProductEvent;

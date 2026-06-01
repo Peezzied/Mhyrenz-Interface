@@ -30,9 +30,8 @@ namespace Mhyrenz_Interface.State
         private readonly INavigationServiceEx _navigationService;
         private readonly NavigationViewModelFactory _navigationViewModelFactory;
 
-        public SourceCollection<int, ProductDataViewModel> Products { get; } = new SourceCollection<int, ProductDataViewModel>(
+        public SourceCollection<int, ProductDataViewModel> Store { get; } = new SourceCollection<int, ProductDataViewModel>(
             v => v.Item.Id);
-        public ILookup<string, ProductDataViewModel> ProductsCollectionViewByCategory { get; private set; }
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
@@ -87,9 +86,9 @@ namespace Mhyrenz_Interface.State
                 .Select(product => _productsViewModelFactory(product))
                 .ToList();
 
-            Products.Clear();
+            Store.Clear();
 
-            Products.AddRange(displayProducts);
+            Store.AddRange(displayProducts);
 
             Loaded?.Invoke();
         }
@@ -108,7 +107,7 @@ namespace Mhyrenz_Interface.State
         public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
         {
             RemoveProductEvent?.Invoke(this, products);
-            Products.RemoveMany(products.Select(x => x.Item.Id));
+            Store.RemoveMany(products.Select(x => x.Item.Id));
 
         }
 
@@ -117,7 +116,7 @@ namespace Mhyrenz_Interface.State
             var displayProducts = products.Select(product => _productsViewModelFactory(product))
                 .ToList();
 
-            Products.AddRange(displayProducts);
+            Store.AddRange(displayProducts);
 
             AddProductEvent?.Invoke(this, displayProducts);
 

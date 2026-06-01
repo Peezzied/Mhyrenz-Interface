@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls.Attached;
+using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
@@ -11,7 +12,7 @@ using Mhyrenz_Interface.State;
 namespace Mhyrenz_Interface.ViewModels
 {
 
-    public class TransactionDataViewModel : BaseViewModel, IFlashRequestable
+    public class TransactionDataViewModel : TrackedViewModel, IFlashRequestable
     {
         public TransactionDataViewModel(Transaction transaction)
         {
@@ -26,11 +27,10 @@ namespace Mhyrenz_Interface.ViewModels
 			{
 				_transaction = value;
 				_qty = _transaction.Amount;
-				OnPropertyChanged(null);
+
+                OnPropertyChanged(null);
 			}
 		}
-
-		private int _qty;
 
         public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
@@ -42,14 +42,16 @@ namespace Mhyrenz_Interface.ViewModels
             return args.Completion.Task;
         }
 
+		private int _qty;
+
         public int Qty
 		{
 			get => _qty;
 			set
 			{
-				_qty = value;
-				OnPropertyChanged(nameof(Qty));
-			}
+                SetTrackedProperty(ref _qty, value, nameof(Qty));
+                OnPropertyChanged(null);
+            }
 		}
 
 		public bool IsPharma => Transaction.Product.IsPharma;

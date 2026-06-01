@@ -10,7 +10,6 @@ using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
@@ -19,7 +18,6 @@ using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
-using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.State;
@@ -57,7 +55,7 @@ namespace Mhyrenz_Interface
                 {
                     CreateServiceCollection(services, context);
                 })
-                .Build();  
+                .Build();
 
             await _appHost.StartAsync();
             ServiceProvider = _appHost.Services;
@@ -124,6 +122,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ISessionStore, SessionStore>()
                 .AddSingleton<IInventoryStore, InventoryStore>()
                 .AddSingleton<ICategoryStore, CategoryStore>()
+                .AddSingleton<ITransactionStore, TransactionStore>()
 
                 .AddSingleton<ICachePath, CachePath>()
                 .AddSingleton<IBarcodeImageCache, BarcodeImageCache>()

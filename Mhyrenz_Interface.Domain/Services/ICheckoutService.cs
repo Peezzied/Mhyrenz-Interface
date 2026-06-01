@@ -131,5 +131,6 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
         Task<Product> Subtract(int productId, Guid sessionId, int amount = 1);
+        Task<Transaction> Update(int id, Transaction product);
     }
 }

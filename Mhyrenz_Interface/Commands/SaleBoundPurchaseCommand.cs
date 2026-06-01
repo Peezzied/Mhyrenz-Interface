@@ -10,21 +10,17 @@ using Mhyrenz_Interface.Views;
 
 namespace Mhyrenz_Interface.Commands
 {
-    public class SaleBoundPurchaseCommand : BaseAsyncCommand, IUndoRedoBound
+    public class SaleBoundPurchaseCommand : BaseAsyncCommand
     {
-        private readonly IUndoRedoManager _undoRedoManager;
+        private readonly ITransactionStore _transactionStore;
         private readonly ICheckoutService _checkoutService;
         private DateTime _dateTime;
 
-        public (CheckoutResult Checkout, DTO.Type Method) Result { get; private set; }
-
         private int _transactionId;
 
-        public bool AllowBack { get; private set; } = true;
-
-        public SaleBoundPurchaseCommand(IUndoRedoManager undoRedoManager, ICheckoutService checkoutService)
+        public SaleBoundPurchaseCommand(ITransactionStore transactionStore, ICheckoutService checkoutService)
         {
-            _undoRedoManager = undoRedoManager;
+            _transactionStore = transactionStore;
             _checkoutService = checkoutService;
         }
 
@@ -37,55 +33,26 @@ namespace Mhyrenz_Interface.Commands
             public Type Method { get; set; }
         }
 
-        public override void Execute(object parameter)
-        {
-            _undoRedoManager.Push(new UndoRedoBoundCommand(this, null, typeof(CheckoutView), parameter));
-            base.Execute(parameter);
-        }
-
         public override async Task ExecuteAsync(object parameter)
         {
             var DTO = parameter as DTO;
 
             _dateTime = _dateTime == default ? DateTime.Now : _dateTime;
 
-            await Execute(DTO);
-        }
-
-        private async Task Execute(DTO DTO)
-        {
             switch (DTO.Method)
             {
                 case DTO.Type.AddNew:
                 case DTO.Type.Add:
-                    Result = (await _checkoutService.AddItem(DTO.SaleId, DTO.ProductId, DTO.Amount), DTO.Method);
-                    _transactionId = Result.Checkout.Transaction.Id;
+                    var result = await _checkoutService.AddItem(DTO.SaleId, DTO.ProductId, DTO.Amount);
+                    _transactionStore.AddToSale(result);
+                    _transactionId = result.Transaction.Id;
                     break;
                 case DTO.Type.Subtract:
-                    Result = (await _checkoutService.Subtract(DTO.SaleId, _transactionId, DTO.Amount), DTO.Method);
+                    _transactionStore.AddToSale(await _checkoutService.Subtract(DTO.SaleId, _transactionId, DTO.Amount));
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported method: {DTO.Method}");
             }
-        }
-
-        public async void Undo(object parameter)
-        {
-            var DTO = parameter as DTO;
-            DTO.Method = DTO.Type.Subtract;
-            await Execute(DTO);
-        }
-
-        public async void Redo(object parameter)
-        {
-            var DTO = parameter as DTO;
-            DTO.Method = DTO.Type.Add;
-            await Execute(parameter as DTO);
-        }
-
-        public void ExecuteRaw(object parameter)
-        {
-            base.Execute(parameter);
         }
     }
 }

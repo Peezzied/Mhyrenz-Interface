@@ -88,7 +88,7 @@ namespace Mhyrenz_Interface.Commands
         public void Redo(object parameter)
         {
             var productsMap = _products.ToHashSet();
-            var products = _inventoryStore.Products.Where(p => productsMap.Contains(p.Item.Id));
+            var products = _inventoryStore.Store.Where(p => productsMap.Contains(p.Item.Id));
             ExecuteRaw(products);
         }
 

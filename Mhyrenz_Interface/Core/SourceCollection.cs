@@ -21,6 +21,12 @@ namespace Mhyrenz_Interface.Core
 
         public int Count => Source.Count;
 
+        public IEnumerable<TKey> Keys => Lookup.Keys;
+
+        public IEnumerable<TValue> Values => Lookup.Values;
+
+        public TValue this[TKey key] => Lookup[key];
+
         public SourceCollection(Func<TValue, TKey> keySelector)
         {
             _keySelector = keySelector;
@@ -102,6 +108,11 @@ namespace Mhyrenz_Interface.Core
         {
             // TODO dispose the source collection
             throw new NotImplementedException();
+        }
+
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            return Lookup.TryGetValue(key, out value);
         }
     }
 }

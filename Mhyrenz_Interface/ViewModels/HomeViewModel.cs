@@ -151,7 +151,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
 
                 if (_categoryStore.Colors.Any())
-                    foreach (var item in _inventoryStore.Products)
+                    foreach (var item in _inventoryStore.Store)
                     {
                         item.CategoryColor = _categoryStore.Colors[item.CategoryId];
                     }

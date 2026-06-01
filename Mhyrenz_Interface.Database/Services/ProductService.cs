@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Metadata;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Domain.Models;
@@ -65,15 +66,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                     .Include(p => p.PharmaDetails)
                     .ToListAsync();
 
-                var purchases = await context.Transactions
-                    .AsNoTracking()
-                    .GroupBy(t => t.ProductId)
-                    .Select(g => new
-                    {
-                        ProductId = g.Key,
-                        Purchase = g.Sum(t => t.Amount)
-                    })
-                    .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
+                var purchases = await GetTransactions(context);
 
                 foreach (var product in products)
                 {
@@ -86,6 +79,20 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
+        private static async Task<Dictionary<int, int>> GetTransactions(InventoryDbContext context)
+        {
+            return await context.Transactions
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .GroupBy(t => t.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    Purchase = g.Sum(t => t.Amount)
+                })
+                .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
+        }
+
         public async Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<int> productIds)
         {
             return await SoftRemove(productIds, p => p.Delete());
@@ -93,7 +100,17 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
 
         public async Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<int> productIds)
         {
-            return await SoftRemove(productIds, p => p.DeleteBack());
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var purchases = await GetTransactions(context);
+                return await SoftRemove(productIds, p =>
+                {
+                    p.DeleteBack();
+                    p.Purchase = purchases.TryGetValue(p.Id, out var purchase)
+                        ? purchase
+                        : 0;
+                });
+            }
         }
 
         private async Task<IReadOnlyList<Product>> SoftRemove(IEnumerable<int> productIds, Action<Product> action)

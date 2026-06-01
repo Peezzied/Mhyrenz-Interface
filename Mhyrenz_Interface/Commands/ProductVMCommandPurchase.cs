@@ -8,10 +8,10 @@ namespace Mhyrenz_Interface.Commands
 {
     public class ProductVMCommandPurchase : ProductVMPropertyChangeCommand
     {
-        private readonly ProductDataViewModel _target;
+        private readonly int _target;
         private readonly ICommand _command;
 
-        public ProductVMCommandPurchase(ProductDataViewModel target,
+        public ProductVMCommandPurchase(int target,
             ChangedArgs args,
             TrackPropertyHelper.Setter setter,
             ICommand command,
@@ -38,7 +38,7 @@ namespace Mhyrenz_Interface.Commands
             _command.Execute(new DirectPurchaseCommand.DTO()
             {
                 Amount = Math.Abs(oldValue - newValue),
-                ProductId = _target.Item.Id,
+                ProductId = _target,
                 Method = method,
             });
 

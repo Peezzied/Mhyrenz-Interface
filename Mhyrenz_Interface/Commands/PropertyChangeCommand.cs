@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Mhyrenz_Interface.Commands
 {
 
-    public abstract class PropertyChangeCommand<R> : IUndoableCommand, IPropertyChangedCommand
+    public abstract class PropertyChangeCommand<RowInfo> : IUndoableCommand, IPropertyChangedCommand
     {
         private readonly TrackPropertyHelper.Setter _setter;
         private readonly Action _propertyChangeHandler;
@@ -58,7 +58,7 @@ namespace Mhyrenz_Interface.Commands
         {
             public object OldValue { get; set; }
             public object NewValue { get; set; }
-            public R RowInfo { get; set; }
+            public RowInfo RowInfo { get; set; }
         }
     }
 

@@ -163,7 +163,7 @@ namespace Mhyrenz_Interface.ViewModels
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
 
-            InventoryView = _inventoryStore.Products.Source.CreateView(v => v);
+            InventoryView = _inventoryStore.Store.Source.CreateView(v => v);
             Inventory = InventoryView.ToNotifyCollectionChanged(
                 SynchronizationContextCollectionEventDispatcher.Current);
 

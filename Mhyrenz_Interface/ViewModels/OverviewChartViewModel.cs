@@ -73,7 +73,7 @@ namespace Mhyrenz_Interface.ViewModels
         // just filter the dictionary values directly
         private IEnumerable<ProductDataViewModel> GetProductsByCategory(Category category)
         {
-            return _inventoryStore.Products
+            return _inventoryStore.Store
                 .Where(p => p.CategoryId == category.Id);
         }
 
