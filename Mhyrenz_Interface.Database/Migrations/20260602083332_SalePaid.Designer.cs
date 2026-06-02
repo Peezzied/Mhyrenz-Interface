@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260524093646_SessionInTransaction")]
-    partial class SessionInTransaction
+    [Migration("20260602083332_SalePaid")]
+    partial class SalePaid
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -108,13 +108,13 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Change")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("Completed_at")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created_at")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Paid")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("SessionId")
@@ -229,7 +229,7 @@ namespace Mhyrenz_Interface.Database.Migrations
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>
                 {
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Item")
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Product")
                         .WithMany("Transactions")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)

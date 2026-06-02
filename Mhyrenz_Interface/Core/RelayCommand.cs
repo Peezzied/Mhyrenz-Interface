@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace Mhyrenz_Interface.Core
 {
-    public class RelayCommand<T> : ICommand
+    public class RelayCommand<T> : ICommand, IRaiseCanExecuteChanged
     {
         private readonly Action<T> _execute;
         private readonly Predicate<T> _canExecute;
@@ -15,34 +15,31 @@ namespace Mhyrenz_Interface.Core
             _canExecute = canExecute;
         }
 
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
+        public event EventHandler CanExecuteChanged;
 
         public bool CanExecute(object parameter) =>
             _canExecute == null || _canExecute((T)parameter);
 
         public void Execute(object parameter) =>
             _execute((T)parameter);
+
+        public void OnCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, new EventArgs());
+        }
     }
-    public class RelayCommand : ICommand
+    public class RelayCommand : ICommand, IRaiseCanExecuteChanged
     {
         private readonly Action<object> _execute;
-        private readonly Func<object, bool> _canExecute;
+        private readonly Predicate<object> _canExecute;
 
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
         {
             _execute = execute;
             _canExecute = canExecute;
         }
 
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
+        public event EventHandler CanExecuteChanged;
 
         public bool CanExecute(object parameter)
         {
@@ -53,15 +50,28 @@ namespace Mhyrenz_Interface.Core
         {
             _execute(parameter);
         }
+
+        public void OnCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, new EventArgs());
+        }
     }
 
     public class AsyncRelayCommand : BaseAsyncCommand
     {
         private readonly Func<object, Task> _execute;
+        private readonly Predicate<object> _canExecute;
 
-        public AsyncRelayCommand(Func<object, Task> execute)
+        public AsyncRelayCommand(Func<object, Task> execute, Predicate<object> canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+
+        public override bool CanExecute(object parameter)
+        {
+            return base.CanExecute(parameter) && 
+                (_canExecute == null || _canExecute(parameter));
         }
 
         public override async Task ExecuteAsync(object parameter)

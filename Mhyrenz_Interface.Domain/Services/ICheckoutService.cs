@@ -70,7 +70,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         Task<Product> AddItem(int productId, Guid sessionId, int amount = 1);
         Task<Sale> CompleteSale(int saleId);
         Task<Sale> Create(Guid sessionId);
-        Task DiscardSale(int saleId);
+        Task DiscardSale(int saleId, bool asComplete = false);
         Task<IReadOnlyList<Sale>> GetActive();
         Task<bool> HasTransactions();
         Task<int> InactiveTransactionsCount();

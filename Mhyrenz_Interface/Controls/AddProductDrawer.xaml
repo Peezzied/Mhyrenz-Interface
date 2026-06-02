@@ -10,7 +10,7 @@
              xmlns:vm="clr-namespace:Mhyrenz_Interface.ViewModels"
              xmlns:attach="clr-namespace:Mhyrenz_Interface.Controls.Attached"
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
-             mc:Ignorable="d"
+             mc:Ignorable="d" d:Background="White"
              d:DesignWidth="400">
     <UserControl.Resources>
         <DataTemplate x:Key="NoBarcode">
@@ -156,7 +156,7 @@
                                 </Style>
                             </ContentControl.Style>
                         </ContentControl>
-                        <Button Command="{Binding SubmitActionCommand}" Content="Submit" CommandParameter="{Binding (Validation.HasError), ElementName=RetailPriceNumericUpDown}"/>
+                        <Button Command="{Binding AddCommand}" Content="Submit" CommandParameter="{Binding (Validation.HasError), ElementName=RetailPriceNumericUpDown}"/>
                     </hc:UniformSpacingPanel>
                 </hc:UniformSpacingPanel>
             </Grid>

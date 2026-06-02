@@ -15,11 +15,13 @@
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:fake="clr-namespace:Mhyrenz_Interface.ViewModels.Fake"
+             d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="450" d:DesignWidth="500">
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
               ItemsSource="{Binding Transactions}"
+              GridLinesVisibility="Horizontal"
               AutoGenerateColumns="False"
-              RowHeight="32"
               attached:DataGridFlashBehavior.Enabled="True"
               EnableRowVirtualization="True"
               dd:DragDrop.IsDropTarget="True"
@@ -42,11 +44,48 @@
                 </Style.Triggers>
             </Style>
         </DataGrid.Resources>
+        <DataGrid.CellStyle>
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Margin" Value="0 6 0 0"/>
+            </Style>
+        </DataGrid.CellStyle>
         <DataGrid.Columns>
-            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}" NumberControlStyle="{StaticResource QtyStyle}"/>
-            <DataGridTextColumn IsReadOnly="True" Header="Item Name" Width="*" FontSize="16" Binding="{Binding Product.Name}"/>
-            <columns:NumberColumn IsReadOnly="True" Header="Price" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
-            <columns:NumberColumn IsReadOnly="True" Header="Total" Width="100" Binding="{Binding TotalPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
+            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}" NumberControlStyle="{StaticResource QtyStyle}">
+                <columns:NumberColumn.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}"/>
+                </columns:NumberColumn.CellStyle>
+            </columns:NumberColumn>
+            <DataGridTemplateColumn IsReadOnly="True" Header="Item Name" Width="*">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <hc:UniformSpacingPanel Margin="4 0" Spacing="8" Orientation="Vertical">
+                            <controls:MaxLinesTextBlock 
+                                Text="{Binding Product.Name}" 
+                                LineHeight="16"
+                                MaxLines="2"
+                                Width="Auto"
+                                FontSize="16"/>
+                            <hc:UniformSpacingPanel Spacing="4">
+                                <iconPacks:PackIconMaterial Width="12" Kind="TicketPercent"/>
+                                <TextBlock Text="Senior Discount (20%)"/>
+                            </hc:UniformSpacingPanel>
+                        </hc:UniformSpacingPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <columns:NumberColumn IsReadOnly="True" Header="Price" Width="Auto" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
+            <DataGridTemplateColumn IsReadOnly="True" Header="Total" Width="Auto">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <hc:UniformSpacingPanel Spacing="8" Orientation="Vertical">
+                            <TextBlock TextAlignment="Right" Text="{Binding TotalPrice, StringFormat=C}"/>
+                            <TextBlock TextAlignment="Right" Text="--"/>
+                        </hc:UniformSpacingPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
             <DataGridTemplateColumn Header="Actions" IsReadOnly="True">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>

@@ -1,15 +1,17 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.ValidationAttributes;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.State;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class SessionBoxContext : ValidationViewModel
+    public class SessionBoxContext : ValidationViewModel<Session>
     {
         private readonly ISessionStore _sessionStore;
 
@@ -62,8 +64,6 @@ namespace Mhyrenz_Interface.ViewModels
 
             OkButtonCommand = createSessionCommand(this);
             CloseButtonCommand = new RelayCommand(CloseActionCommand);
-
-            base.SubmitActionCommand = OkButtonCommand;
         }
 
         public event Action SessionCreated;
@@ -77,6 +77,11 @@ namespace Mhyrenz_Interface.ViewModels
         {
             IsSessionBox = false;
             base.InvokeClearValidations();
+        }
+
+        protected override IRaiseCanExecuteChanged SubmitActionCommand()
+        {
+            return OkButtonCommand;
         }
     }
 }

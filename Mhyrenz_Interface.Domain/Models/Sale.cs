@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public DateTime? Completed_at { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Total { get; set; }
-        public decimal Change { get; set; }
+        public decimal Paid { get; set; }
         public ICollection<Transaction> Transactions { get; private set; }
             = new List<Transaction>();
 
@@ -57,7 +57,7 @@ namespace Mhyrenz_Interface.Domain.Models
                 throw new InvalidOperationException("Cash received cannot be negative.");
 
             RecalculateTotals();
-            Change = cashReceived - Total;
+            Paid = cashReceived - Total;
         }
 
         public void RecalculateTotals()

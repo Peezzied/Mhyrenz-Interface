@@ -106,13 +106,13 @@ namespace Mhyrenz_Interface.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Change")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime?>("Completed_at")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created_at")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Paid")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("SessionId")
@@ -227,7 +227,7 @@ namespace Mhyrenz_Interface.Database.Migrations
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>
                 {
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Item")
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Product")
                         .WithMany("Transactions")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)

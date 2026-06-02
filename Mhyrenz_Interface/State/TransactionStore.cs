@@ -31,6 +31,8 @@ namespace Mhyrenz_Interface.State
             _inventoryStore = inventoryStore;
         }
 
+        public event EventHandler<Sale> SaleChange;
+
         public async void AddToSale(CheckoutResult result)
         {
             var checkoutResult = result;
@@ -39,6 +41,7 @@ namespace Mhyrenz_Interface.State
                 throw new ArgumentNullException(nameof(checkoutResult.Transaction), "Transaction cannot be null in CheckoutResult.");
 
             _inventoryStore.PurchaseProduct(transaction.ProductId, transaction.Product.Purchase);
+            OnSaleChange(checkoutResult.Sale);
 
             if (checkoutResult.WasRemoved)
             {
@@ -64,6 +67,11 @@ namespace Mhyrenz_Interface.State
 
                 App.Current.BeginInvoke(new Action(() => vm.RequestFlash(SaleBoundPurchaseCommand.DTO.Type.AddNew)));
             }
+        }
+
+        public void OnSaleChange(Sale sale)
+        {
+            SaleChange?.Invoke(this, sale);
         }
 
         public async Task InitializeAsync()

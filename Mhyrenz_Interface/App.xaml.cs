@@ -143,11 +143,6 @@ namespace Mhyrenz_Interface
                 .AddTransient<IncomingPanelViewModel>()
                 .AddTransient<OverviewChartViewModel>()
 
-                .AddTransient<HomeViewModel>()
-                .AddTransient<InventoryViewModel>()
-                .AddTransient<CheckoutViewModel>()
-                .AddTransient<SettingsViewModel>()
-
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
                 .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
@@ -169,6 +164,7 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<CreateSessionCommand>()
                 .AddCommandFactory<LoadCategoriesCommand>()
                 .AddCommandFactory<SaleBoundPurchaseCommand>()
+                .AddCommandFactory<CheckoutCommand>()
 
                 .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -68,12 +70,22 @@ namespace Mhyrenz_Interface.ViewModels
             SaleTabItems.AddRange(sales.Select(s =>
             {
                 var saleTabItem = _saleTabItemFactory(
+                    this,
                     s.FromStartCount(_startSaleCount) + " Regular Customer",
                     inventoryDataGrid,
                     s);
 
                 return saleTabItem;
             }));
+        }
+
+        public async void DropCurrentTab(SaleTabItem saleTabItem)
+        {
+            await _checkoutService.DiscardSale(saleTabItem.Sale.Id);
+            await CreateOrIgnore();
+
+            saleTabItem.Dispose();
+            SaleTabItems.Remove(saleTabItem);
         }
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
@@ -123,49 +135,50 @@ namespace Mhyrenz_Interface.ViewModels
 
         private async void ClosingTab(ItemActionCallbackArgs<TabablzControl> args)
         {
-            if (args.DragablzItem.DataContext is SaleTabItem saleTabItem)
+            if (args.DragablzItem.DataContext is SaleTabItem saleTabItem && ClosingPrompt(saleTabItem))
+                DropCurrentTab(saleTabItem);
+        }
+
+        public static bool ClosingPrompt(SaleTabItem saleTabItem)
+        {
+            MessageBoxResult firstPrompt = MessageBox.Show(
+                "You have unsaved changes. Closing this tab will discard the current sale.",
+                "Unsaved Changes",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (firstPrompt != MessageBoxResult.Yes)
+                return false;
+
+            if (saleTabItem.Transactions.Count > 0)
             {
-                MessageBoxResult firstPrompt = MessageBox.Show(
-                    "You have unsaved changes. Closing this tab will discard the current sale.",
-                    "Unsaved Changes",
+                MessageBoxResult secondPrompt = MessageBox.Show(
+                    "This action cannot be undone.  \nAre you sure you want to permanently discard this sale?",
+                    "Confirm Discard Sale",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
-                if (firstPrompt != MessageBoxResult.Yes)
-                {
-                    args.Cancel();
-                    return;
-                }
+                if (secondPrompt != MessageBoxResult.Yes)
+                    return false;
+            }
+            return true;
+        }
 
-                if (saleTabItem.Transactions.Count > 0)
-                {
-                    MessageBoxResult secondPrompt = MessageBox.Show(
-                        "This action cannot be undone.  \nAre you sure you want to permanently discard this sale?",
-                        "Confirm Discard Sale",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Warning);
-
-                    if (secondPrompt != MessageBoxResult.Yes)
-                    {
-                        args.Cancel();
-                        return;
-                    }
-                }
-
-                await _checkoutService.DiscardSale(saleTabItem.Sale.Id);
-                saleTabItem.Dispose();
-
-                if (args.Owner.Items.Count == 1)
-                {
-                    await CreateSale();
-                }
+        public async Task CreateOrIgnore()
+        {
+            if (SaleTabItems.Count == 1)
+            {
+                await CreateSale();
             }
         }
 
         private async Task CreateSale()
         {
             var sale = await _checkoutService.Create(_sessionStore.CurrentSession.Id);
-            var item = _saleTabItemFactory(sale.FromStartCount(_startSaleCount) + " Regular Customer", _inventoryDataGridFactory(this), sale);
+            SaleTabItem item = _saleTabItemFactory(this,
+                sale.FromStartCount(_startSaleCount) + " Regular Customer",
+                _inventoryDataGridFactory(this),
+                sale);
 
             SaleTabItems.Add(item);
             SelectedItem = item;

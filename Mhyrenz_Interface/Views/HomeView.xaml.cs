@@ -12,10 +12,5 @@ namespace Mhyrenz_Interface.Views
         {
             InitializeComponent();
         }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

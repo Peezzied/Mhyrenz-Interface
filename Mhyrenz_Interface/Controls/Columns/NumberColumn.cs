@@ -57,11 +57,12 @@ namespace Mhyrenz_Interface.Controls.Columns
         {
             var textBlock = new TextBlock
             {
-                TextAlignment = TextAlignment,
                 FontSize = FontSize,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Style = Application.Current.TryFindResource("MahApps.Styles.TextBlock.DataGrid") as Style ?? default
             };
+
+            textBlock.TextAlignment = TextAlignment;
 
             textBlock.SetBinding(TextBlock.TextProperty, Binding ?? DisplayBinding);
 

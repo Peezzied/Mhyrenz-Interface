@@ -19,19 +19,20 @@ namespace Mhyrenz_Interface.ViewModels
 
     #endregion
 
-    public class AddProductViewModel : ValidationViewModel
+    public class AddProductViewModel : ValidationViewModel<ProductDataViewModel>
     {
         private Category _category;
         private readonly ICategoryStore _categoryStore;
         private readonly IInventoryStore _inventoryStore;
 
+        public AddCommand AddCommand { get; private set; }
+
         public AddProductViewModel(ICategoryStore categoryStore, IInventoryStore inventoryStore, CreateCommand<AddCommand> addCommand)
         {
-            ClearValidations = InvokeClearValidations;
             _categoryStore = categoryStore;
             _inventoryStore = inventoryStore;
 
-            base.SubmitActionCommand = addCommand(this);
+            AddCommand = addCommand(this);
         }
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
@@ -182,7 +183,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public override void Dispose()
         {
-            ClearValidations?.Invoke();
+            InvokeClearValidations();
             DrawerClose = null;
             RowIntoView = null;
         }
@@ -198,6 +199,11 @@ namespace Mhyrenz_Interface.ViewModels
         public void RaiseRowIntoView(ProductDataViewModel item)
         {
             RowIntoView?.Invoke(item);
+        }
+
+        protected override IRaiseCanExecuteChanged SubmitActionCommand()
+        {
+            return AddCommand;
         }
     }
 }

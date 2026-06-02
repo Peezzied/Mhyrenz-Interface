@@ -474,6 +474,7 @@
     </ApplicationDefinition>
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
+    <Compile Include="Commands\CheckoutCommand.cs" />
     <Compile Include="Commands\IUndoRedoBound.cs" />
     <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
     <Compile Include="Commands\SaleBoundPurchaseCommand.cs" />

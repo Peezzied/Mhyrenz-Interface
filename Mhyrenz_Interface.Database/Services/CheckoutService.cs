@@ -207,7 +207,7 @@ namespace Mhyrenz_Interface.Database.Services
         }
 
 
-        public async Task DiscardSale(int saleId)
+        public async Task DiscardSale(int saleId, bool asComplete = false)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -217,7 +217,9 @@ namespace Mhyrenz_Interface.Database.Services
                     ?? throw new InvalidOperationException("Sale not found.");
 
                 context.Transactions.RemoveRange(sale.Transactions);
-                context.Sales.Remove(sale);
+
+                if (!asComplete)
+                    context.Sales.Remove(sale);
 
                 await context.SaveChangesAsync();
             }
@@ -228,6 +230,7 @@ namespace Mhyrenz_Interface.Database.Services
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
                 var sale = await context.Sales
+                    .Where(s => s.Completed_at == null)
                     .Include(s => s.Transactions)
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");

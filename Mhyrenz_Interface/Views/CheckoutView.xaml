@@ -36,7 +36,7 @@
             
         </Style>
     </UserControl.Resources>
-    <dragablz:TabablzControl x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem}" ItemsSource="{Binding SaleTabItems}" >
+    <dragablz:TabablzControl x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemsSource="{Binding SaleTabItems}" >
         <dragablz:TabablzControl.HeaderSuffixContent>
             <Button
                 HorizontalAlignment="Left"

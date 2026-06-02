@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Linq;
+using HandyControl.Tools.Extension;
+using Mhyrenz_Interface.Domain.Models;
 
 namespace Mhyrenz_Interface.ViewModels.Fake
 {
     public class FakeTransactionDataGridViewModel
     {
-        public List<object> Transactions { get; set; }
-
-        public FakeTransactionDataGridViewModel()
-        {
-            Transactions = new List<object>();
-            Transactions.Add(new { Name = "Lorem", Price = 10, Amount = 20, Date = DateTime.Now, Product = new { CategoryName = "Branded", CategoryColor = Brushes.Red } });
-            Transactions.Add(new { Name = "Lorem", Price = 10, Amount = 20, Date = DateTime.Now, Product = new { CategoryName = "Branded", CategoryColor = Brushes.Red } });
-            Transactions.Add(new { Name = "Lorem", Price = 10, Amount = 20, Date = DateTime.Now, Product = new { CategoryName = "Branded", CategoryColor = Brushes.Red } });
-            Transactions.Add(new { Name = "Lorem", Price = 10, Amount = 20, Date = DateTime.Now, Product = new { CategoryName = "Branded", CategoryColor = Brushes.Red } });
-
-        }
+        public ObservableCollection<object> Transactions { get; } =
+        new ObservableCollection<object>(
+            Enumerable.Range(1, 20)
+                .Select(i => new
+                {
+                    Qty = i,
+                    RetailPrice = 5m,
+                    Discount = "asdasd",
+                    TotalPrice = i * 5m,
+                    Product = new
+                    {
+                        Name = $"Lorem Ipsum dolor sit amet {i}"
+                    }
+                }));
     }
 }

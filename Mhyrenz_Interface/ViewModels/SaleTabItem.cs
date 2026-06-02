@@ -1,4 +1,8 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using GongSolutions.Wpf.DragDrop;
@@ -14,30 +18,54 @@ using Setter = Mhyrenz_Interface.Core.TrackPropertyHelper.Setter;
 
 namespace Mhyrenz_Interface.ViewModels
 {
-    public class SaleTabItem : BaseViewModel, IEditCancelState
+    public class SaleTabItem : ValidationViewModel<Sale>, IEditCancelState
     {
-
         public SaleTabItem(
             string header,
             Sale sale,
+            CheckoutViewModel parent,
             InventoryDataGridViewModel inventoryDataGridViewModel,
             IUndoRedoManager undoRedoManager,
             ITransactionStore transactionStore,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
-            CreateCommand<SaleBoundPurchaseCommand> saleBoundPurchaseCommand)
+            CreateCommand<SaleBoundPurchaseCommand> saleBoundPurchaseCommand,
+            CreateCommand<CheckoutCommand> createCommand)
         {
             _transactionDataViewModel = transactionDataViewModel;
             _undoRedoManager = undoRedoManager;
             _transactionStore = transactionStore;
+            _parent = parent;
+
+            CheckoutCommand = new RelayCommand(CheckoutAction, ValidateCheckout);
+            VoidCommand = new AsyncRelayCommand(VoidAction);
+
             Sale = sale;
             Header = header;
 
             InventoryDataGridViewModel = inventoryDataGridViewModel;
 
+            _checkoutCommand = createCommand;
             _saleBoundPurchaseCommand = saleBoundPurchaseCommand;
 
             SaleDropHandler = new SaleDropHandler(this, transactionStore);
             InventoryDragHandler = new InventoryDragHandler(this);
+
+        }
+
+        private async Task VoidAction(object arg)
+        {
+            if (CheckoutViewModel.ClosingPrompt(this))
+                _parent.DropCurrentTab(this);
+        }
+
+        private void CheckoutAction(object obj)
+        {
+            _checkoutCommand(Sale.Id).Execute();
+        }
+
+        private bool ValidateCheckout(object arg)
+        {
+            return !HasErrors && Due > 0;
         }
 
         private NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> _transactions;
@@ -51,22 +79,65 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        public Sale Sale { get; private set; }
+        private Sale _sale;
+        public Sale Sale
+        {
+            get => _sale;
+            set
+            {
+                _sale = value;
+                OnPropertyChanged(null);
+                Validate(nameof(Received), Received);
+            }
+        }
 
         public string Header { get; set; }
 
+        public decimal Change
+        {
+            get
+            {
+                var value = Received - Due;
+                if (value > 0)
+                    return value;
+
+                return 0;
+            }
+        }
+        public decimal Due => Sale.Total;
+        public int Items => Sale.Transactions.Count;
+        public decimal Discount => Sale.Total - Sale.SubTotal;
+
+        private decimal _received;
+        public decimal Received
+        {
+            get => _received;
+            set
+            {
+                if (SetProperty(ref _received, value))
+                {
+                    Validate(nameof(Received), value);
+                    OnPropertyChanged(nameof(Change));
+                }
+            }
+        }
+
         public InventoryDataGridViewModel InventoryDataGridViewModel { get; }
 
+        private readonly CreateCommand<CheckoutCommand> _checkoutCommand;
         private readonly CreateCommand<SaleBoundPurchaseCommand> _saleBoundPurchaseCommand;
 
         public SaleDropHandler SaleDropHandler { get; }
 
         public InventoryDragHandler InventoryDragHandler { get; }
+        public RelayCommand CheckoutCommand { get; private set; }
+        public AsyncRelayCommand VoidCommand { get; private set; }
 
         private readonly CreateCommand<TransactionVMCommandQty> _updateTransactionCommand;
         private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
+        private readonly CheckoutViewModel _parent;
         private DataGridRowDetailsVisibilityMode _productRowDetailsVisibilityMode =
             DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
         public DataGridRowDetailsVisibilityMode ProductRowDetailsVisibilityMode
@@ -85,6 +156,8 @@ namespace Mhyrenz_Interface.ViewModels
         {
             var view = _transactionStore.Store.Source.CreateView(v => v);
 
+            _transactionStore.SaleChange += TransactionStore_SaleChange;
+
             view.AttachFilter(TransactionFilter);
 
             view.ViewChanged += View_ViewChanged;
@@ -94,6 +167,28 @@ namespace Mhyrenz_Interface.ViewModels
             foreach (var (Value, View) in view.Filtered)
             {
                 View.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
+            }
+        }
+
+        protected override void ValidateCustom(string propertyName)
+        {
+            if (propertyName == nameof(Received))
+            {
+                if (Received < Due)
+                    AddError(nameof(Received), "Cash is less than total.");
+            }
+        }
+
+        private void TransactionStore_SaleChange(object sender, Sale e)
+        {
+            if (Sale.Id == e.Id)
+            {
+                if (e.Completed_at != null)
+                {
+                    _parent.DropCurrentTab(this);
+                    return;
+                }
+                Sale = e;
             }
         }
 
@@ -155,6 +250,11 @@ namespace Mhyrenz_Interface.ViewModels
                     currentViewIn: typeof(CheckoutView)
                 ));
             }
+        }
+
+        protected override IRaiseCanExecuteChanged SubmitActionCommand()
+        {
+            return CheckoutCommand;
         }
     }
 

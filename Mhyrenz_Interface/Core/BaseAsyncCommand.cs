@@ -21,7 +21,7 @@ namespace Mhyrenz_Interface.Core
             }
         }
 
-        public virtual event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged;
 
         public virtual bool CanExecute(object parameter)
         {
