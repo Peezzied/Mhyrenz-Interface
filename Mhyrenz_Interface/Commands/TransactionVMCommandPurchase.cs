@@ -18,14 +18,14 @@ namespace Mhyrenz_Interface.Commands
         public int[] Transactions { get; set; }
     }
 
-    public class TransactionVMCommandProp : PropertyChangeCommand<TransactionVMRowInfo>
+    public class TransactionVMCommandPurchase : PropertyChangeCommand<TransactionVMRowInfo>
     {
         private readonly ICommand _command;
         private int _productId;
         private readonly int _saleId;
         private readonly int? _transactionId;
 
-        public TransactionVMCommandProp(int saleId, int productId, ChangedArgs args, TrackPropertyHelper.Setter setter, ICommand command, Action propertyChangeHandler, Type currentViewIn, int? transactionId) : 
+        public TransactionVMCommandPurchase(int saleId, int productId, ChangedArgs args, TrackPropertyHelper.Setter setter, ICommand command, Action propertyChangeHandler, Type currentViewIn, int? transactionId) : 
             base(args, setter, propertyChangeHandler, currentViewIn)
         {
             _productId = productId;

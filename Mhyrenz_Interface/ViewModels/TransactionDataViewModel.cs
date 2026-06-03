@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls.Attached;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
-using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.State;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -17,20 +13,28 @@ namespace Mhyrenz_Interface.ViewModels
         public TransactionDataViewModel(Transaction transaction)
         {
             Transaction = transaction;
+            DiscountCommand = new RelayCommand(DiscountAction);
+        }
+
+        private void DiscountAction(object obj)
+        {
+            Discount = (Discount)obj;
         }
 
         private Transaction _transaction;
-		public Transaction Transaction
-		{
-			get => _transaction;
-			set
-			{
-				_transaction = value;
-				_qty = _transaction.Amount;
+        public Transaction Transaction
+        {
+            get => _transaction;
+            set
+            {
+                _transaction = value;
+                _qty = _transaction.Amount;
 
                 OnPropertyChanged(null);
-			}
-		}
+            }
+        }
+
+        public RelayCommand DiscountCommand { get; }
 
         public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
@@ -42,20 +46,20 @@ namespace Mhyrenz_Interface.ViewModels
             return args.Completion.Task;
         }
 
-		private int _qty;
+        private int _qty;
 
         public int Qty
-		{
-			get => _qty;
-			set
-			{
+        {
+            get => _qty;
+            set
+            {
                 if (_qty != value)
                 {
                     SetTrackedProperty(ref _qty, value, nameof(Qty));
                     OnPropertyChanged(null);
                 }
             }
-		}
+        }
 
         private int _qtyIncrementEdit;
         public int QtyIncrementEdit
@@ -73,6 +77,19 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
+        private Discount _discount;
+        public Discount Discount
+        {
+            get => _discount;
+            set
+            {
+                _discount = value;
+
+                SetTrackedProperty(ref _discount, value, nameof(Discount));
+                OnPropertyChanged(null);
+            }
+        }
+
         public int MaxQty => Product.NetQty;
 
         public int MaxIncrementQty => Product.NetQty;
@@ -81,11 +98,16 @@ namespace Mhyrenz_Interface.ViewModels
 
         public bool IsPrescribed { get; set; }
 
-		public Product Product => Transaction.Product;
-
+        public Product Product => Transaction.Product;
 
         public decimal RetailPrice => Transaction.RetailPrice;
 
         public decimal TotalPrice => Transaction.LineTotal;
+
+        public decimal DiscountAmount => Transaction.DiscountAmount;
+
+        public string DiscountInfo => $"{Discount} Discount ({DiscountAmount:P0})";
+
+        public bool HasDiscount => Discount != Discount.None;
     }
 }

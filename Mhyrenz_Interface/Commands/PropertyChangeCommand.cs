@@ -60,6 +60,14 @@ namespace Mhyrenz_Interface.Commands
             public object NewValue { get; set; }
             public RowInfo RowInfo { get; set; }
         }
+
+        public class DTO
+        {
+            public ChangedArgs ChangedArgs { get; set; }
+            public TrackPropertyHelper.Setter Setter { get; set; }
+            public Action PropertyChangeHandler { get; set; }
+            public Type CurrentViewIn { get; set; }
+        }
     }
 
     public interface IPropertyChangedCommand

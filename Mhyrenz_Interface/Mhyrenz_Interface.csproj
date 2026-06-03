@@ -475,6 +475,7 @@
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
     <Compile Include="Commands\CheckoutCommand.cs" />
+    <Compile Include="Commands\TransactionVMDiscountCommand.cs" />
     <Compile Include="Commands\IUndoRedoBound.cs" />
     <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
     <Compile Include="Commands\SaleBoundPurchaseCommand.cs" />
@@ -486,7 +487,7 @@
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
     <Compile Include="Commands\DirectPurchaseCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
-    <Compile Include="Commands\TransactionVMCommandProp.cs" />
+    <Compile Include="Commands\TransactionVMCommandPurchase.cs" />
     <Compile Include="Commands\UndoRedoBoundCommand.cs" />
     <Compile Include="Commands\UpdateTransactionCommand.cs" />
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
@@ -521,6 +522,7 @@
     <Compile Include="Controls\InventoryDataGrid.xaml.cs">
       <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\MarkupEx\EnumValuesExtension.cs" />
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
@@ -805,6 +807,7 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.resources.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

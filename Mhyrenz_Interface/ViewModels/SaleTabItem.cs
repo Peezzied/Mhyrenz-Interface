@@ -211,12 +211,39 @@ namespace Mhyrenz_Interface.ViewModels
                 return;
 
             var viewModel = sender as TransactionDataViewModel;
-            NewMethod(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id);
+            TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id)
+                .Track(nameof(TransactionDataViewModel.Discount), discountMethod);
+
+            void discountMethod(Setter setter, Getter getter, int key)
+            {
+                void handlePropChange()
+                {
+                    //_transactionStore.AddToSale(command.Result);
+                }
+
+                _undoRedoManager.Execute(new TransactionVMDiscountCommand(
+                    saleId: Sale.Id,
+                    productId: viewModel.Transaction.ProductId,
+                    transactionId: viewModel.Transaction.Id,
+                    args: new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
+                    {
+                        OldValue = args.OldValue,
+                        NewValue = getter(),
+                        RowInfo = new TransactionVMRowInfo
+                        {
+                            Sale = Sale.Id
+                        }
+                    },
+                    setter: setter,
+                    propertyChangeHandler: handlePropChange,
+                    currentViewIn: typeof(CheckoutView)
+                ));
+            }
         }
 
-        public void NewMethod(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
+        public TrackPropertyHelper<int, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
         {
-            TrackPropertyHelper.Build(_transactionStore, productId, propertyName)
+            var tracker = TrackPropertyHelper.Build(_transactionStore, productId, propertyName)
                 .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, getter, key) =>
                 {
                     oldValue = 0;
@@ -231,7 +258,7 @@ namespace Mhyrenz_Interface.ViewModels
                     //_transactionStore.AddToSale(command.Result);
                 }
 
-                _undoRedoManager.Execute(new TransactionVMCommandProp(
+                _undoRedoManager.Execute(new TransactionVMCommandPurchase(
                     saleId: Sale.Id,
                     productId: productId,
                     transactionId: transactionId,
@@ -250,6 +277,8 @@ namespace Mhyrenz_Interface.ViewModels
                     currentViewIn: typeof(CheckoutView)
                 ));
             }
+
+            return tracker;
         }
 
         protected override IRaiseCanExecuteChanged SubmitActionCommand()
@@ -319,7 +348,7 @@ namespace Mhyrenz_Interface.ViewModels
             }
             else
             {
-                saleTabItem.NewMethod(propertyName: nameof(TransactionDataViewModel.Qty), productId: product.Id,
+                saleTabItem.TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty), productId: product.Id,
                     oldValue: 0, newValue: 1);
             }
         }

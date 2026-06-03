@@ -21,7 +21,6 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <local:SaleDataGrid 
-                
                 xmlns:fake="clr-namespace:Mhyrenz_Interface.ViewModels.Fake"
                 d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
                 Grid.Row="0"/>
