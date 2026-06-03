@@ -225,7 +225,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Sale> CompleteSale(int saleId)
+        public async Task<Sale> CompleteSale(int saleId, decimal received)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -239,6 +239,7 @@ namespace Mhyrenz_Interface.Database.Services
                     throw new InvalidOperationException("Cannot complete an empty sale.");
 
                 sale.Completed_at = DateTime.Now;
+                sale.ReceiveCash(received);
 
                 await context.SaveChangesAsync();
 
@@ -259,6 +260,40 @@ namespace Mhyrenz_Interface.Database.Services
                 await context.SaveChangesAsync();
 
                 return sale;
+            }
+        }
+
+        public async Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var sale = await context.Sales
+                    .Include(s => s.Transactions)
+                    .Include(s => s.Session)
+                    .FirstOrDefaultAsync(s => s.Id == saleId)
+                    ?? throw new InvalidOperationException("Sale not found.");
+
+                var transaction = await context.Transactions
+                    .Include(t => t.Product)
+                    .Where(t => t.Session.Id == sale.Session.Id)
+                    .FirstOrDefaultAsync(t =>
+                        t.Id == transactionId &&
+                        t.SaleId == saleId)
+                    ?? throw new InvalidOperationException("Transaction not found.");
+
+                sale.Discount = discountInfo.Discount;
+                transaction.Discount = discountInfo.Discount;
+                transaction.DiscountRate = discountInfo.DiscountRate;
+
+                sale.RecalculateTotals();
+
+                await context.SaveChangesAsync();
+
+                return new CheckoutResult
+                {
+                    Sale = sale,
+                    Transaction = transaction
+                };
             }
         }
 

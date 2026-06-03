@@ -68,7 +68,8 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
         Task<Product> AddItem(int productId, Guid sessionId, int amount = 1);
-        Task<Sale> CompleteSale(int saleId);
+        Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId);
+        Task<Sale> CompleteSale(int saleId, decimal received);
         Task<Sale> Create(Guid sessionId);
         Task DiscardSale(int saleId, bool asComplete = false);
         Task<IReadOnlyList<Sale>> GetActive();

@@ -18,6 +18,9 @@ namespace Mhyrenz_Interface.Domain.Models
         public decimal SubTotal { get; set; }
         public decimal Total { get; set; }
         public decimal Paid { get; set; }
+
+        public Discount Discount { get; set; }
+
         public ICollection<Transaction> Transactions { get; private set; }
             = new List<Transaction>();
 

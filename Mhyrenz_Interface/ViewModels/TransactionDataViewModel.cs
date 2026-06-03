@@ -78,15 +78,13 @@ namespace Mhyrenz_Interface.ViewModels
             }
         }
 
-        private Discount _discount;
         public Discount Discount
         {
-            get => _discount;
+            get => Transaction.Discount;
             set
             {
-                _discount = value;
-
-                SetTrackedProperty(ref _discount, value, nameof(Discount));
+                SetTrackedProperty(Discount, value, 
+                    v => Transaction.Discount = v, nameof(Discount));
                 OnPropertyChanged(null);
             }
         }
@@ -107,7 +105,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public decimal DiscountAmount => Transaction.DiscountAmount;
 
-        public string DiscountInfo => $"{Discount} Discount ({DiscountAmount:P0})";
+        public string DiscountInfo => $"{Discount} Discount ({Transaction.DiscountRate:P0})";
 
         public bool HasDiscount => Discount != Discount.None;
     }

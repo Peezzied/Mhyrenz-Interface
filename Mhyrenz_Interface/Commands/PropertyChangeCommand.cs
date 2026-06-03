@@ -49,7 +49,7 @@ namespace Mhyrenz_Interface.Commands
         private void CommandHandler(object parameter, ActionType intent)
         {
             Command(parameter, intent);
-            _propertyChangeHandler();
+            _propertyChangeHandler?.Invoke();
         }
 
         public abstract void Command(object parameter, ActionType intent);

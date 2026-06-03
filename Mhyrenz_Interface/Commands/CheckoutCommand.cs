@@ -13,15 +13,17 @@ namespace Mhyrenz_Interface.Commands
     public class CheckoutCommand : BaseAsyncCommand, IUndoRedoBound
     {
         private readonly int _saleId;
+        private readonly decimal _received;
         private readonly ICheckoutService _checkoutService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
 
         public bool AllowBack { get; private set; } = true;
 
-        public CheckoutCommand(int saleId, ICheckoutService checkoutService, IUndoRedoManager undoRedoManager, ITransactionStore transactionStore)
+        public CheckoutCommand(int saleId, decimal received, ICheckoutService checkoutService, IUndoRedoManager undoRedoManager, ITransactionStore transactionStore)
         {
             _saleId = saleId;
+            _received = received;
             _checkoutService = checkoutService;
             _undoRedoManager = undoRedoManager;
             _transactionStore = transactionStore;
@@ -44,8 +46,7 @@ namespace Mhyrenz_Interface.Commands
             if (result != MessageBoxResult.Yes)
                 return;
 
-            var sale = await _checkoutService.CompleteSale(_saleId);
-            await _checkoutService.DiscardSale(_saleId, asComplete: true);
+            var sale = await _checkoutService.CompleteSale(_saleId, _received);
 
             _transactionStore.OnSaleChange(sale);
         }

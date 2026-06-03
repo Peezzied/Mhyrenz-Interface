@@ -33,7 +33,7 @@ namespace Mhyrenz_Interface.State
 
         public event EventHandler<Sale> SaleChange;
 
-        public enum OperationType { AddNew, Add, Subtract }
+        public enum OperationType { New, Update, Remove }
 
         public async void AddToSale(CheckoutResult result)
         {
@@ -50,25 +50,32 @@ namespace Mhyrenz_Interface.State
                 var productId = transaction.ProductId;
                 if (Store.TryGetValue(productId, out var vm))
                 {
-                    await vm.RequestFlash(OperationType.Subtract);
+                    await vm.RequestFlash(OperationType.Remove);
                     Store.Remove(productId);
                 }
                 return;
             }
 
 
-            if (Store.TryGetValue(transaction.ProductId, out var existingVm))
-            {
-                existingVm.Transaction = transaction;
-                await existingVm.RequestFlash(OperationType.Add);
-            }
-            else
+            if (!(await UpdateTransaction(transaction)))
             {
                 var vm = _transactionDataViewModel(transaction);
                 Store.Add(vm);
 
-                App.Current.BeginInvoke(new Action(() => vm.RequestFlash(OperationType.AddNew)));
+                App.Current.BeginInvoke(new Action(() => vm.RequestFlash(OperationType.New)));
             }
+        }
+
+        public async Task<bool> UpdateTransaction(Transaction transaction)
+        {
+            if (Store.TryGetValue(transaction.ProductId, out var existingVm))
+            {
+                existingVm.Transaction = transaction;
+                await existingVm.RequestFlash(OperationType.Update);
+
+                return true;
+            }
+            return false;
         }
 
         public void OnSaleChange(Sale sale)

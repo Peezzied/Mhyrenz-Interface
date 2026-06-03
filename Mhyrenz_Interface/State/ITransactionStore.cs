@@ -14,5 +14,6 @@ namespace Mhyrenz_Interface.State
         void AddToSale(CheckoutResult result);
         Task InitializeAsync();
         void OnSaleChange(Sale sale);
+        Task<bool> UpdateTransaction(Transaction transaction);
     }
 }

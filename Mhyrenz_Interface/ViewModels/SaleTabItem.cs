@@ -29,7 +29,8 @@ namespace Mhyrenz_Interface.ViewModels
             ITransactionStore transactionStore,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
             CreateCommand<CheckoutCommand> checkoutCommand,
-            CreateCommand<TransactionVMCommandPurchase> transctionPurchaseCommand)
+            CreateCommand<TransactionVMCommandPurchase> transctionPurchaseCommand,
+            CreateCommand<TransactionVMCommandDiscount> transactionPropCommand)
         {
             _transactionDataViewModel = transactionDataViewModel;
             _undoRedoManager = undoRedoManager;
@@ -46,7 +47,7 @@ namespace Mhyrenz_Interface.ViewModels
 
             _checkoutCommand = checkoutCommand;
             _transctionPurchaseCommand = transctionPurchaseCommand;
-
+            _transactionPropCommand = transactionPropCommand;
             SaleDropHandler = new SaleDropHandler(this, transactionStore);
             InventoryDragHandler = new InventoryDragHandler(this);
 
@@ -55,12 +56,12 @@ namespace Mhyrenz_Interface.ViewModels
         private async Task VoidAction(object arg)
         {
             if (CheckoutViewModel.ClosingPrompt(this))
-                _parent.DropCurrentTab(this);
+                _parent.DropCurrentTab(this, asCompleted: false);
         }
 
         private void CheckoutAction(object obj)
         {
-            _checkoutCommand(Sale.Id).Execute();
+            _checkoutCommand(Sale.Id, Received).Execute();
         }
 
         private bool ValidateCheckout(object arg)
@@ -126,6 +127,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         private readonly CreateCommand<CheckoutCommand> _checkoutCommand;
         private readonly CreateCommand<TransactionVMCommandPurchase> _transctionPurchaseCommand;
+        private readonly CreateCommand<TransactionVMCommandDiscount> _transactionPropCommand;
 
         public SaleDropHandler SaleDropHandler { get; }
 
@@ -184,7 +186,7 @@ namespace Mhyrenz_Interface.ViewModels
             {
                 if (e.Completed_at != null)
                 {
-                    _parent.DropCurrentTab(this);
+                    _parent.DropCurrentTab(this, asCompleted: true);
                     return;
                 }
                 Sale = e;
@@ -215,11 +217,22 @@ namespace Mhyrenz_Interface.ViewModels
 
             void discountMethod(Setter setter, Getter getter, int key)
             {
-                void handlePropChange()
+                _undoRedoManager.Execute(_transactionPropCommand(new TransactionVMCommandDiscount.DTO
                 {
-                    //_transactionStore.AddToSale(command.Result);
-                }
-
+                    SaleId = Sale.Id,
+                    TransactionId = ((TransactionDataViewModel)sender).Transaction.Id,
+                    ChangedArgs = new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
+                    {
+                        OldValue = args.OldValue,
+                        NewValue = getter(),
+                        RowInfo = new TransactionVMRowInfo
+                        {
+                            Sale = Sale.Id
+                        }
+                    },
+                    Setter = setter,
+                    CurrentViewIn = typeof(CheckoutView)
+                }));
             }
         }
 

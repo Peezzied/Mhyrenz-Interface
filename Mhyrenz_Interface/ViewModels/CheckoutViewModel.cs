@@ -79,9 +79,9 @@ namespace Mhyrenz_Interface.ViewModels
             }));
         }
 
-        public async void DropCurrentTab(SaleTabItem saleTabItem)
+        public async void DropCurrentTab(SaleTabItem saleTabItem, bool asCompleted)
         {
-            await _checkoutService.DiscardSale(saleTabItem.Sale.Id);
+            await _checkoutService.DiscardSale(saleTabItem.Sale.Id, asCompleted);
             await CreateOrIgnore();
 
             saleTabItem.Dispose();
@@ -136,7 +136,7 @@ namespace Mhyrenz_Interface.ViewModels
         private async void ClosingTab(ItemActionCallbackArgs<TabablzControl> args)
         {
             if (args.DragablzItem.DataContext is SaleTabItem saleTabItem && ClosingPrompt(saleTabItem))
-                DropCurrentTab(saleTabItem);
+                DropCurrentTab(saleTabItem, asCompleted: false);
         }
 
         public static bool ClosingPrompt(SaleTabItem saleTabItem)

@@ -112,6 +112,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<DateTime>("Created_at")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Discount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Paid")
                         .HasColumnType("TEXT");
 

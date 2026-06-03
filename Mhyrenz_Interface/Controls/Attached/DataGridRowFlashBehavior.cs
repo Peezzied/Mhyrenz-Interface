@@ -331,13 +331,13 @@ namespace Mhyrenz_Interface.Controls.Attached
 
             switch (args.Method)
             {
-                case TransactionStore.OperationType.AddNew:
+                case TransactionStore.OperationType.New:
                     color = Color.FromRgb(76, 175, 80);
                     break;
-                case TransactionStore.OperationType.Add:
+                case TransactionStore.OperationType.Update:
                     color = Color.FromRgb(255, 193, 7);
                     break;
-                case TransactionStore.OperationType.Subtract:
+                case TransactionStore.OperationType.Remove:
                     color = Color.FromRgb(244, 67, 54);
                     break;
                 default:

@@ -162,6 +162,7 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<CreateSessionCommand>()
                 .AddCommandFactory<LoadCategoriesCommand>()
                 .AddCommandFactory<CheckoutCommand>()
+                .AddCommandFactory<TransactionVMCommandDiscount, TransactionVMCommandDiscount.DTO>()
                 .AddCommandFactory<TransactionVMCommandPurchase, TransactionVMCommandPurchase.DTO>()
                 .AddCommandFactory<ProductVMCommandCommonProp, ProductVMCommandCommonProp.DTO>()
                 .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()

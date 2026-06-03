@@ -134,7 +134,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock TextAlignment="Right" Text="{Binding TotalPrice, StringFormat=C}"/>
-                            <TextBlock Visibility="Collapsed" d:Visibility="Visible" Text="{Binding Discount, StringFormat=C}" Grid.Row="1" FontStyle="Italic" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:Text="asd"/>
+                            <TextBlock Visibility="{Binding HasDiscount, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible" Text="{Binding DiscountAmount, StringFormat=- {0:C}}" Grid.Row="1" FontStyle="Italic" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:Text="asd"/>
                         </Grid>
                     </DataTemplate> 
                 </DataGridTemplateColumn.CellTemplate>
@@ -153,7 +153,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <CheckBox Margin="0 0 6 0" Visibility="{Binding IsPharma, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible">
+                            <CheckBox Margin="0 0 5 0" Visibility="{Binding IsPharma, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible">
                                 <CheckBox.ToolTip>
                                     <ToolTip Content="Check if the item is doctor prescribed."/>
                                 </CheckBox.ToolTip>
@@ -169,7 +169,7 @@
                 <DataGridTemplateColumn.CellStyle>
                     <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
                         <Setter Property="VerticalContentAlignment" Value="Top"/>
-                        <Setter Property="Padding" Value="0 4"/>
+                        <Setter Property="Padding" Value="0 5"/>
                     </Style>
                 </DataGridTemplateColumn.CellStyle>
             </DataGridTemplateColumn>

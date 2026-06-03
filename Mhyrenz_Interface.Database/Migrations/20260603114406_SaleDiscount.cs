@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class SalePaid : Migration
+    public partial class SaleDiscount : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -70,6 +70,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     SubTotal = table.Column<decimal>(nullable: false),
                     Total = table.Column<decimal>(nullable: false),
                     Paid = table.Column<decimal>(nullable: false),
+                    Discount = table.Column<int>(nullable: false),
                     SessionId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>

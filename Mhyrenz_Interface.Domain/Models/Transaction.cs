@@ -6,10 +6,8 @@ namespace Mhyrenz_Interface.Domain.Models
     public enum Discount
     {
         None,
-        Student,
         PWD,
-        Senior,
-        Custom
+        Senior
     }
     public class Transaction
     {
@@ -34,7 +32,7 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public int Amount { get; set; }
         public decimal RetailPrice { get; set; }
-        public Discount Discount { get; set; }
+        public Discount Discount { get; set; } = Discount.None;
 
         /// <summary>
         /// Percentage in decimal form (from 0 to 1).
