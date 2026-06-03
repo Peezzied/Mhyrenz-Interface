@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows.Input;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.Domain.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 
@@ -8,41 +11,48 @@ namespace Mhyrenz_Interface.Commands
 {
     public class ProductVMCommandPurchase : ProductVMPropertyChangeCommand
     {
-        private readonly int _target;
-        private readonly ICommand _command;
+        private readonly DTO _dto;
+        private readonly ICheckoutService _checkoutService;
+        private readonly ISessionStore _sessionStore;
+        private readonly ICheckoutService checkoutService;
+        private readonly ISessionStore sessionStore;
 
-        public ProductVMCommandPurchase(int target,
-            ChangedArgs args,
-            TrackPropertyHelper.Setter setter,
-            ICommand command,
-            Action propertyChangeHandler,
-            Type currentViewIn) : base(args, setter, propertyChangeHandler, currentViewIn)
+        public ProductVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ISessionStore sessionStore) : base(dto)
         {
-            _target = target;
-            _command = command;
+            _dto = dto;
+            _checkoutService = checkoutService;
+            _sessionStore = sessionStore;
         }
 
-        public override bool Command(object parameter, ActionType intent)
+        public override async void Command(object parameter, ActionType intent)
         {
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
-            DirectPurchaseCommand.DTO.Type method;
-            if (newValue > oldValue)
-                method = intent == ActionType.Undo ? DirectPurchaseCommand.DTO.Type.Subtract : DirectPurchaseCommand.DTO.Type.Add;
-            else if (newValue < oldValue)
-                method = intent == ActionType.Undo ? DirectPurchaseCommand.DTO.Type.Add : DirectPurchaseCommand.DTO.Type.Subtract;
-            else
-                return false;
+            if (newValue == oldValue)
+                return;
 
-            _command.Execute(new DirectPurchaseCommand.DTO()
+            var amount = Math.Abs(newValue - oldValue);
+            var isIncrease = newValue > oldValue;
+
+            var shouldAdd =
+                intent == ActionType.Undo
+                    ? !isIncrease
+                    : isIncrease;
+
+            if (shouldAdd)
             {
-                Amount = Math.Abs(oldValue - newValue),
-                ProductId = _target,
-                Method = method,
-            });
+                await _checkoutService.AddItem(_dto.ProductId, _sessionStore.CurrentSession.Id, amount);
+            }
+            else
+            {
+                await _checkoutService.Subtract(_dto.ProductId, _sessionStore.CurrentSession.Id, amount);
+            }
+        }
 
-            return true;
+        public new class DTO : PropertyChangeCommand<ProductVMRowInfo>.DTO
+        {
+            public int ProductId { get; set; }
         }
     }
 }

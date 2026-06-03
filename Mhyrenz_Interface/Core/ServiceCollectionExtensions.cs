@@ -69,5 +69,26 @@ namespace Mhyrenz_Interface.Core
 
             return services;
         }
+
+        public static IServiceCollection AddCommandFactory<TCommand, TDTO>(
+            this IServiceCollection services)
+            where TCommand : class
+            where TDTO : class
+        {
+            services.AddSingleton<CreateCommand<TCommand>>(s =>
+            {
+                return parameters =>
+                {
+                    if (parameters.Length == 1 && parameters[0] is TDTO dto)
+                        return ActivatorUtilities.CreateInstance<TCommand>(s, dto);
+
+                    throw new ArgumentException(
+                        $"Expected a single {typeof(TDTO).Name} parameter " +
+                        $"for {typeof(TCommand).Name} creation.");
+                };
+            });
+
+            return services;
+        }
     }
 }

@@ -28,8 +28,8 @@ namespace Mhyrenz_Interface.ViewModels
             IUndoRedoManager undoRedoManager,
             ITransactionStore transactionStore,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
-            CreateCommand<SaleBoundPurchaseCommand> saleBoundPurchaseCommand,
-            CreateCommand<CheckoutCommand> createCommand)
+            CreateCommand<CheckoutCommand> checkoutCommand,
+            CreateCommand<TransactionVMCommandPurchase> transctionPurchaseCommand)
         {
             _transactionDataViewModel = transactionDataViewModel;
             _undoRedoManager = undoRedoManager;
@@ -44,8 +44,8 @@ namespace Mhyrenz_Interface.ViewModels
 
             InventoryDataGridViewModel = inventoryDataGridViewModel;
 
-            _checkoutCommand = createCommand;
-            _saleBoundPurchaseCommand = saleBoundPurchaseCommand;
+            _checkoutCommand = checkoutCommand;
+            _transctionPurchaseCommand = transctionPurchaseCommand;
 
             SaleDropHandler = new SaleDropHandler(this, transactionStore);
             InventoryDragHandler = new InventoryDragHandler(this);
@@ -125,7 +125,7 @@ namespace Mhyrenz_Interface.ViewModels
         public InventoryDataGridViewModel InventoryDataGridViewModel { get; }
 
         private readonly CreateCommand<CheckoutCommand> _checkoutCommand;
-        private readonly CreateCommand<SaleBoundPurchaseCommand> _saleBoundPurchaseCommand;
+        private readonly CreateCommand<TransactionVMCommandPurchase> _transctionPurchaseCommand;
 
         public SaleDropHandler SaleDropHandler { get; }
 
@@ -133,7 +133,6 @@ namespace Mhyrenz_Interface.ViewModels
         public RelayCommand CheckoutCommand { get; private set; }
         public AsyncRelayCommand VoidCommand { get; private set; }
 
-        private readonly CreateCommand<TransactionVMCommandQty> _updateTransactionCommand;
         private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
@@ -221,23 +220,6 @@ namespace Mhyrenz_Interface.ViewModels
                     //_transactionStore.AddToSale(command.Result);
                 }
 
-                _undoRedoManager.Execute(new TransactionVMDiscountCommand(
-                    saleId: Sale.Id,
-                    productId: viewModel.Transaction.ProductId,
-                    transactionId: viewModel.Transaction.Id,
-                    args: new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
-                    {
-                        OldValue = args.OldValue,
-                        NewValue = getter(),
-                        RowInfo = new TransactionVMRowInfo
-                        {
-                            Sale = Sale.Id
-                        }
-                    },
-                    setter: setter,
-                    propertyChangeHandler: handlePropChange,
-                    currentViewIn: typeof(CheckoutView)
-                ));
             }
         }
 
@@ -258,11 +240,12 @@ namespace Mhyrenz_Interface.ViewModels
                     //_transactionStore.AddToSale(command.Result);
                 }
 
-                _undoRedoManager.Execute(new TransactionVMCommandPurchase(
-                    saleId: Sale.Id,
-                    productId: productId,
-                    transactionId: transactionId,
-                    args: new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
+                _undoRedoManager.Execute(_transctionPurchaseCommand(new TransactionVMCommandPurchase.DTO
+                {
+                    SaleId = Sale.Id,
+                    ProductId = productId,
+                    TransactionId = transactionId ?? 0,
+                    ChangedArgs = new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
                     {
                         OldValue = oldValue,
                         NewValue = newValue ?? getter(),
@@ -271,11 +254,10 @@ namespace Mhyrenz_Interface.ViewModels
                             Sale = Sale.Id
                         }
                     },
-                    setter: setter,
-                    command: _saleBoundPurchaseCommand(),
-                    propertyChangeHandler: handlePropChange,
-                    currentViewIn: typeof(CheckoutView)
-                ));
+                    Setter = setter,
+                    PropertyChangeHandler = handlePropChange,
+                    CurrentViewIn = typeof(CheckoutView)
+                }));
             }
 
             return tracker;

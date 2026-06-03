@@ -28,8 +28,6 @@ namespace Mhyrenz_Interface.ViewModels
 
         public ObservableDictionary<string, ColumnSettingViewModel> Columns { get; set; }
 
-        private readonly CreateCommand<UpdateProductCommand> _updateProductCommand;
-
         public ObservableCollection<ColumnSettingViewModel> ColumnsView { get; set; }
 
         private readonly Predicate<object> _originalFilter;
@@ -58,7 +56,10 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly CreateViewModel<ColumnSettingViewModel> _columnSettingViewModelFactory;
         private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly InventoryDataGridSettingsProvider _inventoryDataGridSettingsProvider;
-        private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
+        private readonly CreateCommand<ProductVMCommandPurchase> _productCommandPurchase;
+        private readonly CreateCommand<ProductVMCommandCommonProp> _productCommandCommonProp;
+        private readonly CreateCommand<ProductVMCommandPurchase> productCommandPurchase;
+        private readonly CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp;
         private readonly IInventoryStore _inventoryStore;
 
         public ICommand ToggleColumnCommand { get; }
@@ -71,8 +72,8 @@ namespace Mhyrenz_Interface.ViewModels
             CreateViewModel<ColumnSettingViewModel> columnSettingViewModelFactory,
             InventoryDataGridSettingsProvider inventoryDataGridSettingsProvider,
             ICategoryStore categoryStore,
-            CreateCommand<UpdateProductCommand> updateProductCommandFactory,
-            CreateCommand<DirectPurchaseCommand> directPurchaseCommandFactory,
+            CreateCommand<ProductVMCommandPurchase> productCommandPurchase,
+            CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp,
             IInventoryStore inventoryStore,
             IUndoRedoManager undoRedoManager,
             IProductService productService
@@ -93,9 +94,8 @@ namespace Mhyrenz_Interface.ViewModels
 
             ColumnsView = new ObservableCollection<ColumnSettingViewModel>();
             Columns = new ObservableDictionary<string, ColumnSettingViewModel>();
-
-            _updateProductCommand = updateProductCommandFactory;
-            _directPurchaseCommand = directPurchaseCommandFactory;
+            _productCommandPurchase = productCommandPurchase;
+            _productCommandCommonProp = productCommandCommonProp;
             _inventoryStore = inventoryStore;
         }
 
@@ -157,14 +157,14 @@ namespace Mhyrenz_Interface.ViewModels
                     // TODO event changed hook
                 }
 
-                _undoRedoManager.Execute(new ProductVMCommandCommonProp(
-                    viewModel,
-                    args: changedArgs(getter()),
-                    setter: setter,
-                    command: _updateProductCommand(),
-                    propertyChangeHandler: handlePropChange,
-                    currentViewIn: typeof(InventoryView)
-                ));
+                _undoRedoManager.Execute(_productCommandCommonProp(new ProductVMCommandCommonProp.DTO
+                {
+                    Product = viewModel.Item,
+                    ChangedArgs = changedArgs(getter()),
+                    Setter = setter,
+                    PropertyChangeHandler = handlePropChange,
+                    CurrentViewIn = typeof(InventoryView)
+                }));
             }
 
             void purchasePropHandler(Setter setter, Getter getter, int key)
@@ -180,14 +180,14 @@ namespace Mhyrenz_Interface.ViewModels
                     }));
                 }
 
-                _undoRedoManager.Execute(new ProductVMCommandPurchase(
-                    key,
-                    args: changedArgs(getter()),
-                    setter: setter,
-                    command: _directPurchaseCommand(),
-                    propertyChangeHandler: handlePropChange,
-                    currentViewIn: typeof(InventoryView)
-                )); 
+                _undoRedoManager.Execute(_productCommandPurchase(new ProductVMCommandPurchase.DTO
+                {
+                    ProductId = key,
+                    Setter = setter,
+                    ChangedArgs = changedArgs(getter()),
+                    PropertyChangeHandler = handlePropChange,
+                    CurrentViewIn = typeof(InventoryView)
+                }));
             }
 
             TrackPropertyHelper.Build(_inventoryStore, viewModel.Item.Id, args.PropertyName)
@@ -197,10 +197,10 @@ namespace Mhyrenz_Interface.ViewModels
                 .Track(nameof(ProductDataViewModel.Barcode), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Expiry), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Batch), commonPropHandler)
-                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, propertyName) =>
+                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, key) =>
                 {
                     args.OldValue = 0;
-                    purchasePropHandler(setter, getter, propertyName);
+                    purchasePropHandler(setter, getter, key);
                 })
                 .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler);
         }

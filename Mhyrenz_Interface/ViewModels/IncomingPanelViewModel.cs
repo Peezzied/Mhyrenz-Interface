@@ -19,17 +19,14 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly ShellViewModel _mainViewModel;
         private readonly INavigationServiceEx _navigationService;
-        private readonly CreateCommand<DirectPurchaseCommand> _directPurchaseCommand;
 
         public IncomingPanelViewModel(IInventoryStore inventoryStore,
             ISerialBarcodeService serialBarcodeService,
             INavigationServiceEx navigationService,
-            CreateCommand<DirectPurchaseCommand> directPurchaseCommand,
             ShellViewModel mainViewModel)
         {
             _inventoryStore = inventoryStore;
             _navigationService = navigationService;
-            _directPurchaseCommand = directPurchaseCommand;
             _serialBarcodeService = serialBarcodeService;
             _mainViewModel = mainViewModel;
 

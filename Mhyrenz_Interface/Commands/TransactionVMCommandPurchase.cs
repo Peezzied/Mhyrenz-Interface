@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
@@ -20,18 +22,15 @@ namespace Mhyrenz_Interface.Commands
 
     public class TransactionVMCommandPurchase : PropertyChangeCommand<TransactionVMRowInfo>
     {
-        private readonly ICommand _command;
-        private int _productId;
-        private readonly int _saleId;
-        private readonly int? _transactionId;
+        private readonly DTO _dto;
+        private readonly ICheckoutService _checkoutService;
+        private readonly ITransactionStore _transactionStore;
 
-        public TransactionVMCommandPurchase(int saleId, int productId, ChangedArgs args, TrackPropertyHelper.Setter setter, ICommand command, Action propertyChangeHandler, Type currentViewIn, int? transactionId) : 
-            base(args, setter, propertyChangeHandler, currentViewIn)
+        public TransactionVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto)
         {
-            _productId = productId;
-            _saleId = saleId;
-            _transactionId = transactionId;
-            _command = command;
+            _dto = dto;
+            _checkoutService = checkoutService;
+            _transactionStore = transactionStore;
             SideEffect = SideEffectHandler;
         }
 
@@ -41,29 +40,44 @@ namespace Mhyrenz_Interface.Commands
             //view.RowIntoView(PropertyChangedArgs.RowInfo.Sale, PropertyChangedArgs.RowInfo.Transactions);
         }
 
-        public override bool Command(object parameter, ActionType intent)
+        public override async void Command(object parameter, ActionType intent)
         {
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
-            SaleBoundPurchaseCommand.DTO.Type method;
-            if (newValue > oldValue)
-                method = intent == ActionType.Undo ? SaleBoundPurchaseCommand.DTO.Type.Subtract : SaleBoundPurchaseCommand.DTO.Type.Add;
-            else if (newValue < oldValue)
-                method = intent == ActionType.Undo ? SaleBoundPurchaseCommand.DTO.Type.Add : SaleBoundPurchaseCommand.DTO.Type.Subtract;
+            if (newValue == oldValue)
+                return;
+
+            var amount = Math.Abs(oldValue - newValue);
+
+            var isIncrease = newValue > oldValue;
+
+            var shouldAdd =
+                intent == ActionType.Undo
+                    ? !isIncrease
+                    : isIncrease;
+
+            if (shouldAdd)
+            {
+                var result = await _checkoutService.AddItem(_dto.SaleId, _dto.ProductId,amount);
+
+                _transactionStore.AddToSale(result);
+
+                _dto.TransactionId = result.Transaction.Id;
+            }
             else
-                return false;
+            {
+                var result = await _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, amount);
 
-            _command.Execute(new SaleBoundPurchaseCommand.DTO()
-            { 
-                Amount = Math.Abs(oldValue - newValue),
-                SaleId = _saleId,
-                ProductId = _productId,
-                TransactionId = _transactionId,
-                Method = method,
-            });
+                _transactionStore.AddToSale(result);
+            }
+        }
 
-            return true;
+        public new class DTO: PropertyChangeCommand<TransactionVMRowInfo>.DTO
+        {
+            public int SaleId { get; set; }
+            public int ProductId { get; set; }
+            public int TransactionId { get; set; }
         }
     }
 

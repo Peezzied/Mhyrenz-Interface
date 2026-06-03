@@ -18,13 +18,13 @@ namespace Mhyrenz_Interface.Commands
 
         public ChangedArgs PropertyChangedArgs { get; set; }
 
-        public PropertyChangeCommand(ChangedArgs args, TrackPropertyHelper.Setter setter, Action propertyChangeHandler, Type currentViewIn)
+        public PropertyChangeCommand(DTO dto)
         {
-            PropertyChangedArgs = args;
-            _setter = setter;
-            _propertyChangeHandler = propertyChangeHandler;
+            PropertyChangedArgs = dto.ChangedArgs;
+            _setter = dto.Setter;
+            _propertyChangeHandler = dto.PropertyChangeHandler;
 
-            CurrentViewIn = currentViewIn;
+            CurrentViewIn = dto.CurrentViewIn;
         }
 
         public void Execute()
@@ -52,7 +52,7 @@ namespace Mhyrenz_Interface.Commands
             _propertyChangeHandler();
         }
 
-        public abstract bool Command(object parameter, ActionType intent);
+        public abstract void Command(object parameter, ActionType intent);
 
         public class ChangedArgs
         {

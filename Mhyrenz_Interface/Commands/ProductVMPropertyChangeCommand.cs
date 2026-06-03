@@ -1,5 +1,6 @@
 ﻿using System;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.ViewModels;
 using Mhyrenz_Interface.ViewModels.Factory;
 
@@ -13,8 +14,7 @@ namespace Mhyrenz_Interface.Commands
 
     public abstract class ProductVMPropertyChangeCommand : PropertyChangeCommand<ProductVMRowInfo>
     {
-        public ProductVMPropertyChangeCommand(ChangedArgs args, TrackPropertyHelper.Setter setter, Action propertyChangeHandler, Type currentViewIn) : 
-            base(args, setter, propertyChangeHandler, currentViewIn)
+        public ProductVMPropertyChangeCommand(DTO dto) : base(dto)
         {
             SideEffect = SideEffectHandler;
         }
@@ -24,6 +24,5 @@ namespace Mhyrenz_Interface.Commands
             var view = vm as InventoryViewModel;
             view.RowIntoView(PropertyChangedArgs.RowInfo.Category, PropertyChangedArgs.RowInfo.Products);
         }
-
     }
 }

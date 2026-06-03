@@ -4,6 +4,7 @@ using Mhyrenz_Interface.Commands;
 using Mhyrenz_Interface.Controls.Attached;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.State;
 
 namespace Mhyrenz_Interface.ViewModels
 {
@@ -38,7 +39,7 @@ namespace Mhyrenz_Interface.ViewModels
 
         public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
-        public Task RequestFlash(SaleBoundPurchaseCommand.DTO.Type type)
+        public Task RequestFlash(TransactionStore.OperationType type)
         {
             var args = new RowFlashRequestedEventArgs(type);
             FlashRequested?.Invoke(this, args);

@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using GongSolutions.Wpf.DragDrop.Utilities;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Commands;
+using Mhyrenz_Interface.State;
 using Mhyrenz_Interface.ViewModels;
 using ZXing.PDF417.Internal;
 
@@ -28,13 +29,13 @@ namespace Mhyrenz_Interface.Controls.Attached
 
     public class RowFlashRequestedEventArgs : EventArgs
     {
-        public RowFlashRequestedEventArgs(SaleBoundPurchaseCommand.DTO.Type method)
+        public RowFlashRequestedEventArgs(TransactionStore.OperationType method)
         {
             Method = method;
             Completion = new TaskCompletionSource<bool>();
         }
 
-        public SaleBoundPurchaseCommand.DTO.Type Method { get; private set; }
+        public TransactionStore.OperationType Method { get; private set; }
         public TaskCompletionSource<bool> Completion { get; }
     }
 
@@ -330,13 +331,13 @@ namespace Mhyrenz_Interface.Controls.Attached
 
             switch (args.Method)
             {
-                case SaleBoundPurchaseCommand.DTO.Type.AddNew:
+                case TransactionStore.OperationType.AddNew:
                     color = Color.FromRgb(76, 175, 80);
                     break;
-                case SaleBoundPurchaseCommand.DTO.Type.Add:
+                case TransactionStore.OperationType.Add:
                     color = Color.FromRgb(255, 193, 7);
                     break;
-                case SaleBoundPurchaseCommand.DTO.Type.Subtract:
+                case TransactionStore.OperationType.Subtract:
                     color = Color.FromRgb(244, 67, 54);
                     break;
                 default:

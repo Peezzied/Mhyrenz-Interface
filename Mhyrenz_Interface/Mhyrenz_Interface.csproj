@@ -478,18 +478,15 @@
     <Compile Include="Commands\TransactionVMDiscountCommand.cs" />
     <Compile Include="Commands\IUndoRedoBound.cs" />
     <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
-    <Compile Include="Commands\SaleBoundPurchaseCommand.cs" />
     <Compile Include="Commands\ProductVMCommandNestedProp.cs" />
     <Compile Include="Commands\CreateSessionCommand.cs" />
     <Compile Include="Commands\DeleteCommand.cs" />
     <Compile Include="Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Commands\ProductVMCommandCommonProp.cs" />
     <Compile Include="Commands\ProductVMCommandPurchase.cs" />
-    <Compile Include="Commands\DirectPurchaseCommand.cs" />
     <Compile Include="Commands\SalesRegisterCommand.cs" />
     <Compile Include="Commands\TransactionVMCommandPurchase.cs" />
     <Compile Include="Commands\UndoRedoBoundCommand.cs" />
-    <Compile Include="Commands\UpdateTransactionCommand.cs" />
     <Compile Include="Controls\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
@@ -558,7 +555,6 @@
     <Compile Include="Converters\String2BooleanConverter.cs" />
     <Compile Include="Core\Aliases.cs" />
     <Compile Include="Core\BaseAsyncCommand.cs" />
-    <Compile Include="Commands\UpdateProductCommand.cs" />
     <Compile Include="Controls\Columns\ColumnType.cs" />
     <Compile Include="Core\ITrackPropertyChanged.cs" />
     <Compile Include="Core\ServiceCollectionExtensions.cs" />

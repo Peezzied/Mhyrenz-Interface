@@ -9,12 +9,11 @@ namespace Mhyrenz_Interface.Commands
 {
     public class TransactionVMDiscountCommand : PropertyChangeCommand<TransactionVMRowInfo>
     {
-        public TransactionVMDiscountCommand(ChangedArgs args, TrackPropertyHelper.Setter setter, Action propertyChangeHandler, Type currentViewIn) : 
-            base(args, setter, propertyChangeHandler, currentViewIn)
+        public TransactionVMDiscountCommand(DTO dto) : base(dto)
         {
         }
 
-        public override bool Command(object parameter, ActionType intent)
+        public override void Command(object parameter, ActionType intent)
         {
             throw new NotImplementedException();
         }

@@ -159,12 +159,12 @@ namespace Mhyrenz_Interface
 
                 .AddCommandFactory<DeleteCommand>()
                 .AddCommandFactory<AddCommand>()
-                .AddCommandFactory<UpdateProductCommand>()
-                .AddCommandFactory<DirectPurchaseCommand>()
                 .AddCommandFactory<CreateSessionCommand>()
                 .AddCommandFactory<LoadCategoriesCommand>()
-                .AddCommandFactory<SaleBoundPurchaseCommand>()
                 .AddCommandFactory<CheckoutCommand>()
+                .AddCommandFactory<TransactionVMCommandPurchase, TransactionVMCommandPurchase.DTO>()
+                .AddCommandFactory<ProductVMCommandCommonProp, ProductVMCommandCommonProp.DTO>()
+                .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()
 
                 .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()

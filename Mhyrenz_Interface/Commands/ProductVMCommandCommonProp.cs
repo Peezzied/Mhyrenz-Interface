@@ -1,37 +1,32 @@
 ﻿using System;
 using System.Windows.Input;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.ViewModels;
 
 namespace Mhyrenz_Interface.Commands
 {
     public class ProductVMCommandCommonProp : ProductVMPropertyChangeCommand
     {
-        private readonly ProductDataViewModel _target;
-        private readonly ICommand _command;
+        private readonly DTO _dto;
+        private readonly IProductService _productService;
+        private readonly IProductService productService;
 
-        public ProductVMCommandCommonProp(ProductDataViewModel target,
-            ChangedArgs args,
-            TrackPropertyHelper.Setter setter,
-            ICommand command,
-            Action propertyChangeHandler,
-            Type currentViewIn) : base(args, setter, propertyChangeHandler, currentViewIn)
+        public ProductVMCommandCommonProp(DTO dto, IProductService productService) : base(dto)
         {
-            _target = target;
-            _command = command;
+            _dto = dto;
+            _productService = productService;
         }
 
-        public override bool Command(object parameter, ActionType intent)
+        public override async void Command(object parameter, ActionType intent)
         {
-            var product = _target.Item;
+            await _productService.Update(_dto.Product.Id, _dto.Product);
+        }
 
-            _command.Execute(new UpdateProductCommand.DTO()
-            {
-                Id = product.Id,
-                UpdatedProduct = product
-            });
-
-            return true;
+        public new class DTO : PropertyChangeCommand<ProductVMRowInfo>.DTO
+        {
+            public Product Product { get; set; }
         }
     }
 }
