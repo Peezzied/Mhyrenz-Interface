@@ -475,6 +475,7 @@
     <Compile Include="AppPresenter.cs" />
     <Compile Include="Commands\AddCommand.cs" />
     <Compile Include="Commands\CheckoutCommand.cs" />
+    <Compile Include="Commands\PlaceOrderVMCommandQty.cs" />
     <Compile Include="Commands\TransactionVMCommandDiscount.cs" />
     <Compile Include="Commands\IUndoRedoBound.cs" />
     <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
@@ -526,6 +527,9 @@
     <Compile Include="Controls\MaxLinesTextBlock.cs" />
     <Compile Include="Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PlaceOrderDrawer.xaml.cs">
+      <DependentUpon>PlaceOrderDrawer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\RibbonBar.xaml.cs">
       <DependentUpon>RibbonBar.xaml</DependentUpon>
@@ -579,10 +583,12 @@
     <Compile Include="State\CategoryStore.cs" />
     <Compile Include="State\ICategoryStore.cs" />
     <Compile Include="State\IInventroyStore.cs" />
+    <Compile Include="State\IOrderStore.cs" />
     <Compile Include="State\ISessionStore.cs" />
     <Compile Include="State\ITransactionStore.cs" />
     <Compile Include="State\IUndoManager.cs" />
     <Compile Include="State\IViewModelStore.cs" />
+    <Compile Include="State\OrderStore.cs" />
     <Compile Include="State\SessionStore.cs" />
     <Compile Include="State\TransactionStore.cs" />
     <Compile Include="State\UndoRedoManager.cs" />
@@ -618,7 +624,9 @@
     <Compile Include="ViewModels\InventoryTabItem.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="Controls\MenuItem.cs" />
+    <Compile Include="ViewModels\OrderViewModel.cs" />
     <Compile Include="ViewModels\OverviewChartViewModel.cs" />
+    <Compile Include="ViewModels\PlaceOrderViewModel.cs" />
     <Compile Include="ViewModels\ProductDataViewModel.cs" />
     <Compile Include="ViewModels\SaleTabItem.cs" />
     <Compile Include="ViewModels\SessionBoxContext.cs" />
@@ -670,6 +678,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\OverviewChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\PlaceOrderDrawer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -5,15 +5,6 @@
              xmlns:local="clr-namespace:Mhyrenz_Interface">
     <Application.Resources>
         <ResourceDictionary>
-            <!--<FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter 24pt</FontFamily>-->
-            <FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter</FontFamily>
-            <FontFamily x:Key="Geist">pack://application:,,,/Mhyrenz Interface;component/Fonts/Geist.ttf#Geist</FontFamily>
-
-
-            <Style TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="{StaticResource Geist}"/>
-            </Style>
-
 
             <ResourceDictionary.MergedDictionaries>
                 <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
@@ -24,13 +15,44 @@
 
                 <hc:ThemeResources AccentColor="{StaticResource MahApps.Brushes.Accent}"/>
                 <hc:Theme/>
- 
+
                 <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
                 <ResourceDictionary Source="/Controls/Templates/DragablzMahApps.xaml"/>
 
 
                 <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
+
+            <!--<FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter 24pt</FontFamily>-->
+            <FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter</FontFamily>
+            <FontFamily x:Key="Geist">pack://application:,,,/Mhyrenz Interface;component/Fonts/Geist.ttf#Geist</FontFamily>
+
+
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource Geist}"/>
+            </Style>
+
+            <Style x:Key="DataGridCell" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                            <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
         </ResourceDictionary>
         
     </Application.Resources>

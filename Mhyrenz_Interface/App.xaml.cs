@@ -139,19 +139,22 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ICheckoutService, CheckoutService>()
                 .AddSingleton<ICategoryService, CategoryService>()
                 .AddSingleton<IProductService, ProductService>()
+                .AddSingleton<IOrderStore, OrderStore>()
 
                 .AddTransient<IncomingPanelViewModel>()
                 .AddTransient<OverviewChartViewModel>()
 
-                .AddViewModelFactory<CompletedSaleViewModel>()
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
                 .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
+                .AddViewModelFactory<OrderViewModel, Order>()
+                .AddViewModelFactory<PlaceOrderViewModel>()
                 .AddViewModelFactory<InventoryDataGridViewModel>()
                 .AddViewModelFactory<InventoryTabItem>()
                 .AddViewModelFactory<SaleTabItem>()
                 .AddViewModelFactory<SessionBoxContext>(resolveFromContainer: true)
                 .AddViewModelFactory<AddProductViewModel>(resolveFromContainer: true)
+                .AddViewModelFactory<CompletedSaleViewModel>(resolveFromContainer: true)
 
                 .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<InventoryViewModel>(resolveFromContainer: true)
@@ -167,6 +170,7 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<TransactionVMCommandPurchase, TransactionVMCommandPurchase.DTO>()
                 .AddCommandFactory<ProductVMCommandCommonProp, ProductVMCommandCommonProp.DTO>()
                 .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()
+                .AddCommandFactory<PlaceOrderVMCommandQty, PlaceOrderVMCommandQty.DTO>()
 
                 .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()

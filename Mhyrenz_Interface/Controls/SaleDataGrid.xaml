@@ -20,32 +20,8 @@
              xmlns:fake="clr-namespace:Mhyrenz_Interface.ViewModels.Fake"
              d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:Width="450">
-    <UserControl.Resources>
-        <Style x:Key="DataGridCell" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
-            <Setter Property="VerticalContentAlignment" Value="Top"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type DataGridCell}">
-                        <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
-                            <ContentPresenter Margin="{TemplateBinding Padding}"
-                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                              Content="{TemplateBinding Content}"
-                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
               ItemsSource="{Binding Transactions}"
-              CellStyle="{StaticResource DataGridCell}"
               GridLinesVisibility="Horizontal"
               AutoGenerateColumns="False"
               CanUserResizeColumns="False"
@@ -72,6 +48,11 @@
                 </Style.Triggers>
             </Style>
         </DataGrid.Resources>
+        <DataGrid.CellStyle>
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+            </Style>
+        </DataGrid.CellStyle>
         <DataGrid.RowStyle>
             <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
                 <Setter Property="ContextMenu">
