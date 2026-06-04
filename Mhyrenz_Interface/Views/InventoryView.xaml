@@ -20,9 +20,26 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <hc:Drawer IsOpen="{Binding DrawerIsOpen}" ShowMode="Push" Name="DrawerRight" Dock="Right">
+        <hc:Drawer IsOpen="{Binding AddProductIsOpen}" ShowMode="Push" Name="DrawerRight" Dock="Right">
             <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="300">
-                <ContentControl Content="{Binding DrawerContent}" Margin="30"/>
+                <ContentControl Content="{Binding AddProductViewModel}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:AddProductViewModel}">
+                            <controls:AddProductDrawer/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+            </Border>
+        </hc:Drawer>
+        <hc:Drawer IsOpen="{Binding PlaceOrderIsOpen}" ShowMode="Cover" ShowMask="False" Dock="Right">
+            <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="400">
+                <ContentControl Content="{Binding PlaceOrderViewModel}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:PlaceOrderViewModel}">
+                            <controls:PlaceOrderDrawer/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
             </Border>
         </hc:Drawer>
         <Grid Margin="17,10,17,10">

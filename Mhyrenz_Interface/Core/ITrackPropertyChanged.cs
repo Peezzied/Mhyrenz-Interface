@@ -28,6 +28,8 @@ namespace Mhyrenz_Interface.Core
         public object OldValue { get; set; }
         public string PropertyName { get; set; }
         public PropertyChangeOrigin Origin { get; set; }
+
+        public bool IsTrueOrigin => Origin != PropertyChangeOrigin.UndoRedo;
     }
 
     public interface ITrackPropertyChanged

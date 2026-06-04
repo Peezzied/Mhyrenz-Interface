@@ -33,6 +33,25 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Orders");
+                });
+
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.PharmaDetails", b =>
                 {
                     b.Property<int>("Id")
@@ -198,6 +217,15 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Order", b =>
+                {
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Product", b =>

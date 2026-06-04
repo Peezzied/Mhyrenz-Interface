@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260603114406_SaleDiscount")]
-    partial class SaleDiscount
+    [Migration("20260604115250_Order")]
+    partial class Order
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,6 +33,25 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.PharmaDetails", b =>
@@ -200,6 +219,15 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Order", b =>
+                {
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Product", b =>

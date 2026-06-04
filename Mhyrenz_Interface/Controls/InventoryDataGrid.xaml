@@ -9,10 +9,12 @@
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Controls.Columns"
              xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Controls.Behaviors"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
+             xmlns:view="clr-namespace:Mhyrenz_Interface.Views"
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Converters"
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:attached="clr-namespace:Mhyrenz_Interface.Controls.Attached"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -274,7 +276,6 @@
 
             <DataTemplate x:Key="DataGridCompactLayout">
                 <DataGrid CanUserResizeColumns="False" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False"
-                          xmlns:dd="urn:gong-wpf-dragdrop"
                           RowDetailsVisibilityMode="{Binding DataContext.ProductRowDetailsVisibilityMode, RelativeSource={RelativeSource AncestorType=local:SaleTabContent}}"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=local:SaleTabContent}}"
                           dd:DragDrop.IsDragSource="True"
@@ -354,7 +355,11 @@
             </DataTemplate>
 
             <DataTemplate x:Key="DataGridDetailedLayout">
-                <DataGrid FrozenColumnCount="3" SelectionUnit="FullRow" SelectionMode="Extended">
+                <DataGrid FrozenColumnCount="3" 
+                          SelectionUnit="FullRow" 
+                          SelectionMode="Extended"
+                          dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=view:InventoryView}}"
+                          dd:DragDrop.IsDragSource="True">
                     <DataGrid.Style>
                         <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridStyle}">
                             <Setter Property="RowDetailsTemplate" Value="{x:Null}"/>
@@ -399,7 +404,6 @@
                         <behaviors:InventoryDataGridBehavior/>
                     </i:Interaction.Behaviors>
                     <DataGrid.Columns>
-                        <DataGridCheckBoxColumn Binding="{Binding IsSelected}" Width="42"  MinWidth="42" MaxWidth="100"/>
                         <DataGridTextColumn Header="Id" Width="Auto" IsReadOnly="True" Binding="{Binding Item.Id}" ElementStyle="{StaticResource IdColumnElementStyle}" attached:InventoryDataGridColumn.IgnoreReorder="True" />
                         <DataGridTemplateColumn Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" CellEditingTemplate="{StaticResource NameColumnCellEditingTemplate}" attached:InventoryDataGridColumn.IgnoreReorder="True" attached:InventoryDataGridColumn.IgnoreVisibilityToggle="True" />
                         <columns:TextColumn Binding="{Binding Batch, UpdateSourceTrigger=Explicit}" Header="Batch" Width="125" />
