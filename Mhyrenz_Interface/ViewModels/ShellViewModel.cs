@@ -275,8 +275,6 @@ namespace Mhyrenz_Interface.ViewModels
             var vm = _viewModelFactory.CreateViewModel(viewType);
             _navigationServiceEx.CurrentViewModel = vm;
             OnPropertyChanged(nameof(CurrentViewModel));
-
-            RibbonBarViewModel = this;
         }
 
         internal void SuspendMainBarcodeReceiver()

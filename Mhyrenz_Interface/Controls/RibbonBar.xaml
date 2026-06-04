@@ -11,14 +11,6 @@
              mc:Ignorable="d" 
              xmlns:core="clr-namespace:Mhyrenz_Interface.Core"
              d:DesignHeight="50" d:DesignWidth="800">
-    <UserControl.Resources>
-        <DataTemplate DataType="{x:Type vm:ShellViewModel}">
-            <tools:BarcodeTools/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:InventoryTabItem}">
-            <tools:InventoryDataGridTools/>
-        </DataTemplate>
-    </UserControl.Resources>
     <Grid Background="Black">
         <hc:FlexPanel Margin="30, 0" FlexDirection="Row" JustifyContent="SpaceBetween">
             <hc:UniformSpacingPanel Spacing="30" Grid.Row="0" Orientation="Horizontal">
@@ -34,7 +26,17 @@
                         </local:IconButtonWithTip.IconContent>
                     </local:IconButtonWithTip>
                 </hc:UniformSpacingPanel>
-                <ContentControl Content="{Binding RibbonBarViewModel}"/>
+                <tools:BarcodeTools/>
+                <ContentControl Content="{Binding RibbonBarViewModel}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:InventoryTabItem}">
+                            <tools:InventoryDataGridTools/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:CheckoutViewModel}">
+                            <tools:CheckoutViewTools/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
             </hc:UniformSpacingPanel>
             <hc:UniformSpacingPanel Spacing="20" VerticalAlignment="Center">
                 <hc:Shield FontSize="14" Subject="session" d:Status="Fri, August 08" Status="{Binding Session}"/>

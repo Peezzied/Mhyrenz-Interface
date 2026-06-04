@@ -206,6 +206,16 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
+        public async Task<IReadOnlyList<Sale>> GetHistory()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return await context.Sales
+                    .AsNoTracking()
+                    .Where(s => s.Completed_at != null)
+                    .ToListAsync();
+            }
+        }
 
         public async Task DiscardSale(int saleId, bool asComplete = false)
         {

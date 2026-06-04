@@ -28,14 +28,21 @@ namespace Mhyrenz_Interface.ViewModels
         public CheckoutViewModel(INavigationServiceEx navigationServiceEx, ICheckoutService checkoutService,
             ISessionStore sessionStore,
             IInventoryStore inventoryStore,
+            ShellViewModel shellViewModel,
+            CreateViewModel<CompletedSaleViewModel> completedSaleViewModel,
             CreateViewModel<SaleTabItem> saleTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory) : base(navigationServiceEx)
         {
+            _shellViewModel = shellViewModel;
+            shellViewModel.RibbonBarViewModel = this;
+
             _inventoryDataGridFactory = inventoryDataGridFactory;
             _sessionStore = sessionStore;
             _inventoryStore = inventoryStore;
             _checkoutService = checkoutService;
             _saleTabItemFactory = saleTabItemFactory;
+
+            _completedSaleViewModel = completedSaleViewModel;
 
             AddSaleCommand = new AsyncRelayCommand(CreateSale);
 
@@ -100,6 +107,8 @@ namespace Mhyrenz_Interface.ViewModels
         private readonly IInventoryStore _inventoryStore;
         private readonly ICheckoutService _checkoutService;
         private readonly CreateViewModel<SaleTabItem> _saleTabItemFactory;
+        private readonly CreateViewModel<CompletedSaleViewModel> _completedSaleViewModel;
+        private readonly ShellViewModel _shellViewModel;
 
         public ICommand AddSaleCommand { get; private set; }
 
@@ -126,6 +135,39 @@ namespace Mhyrenz_Interface.ViewModels
                 }
 
                 OnPropertyChanged(nameof(SelectedItem));
+            }
+        }
+
+        private bool _completedSalesIsOpen;
+        public bool CompletedSalesIsOpen
+        {
+            get => _completedSalesIsOpen;
+            set
+            {
+                if (_completedSalesIsOpen != value)
+                {
+                    _completedSalesIsOpen = value;
+                    OnPropertyChanged(nameof(CompletedSalesIsOpen));
+
+                    if (_completedSalesIsOpen)
+                        CompletedSaleViewModel = _completedSaleViewModel();
+                    else
+                    {
+                        CompletedSaleViewModel.Dispose();
+                        CompletedSaleViewModel = null;
+                    }
+                }
+            }
+        }
+
+        private CompletedSaleViewModel completedSaleViewModel;
+        public CompletedSaleViewModel CompletedSaleViewModel
+        {
+            get => completedSaleViewModel;
+            set
+            {
+                completedSaleViewModel = value;
+                OnPropertyChanged(nameof(CompletedSaleViewModel));
             }
         }
 
@@ -187,6 +229,7 @@ namespace Mhyrenz_Interface.ViewModels
         public override void Dispose()
         {
             _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
+            _shellViewModel.RibbonBarViewModel = null;  
         }
     }
 }

@@ -73,6 +73,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         Task<Sale> Create(Guid sessionId);
         Task DiscardSale(int saleId, bool asComplete = false);
         Task<IReadOnlyList<Sale>> GetActive();
+        Task<IReadOnlyList<Sale>> GetHistory();
         Task<bool> HasTransactions();
         Task<int> InactiveTransactionsCount();
 

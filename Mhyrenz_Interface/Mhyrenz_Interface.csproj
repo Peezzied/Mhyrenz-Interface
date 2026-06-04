@@ -502,6 +502,9 @@
     <Compile Include="Controls\Behaviors\UndoRedoBehavior.cs" />
     <Compile Include="Controls\CategoryTag.cs" />
     <Compile Include="Controls\CellAdorner.cs" />
+    <Compile Include="Controls\CompletedSales.xaml.cs">
+      <DependentUpon>CompletedSales.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\IEditCancelState.cs" />
     <Compile Include="Controls\ColumnList.xaml.cs">
       <DependentUpon>ColumnList.xaml</DependentUpon>
@@ -529,6 +532,9 @@
     </Compile>
     <Compile Include="Controls\RibbonBarTools\BarcodeTools.xaml.cs">
       <DependentUpon>BarcodeTools.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RibbonBarTools\CheckoutViewTools.xaml.cs">
+      <DependentUpon>CheckoutViewTools.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml.cs">
       <DependentUpon>InventoryDataGridTools.xaml</DependentUpon>
@@ -598,9 +604,11 @@
     </Compile>
     <Compile Include="ViewModels\AddProductViewModel.cs" />
     <Compile Include="ViewModels\ColumnSettingViewModel.cs" />
+    <Compile Include="ViewModels\CompletedSaleViewModel.cs" />
     <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
     <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
+    <Compile Include="ViewModels\Fake\FakeCompletedSaleViewModel.cs" />
     <Compile Include="ViewModels\Fake\FakeInfoPanelViewModel.cs" />
     <Compile Include="ViewModels\Fake\FakeTransactionDataGridViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
@@ -645,6 +653,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\CompletedSales.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\IncomingItemPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -666,6 +678,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\RibbonBarTools\BarcodeTools.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RibbonBarTools\CheckoutViewTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
