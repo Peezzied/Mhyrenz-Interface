@@ -4,12 +4,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Dragablz;
+using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.Features.Inventory.Controls;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
@@ -43,6 +46,10 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             AddSaleCommand = new AsyncRelayCommand(CreateSale);
 
+            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
+
+            InventoryDragHandler = new InventoryDragSource(this);
+
             App.Current.Dispatcher.BeginInvoke(new Action(async () => // TODO re-evaluate the async keyword in here
             {
                 LoadTabItems();
@@ -65,18 +72,16 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 return;
             }
 
-            var inventoryDataGrid = _inventoryDataGridFactory(this);
-            inventoryDataGrid.InventoryView.AttachFilter(e => e.NetQty > 0);
-            inventoryDataGrid.IsReadOnly = true;
-
-            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
+            _inventoryDataGrid = _inventoryDataGridFactory(this);
+            _inventoryDataGrid.InventoryView.AttachFilter(e => e.NetQty > 0);
+            _inventoryDataGrid.IsReadOnly = true;
 
             SaleTabItems.AddRange(sales.Select(s =>
             {
                 var saleTabItem = _saleTabItemFactory(
                     this,
                     s.FromStartCount(_startSaleCount) + " Regular Customer",
-                    inventoryDataGrid,
+                    _inventoryDataGrid,
                     s);
 
                 return saleTabItem;
@@ -94,11 +99,16 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
         {
-            SelectedItem.InventoryDataGridViewModel.InventoryView
-                .AttachFilter(p => p.NetQty > 0);
+            if (e.Product.NetQty > 0)
+                return;
+
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _inventoryDataGrid.InventoryView
+                    .AttachFilter(p => p.NetQty > 0);
+            }));
         }
 
-        private readonly HashSet<int> _initializedTabs = new HashSet<int>();
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IInventoryStore _inventoryStore;
@@ -117,21 +127,24 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             get => _selectedItem;
             set
             {
-                _selectedItem?.Dispose();
+                _selectedItem?.Unload();
 
                 _selectedItem = value;
-
-                if (_selectedItem != null
-                    && !_initializedTabs.Contains(_selectedItem.Sale.Id))
-                {
-                    App.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _selectedItem.LoadTransactions();
-                    }), DispatcherPriority.Background);
-                    _initializedTabs.Add(_selectedItem.Sale.Id);
-                }
+                _selectedItem?.Load();
 
                 OnPropertyChanged(nameof(SelectedItem));
+            }
+        }
+
+        private DataGridRowDetailsVisibilityMode _productRowDetailsVisibilityMode =
+            DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+        public DataGridRowDetailsVisibilityMode ProductRowDetailsVisibilityMode
+        {
+            get => _productRowDetailsVisibilityMode;
+            set
+            {
+                _productRowDetailsVisibilityMode = value;
+                OnPropertyChanged(nameof(ProductRowDetailsVisibilityMode));
             }
         }
 
@@ -158,6 +171,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         }
 
         private CompletedSaleViewModel completedSaleViewModel;
+        private InventoryDataGridViewModel _inventoryDataGrid;
+
         public CompletedSaleViewModel CompletedSaleViewModel
         {
             get => completedSaleViewModel;
@@ -171,6 +186,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public ObservableCollection<SaleTabItem> SaleTabItems { get; } = new ObservableCollection<SaleTabItem>();
 
         public ItemActionCallback OnTabClosing => ClosingTab;
+
+        public InventoryDragSource InventoryDragHandler { get; }
 
         private async void ClosingTab(ItemActionCallbackArgs<TabablzControl> args)
         {
@@ -226,7 +243,49 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public override void Dispose()
         {
             _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
-            _shellViewModel.RibbonBarViewModel = null;
+
+            foreach (var tab in SaleTabItems.ToList())
+                tab.Dispose();
+
+            SaleTabItems.Clear();
+
+            CompletedSaleViewModel?.Dispose();
+            CompletedSaleViewModel = null;
+
+            if (ReferenceEquals(_shellViewModel.RibbonBarViewModel, this))
+                _shellViewModel.RibbonBarViewModel = null;
+
+            AddSaleCommand = null;
+        }
+
+        public class InventoryDragSource : DefaultDragHandler
+        {
+            public InventoryDragSource(CheckoutViewModel checkoutViewModel)
+            {
+                CheckoutViewModel = checkoutViewModel;
+            }
+
+            public CheckoutViewModel CheckoutViewModel { get; }
+
+            public override void StartDrag(IDragInfo dragInfo)
+            {
+                if (dragInfo.SourceItem is ProductDataViewModel product)
+                {
+                    CheckoutViewModel.ProductRowDetailsVisibilityMode =
+                        DataGridRowDetailsVisibilityMode.Collapsed;
+
+                    dragInfo.Data = product;
+                    dragInfo.Effects = DragDropEffects.Copy;
+                }
+            }
+
+            public override void DragDropOperationFinished(
+                DragDropEffects operationResult,
+                IDragInfo dragInfo)
+            {
+                CheckoutViewModel.ProductRowDetailsVisibilityMode =
+                    DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+            }
         }
     }
 }

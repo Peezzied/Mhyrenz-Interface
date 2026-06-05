@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,10 +48,14 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _checkoutCommand = checkoutCommand;
             _transctionPurchaseCommand = transctionPurchaseCommand;
             _transactionPropCommand = transactionPropCommand;
-            SaleDropHandler = new SaleDropHandler(this, transactionStore);
-            InventoryDragHandler = new InventoryDragHandler(this);
+            SaleDropHandler = new SaleDropTarget(this, transactionStore);
 
         }
+
+        private ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
+
+        private bool _isLoaded;
+        private bool _disposed;
 
         private async Task VoidAction(object arg)
         {
@@ -128,9 +133,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly CreateCommand<TransactionVMCommandPurchase> _transctionPurchaseCommand;
         private readonly CreateCommand<TransactionVMCommandDiscount> _transactionPropCommand;
 
-        public SaleDropHandler SaleDropHandler { get; }
+        public SaleDropTarget SaleDropHandler { get; }
 
-        public InventoryDragHandler InventoryDragHandler { get; }
         public RelayCommand CheckoutCommand { get; private set; }
         public AsyncRelayCommand VoidCommand { get; private set; }
 
@@ -138,36 +142,71 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
         private readonly CheckoutViewModel _parent;
-        private DataGridRowDetailsVisibilityMode _productRowDetailsVisibilityMode =
-            DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
-        public DataGridRowDetailsVisibilityMode ProductRowDetailsVisibilityMode
-        {
-            get => _productRowDetailsVisibilityMode;
-            set
-            {
-                _productRowDetailsVisibilityMode = value;
-                OnPropertyChanged(nameof(ProductRowDetailsVisibilityMode));
-            }
-        }
 
         public bool IsEditCancelled { get; set; }
 
-        public void LoadTransactions()
+        public void Load()
         {
-            var view = _transactionStore.Store.Source.CreateView(v => v);
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(SaleTabItem));
+
+            if (_isLoaded)
+                return;
+
+            _transactionView = _transactionStore.Store.Source.CreateView(v => v);
+            _transactionView.AttachFilter(TransactionFilter);
+            _transactionView.ViewChanged += View_ViewChanged;
+
+            Transactions = _transactionView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
+
+            foreach (var (_, view) in _transactionView.Filtered)
+                view.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
 
             _transactionStore.SaleChange += TransactionStore_SaleChange;
 
-            view.AttachFilter(TransactionFilter);
+            //InventoryDataGridViewModel.InventoryView.AttachFilter(x => x.NetQty > 0);
 
-            view.ViewChanged += View_ViewChanged;
+            _isLoaded = true;
+        }
 
-            Transactions = view.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
+        public void Unload()
+        {
+            if (!_isLoaded)
+                return;
 
-            foreach (var (Value, View) in view.Filtered)
+            _transactionStore.SaleChange -= TransactionStore_SaleChange;
+
+            if (_transactionView != null)
             {
-                View.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
+                _transactionView.ViewChanged -= View_ViewChanged;
+
+                foreach (var (_, view) in _transactionView.Filtered)
+                    view.TrackedPropertyChanged -= Transaction_TrackedPropertyChanged;
+
+                _transactionView.Dispose();
+                _transactionView = null;
             }
+
+            Transactions?.Dispose();
+            Transactions = null;
+
+            _isLoaded = false;
+        }
+
+        public override void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            Unload();
+
+            CheckoutCommand = null;
+            VoidCommand = null;
+
+            base.Dispose();
+
+            _disposed = true;
         }
 
         protected override void ValidateCustom(string propertyName)
@@ -189,6 +228,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                     return;
                 }
                 Sale = e;
+
+                //_transactionView.AttachFilter(TransactionFilter);
             }
         }
 
@@ -207,14 +248,14 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         private void Transaction_TrackedPropertyChanged(object sender, TrackedPropertyChangedEventArgs args)
         {
-            if (args.Origin == PropertyChangeOrigin.UndoRedo)
+            if (!args.IsTrueOrigin)
                 return;
 
             var viewModel = sender as TransactionDataViewModel;
             TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id)
                 .Track(nameof(TransactionDataViewModel.Discount), discountMethod);
 
-            void discountMethod(Setter setter, Getter getter, int key)
+            void discountMethod(Setter setter, Getter getter, long key)
             {
                 _undoRedoManager.Execute(_transactionPropCommand(new TransactionVMCommandDiscount.DTO
                 {
@@ -235,9 +276,9 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
         }
 
-        public TrackPropertyHelper<int, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
+        public TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
         {
-            var tracker = TrackPropertyHelper.Build(_transactionStore, productId, propertyName)
+            var tracker = TrackPropertyHelper.Build(_transactionStore, Transaction.CreateTransactionKey(productId, Sale.Id), propertyName)
                 .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, getter, key) =>
                 {
                     oldValue = 0;
@@ -245,13 +286,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 })
                 .Track(nameof(TransactionDataViewModel.Qty), method);
 
-            void method(Setter setter, Getter getter, int key)
+            void method(Setter setter, Getter getter, long key)
             {
-                void handlePropChange()
-                {
-                    //_transactionStore.AddToSale(command.Result);
-                }
-
                 _undoRedoManager.Execute(_transctionPurchaseCommand(new TransactionVMCommandPurchase.DTO
                 {
                     SaleId = Sale.Id,
@@ -267,7 +303,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                         }
                     },
                     Setter = setter,
-                    PropertyChangeHandler = handlePropChange,
                     CurrentViewIn = typeof(CheckoutView)
                 }));
             }
@@ -279,71 +314,44 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         {
             return CheckoutCommand;
         }
-    }
 
-    public class InventoryDragHandler : DefaultDragHandler
-    {
-        public InventoryDragHandler(SaleTabItem saleTabItem)
+        public class SaleDropTarget : DefaultDropHandler
         {
-            SaleTabItem = saleTabItem;
-        }
+            private readonly SaleTabItem saleTabItem;
+            private readonly ITransactionStore transactionStore;
 
-        public SaleTabItem SaleTabItem { get; }
-
-        public override void StartDrag(IDragInfo dragInfo)
-        {
-            if (dragInfo.SourceItem is ProductDataViewModel product)
+            public SaleDropTarget(SaleTabItem saleTabItem, ITransactionStore transactionStore)
             {
-                SaleTabItem.ProductRowDetailsVisibilityMode =
-                    DataGridRowDetailsVisibilityMode.Collapsed;
-
-                dragInfo.Data = product;
-                dragInfo.Effects = DragDropEffects.Copy;
+                this.saleTabItem = saleTabItem;
+                this.transactionStore = transactionStore;
             }
-        }
 
-        public override void DragDropOperationFinished(
-            DragDropEffects operationResult,
-            IDragInfo dragInfo)
-        {
-            SaleTabItem.ProductRowDetailsVisibilityMode =
-                DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
-        }
-    }
-
-    public class SaleDropHandler : DefaultDropHandler
-    {
-        private readonly SaleTabItem saleTabItem;
-        private readonly ITransactionStore transactionStore;
-
-        public SaleDropHandler(SaleTabItem saleTabItem, ITransactionStore transactionStore)
-        {
-            this.saleTabItem = saleTabItem;
-            this.transactionStore = transactionStore;
-        }
-
-        public override void DragOver(IDropInfo dropInfo)
-        {
-            base.DragOver(dropInfo);
-            if (dropInfo.Data is ProductDataViewModel)
+            public override void DragOver(IDropInfo dropInfo)
             {
-                dropInfo.Effects = DragDropEffects.Copy;
-                dropInfo.DropTargetAdorner = null;
+                base.DragOver(dropInfo);
+                if (dropInfo.Data is ProductDataViewModel)
+                {
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    dropInfo.DropTargetAdorner = null;
+                }
             }
-        }
-
-        public override void Drop(IDropInfo dropInfo)
-        {
-            var product = (dropInfo.Data as ProductDataViewModel).Item;
-
-            if (transactionStore.Store.TryGetValue(product.Id, out var transaction))
+             
+            public override void Drop(IDropInfo dropInfo)
             {
-                transaction.Qty += 1;
-            }
-            else
-            {
-                saleTabItem.TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty), productId: product.Id,
-                    oldValue: 0, newValue: 1);
+                var product = (dropInfo.Data as ProductDataViewModel).Item;
+
+                if (transactionStore.Store.TryGetValue(
+                    Transaction.CreateTransactionKey(product.Id, saleTabItem.Sale.Id), out var transaction))
+                {
+                    transaction.Qty += 1;
+                }
+                else
+                {
+                    saleTabItem.TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty),
+                        productId: product.Id,
+                        oldValue: 0,
+                        newValue: 1);
+                }
             }
         }
     }

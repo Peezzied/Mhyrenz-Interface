@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using DocumentFormat.OpenXml.Office.CustomUI;
 
 namespace Mhyrenz_Interface.Domain.Models
@@ -45,6 +46,9 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public decimal LineTotal => SubTotal - DiscountAmount;
 
+        [NotMapped]
+        public long TransactionKey => CreateTransactionKey(ProductId, SaleId);
+
         public void IncreaseAmount(int amount)
         {
             if (amount <= 0)
@@ -59,6 +63,11 @@ namespace Mhyrenz_Interface.Domain.Models
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
             Amount -= amount;
+        }
+
+        public static long CreateTransactionKey(int productId, int? saleId)
+        {
+            return ((long)(saleId ?? 0) << 32) | (uint)productId;
         }
     }
 }

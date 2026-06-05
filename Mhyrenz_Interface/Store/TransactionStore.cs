@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MahApps.Metro.Controls;
@@ -19,8 +20,8 @@ namespace Mhyrenz_Interface.Store
         private readonly IInventoryStore _inventoryStore;
         private readonly IInventoryStore inventoryStore;
 
-        public SourceCollection<int, TransactionDataViewModel> Store { get; }
-            = new SourceCollection<int, TransactionDataViewModel>(v => v.Transaction.ProductId);
+        public SourceCollection<long, TransactionDataViewModel> Store { get; }
+            = new SourceCollection<long, TransactionDataViewModel>(v => v.Transaction.TransactionKey);
 
         public TransactionStore(CreateViewModel<TransactionDataViewModel> transactionDataViewModel, ICheckoutService checkoutService, IInventoryStore inventoryStore)
         {
@@ -45,11 +46,10 @@ namespace Mhyrenz_Interface.Store
 
             if (checkoutResult.WasRemoved)
             {
-                var productId = transaction.ProductId;
-                if (Store.TryGetValue(productId, out var vm))
+                if (Store.TryGetValue(transaction.TransactionKey, out var vm))
                 {
                     await vm.RequestFlash(OperationType.Remove);
-                    Store.Remove(productId);
+                    Store.Remove(transaction.TransactionKey);
                 }
                 return;
             }
@@ -66,7 +66,7 @@ namespace Mhyrenz_Interface.Store
 
         public async Task<bool> UpdateTransaction(Transaction transaction)
         {
-            if (Store.TryGetValue(transaction.ProductId, out var existingVm))
+            if (Store.TryGetValue(transaction.TransactionKey, out var existingVm))
             {
                 existingVm.Transaction = transaction;
                 await existingVm.RequestFlash(OperationType.Update);

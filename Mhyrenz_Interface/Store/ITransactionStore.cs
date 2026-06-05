@@ -6,7 +6,7 @@ using Mhyrenz_Interface.Features.Checkout.ViewModels;
 
 namespace Mhyrenz_Interface.Store
 {
-    public interface ITransactionStore : IViewModelStore<int, TransactionDataViewModel>
+    public interface ITransactionStore : IViewModelStore<long, TransactionDataViewModel>
     {
         event EventHandler<Sale> SaleChange;
 

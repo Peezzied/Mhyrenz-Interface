@@ -6,7 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Inventory.Controls"
-             xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
+             xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
              xmlns:adorn="clr-namespace:Mhyrenz_Interface.Shared.Adorners"
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Shared.Columns"
              xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Features.Inventory.Behaviors"
@@ -278,8 +278,8 @@
 
             <DataTemplate x:Key="DataGridCompactLayout">
                 <DataGrid CanUserResizeColumns="False" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False"
-                          RowDetailsVisibilityMode="{Binding DataContext.ProductRowDetailsVisibilityMode, RelativeSource={RelativeSource AncestorType=checkout:SaleTabContent}}"
-                          dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=checkout:SaleTabContent}}"
+                          RowDetailsVisibilityMode="{Binding DataContext.ProductRowDetailsVisibilityMode, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
+                          dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
                           dd:DragDrop.IsDragSource="True"
                           RowHeaderWidth="25"
                           HeadersVisibility="All"
