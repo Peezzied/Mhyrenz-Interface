@@ -2,9 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-using System.Windows.Threading;
-using Mhyrenz_Interface.Controls.Behaviors;
-using Mhyrenz_Interface.ViewModels.Factory;
 
 namespace Mhyrenz_Interface.Navigation
 {

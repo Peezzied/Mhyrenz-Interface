@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="Mhyrenz_Interface.Shared.Controls.RibbonBar"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
+             xmlns:tools="clr-namespace:Mhyrenz_Interface.Shared.RibbonBarTools"
+             mc:Ignorable="d" 
+             xmlns:core="clr-namespace:Mhyrenz_Interface.Core.UndoRedo"
+             d:DesignHeight="50" d:DesignWidth="800">
+    <Grid Background="Black">
+        <hc:FlexPanel Margin="30, 0" FlexDirection="Row" JustifyContent="SpaceBetween">
+            <hc:UniformSpacingPanel Spacing="30" Grid.Row="0" Orientation="Horizontal">
+                <hc:UniformSpacingPanel Spacing="7" Orientation="Horizontal">
+                    <controls:IconButtonWithTip Foreground="White" TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Tiptext="Undo (Ctrl+Z)" Command="{Binding UndoCommand}" CommandParameter="{x:Static core:ActionType.Undo}">
+                        <controls:IconButtonWithTip.IconContent>
+                            <iconPacks:PackIconMaterial Kind="ArrowULeftTopBold" Height="20" Width="20" VerticalAlignment="Center" />
+                        </controls:IconButtonWithTip.IconContent>
+                    </controls:IconButtonWithTip>
+                    <controls:IconButtonWithTip Foreground="White" Tiptext="Redo (Ctrl+Y)" TipTextColor="{StaticResource MahApps.Brushes.Gray1 }" Command="{Binding RedoCommand}" CommandParameter="{x:Static core:ActionType.Redo}">
+                        <controls:IconButtonWithTip.IconContent>
+                            <iconPacks:PackIconMaterial Height="20" Width="20" Kind="ArrowURightTopBold"/>
+                        </controls:IconButtonWithTip.IconContent>
+                    </controls:IconButtonWithTip>
+                </hc:UniformSpacingPanel>
+                <tools:BarcodeTools/>
+                <ContentControl Content="{Binding RibbonBarViewModel}" 
+                                xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
+                                xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.ViewModels">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type inventory:InventoryTabItem}">
+                            <tools:InventoryDataGridTools/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type checkout:CheckoutViewModel}">
+                            <tools:CheckoutViewTools/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+            </hc:UniformSpacingPanel>
+            <hc:UniformSpacingPanel Spacing="20" VerticalAlignment="Center">
+                <hc:Shield FontSize="14" Subject="session" d:Status="Fri, August 08" Status="{Binding Session}"/>
+                <hc:UniformSpacingPanel Spacing="1" Orientation="Vertical">
+                    <TextBlock FontSize="14" Foreground="White" d:Text="Fri Aug 08, 7:41 PM" Text="{Binding Today, StringFormat='{}{0:ddd MMM dd, h:mm tt}'}"/>
+                    <ProgressBar Style="{StaticResource ProgressBarFlat}" Value="{Binding Seconds}" Maximum="60" Height="3"/>
+                </hc:UniformSpacingPanel>
+            </hc:UniformSpacingPanel>
+        </hc:FlexPanel>
+    </Grid>
+</UserControl>

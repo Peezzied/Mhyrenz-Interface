@@ -1,8 +1,7 @@
 ﻿<hc:Window x:Class="Mhyrenz_Interface.Test.TestWindow"
         xmlns:hc="https://handyorg.github.io/handycontrol"  
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:controls="clr-namespace:Mhyrenz_Interface.Controls"
-        xmlns:views="clr-namespace:Mhyrenz_Interface.Views"
+        xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,6 +10,6 @@
         mc:Ignorable="d"
         Title="TestWindow" Height="450" Width="800">
     <Grid>
-        <views:InventoryView DataContext="{Binding Context}"/>
+        <inventory:InventoryView DataContext="{Binding Context}"/>
     </Grid>
 </hc:Window>

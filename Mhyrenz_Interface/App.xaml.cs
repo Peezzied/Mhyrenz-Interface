@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
-using Mhyrenz_Interface.Commands;
-using Mhyrenz_Interface.Converters;
+using Mhyrenz_Interface.Bootstrap;
 using Mhyrenz_Interface.Core;
+using Mhyrenz_Interface.Core.MVVM;
+using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
@@ -20,13 +19,20 @@ using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
-using Mhyrenz_Interface.Domain.State;
+using Mhyrenz_Interface.Features.Checkout.Commands;
+using Mhyrenz_Interface.Features.Checkout.ViewModels;
+using Mhyrenz_Interface.Features.Home.ViewModels;
+using Mhyrenz_Interface.Features.Inventory.Commands;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Features.Orders.Commands;
+using Mhyrenz_Interface.Features.Orders.ViewModels;
+using Mhyrenz_Interface.Features.Settings.ViewModels;
 using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.State;
+using Mhyrenz_Interface.Shared.Converters;
+using Mhyrenz_Interface.Startup;
+using Mhyrenz_Interface.Startup.ViewModels;
+using Mhyrenz_Interface.Store;
 using Mhyrenz_Interface.Test;
-using Mhyrenz_Interface.ViewModels;
-using Mhyrenz_Interface.ViewModels.Factory;
-using Mhyrenz_Interface.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -176,11 +182,11 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<TestWindowViewModel>()
 
-                .AddSingleton<CreateWindow<Startup>>(s =>
+                .AddSingleton<CreateWindow<StartupWindow>>(s =>
                 {
                     return (viewModel) =>
                     {
-                        return ActivatorUtilities.CreateInstance<Startup>(s, viewModel);
+                        return ActivatorUtilities.CreateInstance<StartupWindow>(s, viewModel);
                     };
                 })
                 .AddSingleton<CreateWindow<MainWindow>>(s =>

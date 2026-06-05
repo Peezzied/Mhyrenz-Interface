@@ -1,0 +1,21 @@
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Windows.Data;
+
+namespace Mhyrenz_Interface.Shared.Converters
+{
+    public class OrConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            return values.OfType<bool>().Any(v => !v);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+}

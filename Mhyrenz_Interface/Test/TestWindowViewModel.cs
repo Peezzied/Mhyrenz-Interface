@@ -1,7 +1,8 @@
 ﻿using System;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Services.ProductService;
-using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Test
 {

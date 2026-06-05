@@ -16,16 +16,16 @@
                 <hc:ThemeResources AccentColor="{StaticResource MahApps.Brushes.Accent}"/>
                 <hc:Theme/>
 
-                <ResourceDictionary Source="/Controls/Templates/IconButtonWithTipStyle.xaml"/>
-                <ResourceDictionary Source="/Controls/Templates/DragablzMahApps.xaml"/>
+                <ResourceDictionary Source="/Shared/Templates/IconButtonWithTipStyle.xaml"/>
+                <ResourceDictionary Source="/Shared/Templates/DragablzMahApps.xaml"/>
 
 
                 <!--<ResourceDictionary Source="pack://application:,,,/LiveCharts.Wpf;component/Themes/base.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
 
             <!--<FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter 24pt</FontFamily>-->
-            <FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Fonts/Inter.ttf#Inter</FontFamily>
-            <FontFamily x:Key="Geist">pack://application:,,,/Mhyrenz Interface;component/Fonts/Geist.ttf#Geist</FontFamily>
+            <FontFamily x:Key="Inter">pack://application:,,,/Mhyrenz Interface;component/Resources/Fonts/Inter.ttf#Inter</FontFamily>
+            <FontFamily x:Key="Geist">pack://application:,,,/Mhyrenz Interface;component/Resources/Fonts/Geist.ttf#Geist</FontFamily>
 
 
             <Style TargetType="TextBlock">

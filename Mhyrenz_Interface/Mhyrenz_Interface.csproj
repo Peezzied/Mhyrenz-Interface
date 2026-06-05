@@ -472,264 +472,257 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppPresenter.cs" />
-    <Compile Include="Commands\AddCommand.cs" />
-    <Compile Include="Commands\CheckoutCommand.cs" />
-    <Compile Include="Commands\PlaceOrderVMCommandQty.cs" />
-    <Compile Include="Commands\TransactionVMCommandDiscount.cs" />
-    <Compile Include="Commands\IUndoRedoBound.cs" />
-    <Compile Include="Commands\ProductVMPropertyChangeCommand.cs" />
-    <Compile Include="Commands\ProductVMCommandNestedProp.cs" />
-    <Compile Include="Commands\CreateSessionCommand.cs" />
-    <Compile Include="Commands\DeleteCommand.cs" />
-    <Compile Include="Commands\LoadCategoriesCommand.cs" />
-    <Compile Include="Commands\ProductVMCommandCommonProp.cs" />
-    <Compile Include="Commands\ProductVMCommandPurchase.cs" />
-    <Compile Include="Commands\SalesRegisterCommand.cs" />
-    <Compile Include="Commands\TransactionVMCommandPurchase.cs" />
-    <Compile Include="Commands\UndoRedoBoundCommand.cs" />
-    <Compile Include="Controls\AddProductDrawer.xaml.cs">
+    <Compile Include="Bootstrap\AppPresenter.cs" />
+    <Compile Include="Features\Checkout\RowFlashing\RowFlashAdorner.cs" />
+    <Compile Include="Features\Inventory\Commands\AddCommand.cs" />
+    <Compile Include="Features\Checkout\Commands\CheckoutCommand.cs" />
+    <Compile Include="Features\Orders\Commands\PlaceOrderVMCommandQty.cs" />
+    <Compile Include="Features\Checkout\Commands\TransactionVMCommandDiscount.cs" />
+    <Compile Include="Core\UndoRedo\IUndoRedoBound.cs" />
+    <Compile Include="Features\Inventory\Commands\ProductVMPropertyChangeCommand.cs" />
+    <Compile Include="Startup\CreateSessionCommand.cs" />
+    <Compile Include="Features\Inventory\Commands\DeleteCommand.cs" />
+    <Compile Include="Features\Inventory\Commands\LoadCategoriesCommand.cs" />
+    <Compile Include="Features\Inventory\Commands\ProductVMCommandCommonProp.cs" />
+    <Compile Include="Features\Inventory\Commands\ProductVMCommandPurchase.cs" />
+    <Compile Include="Features\Checkout\Commands\TransactionVMCommandPurchase.cs" />
+    <Compile Include="Core\UndoRedo\UndoRedoBoundCommand.cs" />
+    <Compile Include="Features\Inventory\Views\AddProductDrawer.xaml.cs">
       <DependentUpon>AddProductDrawer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Attached\DataGridRowFlashBehavior.cs" />
-    <Compile Include="Controls\Attached\InventoryDataGridColumn.cs" />
-    <Compile Include="Controls\Attached\ValidationHelper.cs" />
-    <Compile Include="Controls\Behaviors\BarcodeCellBehavior.cs" />
-    <Compile Include="Controls\Behaviors\InventoryDataGridCompact.cs" />
-    <Compile Include="Controls\Behaviors\InventoryDataGridAdorned.cs" />
-    <Compile Include="Controls\Behaviors\InventoryDataGridDetailed.cs" />
-    <Compile Include="Controls\Behaviors\InventoryDataGridDelete.cs" />
-    <Compile Include="Controls\Behaviors\InventoryDataGridBehavior.cs" />
-    <Compile Include="Controls\Behaviors\UndoRedoBehavior.cs" />
-    <Compile Include="Controls\CategoryTag.cs" />
-    <Compile Include="Controls\CellAdorner.cs" />
-    <Compile Include="Controls\CompletedSales.xaml.cs">
+    <Compile Include="Features\Checkout\RowFlashing\DataGridRowFlashBehavior.cs" />
+    <Compile Include="Features\Inventory\Controls\InventoryDataGridColumn.cs" />
+    <Compile Include="Shared\Attached\ValidationHelper.cs" />
+    <Compile Include="Features\Inventory\Behaviors\BarcodeCellBehavior.cs" />
+    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridCompact.cs" />
+    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridAdorned.cs" />
+    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDetailed.cs" />
+    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDelete.cs" />
+    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridBehavior.cs" />
+    <Compile Include="Shared\Behaviors\UndoRedoBehavior.cs" />
+    <Compile Include="Shared\Controls\CategoryTag.cs" />
+    <Compile Include="Shared\Adorners\CellAdorner.cs" />
+    <Compile Include="Features\Checkout\Views\CompletedSales.xaml.cs">
       <DependentUpon>CompletedSales.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\IEditCancelState.cs" />
-    <Compile Include="Controls\ColumnList.xaml.cs">
+    <Compile Include="Shared\Behaviors\IEditCancelState.cs" />
+    <Compile Include="Features\Inventory\Controls\ColumnList.xaml.cs">
       <DependentUpon>ColumnList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Columns\CellAdornerHelper.cs" />
-    <Compile Include="Controls\Columns\NumberColumn.cs" />
-    <Compile Include="Controls\Columns\TextColumn.cs" />
-    <Compile Include="Controls\IconButtonWithTip.cs" />
-    <Compile Include="Controls\IncomingItemPanel.xaml.cs">
+    <Compile Include="Shared\Adorners\CellAdornerHelper.cs" />
+    <Compile Include="Shared\Columns\NumberColumn.cs" />
+    <Compile Include="Shared\Columns\TextColumn.cs" />
+    <Compile Include="Shared\Controls\IconButtonWithTip.cs" />
+    <Compile Include="Features\Home\Controls\IncomingItemPanel.xaml.cs">
       <DependentUpon>IncomingItemPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InfoPanel.xaml.cs">
+    <Compile Include="Features\Home\Controls\InfoPanel.xaml.cs">
       <DependentUpon>InfoPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InventoryDataGrid.xaml.cs">
+    <Compile Include="Features\Inventory\Controls\InventoryDataGrid.xaml.cs">
       <DependentUpon>InventoryDataGrid.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\MarkupEx\EnumValuesExtension.cs" />
-    <Compile Include="Controls\MaxLinesTextBlock.cs" />
-    <Compile Include="Controls\OverviewChart.xaml.cs">
+    <Compile Include="Shared\MarkupEx\EnumValuesExtension.cs" />
+    <Compile Include="Shared\Controls\MaxLinesTextBlock.cs" />
+    <Compile Include="Features\Home\Controls\OverviewChart.xaml.cs">
       <DependentUpon>OverviewChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\PlaceOrderDrawer.xaml.cs">
+    <Compile Include="Features\Orders\Views\PlaceOrderDrawer.xaml.cs">
       <DependentUpon>PlaceOrderDrawer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\RibbonBar.xaml.cs">
+    <Compile Include="Shared\Controls\RibbonBar.xaml.cs">
       <DependentUpon>RibbonBar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\RibbonBarTools\BarcodeTools.xaml.cs">
+    <Compile Include="Shared\Converters\BarcodeToImageConverter.cs" />
+    <Compile Include="Shared\Converters\DetailsTextNoneConverter.cs" />
+    <Compile Include="Shared\Converters\EmptyStringToZero.cs" />
+    <Compile Include="Shared\Converters\NavigationCommandParamsConverter.cs" />
+    <Compile Include="Shared\Converters\OrConverter.cs" />
+    <Compile Include="Shared\Converters\PurchaseToGreenConverter.cs" />
+    <Compile Include="Shared\Converters\String2BooleanConverter.cs" />
+    <Compile Include="Shared\RibbonBarTools\BarcodeTools.xaml.cs">
       <DependentUpon>BarcodeTools.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\RibbonBarTools\CheckoutViewTools.xaml.cs">
+    <Compile Include="Shared\RibbonBarTools\CheckoutViewTools.xaml.cs">
       <DependentUpon>CheckoutViewTools.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml.cs">
+    <Compile Include="Shared\RibbonBarTools\InventoryDataGridTools.xaml.cs">
       <DependentUpon>InventoryDataGridTools.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SaleDataGrid.xaml.cs">
+    <Compile Include="Features\Checkout\Controls\SaleDataGrid.xaml.cs">
       <DependentUpon>SaleDataGrid.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SaleTabContent.xaml.cs">
+    <Compile Include="Features\Checkout\Controls\SaleTabContent.xaml.cs">
       <DependentUpon>SaleTabContent.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SearchBox.xaml.cs">
+    <Compile Include="Shared\Controls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Templates\Proxy\InventoryDataGridBindingProxy.cs" />
-    <Compile Include="Controls\Templates\Selectors\InventoryDataGridTemplateSelector.cs" />
-    <Compile Include="Controls\TransactionsDataGrid.xaml.cs">
+    <Compile Include="Features\Home\Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\BarcodeToImageConverter.cs" />
-    <Compile Include="Converters\OrConverter.cs" />
-    <Compile Include="Converters\DetailsTextNoneConverter.cs" />
-    <Compile Include="Converters\EmptyStringToZero.cs" />
-    <Compile Include="Converters\PurchaseToGreenConverter.cs" />
-    <Compile Include="Converters\String2BooleanConverter.cs" />
-    <Compile Include="Core\Aliases.cs" />
-    <Compile Include="Core\BaseAsyncCommand.cs" />
-    <Compile Include="Controls\Columns\ColumnType.cs" />
-    <Compile Include="Core\ITrackPropertyChanged.cs" />
-    <Compile Include="Core\ServiceCollectionExtensions.cs" />
+    <Compile Include="Core\Utilities\Aliases.cs" />
+    <Compile Include="Core\MVVM\BaseAsyncCommand.cs" />
+    <Compile Include="Core\PropertyTracking\ITrackPropertyChanged.cs" />
+    <Compile Include="Core\Utilities\ServiceCollectionExtensions.cs" />
     <Compile Include="Core\InventoryDataGridSettingsProvider.cs" />
     <Compile Include="Core\InventorySettingsProvider.cs" />
-    <Compile Include="Core\PrimativeNotifyProperty.cs" />
-    <Compile Include="Core\SourceCollection.cs" />
-    <Compile Include="Core\TrackedViewModel.cs" />
-    <Compile Include="Core\TrackPropertyHelper.cs" />
-    <Compile Include="Core\Utils.cs" />
-    <Compile Include="Core\SmartObservableCollection.cs" />
-    <Compile Include="Core\ValidationAttributes.cs" />
-    <Compile Include="Core\ValidationViewModel.cs" />
+    <Compile Include="Core\Collection\SourceCollection.cs" />
+    <Compile Include="Core\PropertyTracking\TrackedViewModel.cs" />
+    <Compile Include="Core\PropertyTracking\TrackPropertyHelper.cs" />
+    <Compile Include="Core\Validation\ValidationAttributes.cs" />
+    <Compile Include="Core\MVVM\ValidationViewModel.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="StartupManager.cs" />
-    <Compile Include="State\CategoryStore.cs" />
-    <Compile Include="State\ICategoryStore.cs" />
-    <Compile Include="State\IInventroyStore.cs" />
-    <Compile Include="State\IOrderStore.cs" />
-    <Compile Include="State\ISessionStore.cs" />
-    <Compile Include="State\ITransactionStore.cs" />
-    <Compile Include="State\IUndoManager.cs" />
-    <Compile Include="State\IViewModelStore.cs" />
-    <Compile Include="State\OrderStore.cs" />
-    <Compile Include="State\SessionStore.cs" />
-    <Compile Include="State\TransactionStore.cs" />
-    <Compile Include="State\UndoRedoManager.cs" />
-    <Compile Include="Core\IUndoableCommand.cs" />
-    <Compile Include="Commands\PropertyChangeCommand.cs" />
-    <Compile Include="Controls\StatusBar.xaml.cs">
+    <Compile Include="Bootstrap\StartupManager.cs" />
+    <Compile Include="Store\CategoryStore.cs" />
+    <Compile Include="Store\ICategoryStore.cs" />
+    <Compile Include="Store\IInventroyStore.cs" />
+    <Compile Include="Store\IOrderStore.cs" />
+    <Compile Include="Store\ISessionStore.cs" />
+    <Compile Include="Store\ITransactionStore.cs" />
+    <Compile Include="Store\IUndoRedoManager.cs" />
+    <Compile Include="Store\IViewModelStore.cs" />
+    <Compile Include="Store\OrderStore.cs" />
+    <Compile Include="Store\SessionStore.cs" />
+    <Compile Include="Store\TransactionStore.cs" />
+    <Compile Include="Store\UndoRedoManager.cs" />
+    <Compile Include="Core\UndoRedo\IUndoableCommand.cs" />
+    <Compile Include="Core\PropertyTracking\PropertyChangeCommand.cs" />
+    <Compile Include="Shared\Controls\StatusBar.xaml.cs">
       <DependentUpon>StatusBar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\NavigationCommandParamsConverter.cs" />
-    <Compile Include="Core\BaseViewModel.cs" />
-    <Compile Include="Core\PropertyChangeTracker.cs" />
-    <Compile Include="Core\RelayCommand.cs" />
+    <Compile Include="Core\MVVM\BaseViewModel.cs" />
+    <Compile Include="Core\PropertyTracking\PropertyChangeTracker.cs" />
+    <Compile Include="Core\MVVM\RelayCommand.cs" />
     <Compile Include="Navigation\INavigationServiceEx.cs" />
     <Compile Include="Navigation\NavigationServiceEx.cs" />
-    <Compile Include="State\InventoryStore.cs" />
+    <Compile Include="Store\InventoryStore.cs" />
     <Compile Include="Test\TestWindowViewModel.cs" />
     <Compile Include="Test\TestWindow.xaml.cs">
       <DependentUpon>TestWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\AddProductViewModel.cs" />
-    <Compile Include="ViewModels\ColumnSettingViewModel.cs" />
-    <Compile Include="ViewModels\CompletedSaleViewModel.cs" />
-    <Compile Include="ViewModels\Factory\ViewModelFactory.cs" />
-    <Compile Include="ViewModels\Factory\IViewModelFactory.cs" />
-    <Compile Include="ViewModels\Factory\NavigationViewModelFactory.cs" />
-    <Compile Include="ViewModels\Fake\FakeCompletedSaleViewModel.cs" />
-    <Compile Include="ViewModels\Fake\FakeInfoPanelViewModel.cs" />
-    <Compile Include="ViewModels\Fake\FakeTransactionDataGridViewModel.cs" />
-    <Compile Include="ViewModels\HomeViewModel.cs" />
-    <Compile Include="ViewModels\IncomingPanelViewModel.cs" />
-    <Compile Include="ViewModels\InfoPanelViewModel.cs" />
-    <Compile Include="ViewModels\InventoryDataGridViewModel.cs" />
-    <Compile Include="ViewModels\InventoryTabItem.cs" />
-    <Compile Include="ViewModels\InventoryViewModel.cs" />
-    <Compile Include="Controls\MenuItem.cs" />
-    <Compile Include="ViewModels\OrderViewModel.cs" />
-    <Compile Include="ViewModels\OverviewChartViewModel.cs" />
-    <Compile Include="ViewModels\PlaceOrderViewModel.cs" />
-    <Compile Include="ViewModels\ProductDataViewModel.cs" />
-    <Compile Include="ViewModels\SaleTabItem.cs" />
-    <Compile Include="ViewModels\SessionBoxContext.cs" />
-    <Compile Include="ViewModels\SettingsViewModel.cs" />
-    <Compile Include="ViewModels\ShellViewModel.cs" />
-    <Compile Include="ViewModels\StartupViewModel.cs" />
-    <Compile Include="ViewModels\TransactionDataViewModel.cs" />
-    <Compile Include="ViewModels\CheckoutViewModel.cs" />
-    <Compile Include="Views\HomeView.xaml.cs">
+    <Compile Include="Features\Inventory\ViewModels\AddProductViewModel.cs" />
+    <Compile Include="Features\Inventory\ViewModels\ColumnSettingViewModel.cs" />
+    <Compile Include="Features\Checkout\ViewModels\CompletedSaleViewModel.cs" />
+    <Compile Include="Core\Utilities\ViewModelFactory.cs" />
+    <Compile Include="Core\Utilities\IViewModelFactory.cs" />
+    <Compile Include="Navigation\NavigationViewModelFactory.cs" />
+    <Compile Include="DesignTime\FakeCompletedSaleViewModel.cs" />
+    <Compile Include="DesignTime\FakeInfoPanelViewModel.cs" />
+    <Compile Include="DesignTime\FakeTransactionDataGridViewModel.cs" />
+    <Compile Include="Features\Home\ViewModels\HomeViewModel.cs" />
+    <Compile Include="Features\Home\ViewModels\IncomingPanelViewModel.cs" />
+    <Compile Include="Features\Home\ViewModels\InfoPanelViewModel.cs" />
+    <Compile Include="Features\Inventory\ViewModels\InventoryDataGridViewModel.cs" />
+    <Compile Include="Features\Inventory\ViewModels\InventoryTabItem.cs" />
+    <Compile Include="Features\Inventory\ViewModels\InventoryViewModel.cs" />
+    <Compile Include="Shared\Controls\MenuItem.cs" />
+    <Compile Include="Features\Orders\ViewModels\OrderViewModel.cs" />
+    <Compile Include="Features\Home\ViewModels\OverviewChartViewModel.cs" />
+    <Compile Include="Features\Orders\ViewModels\PlaceOrderViewModel.cs" />
+    <Compile Include="Features\Inventory\ViewModels\ProductDataViewModel.cs" />
+    <Compile Include="Features\Checkout\ViewModels\SaleTabItem.cs" />
+    <Compile Include="Startup\ViewModels\SessionBoxContext.cs" />
+    <Compile Include="Features\Settings\ViewModels\SettingsViewModel.cs" />
+    <Compile Include="ShellViewModel.cs" />
+    <Compile Include="Startup\ViewModels\StartupViewModel.cs" />
+    <Compile Include="Features\Checkout\ViewModels\TransactionDataViewModel.cs" />
+    <Compile Include="Features\Checkout\ViewModels\CheckoutViewModel.cs" />
+    <Compile Include="Features\Home\View\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Inventory.cs">
+    <Compile Include="Features\Inventory\Views\Inventory.cs">
       <DependentUpon>InventoryView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SettingsView.xaml.cs">
+    <Compile Include="Features\Settings\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Splash.xaml.cs">
+    <Compile Include="Startup\Splash.xaml.cs">
       <DependentUpon>Splash.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Startup.xaml.cs">
-      <DependentUpon>Startup.xaml</DependentUpon>
+    <Compile Include="Startup\StartupWindow.xaml.cs">
+      <DependentUpon>StartupWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CheckoutView.cs">
+    <Compile Include="Features\Checkout\Views\CheckoutView.cs">
       <DependentUpon>CheckoutView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Controls\AddProductDrawer.xaml">
+    <Page Include="Features\Inventory\Views\AddProductDrawer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\ColumnList.xaml">
+    <Page Include="Features\Inventory\Controls\ColumnList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\CompletedSales.xaml">
+    <Page Include="Features\Checkout\Views\CompletedSales.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\IncomingItemPanel.xaml">
+    <Page Include="Features\Home\Controls\IncomingItemPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\InfoPanel.xaml">
+    <Page Include="Features\Home\Controls\InfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\InventoryDataGrid.xaml">
+    <Page Include="Features\Inventory\Controls\InventoryDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\OverviewChart.xaml">
+    <Page Include="Features\Home\Controls\OverviewChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\PlaceOrderDrawer.xaml">
+    <Page Include="Features\Orders\Views\PlaceOrderDrawer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RibbonBar.xaml">
+    <Page Include="Shared\Controls\RibbonBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RibbonBarTools\BarcodeTools.xaml">
+    <Page Include="Shared\RibbonBarTools\BarcodeTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RibbonBarTools\CheckoutViewTools.xaml">
+    <Page Include="Shared\RibbonBarTools\CheckoutViewTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\RibbonBarTools\InventoryDataGridTools.xaml">
+    <Page Include="Shared\RibbonBarTools\InventoryDataGridTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\SaleDataGrid.xaml">
+    <Page Include="Features\Checkout\Controls\SaleDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\SaleTabContent.xaml">
+    <Page Include="Features\Checkout\Controls\SaleTabContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\SearchBox.xaml">
+    <Page Include="Shared\Controls\SearchBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\StatusBar.xaml">
+    <Page Include="Shared\Controls\StatusBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Templates\BarcodeColumn.xaml">
+    <Page Include="Features\Inventory\Templates\BarcodeColumn.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Templates\DragablzMahApps.xaml">
+    <Page Include="Shared\Templates\DragablzMahApps.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Templates\IconButtonWithTipStyle.xaml">
+    <Page Include="Shared\Templates\IconButtonWithTipStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\TransactionsDataGrid.xaml">
+    <Page Include="Features\Home\Controls\TransactionsDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -749,27 +742,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\HomeView.xaml">
+    <Page Include="Features\Home\View\HomeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\InventoryView.xaml">
+    <Page Include="Features\Inventory\Views\InventoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SettingsView.xaml">
+    <Page Include="Features\Settings\Views\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Splash.xaml">
+    <Page Include="Startup\Splash.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Startup.xaml">
+    <Page Include="Startup\StartupWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\CheckoutView.xaml">
+    <Page Include="Features\Checkout\Views\CheckoutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -792,9 +785,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Resource Include="Fonts\Geist.ttf" />
-    <Resource Include="Fonts\Inter.ttf" />
-    <None Include=".editorconfig" />
+    <Resource Include="Resources\Fonts\Geist.ttf" />
+    <Resource Include="Resources\Fonts\Inter.ttf" />
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.State;
-using Mhyrenz_Interface.ViewModels;
+using Mhyrenz_Interface.Store;
 using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface

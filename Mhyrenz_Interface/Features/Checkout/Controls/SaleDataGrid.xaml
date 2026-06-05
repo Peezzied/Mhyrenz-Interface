@@ -1,0 +1,159 @@
+﻿<UserControl x:Class="Mhyrenz_Interface.Features.Checkout.Controls.SaleDataGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
+             xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:columns="clr-namespace:Mhyrenz_Interface.Shared.Columns"
+             xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
+             xmlns:attached="clr-namespace:Mhyrenz_Interface.Features.Checkout.RowFlashing"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:markupEx="clr-namespace:Mhyrenz_Interface.Shared.MarkupEx"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:model="clr-namespace:Mhyrenz_Interface.Domain.Models;assembly=Mhyrenz_Interface.Domain"
+             xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+             mc:Ignorable="d" 
+             xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
+             d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="450" d:Width="450">
+    <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
+              ItemsSource="{Binding Transactions}"
+              GridLinesVisibility="Horizontal"
+              AutoGenerateColumns="False"
+              CanUserResizeColumns="False"
+              attached:DataGridFlashBehavior.Enabled="True"
+              EnableRowVirtualization="True"
+              dd:DragDrop.IsDropTarget="True"
+              mah:DataGridHelper.CellPadding="0 6"
+              dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
+              dd:DragDrop.UseDropTargetHint="True">
+        <DataGrid.Resources>
+            <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
+
+            <Style x:Key="QtyStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+                <Setter Property="Value" Value="{Binding QtyIncrementEdit, UpdateSourceTrigger=Explicit}"/>
+                <Setter Property="Maximum" Value="{Binding MaxIncrementQty}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
+                        <DataTrigger.Setters>
+                            <Setter Property="Maximum" Value="{Binding MaxQty}"/>
+                            <Setter Property="HideUpDownButtons" Value="True"/>
+                            <Setter Property="Value" Value="{Binding Qty, StringFormat={}{0}x, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.Resources>
+        <DataGrid.CellStyle>
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+            </Style>
+        </DataGrid.CellStyle>
+        <DataGrid.RowStyle>
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
+                <Setter Property="ContextMenu">
+                    <Setter.Value>
+                        <ContextMenu>
+                            <MenuItem
+                                Header="Remove"
+                                Command="{Binding
+                                    DataContext.RemoveCommand,
+                                    RelativeSource={
+                                        RelativeSource AncestorType=DataGrid
+                                    }}"
+                                CommandParameter="{Binding}" />
+
+                            <MenuItem Header="Discount" ItemsSource="{markupEx:EnumValues {x:Type model:Discount}}">
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Header" Value="{Binding}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.DiscountCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </DataGrid.RowStyle>
+        <DataGrid.Columns>
+            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}" NumberControlStyle="{StaticResource QtyStyle}">
+                <columns:NumberColumn.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}"/>
+                </columns:NumberColumn.CellStyle>
+            </columns:NumberColumn>
+            <DataGridTemplateColumn IsReadOnly="True" Header="Item Name" Width="*">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <hc:UniformSpacingPanel Margin="6 0" Spacing="8" Orientation="Vertical">
+                            <controls:MaxLinesTextBlock 
+                                Text="{Binding Product.Name}" 
+                                LineHeight="16"
+                                MaxLines="2"
+                                Width="Auto"
+                                FontSize="16"/>
+                            <hc:UniformSpacingPanel Visibility="{Binding HasDiscount, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible" Spacing="4">
+                                <iconPacks:PackIconMaterial Width="12" Kind="TicketPercent"/>
+                                <TextBlock Text="{Binding DiscountInfo}" d:Text="Senior Discount (20%)"/>
+                            </hc:UniformSpacingPanel>
+                        </hc:UniformSpacingPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <columns:NumberColumn IsReadOnly="True" Header="Price" Width="Auto" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
+            <DataGridTemplateColumn IsReadOnly="True" Header="Total" Width="Auto">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Grid VerticalAlignment="Stretch">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock TextAlignment="Right" Text="{Binding TotalPrice, StringFormat=C}"/>
+                            <TextBlock Visibility="{Binding HasDiscount, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible" Text="{Binding DiscountAmount, StringFormat=- {0:C}}" Grid.Row="1" FontStyle="Italic" VerticalAlignment="Bottom" HorizontalAlignment="Right" d:Text="asd"/>
+                        </Grid>
+                    </DataTemplate> 
+                </DataGridTemplateColumn.CellTemplate>
+                <DataGridTemplateColumn.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </DataGridTemplateColumn.CellStyle>
+            </DataGridTemplateColumn>
+            <DataGridTemplateColumn Header="Actions" IsReadOnly="True">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Margin="0 0 5 0" Visibility="{Binding IsPharma, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible">
+                                <CheckBox.ToolTip>
+                                    <ToolTip Content="Check if the item is doctor prescribed."/>
+                                </CheckBox.ToolTip>
+                            </CheckBox>
+                            <controls:IconButtonWithTip Grid.Column="2" IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
+                                <controls:IconButtonWithTip.IconContent>
+                                    <iconPacks:PackIconMaterial Kind="CloseCircle" />
+                                </controls:IconButtonWithTip.IconContent>
+                            </controls:IconButtonWithTip>
+                        </Grid>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+                <DataGridTemplateColumn.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+                        <Setter Property="VerticalContentAlignment" Value="Top"/>
+                        <Setter Property="Padding" Value="0 5"/>
+                    </Style>
+                </DataGridTemplateColumn.CellStyle>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

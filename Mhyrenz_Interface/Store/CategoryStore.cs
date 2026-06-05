@@ -1,0 +1,70 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Media;
+using Mhyrenz_Interface.Core.MVVM;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.CategoryService;
+using Mhyrenz_Interface.Features.Inventory.Commands;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Mhyrenz_Interface.Store
+{
+    public class CategoryStore : ICategoryStore
+    {
+        private readonly IInventoryStore _inventoryStore;
+        private readonly ICategoryService _categoryService;
+
+        //public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();
+
+        public event Action Updated;
+
+        public Dictionary<int, Brush> Colors { get; set; } = new Dictionary<int, Brush>();
+        public Dictionary<Category, Predicate<ProductDataViewModel>> CategoriesFilter { get; private set; }
+            = new Dictionary<Category, Predicate<ProductDataViewModel>>();
+        public Dictionary<int, Category> Categories { get; private set; } = new Dictionary<int, Category>();
+
+        private void OnChange()
+        {
+            Updated?.Invoke();
+        }
+
+        public ICommand LoadCategoriesCommand { get; }
+
+        public CategoryStore(ICategoryService categoryService, IInventoryStore inventoryStore, CreateCommand<LoadCategoriesCommand> loadCategoriesCommand)
+        {
+            _inventoryStore = inventoryStore;
+            _categoryService = categoryService;
+
+            //_inventoryStore.AddProductEvent += OnAddProduct;
+
+            LoadCategoriesCommand = loadCategoriesCommand(this);
+        }
+
+        //private void OnAddProduct(object sender, ProductDataViewModel vm)
+        //{
+        //    UpdateCategories();
+        //}
+
+        public async Task UpdateCategories()
+        {
+            CategoriesFilter.Clear();
+
+            var result = await _categoryService.GetAllCategories();
+
+            foreach (var item in result)
+            {
+                Categories[item.Id] = item;
+                CategoriesFilter[item] = vm => vm.CategoryId == item.Id;
+            }
+        }
+
+        public static async Task LoadCategoryStore(IServiceProvider serviceProvider)
+        {
+            var categoryStore = serviceProvider.GetRequiredService<ICategoryStore>();
+            await categoryStore.UpdateCategories();
+        }
+    }
+}

@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="Mhyrenz_Interface.Shared.Controls.SearchBox"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mhyrenz_Interface.Shared.Controls"
+             mc:Ignorable="d"
+             d:Width="400">
+    <hc:SimplePanel Height="40">
+        <hc:SearchBar FontFamily="{StaticResource Geist}" Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}" FontSize="16" hc:InfoElement.ShowClearButton="True" hc:InfoElement.Placeholder="Search a product..." Style="{StaticResource SearchBarPlus}"/>
+        <!--<TextBox VerticalAlignment="Center"
+            FontSize="16"
+            Height="30"
+            Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}"
+            mah:TextBoxHelper.Watermark="Search a Product..."
+            mah:TextBoxHelper.UseFloatingWatermark="True" >
+        <TextBox.Style>
+            <Style BasedOn="{StaticResource MahApps.Styles.TextBox.Search}" TargetType="{x:Type TextBox}">
+                <Style.Triggers>
+                    <Trigger Property="mah:TextBoxHelper.HasText" Value="True">
+                        <Setter Property="mah:TextBoxHelper.ButtonContent" Value="r" />
+                        <Setter Property="mah:TextBoxHelper.ButtonContentTemplate" Value="{x:Null}" />
+                        <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="True" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </TextBox.Style>
+        </TextBox>-->
+    </hc:SimplePanel>
+</UserControl>
