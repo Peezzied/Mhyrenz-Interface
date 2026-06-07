@@ -256,13 +256,18 @@
                 <Setter Property="EnableColumnVirtualization" Value="True"/>
                 <Setter Property="CanUserSortColumns" Value="False"/>
                 <Setter Property="EnableRowVirtualization" Value="True"/>
+                <Setter Property="EnableColumnVirtualization" Value="True"/>
                 <Setter Property="GridLinesVisibility" Value="All"/>
                 <Setter Property="ItemsSource" Value="{Binding Inventory}"/>
                 <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
-                <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+                <!--<Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>-->
+                <Setter Property="VirtualizingPanel.CacheLength" Value="1"/>
+                <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
                 <Setter Property="CanUserReorderColumns" Value="False"/>
+                <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
                 <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
                 <Setter Property="CanUserResizeColumns" Value="True" />
                 <Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>
@@ -278,6 +283,9 @@
 
             <DataTemplate x:Key="DataGridCompactLayout">
                 <DataGrid CanUserResizeColumns="False" Style="{StaticResource DataGridStyle}" CanUserDeleteRows="False"
+                          RowStyle="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}"
+                          CanUserResizeRows="False"
+                          RowHeight="20"
                           RowDetailsVisibilityMode="{Binding DataContext.ProductRowDetailsVisibilityMode, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
                           dd:DragDrop.IsDragSource="True"
@@ -323,7 +331,7 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn IsReadOnly="True" Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" />
+                        <DataGridTemplateColumn IsReadOnly="True" Header="Name" Width="*" SortDirection="Ascending" MaxWidth="450" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" />
                         <columns:NumberColumn IsReadOnly="True" Header="Retail" Width="100" DisplayBinding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}"/>
                         <DataGridTextColumn IsReadOnly="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" Binding="{Binding NetQty}"/>
                         <DataGridTemplateColumn IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
@@ -358,7 +366,6 @@
 
             <DataTemplate x:Key="DataGridDetailedLayout">
                 <DataGrid FrozenColumnCount="3" 
-                          SelectionUnit="FullRow" 
                           SelectionMode="Extended"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=view:InventoryView}}"
                           dd:DragDrop.IsDragSource="True">

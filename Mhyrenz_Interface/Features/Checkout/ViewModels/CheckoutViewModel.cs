@@ -46,8 +46,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             AddSaleCommand = new AsyncRelayCommand(CreateSale);
 
-            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
-
             InventoryDragHandler = new InventoryDragSource(this);
 
             App.Current.Dispatcher.BeginInvoke(new Action(async () => // TODO re-evaluate the async keyword in here
@@ -95,18 +93,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             saleTabItem.Dispose();
             SaleTabItems.Remove(saleTabItem);
-        }
-
-        private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
-        {
-            if (e.Product.NetQty > 0)
-                return;
-
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _inventoryDataGrid.InventoryView
-                    .AttachFilter(p => p.NetQty > 0);
-            }));
         }
 
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridFactory;
@@ -242,7 +228,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public override void Dispose()
         {
-            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
 
             foreach (var tab in SaleTabItems.ToList())
                 tab.Dispose();
@@ -266,6 +251,13 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
 
             public CheckoutViewModel CheckoutViewModel { get; }
+
+            public override bool CanStartDrag(IDragInfo dragInfo)
+            {
+                if (dragInfo.SourceItem is ProductDataViewModel product)
+                    return product.NetQty > 0;
+                return false;
+            }
 
             public override void StartDrag(IDragInfo dragInfo)
             {
