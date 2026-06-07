@@ -14,9 +14,9 @@ using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
+using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
@@ -51,8 +51,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
         private readonly CreateViewModel<AddProductViewModel> _addProductViewModelFactory;
         private readonly CreateViewModel<PlaceOrderViewModel> _placeOrderViewModelFactory;
-        private readonly AppSettingsManager _appSettingsManager;
-        private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly ShellViewModel _mainViewModel;
         private readonly ICategoryStore _categorystore;
         private readonly IInventoryStore _inventoryStore;
@@ -202,16 +200,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             IUndoRedoManager undoRedoManager,
             IOrderStore orderStore,
             ShellViewModel shellViewModel,
-            InventorySettingsProvider inventorySettingsProvider,
-            AppSettingsManager appSettingsManager,
             CreateCommand<DeleteCommand> deleteCommand,
             CreateViewModel<InventoryTabItem> inventoryTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory,
             CreateViewModel<PlaceOrderViewModel> placeOrderViewModelFactory) : base(navigationServiceEx)
         {
-            _appSettingsManager = appSettingsManager;
-            _inventorySettingsProvider = inventorySettingsProvider;
             _mainViewModel = shellViewModel;
             _categorystore = categoryStore;
             _inventoryStore = inventoryStore;

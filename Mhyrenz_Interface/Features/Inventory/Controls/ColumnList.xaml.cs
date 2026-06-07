@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
@@ -35,20 +36,18 @@ namespace Mhyrenz_Interface.Features.Inventory.Controls
             {
                 var list = DragablzItemsControl.ItemsOrganiser.Sort(DragablzItemsControl.Items.Cast<object>()
                   .Select(item => DragablzItemsControl.ItemContainerGenerator.ContainerFromItem(item) as DragablzItem))
-                  .OrderBy(di => di.LogicalIndex)
-                  .ToHashSet();
+                  .OrderBy(x => x.LogicalIndex);
 
-
-                //var sortedIndices = list
-                //    .Select(i => ((ColumnSettingViewModel)i.Content).DisplayIndex)
-                //    .OrderBy(i => i)
-                //    .ToList();
-
-                for (int i = 0; i < list.Count(); i++)
+                var index = 0;
+                foreach (var item in list)
                 {
-                    var item = (ColumnSettingViewModel)list.ElementAt(i).Content;
-                    item.DisplayIndex = i + 1;
+                    ColumnSettingViewModel content = ((ColumnSettingViewModel)item.Content);
+                    content.DisplayIndex = index;
+                    index++;
                 }
+
+                ((InventoryTabItem)DataContext).OnColumnsChanged();
+
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }
     }

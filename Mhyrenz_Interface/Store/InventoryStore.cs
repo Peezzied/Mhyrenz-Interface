@@ -15,7 +15,6 @@ namespace Mhyrenz_Interface.Store
     public class InventoryStore : IInventoryStore
     {
         private readonly IUndoRedoManager _undoRedoManager;
-        private readonly InventorySettingsProvider _inventorySettingsProvider;
         private readonly CreateViewModel<ProductDataViewModel> _productsViewModelFactory;
         private readonly IProductService _productService;
 
@@ -30,12 +29,10 @@ namespace Mhyrenz_Interface.Store
 
         public InventoryStore(
             IUndoRedoManager undoRedoManager,
-            InventorySettingsProvider inventorySettingsProvider,
             CreateViewModel<ProductDataViewModel> productsViewModelFactory,
             IProductService productService)
         {
             _undoRedoManager = undoRedoManager;
-            _inventorySettingsProvider = inventorySettingsProvider;
             _productsViewModelFactory = productsViewModelFactory;
             _productService = productService;
         }
@@ -44,12 +41,6 @@ namespace Mhyrenz_Interface.Store
         public async Task InitializeAsync()
         {
             var products = await _productService.GetAll();
-
-            var extrasTemplates = _inventorySettingsProvider.ColumnSchemaMap
-                .ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.ToDictionary(c => c.Field, c => (object)null)
-                );
 
             LoadProducts(products);
         }

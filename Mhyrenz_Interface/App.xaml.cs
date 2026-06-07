@@ -11,7 +11,6 @@ using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services.AppSettingsManager;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -19,6 +18,7 @@ using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
+using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Features.Home.ViewModels;
@@ -48,7 +48,8 @@ namespace Mhyrenz_Interface
     public partial class App : Application
     {
         private IHost _appHost;
-        private readonly string _configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+        private readonly string _appsettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+        private readonly string _userpreferencesPath = Path.Combine(AppContext.BaseDirectory, "user.preferences.json");
         public static IServiceProvider ServiceProvider { get; set; }
         public static AppPresenter Presenter { get; set; }
 
@@ -57,7 +58,8 @@ namespace Mhyrenz_Interface
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    config.AddJsonFile(_configFilePath, optional: false, reloadOnChange: true);
+                    config.AddJsonFile(_appsettingsPath, optional: false, reloadOnChange: true);
+                    config.AddJsonFile(_userpreferencesPath, optional: true, reloadOnChange: true);
                 })
                 .ConfigureServices((context, services) =>
                 {
@@ -73,11 +75,8 @@ namespace Mhyrenz_Interface
                 context.Database.Migrate();
             } // FIXME: TEMPORARY, CHANGE LATER. DEFER TO DATABASE INTIALIZER
 
-            await ServiceProvider.GetRequiredService<AppSettingsManager>()
-                .GenerateAppSettings(); // FIXME: TEMPORARY
-
-            ServiceProvider.GetRequiredService<InventorySettingsProvider>().Load();
-
+            ServiceProvider.GetRequiredService<ConfigManager<AppSettings>>()
+                .GenerateConfig(nameof(AppSettings)); // FIXME: TEMPORARY
 
             Resources.Add("BarcodeToImageConverter",
                 ServiceProvider.GetRequiredService<BarcodeToImageConverter>());
@@ -105,22 +104,19 @@ namespace Mhyrenz_Interface
                 options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")); // FIXME: TEMPORARY, CHANGE LATER
             }
 
-            services.AddOptions<AppSettingsManager.AppSettings>()
-                .BindConfiguration("AppSettings");
+            services.AddOptions<AppSettings>()
+                .BindConfiguration(nameof(AppSettings));
 
-            services.AddOptions<List<InventorySettings>>()
-                .BindConfiguration("InventorySettings");
+            services.AddOptions<InventoryDataGridSettings>()
+                .BindConfiguration(nameof(InventoryDataGridSettings));
 
             services
-                .AddSingleton(new AppSettingsManager.FilePath(_configFilePath))
-                .AddSingleton<AppSettingsManager>()
+                .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<AppSettings>>(s, _appsettingsPath))
+                .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<InventoryDataGridSettings>>(s, _userpreferencesPath))
 
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton(new InventoryDbContextFactory(inventoryConfig))
 
-                .AddSingleton<InventorySettingsProvider>()
-
-                .AddSingleton<InventoryDataGridSettingsProvider>()
 
                 .AddSingleton<BarcodeToImageConverter>()
 
@@ -152,7 +148,7 @@ namespace Mhyrenz_Interface
 
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
-                .AddViewModelFactory<ColumnSettingViewModel, ColumnSetting>()
+                .AddViewModelFactory<ColumnSettingViewModel, InventoryDataGridColumnSetting>()
                 .AddViewModelFactory<OrderViewModel, Order>()
                 .AddViewModelFactory<PlaceOrderViewModel>()
                 .AddViewModelFactory<InventoryDataGridViewModel>()

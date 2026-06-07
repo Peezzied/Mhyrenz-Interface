@@ -12,10 +12,12 @@ using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.Behaviors;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Inventory.Views;
 using Mhyrenz_Interface.Store;
+using Microsoft.Extensions.Options;
 using ObservableCollections;
 using static Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper;
 
@@ -56,8 +58,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> _searchFilter;
         private readonly Predicate<ProductDataViewModel> _filter;
         private readonly CreateViewModel<ColumnSettingViewModel> _columnSettingViewModelFactory;
-        private readonly InventorySettingsProvider _inventorySettingsProvider;
-        private readonly InventoryDataGridSettingsProvider _inventoryDataGridSettingsProvider;
+        private readonly ConfigManager<InventoryDataGridSettings> _inventoryDataGridSettings;
+        private readonly IOptionsMonitor<InventoryDataGridSettings> _inventoryDataGridSettingsProvider;
         private readonly CreateCommand<ProductVMCommandPurchase> _productCommandPurchase;
         private readonly CreateCommand<ProductVMCommandCommonProp> _productCommandCommonProp;
         private readonly CreateCommand<ProductVMCommandPurchase> productCommandPurchase;
@@ -70,9 +72,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             //InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             Predicate<ProductDataViewModel> filter,
-            InventorySettingsProvider inventorySettingsProvider,
             CreateViewModel<ColumnSettingViewModel> columnSettingViewModelFactory,
-            InventoryDataGridSettingsProvider inventoryDataGridSettingsProvider,
+            ConfigManager<InventoryDataGridSettings> inventoryDataGridSettings,
+            IOptionsMonitor<InventoryDataGridSettings> inventoryDataGridSettingsProvider,
             ICategoryStore categoryStore,
             CreateCommand<ProductVMCommandPurchase> productCommandPurchase,
             CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp,
@@ -91,7 +93,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _filter = filter;
 
             _columnSettingViewModelFactory = columnSettingViewModelFactory;
-            _inventorySettingsProvider = inventorySettingsProvider;
+            _inventoryDataGridSettings = inventoryDataGridSettings;
             _inventoryDataGridSettingsProvider = inventoryDataGridSettingsProvider;
 
             ColumnsView = new ObservableCollection<ColumnSettingViewModel>();
@@ -209,38 +211,25 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public void LoadColumns(IEnumerable<ColumnInfo> columns)
         {
-            // --- Phase 1: resolve settings, build all entries without touching Columns yet ---
-
-            if (!_inventoryDataGridSettingsProvider.Categories.TryGetValue(Id, out var settings))
-            {
-                settings = new Dictionary<string, ColumnSetting>();
-                _inventoryDataGridSettingsProvider.Categories[Id] = settings;
-                _inventoryDataGridSettingsProvider.Save();
-            }
-
-            if (_inventorySettingsProvider.ColumnSchemaMap.TryGetValue(Id, out var columnSchemas)
-                && ContentViewModel.ColumnExtras is null)
-            {
-                ContentViewModel.ColumnExtras = new ObservableDictionary<string, InventorySettings.ColumnSchema>(
-                    columnSchemas.ToDictionary(k => k.Name, v => v));
-            }
 
             bool needsSave = false;
             var newEntries = new Dictionary<string, ColumnSettingViewModel>(); // no notifications yet
             var newColumnsView = new List<ColumnSettingViewModel>();
+
+            var settings = (_inventoryDataGridSettingsProvider.CurrentValue ?? new InventoryDataGridSettings())
+                .ToDictionary(k => k.Header, v => v);
+
 
             foreach (var column in columns)
             {
                 if (string.IsNullOrEmpty(column.Header))
                     continue;
 
-                InventorySettings.ColumnSchema extra = null;
-                ContentViewModel.ColumnExtras?.TryGetValue(column.Header, out extra);
-
                 if (!settings.TryGetValue(column.Header, out var setting))
                 {
-                    setting = new ColumnSetting()
+                    setting = new InventoryDataGridColumnSetting()
                     {
+                        Header = column.Header,
                         DisplayIndex = column.DisplayIndex
                     };
                     settings[column.Header] = setting;
@@ -251,19 +240,17 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
                 columnSettingViewModel.Initialize(
                     isVisible: setting.IsVisible,
-                    displayIndex: setting.DisplayIndex == -1
-                        ? column.DisplayIndex
-                        : setting.DisplayIndex,
-                    name: column.Header,
+                    displayIndex: setting.DisplayIndex,
+                    name: setting.Header,
                     hidden: !column.IgnoreVisibilityToggle,
                     isDraggable: !column.IgnoreReorder
                 );
 
-                newEntries.Add(extra?.Field ?? column.Header, columnSettingViewModel);
+                newEntries.Add(column.Header, columnSettingViewModel);
             }
 
             if (needsSave)
-                _inventoryDataGridSettingsProvider.Save();
+                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(settings.Values));
 
             // --- Phase 2: apply atomically so bindings only cascade once the dict is complete ---
 
@@ -283,6 +270,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             Columns.Clear();
             ColumnsView.Clear();
+        }
+
+        public event Action ColumnsChanged;
+
+        internal void OnColumnsChanged()
+        {
+            ColumnsChanged?.Invoke();
         }
     }
 }

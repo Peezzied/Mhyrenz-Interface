@@ -15,6 +15,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
 {
     public class InventoryDataGridDetailed : Behavior<DataGrid>
     {
+        public delegate void TabChangedEvent(InventoryTabItem newTab, InventoryTabItem oldTab);
 
         public static readonly DependencyProperty TabOwnerProperty =
             DependencyProperty.Register(
@@ -23,7 +24,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
                 typeof(InventoryDataGridDetailed),
                 new PropertyMetadata(null, OnTabOwnerChanged));
 
-        public static event Action<InventoryTabItem> TabChanged;
+        public static event TabChangedEvent TabChanged;
 
         public InventoryTabItem TabOwner
         {
@@ -35,11 +36,11 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
         {
             var behavior = (InventoryDataGridDetailed)d;
 
-            if (!(e.NewValue is InventoryTabItem tab) || behavior.AssociatedObject == null)
+            if (!(e.NewValue is InventoryTabItem newTab) || behavior.AssociatedObject == null)
                 return;
 
             //behavior.InventoryDataGridDetailed_TabChanged(tab);
-            TabChanged?.Invoke(tab);
+            TabChanged?.Invoke(newTab, e.OldValue as InventoryTabItem);
         }
 
         protected override void OnAttached()
@@ -67,6 +68,8 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
 
         private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
         {
+            TabOwner.ColumnsChanged -= InventoryTabItem_ColumnsChange;
+
             TabChanged -= InventoryDataGridDetailed_TabChanged;
             TabChanged -= InventoryDataGridSelect;
 
@@ -79,71 +82,78 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
             vm.CommitEdits -= InventoryDataGridDetailed_CommitEdits;
         }
 
-        private void InventoryDataGridDetailed_TabChanged(InventoryTabItem tab)
+        private void InventoryDataGridDetailed_TabChanged(InventoryTabItem newTab, InventoryTabItem oldTab)
         {
-            //App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            //{
-            //    var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+            newTab.ColumnsChanged += InventoryTabItem_ColumnsChange;
 
-            //    // Clear stale bindings from the previous tab BEFORE touching LoadColumns
-            //    foreach (var col in AssociatedObject.Columns)
-            //    {
-            //        BindingOperations.ClearBinding(col, DataGridColumn.VisibilityProperty);
-            //        BindingOperations.ClearBinding(col, DataGridColumn.DisplayIndexProperty);
-            //    }
+            if (oldTab != null) 
+                oldTab.ColumnsChanged -= InventoryTabItem_ColumnsChange;
 
-            //    if (vm.ColumnExtras?.Any() ?? false)
-            //    {
-            //        var existingHeaders = AssociatedObject.Columns
-            //            .Select(c => c.Header?.ToString())
-            //            .ToHashSet();
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
 
-            //        foreach (var item in vm.ColumnExtras)
-            //        {
-            //            if (existingHeaders.Contains(item.Value.Name)) continue;
-            //            var column = new TextColumn
-            //            {
-            //                Header = item.Value.Name
-            //            };
-            //            AssociatedObject.Columns.Add(column);
-            //            InventoryDataGridColumn.SetColumnPath(column, item.Value.Field);
-            //        }
-            //    }
+                // Clear stale bindings from the previous tab BEFORE touching LoadColumns
+                foreach (var col in AssociatedObject.Columns)
+                {
+                    BindingOperations.ClearBinding(col, DataGridColumn.VisibilityProperty);
+                    BindingOperations.ClearBinding(col, DataGridColumn.DisplayIndexProperty);
+                }
 
-            //    tab.LoadColumns(AssociatedObject.Columns.Select(x => new ColumnInfo
-            //    {
-            //        Header = x.Header?.ToString(),
-            //        DisplayIndex = x.DisplayIndex,
-            //        IgnoreReorder = InventoryDataGridColumn.GetIgnoreReorder(x),
-            //        IgnoreVisibilityToggle = InventoryDataGridColumn.GetIgnoreVisibilityToggle(x),
-            //    }));
+                newTab.LoadColumns(AssociatedObject.Columns.Select(x => new ColumnInfo
+                {
+                    Header = x.Header?.ToString(),
+                    DisplayIndex = x.DisplayIndex,
+                    IgnoreReorder = InventoryDataGridColumn.GetIgnoreReorder(x),
+                    IgnoreVisibilityToggle = InventoryDataGridColumn.GetIgnoreVisibilityToggle(x),
+                }));
 
-            //    foreach (var col in AssociatedObject.Columns)
-            //    {
-            //        if (col.Header == null) continue;
+                foreach (var col in AssociatedObject.Columns)
+                {
+                    if (col.Header == null) continue;
 
-            //        var columnPath = InventoryDataGridColumn.GetColumnPath(col);
+                    BindingOperations.SetBinding(col, DataGridColumn.VisibilityProperty, new Binding
+                    {
+                        Source = vm,
+                        Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{col.Header}].{nameof(ColumnSettingViewModel.IsVisible)}"),
+                        Converter = new BooleanToVisibilityConverter(),
+                    });
 
-            //        BindingOperations.SetBinding(col, DataGridColumn.VisibilityProperty, new Binding
-            //        {
-            //            Source = vm,
-            //            Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{columnPath ?? col.Header}].{nameof(ColumnSettingViewModel.IsVisible)}"),
-            //            Converter = new BooleanToVisibilityConverter(),
-            //        });
-
-            //        BindingOperations.SetBinding(col, DataGridColumn.DisplayIndexProperty, new Binding
-            //        {
-            //            Source = vm,
-            //            Path = new PropertyPath($"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{columnPath ?? col.Header}].{nameof(ColumnSettingViewModel.DisplayIndex)}"),
-            //            Mode = BindingMode.OneWay  // ← critical change
-            //        });
-            //    }
-            //}));
+                    col.DisplayIndex = vm.ColumnsSettings[(string)col.Header].DisplayIndex;
+                }
+            }));
         }
 
-        private void InventoryDataGridSelect(InventoryTabItem item)
+        private void InventoryTabItem_ColumnsChange()
         {
-            item.ContentViewModel.SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
+            var vm = AssociatedObject.DataContext.CastTo<InventoryDataGridViewModel>();
+            var columns = AssociatedObject.Columns
+                .Select(col => new
+                {
+                    Column = col,
+                    Key = col.Header as string
+                })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Key))
+                .Where(x => vm.ColumnsSettings.ContainsKey(x.Key))
+                .Select(x => new
+                {
+                    x.Column,
+                    Setting = vm.ColumnsSettings[x.Key]
+                })
+                .OrderBy(x => x.Setting.DisplayIndex)
+                .ToList();
+
+            int index = 0;
+
+            foreach (var item in columns)
+            {
+                item.Column.DisplayIndex = index++;
+            }
+        }
+
+        private void InventoryDataGridSelect(InventoryTabItem newTab, InventoryTabItem oldTab)
+        {
+            newTab.ContentViewModel.SwitchSelectedItem += InventoryDataGridSelect_SwitchSelectedItem;
             AssociatedObject.DataContextChanged += AssociatedObject_DataContextChanged;
         }
 

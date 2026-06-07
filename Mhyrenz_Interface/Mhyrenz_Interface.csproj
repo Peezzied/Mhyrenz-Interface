@@ -561,12 +561,9 @@
     <Compile Include="Features\Home\Controls\TransactionsDataGrid.xaml.cs">
       <DependentUpon>TransactionsDataGrid.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\Utilities\Aliases.cs" />
     <Compile Include="Core\MVVM\BaseAsyncCommand.cs" />
     <Compile Include="Core\PropertyTracking\ITrackPropertyChanged.cs" />
     <Compile Include="Core\Utilities\ServiceCollectionExtensions.cs" />
-    <Compile Include="Core\InventoryDataGridSettingsProvider.cs" />
-    <Compile Include="Core\InventorySettingsProvider.cs" />
     <Compile Include="Core\Collection\SourceCollection.cs" />
     <Compile Include="Core\PropertyTracking\TrackedViewModel.cs" />
     <Compile Include="Core\PropertyTracking\TrackPropertyHelper.cs" />

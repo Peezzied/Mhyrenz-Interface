@@ -38,8 +38,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public ObservableDictionary<string, ColumnSettingViewModel> ColumnsSettings { get; set; }
 
-        public ObservableDictionary<string, InventorySettings.ColumnSchema> ColumnExtras { get; set; }
-
         public SelectionRowsInfo SelectionInfo { get; set; }
 
         public event Action<bool> SelectedItemsChanged;
