@@ -1,10 +1,21 @@
-﻿using Mhyrenz_Interface.Core.PropertyTracking;
+﻿using System;
+using System.Drawing;
+using System.Threading.Tasks;
+using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Shared.Behaviors;
+using Brush = System.Windows.Media.Brush;
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
 {
-    public class OrderViewModel : TrackedViewModel
+    public class OrderDataViewModel : TrackedViewModel, IFlashRequestable
     {
+        public OrderDataViewModel(Order order)
+        {
+            Order = order;
+        }
+
+        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
         private Order _order;
         public Order Order
@@ -20,6 +31,8 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         }
 
         private int _qty;
+
+
         public int Qty
         {
             get => _qty;
@@ -37,8 +50,18 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
         public decimal ListPrice => Order.Product.ListPrice;
 
-        public string Category => Order.Product.Category.Name;
+        public string CategoryName { get; set; }
+
+        public Brush CategoryColor { get; set; }
 
         public string Name => Order.Product.Name;
+
+        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
+        {
+            var args = new RowFlashRequestedEventArgs(type);
+            FlashRequested?.Invoke(this, args);
+
+            return args.Completion.Task;
+        }
     }
 }

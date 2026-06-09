@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Bootstrap;
-using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
@@ -37,6 +36,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Mhyrenz_Interface
 {
@@ -45,6 +45,7 @@ namespace Mhyrenz_Interface
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
+    /// 
     public partial class App : Application
     {
         private IHost _appHost;
@@ -60,6 +61,10 @@ namespace Mhyrenz_Interface
                 {
                     config.AddJsonFile(_appsettingsPath, optional: false, reloadOnChange: true);
                     config.AddJsonFile(_userpreferencesPath, optional: true, reloadOnChange: true);
+
+#if DEBUG
+                    config.AddUserSecrets<App>();
+#endif
                 })
                 .ConfigureServices((context, services) =>
                 {
@@ -110,6 +115,9 @@ namespace Mhyrenz_Interface
             services.AddOptions<InventoryDataGridSettings>()
                 .BindConfiguration(nameof(InventoryDataGridSettings));
 
+            services.AddOptions<TelegramSettings>()
+                .BindConfiguration("Telegram");
+
             services
                 .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<AppSettings>>(s, _appsettingsPath))
                 .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<InventoryDataGridSettings>>(s, _userpreferencesPath))
@@ -117,6 +125,12 @@ namespace Mhyrenz_Interface
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton(new InventoryDbContextFactory(inventoryConfig))
 
+                 .AddSingleton<ITelegramBotService>(s =>
+                 {
+                     var telegram = s.GetRequiredService<IOptions<TelegramSettings>>().Value;
+
+                     return new TelegramBotService(telegram.BotToken, telegram.ChatId);
+                 })
 
                 .AddSingleton<BarcodeToImageConverter>()
 
@@ -141,6 +155,7 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ICheckoutService, CheckoutService>()
                 .AddSingleton<ICategoryService, CategoryService>()
                 .AddSingleton<IProductService, ProductService>()
+                .AddSingleton<IOrderService, OrderService>()
                 .AddSingleton<IOrderStore, OrderStore>()
 
                 .AddTransient<IncomingPanelViewModel>()
@@ -149,7 +164,7 @@ namespace Mhyrenz_Interface
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
                 .AddViewModelFactory<ColumnSettingViewModel, InventoryDataGridColumnSetting>()
-                .AddViewModelFactory<OrderViewModel, Order>()
+                .AddViewModelFactory<OrderDataViewModel, Order>()
                 .AddViewModelFactory<PlaceOrderViewModel>()
                 .AddViewModelFactory<InventoryDataGridViewModel>()
                 .AddViewModelFactory<InventoryTabItem>()

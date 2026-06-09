@@ -10,7 +10,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Shared.Columns"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
-             xmlns:attached="clr-namespace:Mhyrenz_Interface.Features.Checkout.RowFlashing"
+             xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Shared.Behaviors"
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:markupEx="clr-namespace:Mhyrenz_Interface.Shared.MarkupEx"
              xmlns:dd="urn:gong-wpf-dragdrop"
@@ -25,12 +25,14 @@
               GridLinesVisibility="Horizontal"
               AutoGenerateColumns="False"
               CanUserResizeColumns="False"
-              attached:DataGridFlashBehavior.Enabled="True"
               EnableRowVirtualization="True"
               dd:DragDrop.IsDropTarget="True"
               mah:DataGridHelper.CellPadding="0 6"
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
               dd:DragDrop.UseDropTargetHint="True">
+        <i:Interaction.Behaviors>
+            <behaviors:DataGridFlashBehavior WatchedItemsSource="Transactions"/>
+        </i:Interaction.Behaviors>
         <DataGrid.Resources>
             <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
 

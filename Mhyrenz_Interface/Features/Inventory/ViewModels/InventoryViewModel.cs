@@ -60,7 +60,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly IReportService _reportService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly IOrderStore _orderStore;
-        private readonly HashSet<int> _initializedTabs = new HashSet<int>();
         private readonly DeleteCommand _deleteCommand;
 
         private string _searchBar = string.Empty;
@@ -99,27 +98,41 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             get => _selectedItem;
             set
             {
-                if (_selectedItem == value) return;
+                if (ReferenceEquals(_selectedItem, value))
+                    return;
 
-                _selectedItem?.Dispose();
+                _selectedItem?.Unload();
+
                 _selectedItem = value;
 
-                if (!_initializedTabs.Contains(SelectedItem.Id))
+                if (_selectedItem != null)
                 {
-                    // First time this tab is opened — create its VM now
-                    var vm = _inventoryDataGridViewModelFactory(this);
-                    vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-                    SelectedItem.SetViewModel(vm);
-                    _initializedTabs.Add(SelectedItem.Id);
+                    EnsureTabViewModel(_selectedItem);
+
+                    _selectedItem.ColumnsLoaded += SelectedItem_ColumnsLoaded;
+                    _selectedItem.Load();
+                    _mainViewModel.RibbonBarViewModel = _selectedItem;
+
+                    CanDelete =
+                        _selectedItem.ContentViewModel
+                            ?.SelectedItems
+                            ?.Any() == true;
+                }
+                else
+                {
+                    CanDelete = false;
                 }
 
-                SelectedItem.ContentViewModel.Load();
-                _mainViewModel.RibbonBarViewModel = SelectedItem;
-
                 OnPropertyChanged(nameof(SelectedItem));
-
-                CanDelete = SelectedItem.ContentViewModel.SelectedItems?.Any() == true;
             }
+        }
+
+        private void SelectedItem_ColumnsLoaded()
+        {
+            SelectedItem.ColumnsLoaded -= SelectedItem_ColumnsLoaded;
+
+            if (PlaceOrderIsOpen)
+                _selectedItem.PlaceOrderMode(true);
         }
 
         public bool CanDelete
@@ -235,21 +248,49 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         #region Lifecycle
 
+        private void EnsureTabViewModel(InventoryTabItem tab)
+        {
+            if (tab.ContentViewModel != null)
+                return;
+
+            var vm = _inventoryDataGridViewModelFactory(this);
+            vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
+
+            tab.SetViewModel(vm);
+        }
+
         public override void Dispose()
         {
             AddProductViewModel?.Dispose();
+            AddProductViewModel = null;
 
-            foreach (var item in TabItems)
+            PlaceOrderViewModel?.Dispose();
+            PlaceOrderViewModel = null;
+
+            if (_selectedItem != null)
             {
-                var vm = item.ContentViewModel;
-                if (vm != null)
-                {
-                    vm.Dispose();
-                    vm.SelectedItemsChanged -= Vm_SelectedItemsChanged;
-                }
+                _selectedItem.ColumnsLoaded -= SelectedItem_ColumnsLoaded;
+                _selectedItem.Unload();
+                _selectedItem = null;
+            }
+
+            foreach (var item in TabItems.ToList())
+            {
+                item.ColumnsLoaded -= SelectedItem_ColumnsLoaded;
+
+                if (item.ContentViewModel != null)
+                    item.ContentViewModel.SelectedItemsChanged -= Vm_SelectedItemsChanged;
+
                 item.Dispose();
             }
+
+            TabItems.Clear();
+
             SearchBar = string.Empty;
+
+            _mainViewModel.RibbonBarViewModel = null;
+
+            base.Dispose();
         }
 
         private void LoadTabItems()
@@ -328,6 +369,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             PlaceOrderViewModel.Dispose();
             PlaceOrderViewModel = null;
+
+            SelectedItem.PlaceOrderMode(false);
         }
 
         private void AddProductClosed()
@@ -398,11 +441,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             PlaceOrderViewModel = _placeOrderViewModelFactory();
 
             PlaceOrderIsOpen = true;
+
+            SelectedItem.PlaceOrderMode(PlaceOrderIsOpen);
         }
 
         #endregion
 
-        #region Nested Types
 
         public class InventoryDragSource : DefaultDragHandler
         {
@@ -427,7 +471,5 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 return _inventoryViewModel.PlaceOrderIsOpen;
             }
         }
-
-        #endregion
     }
 }

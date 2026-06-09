@@ -13,5 +13,15 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public int ProductId { get; set; }
         public Product Product { get; set; }
+
+        public void DecrementQty(int amount)
+        {
+            Qty -= amount;
+        }
+
+        public void IncrementQty(int amount)
+        {
+            Qty += amount;
+        }
     }
 }

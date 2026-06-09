@@ -2,7 +2,7 @@
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace Mhyrenz_Interface.Features.Checkout.RowFlashing
+namespace Mhyrenz_Interface.Shared.Adorners
 {
     public class RowFlashAdorner : Adorner
     {

@@ -23,6 +23,7 @@ namespace Mhyrenz_Interface.Bootstrap
             _serviceProvider = serviceProvider;
             StartupManager.Register(new StartupManager.Action("Inventory Store", "Fetching data from database", async (sp) => await InventoryStore.LoadInventoryStore(sp)));
             StartupManager.Register(new StartupManager.Action("Transaction Store", "Fetching data from database", async (sp) => await TransactionStore.LoadTransactionStore(sp)));
+            StartupManager.Register(new StartupManager.Action("Order Store", "Fetching data from database", async (sp) => await OrderStore.LoadOrderStore(sp)));
             StartupManager.Register(new StartupManager.Action("Categories Store", "Categorizing inventory from cache", async (sp) => await CategoryStore.LoadCategoryStore(sp)));
             StartupManager.Register(new StartupManager.Action("Utility", "Deleting items",
                 async (sp) =>

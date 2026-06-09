@@ -15,16 +15,19 @@ namespace Mhyrenz_Interface.Features.Inventory.Controls
         public static bool GetIgnoreVisibilityToggle(DependencyObject obj) => (bool)obj.GetValue(IgnoreVisibilityToggleProperty);
         public static void SetIgnoreVisibilityToggle(DependencyObject obj, bool value) => obj.SetValue(IgnoreVisibilityToggleProperty, value);
 
-        public static readonly DependencyProperty IgnoreProperty = DependencyProperty.RegisterAttached(
-            "Ignore", typeof(bool), typeof(ValidationHelper), new PropertyMetadata(false));
-        public static bool GetIgnore(DependencyObject obj) => (bool)obj.GetValue(IgnoreProperty);
-        public static void SetIgnore(DependencyObject obj, bool value) => obj.SetValue(IgnoreProperty, value);
 
 
-        public static readonly DependencyProperty ColumnPathProperty = DependencyProperty.RegisterAttached(
-            "ColumnPath", typeof(string), typeof(ValidationHelper), new PropertyMetadata(null));
-        public static string GetColumnPath(DependencyObject obj) => (string)obj.GetValue(ColumnPathProperty);
-        public static void SetColumnPath(DependencyObject obj, string value) => obj.SetValue(ColumnPathProperty, value + "Column");
+        public static bool GetPlaceOrderBound(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(PlaceOrderBoundProperty);
+        }
 
+        public static void SetPlaceOrderBound(DependencyObject obj, bool value)
+        {
+            obj.SetValue(PlaceOrderBoundProperty, value);
+        }
+
+        public static readonly DependencyProperty PlaceOrderBoundProperty =
+            DependencyProperty.RegisterAttached("PlaceOrderBound", typeof(bool), typeof(InventoryDataGridColumn), new PropertyMetadata(false));
     }
 }

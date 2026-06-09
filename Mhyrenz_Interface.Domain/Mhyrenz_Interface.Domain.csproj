@@ -171,6 +171,8 @@
     <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\IOrderService.cs" />
+    <Compile Include="Services\ITelegramBotService.cs" />
     <Compile Include="Services\Settings\AppSettings.cs" />
     <Compile Include="Services\Settings\ConfigManager.cs" />
     <Compile Include="Services\BarcodeCacheService\BarcodeImageCache.cs" />
@@ -189,6 +191,7 @@
     <Compile Include="Models\DiscountInfo.cs" />
     <Compile Include="Services\Settings\InventoryDataGridColumnSetting.cs" />
     <Compile Include="Services\Settings\InventoryDataGridSettings.cs" />
+    <Compile Include="Services\Settings\TelegramSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

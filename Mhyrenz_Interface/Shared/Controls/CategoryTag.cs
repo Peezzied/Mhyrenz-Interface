@@ -28,6 +28,9 @@ namespace Mhyrenz_Interface.Shared.Controls
             _textBlock.SetBinding(TextBlock.TextProperty,
                 new Binding(nameof(CategoryName)) { Source = this });
 
+            _textBlock.SetBinding(TextBlock.FontSizeProperty,
+                new Binding(nameof(FontSize)) { Source = this});
+
             SetBinding(BackgroundProperty,
                 new Binding(nameof(CategoryColor)) { Source = this });
 
@@ -85,5 +88,19 @@ namespace Mhyrenz_Interface.Shared.Controls
                 typeof(Brush),
                 typeof(CategoryTag),
                 new PropertyMetadata(default(Brush)));
+
+
+        public double FontSize
+        {
+            get => (double)GetValue(FontSizeProperty);
+            set => SetValue(FontSizeProperty, value);
+        }
+
+        public static readonly DependencyProperty FontSizeProperty =
+            DependencyProperty.Register(nameof(FontSize),
+                typeof(double),
+                typeof(CategoryTag),
+                new PropertyMetadata(12d));
+
     }
 }

@@ -1,13 +1,18 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
+using HandyControl.Controls;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
+using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Store;
 using ObservableCollections;
 using static Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper;
+using MessageBox = HandyControl.Controls.MessageBox;
 using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Setter;
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
@@ -17,13 +22,14 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         private readonly IOrderStore _orderStore;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly CreateCommand<PlaceOrderVMCommandQty> _placeOrderQtyCommand;
+        private readonly IOrderService _orderService;
 
-        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand)
+        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand, IOrderService orderService)
         {
             _orderStore = orderStore;
             _undoRedoManager = undoRedoManager;
             _placeOrderQtyCommand = placeOrderQtyCommand;
-
+            _orderService = orderService;
             OrderView = orderStore.Store.Source.CreateView(v => v);
             Orders = OrderView.ToNotifyCollectionChanged();
 
@@ -35,15 +41,58 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             }
 
             OrderDropHandler = new OrderDropTarget(this, orderStore);
+
+            EmailCommand = new AsyncRelayCommand(EmailAction, CanEmailCommand);
+            SendTelegramCommand = new AsyncRelayCommand(SendTelegramAction, CanSendTelegramCommand);
         }
 
+        private async Task SendTelegramAction(object arg)
+        {
+            var result = MessageBox.Show(
+                "Send the purchase order to Telegram?",
+                "Send Telegram Order",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
 
-        private void OrderView_ViewChanged(in SynchronizedViewChangedEventArgs<OrderViewModel, OrderViewModel> e)
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            await _orderService.SaveOrdersMessage("test", "supplier");
+        }
+
+        private bool CanSendTelegramCommand(object obj)
+        {
+            return Orders.Count > 0;
+        }
+
+        private bool CanEmailCommand(object obj)
+        {
+            return Orders.Count > 0;
+        }
+
+        private async Task EmailAction(object arg)
+        {
+            var result = MessageBox.Show(
+                "Generate supplier order email?",
+                "Generate Email",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            await _orderService.GenerateEmail("test", "supplier");
+        }
+
+        private void OrderView_ViewChanged(in SynchronizedViewChangedEventArgs<OrderDataViewModel, OrderDataViewModel> e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
                 e.NewItem.View.TrackedPropertyChanged += OrderView_TrackedPropertyChanged;
             else if (e.Action == NotifyCollectionChangedAction.Remove)
                 e.OldItem.View.TrackedPropertyChanged -= OrderView_TrackedPropertyChanged;
+
+            EmailCommand.OnCanExecuteChanged();
+            SendTelegramCommand.OnCanExecuteChanged();
         }
 
         private void OrderView_TrackedPropertyChanged(object sender, TrackedPropertyChangedEventArgs args)
@@ -51,27 +100,35 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             if (!args.IsTrueOrigin)
                 return;
 
-            var viewModel = sender as OrderViewModel;
+            var viewModel = sender as OrderDataViewModel;
 
             TrackQtyProps(args.PropertyName, viewModel.Order.ProductId, args.OldValue);
         }
 
-        public ISynchronizedView<OrderViewModel, OrderViewModel> OrderView { get; }
-        public NotifyCollectionChangedSynchronizedViewList<OrderViewModel> Orders { get; }
+        public ISynchronizedView<OrderDataViewModel, OrderDataViewModel> OrderView { get; }
+        public NotifyCollectionChangedSynchronizedViewList<OrderDataViewModel> Orders { get; }
 
         public OrderDropTarget OrderDropHandler { get; }
+        public AsyncRelayCommand EmailCommand { get; }
+        public AsyncRelayCommand SendTelegramCommand { get; }
 
-        public TrackPropertyHelper<int, OrderViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue = null)
+        protected TrackPropertyHelper<int, OrderDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue = null)
         {
             var tracker = TrackPropertyHelper.Build(_orderStore, productId, propertyName)
-                .Track(nameof(OrderViewModel.Qty), method);
+                .Track(nameof(OrderDataViewModel.Qty), method);
 
             void method(Setter setter, Getter getter, int key)
             {
-                _undoRedoManager.Execute(_placeOrderQtyCommand(new PlaceOrderVMCommandQty.DTO
+                _placeOrderQtyCommand(new PlaceOrderVMCommandQty.DTO
                 {
-                    // TODO
-                }));
+                    ProductId = productId,
+                    ChangedArgs = new PlaceOrderVMCommandQty.ChangedArgs
+                    {
+                        NewValue = newValue ?? getter(),
+                        OldValue = oldValue,
+                        RowInfo = null
+                    }
+                }).Execute();
             }
 
             return tracker;
@@ -116,7 +173,10 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
                 }
                 else
                 {
-
+                    _placeOrderViewModel.TrackQtyProps(nameof(OrderDataViewModel.Qty),
+                        productId: product.Id,
+                        oldValue: 0,
+                        newValue: 1);
                 }
             }
         }

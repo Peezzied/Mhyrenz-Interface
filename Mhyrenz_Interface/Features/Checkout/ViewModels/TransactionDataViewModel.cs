@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Features.Checkout.RowFlashing;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
@@ -39,7 +39,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
-        public Task RequestFlash(TransactionStore.OperationType type)
+        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
         {
             var args = new RowFlashRequestedEventArgs(type);
             FlashRequested?.Invoke(this, args);

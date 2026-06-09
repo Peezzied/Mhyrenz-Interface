@@ -9,6 +9,7 @@ using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Store
@@ -32,8 +33,6 @@ namespace Mhyrenz_Interface.Store
 
         public event EventHandler<Sale> SaleChange;
 
-        public enum OperationType { New, Update, Remove }
-
         public async void AddToSale(CheckoutResult result)
         {
             var checkoutResult = result;
@@ -48,7 +47,7 @@ namespace Mhyrenz_Interface.Store
             {
                 if (Store.TryGetValue(transaction.TransactionKey, out var vm))
                 {
-                    await vm.RequestFlash(OperationType.Remove);
+                    await vm.RequestFlash(DataGridFlashBehavior.OperationType.Remove);
                     Store.Remove(transaction.TransactionKey);
                 }
                 return;
@@ -60,7 +59,7 @@ namespace Mhyrenz_Interface.Store
                 var vm = _transactionDataViewModel(transaction);
                 Store.Add(vm);
 
-                App.Current.BeginInvoke(new Action(() => vm.RequestFlash(OperationType.New)));
+                App.Current.BeginInvoke(new Action(() => vm.RequestFlash(DataGridFlashBehavior.OperationType.New)));
             }
         }
 
@@ -69,7 +68,7 @@ namespace Mhyrenz_Interface.Store
             if (Store.TryGetValue(transaction.TransactionKey, out var existingVm))
             {
                 existingVm.Transaction = transaction;
-                await existingVm.RequestFlash(OperationType.Update);
+                await existingVm.RequestFlash(DataGridFlashBehavior.OperationType.Update);
 
                 return true;
             }

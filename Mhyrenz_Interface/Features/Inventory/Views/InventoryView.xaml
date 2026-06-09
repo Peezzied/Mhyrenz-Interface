@@ -10,62 +10,63 @@
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        
+
     </UserControl.Resources>
-    <Grid
-        xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
-        xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
-        xmlns:orders="clr-namespace:Mhyrenz_Interface.Features.Orders.Views"
-        xmlns:ordersVm="clr-namespace:Mhyrenz_Interface.Features.Orders.ViewModels">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <hc:Drawer IsOpen="{Binding AddProductIsOpen}" ShowMode="Push" Name="DrawerRight" Dock="Right">
-            <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="300" >
-                <ContentControl Content="{Binding AddProductViewModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type inventoryVm:AddProductViewModel}">
-                            <inventory:AddProductDrawer/>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
-            </Border>
-        </hc:Drawer>
-        <hc:Drawer IsOpen="{Binding PlaceOrderIsOpen}" ShowMode="Cover" ShowMask="False" Dock="Right">
-            <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="400">
-                <ContentControl Content="{Binding PlaceOrderViewModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type ordersVm:PlaceOrderViewModel}">
-                            <orders:PlaceOrderDrawer/>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
-            </Border>
-        </hc:Drawer>
-        <Grid Margin="17,10,17,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <controls:SearchBox Grid.Column="0" FontSize="14.22"/>
-            <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
-                <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
-                    <controls:IconButtonWithTip.IconContent>
-                        <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
-                    </controls:IconButtonWithTip.IconContent>
-                </controls:IconButtonWithTip>
-                <controls:IconButtonWithTip Tiptext="Export to xlsx" Command="{Binding ExportInventoryCommand}" >
-                    <controls:IconButtonWithTip.IconContent>
-                        <iconPacks:PackIconMaterial Kind="TableArrowRight" />
-                    </controls:IconButtonWithTip.IconContent>
-                </controls:IconButtonWithTip>
-                <Button IsEnabled="False" Content="Place Order"/>
-                <hc:SplitButton Style="{StaticResource SplitButtonPrimary}" hc:IconElement.Geometry="{StaticResource AddGeometry}" hc:IconElement.Width="12" Content="Add Product" Command="{Binding AddProductCommand}" CommandParameter="{Binding ElementName=DrawerRight}"/>
-            </hc:UniformSpacingPanel>
-        </Grid>
-        <TabControl
+    <hc:DrawerContainer>
+        <Grid
+            xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
+            xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
+            xmlns:orders="clr-namespace:Mhyrenz_Interface.Features.Orders.Views"
+            xmlns:ordersVm="clr-namespace:Mhyrenz_Interface.Features.Orders.ViewModels">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <hc:Drawer IsOpen="{Binding AddProductIsOpen}" ShowMode="Push" Name="DrawerRight" Dock="Right">
+                <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="300" >
+                    <ContentControl Content="{Binding AddProductViewModel}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type inventoryVm:AddProductViewModel}">
+                                <inventory:AddProductDrawer/>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+                </Border>
+            </hc:Drawer>
+            <hc:Drawer IsOpen="{Binding PlaceOrderIsOpen}" ShowMode="Push" ShowMask="False" Dock="Left">
+                <Border Background="{DynamicResource RegionBrush}" BorderBrush="{DynamicResource BorderBrush}" Width="450">
+                    <ContentControl Content="{Binding PlaceOrderViewModel}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type ordersVm:PlaceOrderViewModel}">
+                                <orders:PlaceOrderDrawer/>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+                </Border>
+            </hc:Drawer>
+            <Grid Margin="17,10,17,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <controls:SearchBox Grid.Column="0" FontSize="14.22"/>
+                <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
+                    <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
+                        <controls:IconButtonWithTip.IconContent>
+                            <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
+                        </controls:IconButtonWithTip.IconContent>
+                    </controls:IconButtonWithTip>
+                    <controls:IconButtonWithTip Tiptext="Export to xlsx" Command="{Binding ExportInventoryCommand}" >
+                        <controls:IconButtonWithTip.IconContent>
+                            <iconPacks:PackIconMaterial Kind="TableArrowRight" />
+                        </controls:IconButtonWithTip.IconContent>
+                    </controls:IconButtonWithTip>
+                    <Button Command="{Binding PlaceOrderCommand}" Content="Place Order"/>
+                    <hc:SplitButton Style="{StaticResource SplitButtonPrimary}" hc:IconElement.Geometry="{StaticResource AddGeometry}" hc:IconElement.Width="12" Content="Add Product" Command="{Binding AddProductCommand}" CommandParameter="{Binding ElementName=DrawerRight}"/>
+                </hc:UniformSpacingPanel>
+            </Grid>
+            <TabControl
                 Grid.Row="1"
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding TabItems}"
@@ -73,13 +74,14 @@
                 mah:TabControlHelper.Underlined="TabPanel"
                 xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Controls"
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <inventory:InventoryDataGrid DataContext="{Binding ContentViewModel}" Layout="Detailed" TabOwner="{Binding SelectedItem,
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <inventory:InventoryDataGrid DataContext="{Binding ContentViewModel}" Layout="Detailed" TabOwner="{Binding SelectedItem,
                     RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
-    </Grid>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </Grid>
+    </hc:DrawerContainer>
 
 </UserControl>

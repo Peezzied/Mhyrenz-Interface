@@ -105,16 +105,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public void SetViewModel(InventoryDataGridViewModel inventoryDataGridViewModel)
         {
-            var inventoryView = inventoryDataGridViewModel.InventoryView;
-            inventoryView.AttachFilter(InventoryFilter);
-
-            foreach (var (Value, View) in inventoryView.Filtered)
-            {
-                View.TrackedPropertyChanged += Product_PropertyChanged;
-            }
-
-            inventoryView.ViewChanged += InventoryView_ViewChanged;
-
             ContentViewModel = inventoryDataGridViewModel;
             ContentViewModel.ColumnsSettings = Columns;
         }
@@ -236,14 +226,15 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     needsSave = true;
                 }
 
-                var columnSettingViewModel = _columnSettingViewModelFactory(setting);
+                var columnSettingViewModel = _columnSettingViewModelFactory(new InventoryDataGridColumnSetting(setting));
 
                 columnSettingViewModel.Initialize(
                     isVisible: setting.IsVisible,
                     displayIndex: setting.DisplayIndex,
                     name: setting.Header,
                     hidden: !column.IgnoreVisibilityToggle,
-                    isDraggable: !column.IgnoreReorder
+                    isDraggable: !column.IgnoreReorder,
+                    placeOrderBound: column.PlaceOrderBound
                 );
 
                 newEntries.Add(column.Header, columnSettingViewModel);
@@ -262,21 +253,133 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             foreach (var col in newEntries.Values.OrderBy(c => c.DisplayIndex))
                 ColumnsView.Add(col);
+
+            OnColumnsLoaded();
+        }
+
+        private void OnColumnsLoaded()
+        {
+            ColumnsLoaded?.Invoke();
         }
 
         public override void Dispose()
         {
-            ContentViewModel?.Dispose();
+            if (_disposed)
+                return;
 
-            Columns.Clear();
-            ColumnsView.Clear();
+            Unload();
+
+            ColumnsLoaded = null;
+            ColumnsChanged = null;
+
+            ContentViewModel?.Dispose();
+            ContentViewModel = null;
+
+            Columns?.Clear();
+            ColumnsView?.Clear();
+
+            base.Dispose();
+
+            _disposed = true;
         }
 
         public event Action ColumnsChanged;
 
+        public event Action ColumnsLoaded;
+
         internal void OnColumnsChanged()
         {
             ColumnsChanged?.Invoke();
+        }
+
+        private bool _reorderEnabled = true;
+        public bool ReorderEnabled
+        {
+            get => _reorderEnabled;
+            set
+            {
+                _reorderEnabled = value;
+                OnPropertyChanged(nameof(ReorderEnabled));
+            }
+        }
+
+        internal void PlaceOrderMode(bool placeOrderIsOpen)
+        {
+            ReorderEnabled = !placeOrderIsOpen;
+            if (placeOrderIsOpen)
+            {
+                foreach (var item in ColumnsView)
+                {
+                    item.SuppressSave();
+                    if (item.PlaceOrderBound)
+                    {
+                        item.IsVisible = true;
+                    }
+                    else
+                    {
+                        item.IsVisible = false;
+                    }
+                }
+            }
+            else
+            { // restore
+                foreach (var item in _inventoryDataGridSettingsProvider.CurrentValue)
+                {
+                    var col = Columns[item.Header];
+                    col.SuppressSave();
+                    col.IsVisible = item.IsVisible;
+                }
+            }
+        }
+
+        public void Unload()
+        {
+            if (!_isLoaded)
+                return;
+
+            if (ContentViewModel != null)
+            {
+                var inventoryView = ContentViewModel.InventoryView;
+
+                inventoryView.ViewChanged -= InventoryView_ViewChanged;
+
+                foreach (var (_, view) in inventoryView.Filtered)
+                    view.TrackedPropertyChanged -= Product_PropertyChanged;
+            }
+
+            _isLoaded = false;
+        }
+
+        private bool _isLoaded;
+        private bool _disposed;
+
+        public void Load()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(InventoryTabItem));
+
+            if (_isLoaded)
+                return;
+
+            if (ContentViewModel == null)
+            {
+                // ContentViewModel must be assigned by InventoryViewModel before Load,
+                // unless you move the factory into this class.
+                return;
+            }
+
+            var inventoryView = ContentViewModel.InventoryView;
+
+            inventoryView.AttachFilter(InventoryFilter);
+
+            foreach (var (_, view) in inventoryView.Filtered)
+                view.TrackedPropertyChanged += Product_PropertyChanged;
+
+            inventoryView.ViewChanged += InventoryView_ViewChanged;
+
+            ContentViewModel.ColumnsSettings = Columns;
+
+            _isLoaded = true;
         }
     }
 }

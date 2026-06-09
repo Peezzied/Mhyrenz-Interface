@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.MVVM;
@@ -21,14 +22,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _inventoryDataGridSettingsProvider = inventoryDataGridSettingsProvider;
         }
 
-        public void Initialize(bool isVisible, int displayIndex, string name, bool hidden, bool isDraggable)
+        public void Initialize(bool isVisible, int displayIndex, string name, bool hidden, bool isDraggable, bool placeOrderBound)
         {
-            // Set backing fields directly — no OnPropertyChanged, no Save()
-            _isVisible = isVisible;
-            _displayIndex = displayIndex;
             Name = name;
             Hidden = hidden;
             IsDraggable = isDraggable;
+            PlaceOrderBound = placeOrderBound;
 
             // Sync to model without saving
             _columnSetting.IsVisible = isVisible;
@@ -43,35 +42,27 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public string Name { get; set; }
 
-        private bool _isVisible;
         public bool IsVisible
         {
-            get
-            {
-                return _isVisible;
-            }
+            get => _columnSetting.IsVisible;
             set
             {
-                _isVisible = value;
                 _columnSetting.IsVisible = value;
+
                 OnPropertyChanged(nameof(IsVisible));
+                _isSaveEnabled = true;
             }
         }
 
         public bool IsDraggable { get; internal set; }
-
+        public bool PlaceOrderBound { get; private set; }
         public bool Hidden { get; internal set; }
 
-        private int _displayIndex;
         public int DisplayIndex
         {
-            get
-            {
-                return _displayIndex;
-            }
+            get => _columnSetting.DisplayIndex;
             set
             {
-                _displayIndex = value;
                 _columnSetting.DisplayIndex = value;
                 OnPropertyChanged(nameof(DisplayIndex));
             }
@@ -90,6 +81,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
                 _inventoryDataGridSettings.Save(new InventoryDataGridSettings(settings));
             }
+        }
+
+        internal void SuppressSave()
+        {
+            _isSaveEnabled = false;
         }
     }
 }
