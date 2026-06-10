@@ -12,7 +12,6 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         private readonly ICheckoutService _checkoutService;
         private readonly ISessionStore _sessionStore;
         private readonly ICheckoutService checkoutService;
-        private readonly ISessionStore sessionStore;
 
         public ProductVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ISessionStore sessionStore) : base(dto)
         {

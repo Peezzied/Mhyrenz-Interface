@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Input;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Behaviors;
@@ -100,13 +99,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         #region "Event handlers"
         private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
         {
-            if (e.CurrentView is NavigationViewModel inventoryGridHost && !IsReadOnly)
-            {
-                App.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    e.Command.SideEffect?.Invoke(inventoryGridHost);
-                }), System.Windows.Threading.DispatcherPriority.Input);
-            }
+
         }
         #endregion
 

@@ -9,9 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Shared.Adorners;
-using Mhyrenz_Interface.Store;
 using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Shared.Behaviors

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Threading.Tasks;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
-using HandyControl.Controls;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Services;

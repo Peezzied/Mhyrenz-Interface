@@ -4,7 +4,6 @@ using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Shared.Behaviors;
-using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
@@ -14,12 +13,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public TransactionDataViewModel(Transaction transaction)
         {
             Transaction = transaction;
-            DiscountCommand = new RelayCommand(DiscountAction);
-        }
-
-        private void DiscountAction(object obj)
-        {
-            Discount = (Discount)obj;
         }
 
         private Transaction _transaction;

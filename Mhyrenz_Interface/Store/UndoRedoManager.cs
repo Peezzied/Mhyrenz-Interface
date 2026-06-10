@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Navigation;
@@ -27,63 +28,72 @@ namespace Mhyrenz_Interface.Store
 
         public void Execute(IUndoableCommand command)
         {
-            if (Push(command))
-                command.Execute();
+            if (!Push(command))
+                return;
+
+            command.Execute();
+
+            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public bool Push(IUndoableCommand command)
         {
             _undoStack.Push(command);
             _redoStack.Clear();
+
             return true;
         }
 
-        public void Undo()
+        public async Task Undo()
         {
-            if (_undoStack.Count > 0)
-            {
-                var command = _undoStack.Peek();
-                if (command.Undo())
-                {
-                    command = _undoStack.Pop();
-                    _redoStack.Push(command);
-                    RaiseUndoRedoEvent(ActionType.Undo, command);
-                }
-            }
+            if (_undoStack.Count == 0)
+                return;
+
+            var command = _undoStack.Peek();
+
+            if (!command.Undo())
+                return;
+
+            command = _undoStack.Pop();
+            _redoStack.Push(command);
+
+            await RaiseUndoRedoEvent(ActionType.Undo, command);
+
+            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
 
-
-        public void Redo()
+        public async Task Redo()
         {
-            if (_redoStack.Count > 0)
-            {
-                var command = _redoStack.Peek();
-                if (command.Redo())
-                {
-                    command = _redoStack.Pop();
-                    _undoStack.Push(command);
-                    RaiseUndoRedoEvent(ActionType.Redo, command);
-                }
-            }
+            if (_redoStack.Count == 0)
+                return;
+
+            var command = _redoStack.Peek();
+
+            if (!command.Redo())
+                return;
+
+            command = _redoStack.Pop();
+            _undoStack.Push(command);
+
+            await RaiseUndoRedoEvent(ActionType.Redo, command);
+
+            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
-        private void RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)
+
+        private async Task RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)
         {
+            await _navigationService.NavigateAsync(command.CurrentViewIn);
 
-            if (command.SideEffect is null)
-            {
-                _navigationService.Navigate(command.CurrentViewIn);
-            }
-            else
-            {
-                _navigationService.Navigate(command.CurrentViewIn, vm => command.SideEffect(vm));
-            }
+            command.SideEffect?.Invoke(
+                _navigationService.CurrentViewModel);
 
-            App.Current.Dispatcher.BeginInvoke(new Action(() => UndoRedoEvent?.Invoke(intent, new UndoRedoEventArgs
-            {
-                CurrentView = _navigationService.CurrentViewModel,
-                Command = command
-            })));
-
+            UndoRedoEvent?.Invoke(
+                intent,
+                new UndoRedoEventArgs
+                {
+                    CurrentView = _navigationService.CurrentViewModel,
+                    Command = command
+                });
         }
 
         public void Clear()
@@ -109,6 +119,8 @@ namespace Mhyrenz_Interface.Store
         }
 
         public event Action<ActionType, UndoRedoEventArgs> UndoRedoEvent;
+
+        public event EventHandler UndoRedoChanged;
 
         public bool CanUndo => _undoStack.Count > 0;
         public bool CanRedo => _redoStack.Count > 0;

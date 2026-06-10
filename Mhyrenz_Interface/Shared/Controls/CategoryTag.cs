@@ -29,7 +29,7 @@ namespace Mhyrenz_Interface.Shared.Controls
                 new Binding(nameof(CategoryName)) { Source = this });
 
             _textBlock.SetBinding(TextBlock.FontSizeProperty,
-                new Binding(nameof(FontSize)) { Source = this});
+                new Binding(nameof(FontSize)) { Source = this });
 
             SetBinding(BackgroundProperty,
                 new Binding(nameof(CategoryColor)) { Source = this });

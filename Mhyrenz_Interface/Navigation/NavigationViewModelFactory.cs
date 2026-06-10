@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
@@ -22,8 +21,8 @@ namespace Mhyrenz_Interface.Navigation
         public NavigationViewModel(INavigationServiceEx navigationServiceEx)
         {
             _navigationServiceEx = navigationServiceEx;
-            _navigationServiceEx.Navigating += (s, e) => Navigating?.Invoke(s, e);
-            _navigationServiceEx.TransitionCompleted += () => TransitionCompleted?.Invoke();
+            //_navigationServiceEx.Navigating += (s, e) => Navigating?.Invoke(s, e);
+            //_navigationServiceEx.TransitionCompleted += () => TransitionCompleted?.Invoke();
         }
 
         public event EventHandler Navigating;
@@ -31,8 +30,8 @@ namespace Mhyrenz_Interface.Navigation
 
         public override void Dispose()
         {
-            _navigationServiceEx.Navigating -= (s, e) => Navigating?.Invoke(s, e);
-            _navigationServiceEx.TransitionCompleted -= () => TransitionCompleted?.Invoke(); base.Dispose();
+            //_navigationServiceEx.Navigating -= (s, e) => Navigating?.Invoke(s, e);
+            //_navigationServiceEx.TransitionCompleted -= () => TransitionCompleted?.Invoke(); base.Dispose();
         }
     }
     public class NavigationViewModelFactory : IViewModelFactory<NavigationViewModel>
@@ -71,17 +70,11 @@ namespace Mhyrenz_Interface.Navigation
             throw new ArgumentException($"No view model found for type {viewType.Name}");
         }
 
-        public Type GetViewByViewModel(NavigationViewModel viewModel)
+        public Type GetViewModelType(Type viewType)
         {
-            var derivedSetToViewModels = _viewsSet.ToDictionary(v => v.Value.viewModelType, v => v.Key);
-            var viewModelType = viewModel.GetType();
+            _viewsSet.TryGetValue(viewType, out var viewModelType);
 
-            if (derivedSetToViewModels.TryGetValue(viewModelType, out var viewType))
-            {
-                return viewType;
-            }
-
-            throw new ArgumentException($"No view found for type {viewModelType.Name}");
+            return viewModelType.viewModelType;
         }
     }
 }

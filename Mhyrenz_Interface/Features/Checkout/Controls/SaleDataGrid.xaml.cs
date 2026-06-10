@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Linq;
+using System.Windows.Controls;
+using Mhyrenz_Interface.Features.Checkout.ViewModels;
 
 namespace Mhyrenz_Interface.Features.Checkout.Controls
 {
@@ -10,6 +12,14 @@ namespace Mhyrenz_Interface.Features.Checkout.Controls
         public SaleDataGrid()
         {
             InitializeComponent();
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var vm = (SaleTabItem)DataGrid.DataContext;
+
+            if (vm != null)
+                vm.SelectedItems = DataGrid.SelectedItems.OfType<TransactionDataViewModel>();
         }
     }
 }

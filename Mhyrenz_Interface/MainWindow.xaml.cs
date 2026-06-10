@@ -1,8 +1,5 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Core.MVVM;
-using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 using MessageBox = HandyControl.Controls.MessageBox;
 
@@ -13,21 +10,15 @@ namespace Mhyrenz_Interface
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private readonly INavigationServiceEx _navigationServiceEx;
         private readonly IUndoRedoManager _undoRedoManager;
 
-        public Frame NavigationFrame => _navigationServiceEx.Frame;
-
-        public MainWindow(BaseViewModel dataContext, INavigationServiceEx navigationServiceEx, IUndoRedoManager undoRedoManager)
+        public MainWindow(ShellViewModel shellVIewModel, IUndoRedoManager undoRedoManager)
         {
-            DataContext = dataContext;
-            _navigationServiceEx = navigationServiceEx;
+            DataContext = shellVIewModel;
             _undoRedoManager = undoRedoManager;
 
             Closing += MainWindow_Closing;
             InitializeComponent();
-
-
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -44,12 +35,9 @@ namespace Mhyrenz_Interface
                     e.Cancel = true;
                     return;
                 }
-            }
-        }
 
-        private void TransitioningContentControl_TransitionCompleted(object sender, RoutedEventArgs e)
-        {
-            ((ShellViewModel)DataContext).OnTransitionComplete();
+                Closing -= MainWindow_Closing;
+            }
         }
     }
 }

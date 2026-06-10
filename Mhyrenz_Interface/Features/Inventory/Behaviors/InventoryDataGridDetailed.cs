@@ -4,11 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Threading;
-using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Features.Inventory.Controls;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
-using Mhyrenz_Interface.Shared.Columns;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Features.Inventory.Behaviors

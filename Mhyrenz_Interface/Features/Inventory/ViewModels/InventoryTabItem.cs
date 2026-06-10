@@ -7,7 +7,6 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
@@ -289,7 +288,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         internal void OnColumnsChanged()
         {
-            ColumnsChanged?.Invoke();
+            ColumnsChanged?.Invoke(); // update the view
+
+            _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
         }
 
         private bool _reorderEnabled = true;
@@ -310,7 +311,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             {
                 foreach (var item in ColumnsView)
                 {
-                    item.SuppressSave();
                     if (item.PlaceOrderBound)
                     {
                         item.IsVisible = true;
@@ -320,16 +320,18 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                         item.IsVisible = false;
                     }
                 }
+                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
             else
             { // restore
                 foreach (var item in _inventoryDataGridSettingsProvider.CurrentValue)
                 {
                     var col = Columns[item.Header];
-                    col.SuppressSave();
                     col.IsVisible = item.IsVisible;
                 }
+                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
+
         }
 
         public void Unload()

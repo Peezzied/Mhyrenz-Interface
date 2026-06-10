@@ -50,7 +50,7 @@ namespace Mhyrenz_Interface.Features.Orders.Commands
             _orderStore.AddItem(result, _dto.ProductId);
         }
 
-        public new class DTO: PropertyChangeCommand<PlaceOrderVMRowInfo>.DTO
+        public new class DTO : PropertyChangeCommand<PlaceOrderVMRowInfo>.DTO
         {
             public int ProductId { get; set; }
         }

@@ -6,6 +6,7 @@
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
+             xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
              xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Controls"
              mc:Ignorable="d" 
              d:Background="White"
@@ -86,6 +87,6 @@
                 </hc:UniformSpacingPanel>
             </Border>
         </Grid>
-        <inventory:InventoryDataGrid DataContext="{Binding InventoryDataGridViewModel}" Grid.Column="2" Layout="Compacted" />
+        <inventory:InventoryDataGrid DataContext="{Binding DataContext.InventoryDataGridViewModel, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}" Grid.Column="2" Layout="Compacted" />
     </Grid>
 </UserControl>

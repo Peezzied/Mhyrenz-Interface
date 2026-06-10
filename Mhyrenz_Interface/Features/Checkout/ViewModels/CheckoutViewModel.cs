@@ -1,33 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Dragablz;
 using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
+using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
-using Mhyrenz_Interface.Features.Inventory.Controls;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
-using Microsoft.EntityFrameworkCore.Internal;
 using ObservableCollections;
 using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class CheckoutViewModel : NavigationViewModel
+    public class CheckoutViewModel : NavigationViewModel, IAsyncInitializable
     {
 
         public CheckoutViewModel(INavigationServiceEx navigationServiceEx, ICheckoutService checkoutService,
             ISessionStore sessionStore,
             IInventoryStore inventoryStore,
+            ITransactionStore transactionStore,
             ShellViewModel shellViewModel,
             CreateViewModel<CompletedSaleViewModel> completedSaleViewModel,
             CreateViewModel<SaleTabItem> saleTabItemFactory,
@@ -39,6 +38,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _inventoryDataGridFactory = inventoryDataGridFactory;
             _sessionStore = sessionStore;
             _inventoryStore = inventoryStore;
+            _transactionStore = transactionStore;
             _checkoutService = checkoutService;
             _saleTabItemFactory = saleTabItemFactory;
 
@@ -48,42 +48,66 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             InventoryDragHandler = new InventoryDragSource(this);
 
-            App.Current.Dispatcher.BeginInvoke(new Action(async () => // TODO re-evaluate the async keyword in here
-            {
-                LoadTabItems();
-            }));
+            _transactionView = _transactionStore.Store.Source.CreateView(v => v);
         }
 
-        private async Task CreateSale(object arg)
-        {
-            await CreateSale();
-        }
 
-        private async void LoadTabItems()
+        public async Task InitializeAsync(CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
             var sales = await _checkoutService.GetActive();
-            _startSaleCount = await _checkoutService.InactiveTransactionsCount();
+            token.ThrowIfCancellationRequested();
 
-            if (!sales.Any())
+            token.ThrowIfCancellationRequested();
+            _startSaleCount = await _checkoutService.InactiveTransactionsCount();
+            token.ThrowIfCancellationRequested();
+
+            if (sales.Count == 0)
             {
                 await CreateSale();
                 return;
             }
 
-            _inventoryDataGrid = _inventoryDataGridFactory(this);
-            _inventoryDataGrid.InventoryView.AttachFilter(e => e.NetQty > 0);
-            _inventoryDataGrid.IsReadOnly = true;
+            token.ThrowIfCancellationRequested();
+            InventoryDataGridViewModel = _inventoryDataGridFactory(this);
+            token.ThrowIfCancellationRequested();
+            InventoryDataGridViewModel.IsReadOnly = true;
 
-            SaleTabItems.AddRange(sales.Select(s =>
-            {
-                var saleTabItem = _saleTabItemFactory(
-                    this,
-                    s.FromStartCount(_startSaleCount) + " Regular Customer",
-                    _inventoryDataGrid,
-                    s);
+            List<SaleTabItem> tabs = new List<SaleTabItem>();
 
-                return saleTabItem;
-            }));
+            Transactions = _transactionView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
+
+            token.ThrowIfCancellationRequested();
+            await UiTimeSlicer.RunAsync(
+                sales,
+                sale =>
+                {
+                    token.ThrowIfCancellationRequested();
+                    tabs.Add(_saleTabItemFactory(
+                        this,
+                        _transactionView,
+                        sale.FromStartCount(_startSaleCount) + " Regular Customer",
+                        sale));
+                }
+                );
+            token.ThrowIfCancellationRequested();
+
+            SaleTabItems.Clear();
+
+            token.ThrowIfCancellationRequested();
+            SaleTabItems.AddRange(tabs);
+            token.ThrowIfCancellationRequested();
+
+            SelectedItem = SaleTabItems.FirstOrDefault();
+
+            _isInitialized = true;
+        }
+
+
+        private async Task CreateSale(object arg)
+        {
+            await CreateSale();
         }
 
         public async void DropCurrentTab(SaleTabItem saleTabItem, bool asCompleted)
@@ -98,6 +122,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridFactory;
         private readonly ISessionStore _sessionStore;
         private readonly IInventoryStore _inventoryStore;
+        private readonly ITransactionStore _transactionStore;
         private readonly ICheckoutService _checkoutService;
         private readonly CreateViewModel<SaleTabItem> _saleTabItemFactory;
         private readonly CreateViewModel<CompletedSaleViewModel> _completedSaleViewModel;
@@ -113,9 +138,13 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             get => _selectedItem;
             set
             {
+                if (ReferenceEquals(_selectedItem, value))
+                    return;
+
                 _selectedItem?.Unload();
 
                 _selectedItem = value;
+
                 _selectedItem?.Load();
 
                 OnPropertyChanged(nameof(SelectedItem));
@@ -156,8 +185,11 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
         }
 
+        public InventoryDataGridViewModel InventoryDataGridViewModel { get; set; }
+
         private CompletedSaleViewModel completedSaleViewModel;
-        private InventoryDataGridViewModel _inventoryDataGrid;
+
+        private bool _isInitialized = false;
 
         public CompletedSaleViewModel CompletedSaleViewModel
         {
@@ -175,10 +207,19 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public InventoryDragSource InventoryDragHandler { get; }
 
+        private readonly ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
+
+        public NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> Transactions { get; private set; }
+
         private async void ClosingTab(ItemActionCallbackArgs<TabablzControl> args)
         {
             if (args.DragablzItem.DataContext is SaleTabItem saleTabItem && ClosingPrompt(saleTabItem))
+            {
                 DropCurrentTab(saleTabItem, asCompleted: false);
+                return;
+            }
+
+            args.Cancel();
         }
 
         public static bool ClosingPrompt(SaleTabItem saleTabItem)
@@ -192,7 +233,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             if (firstPrompt != MessageBoxResult.Yes)
                 return false;
 
-            if (saleTabItem.Transactions.Count > 0)
+            if (saleTabItem.Sale.Transactions.Count > 0)
             {
                 MessageBoxResult secondPrompt = MessageBox.Show(
                     "This action cannot be undone.  \nAre you sure you want to permanently discard this sale?",
@@ -217,9 +258,10 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private async Task CreateSale()
         {
             var sale = await _checkoutService.Create(_sessionStore.CurrentSession.Id);
-            SaleTabItem item = _saleTabItemFactory(this,
+            SaleTabItem item = _saleTabItemFactory(
+                this,
+                _transactionView,
                 sale.FromStartCount(_startSaleCount) + " Regular Customer",
-                _inventoryDataGridFactory(this),
                 sale);
 
             SaleTabItems.Add(item);
@@ -228,7 +270,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public override void Dispose()
         {
-
             foreach (var tab in SaleTabItems.ToList())
                 tab.Dispose();
 
@@ -241,6 +282,9 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 _shellViewModel.RibbonBarViewModel = null;
 
             AddSaleCommand = null;
+
+            InventoryDataGridViewModel?.Dispose();
+            InventoryDataGridViewModel = null;
         }
 
         public class InventoryDragSource : DefaultDragHandler

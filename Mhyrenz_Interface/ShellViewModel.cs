@@ -2,15 +2,13 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows.Navigation;
 using System.Windows.Threading;
-using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
-using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
@@ -27,11 +25,7 @@ namespace Mhyrenz_Interface
 {
     public class ShellViewModel : BaseViewModel
     {
-        private readonly INavigationServiceEx _navigationServiceEx;
-        private readonly IViewModelFactory<NavigationViewModel> _viewModelFactory;
-
-        private readonly ObservableCollection<MenuItem> AppMenu = new ObservableCollection<MenuItem>();
-        private readonly ObservableCollection<MenuItem> AppOptionsMenu = new ObservableCollection<MenuItem>();
+        private readonly INavigationServiceEx _navigationService;
         private readonly IInventoryStore _inventoryStore;
         private readonly IProductService _productService;
         private readonly IUndoRedoManager _undoRedoManger;
@@ -40,13 +34,102 @@ namespace Mhyrenz_Interface
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private readonly DateTime _baseTime;
 
-        public BaseViewModel CurrentViewModel => _navigationServiceEx.CurrentViewModel;
 
-        public ObservableCollection<MenuItem> Menu => AppMenu;
+        public ShellViewModel(
+            ISessionStore sessionStore,
+            INavigationServiceEx navigationServiceEx,
+            IDialogCoordinator dialogCoordinator,
+            IUndoRedoManager undoRedoManager,
+            ISerialBarcodeService serialBarcodeService)
+        {
 
-        public ObservableCollection<MenuItem> OptionsMenu => AppOptionsMenu;
+            serialBarcodeService.OnSerialConnected += SerialBarcodeService_OnSerialConnected;
+            serialBarcodeService.OnSerialDisconnected += SerialBarcodeService_OnSerialDisconnected;
+            serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
 
+            serialBarcodeService.Start("COM2");
+
+            sessionStore.StateChanged += SessionStore_SessionChanged;
+            Session = sessionStore.CurrentSession.Period.ToString("ddd MMM d, yyyy");
+
+            _navigationService = navigationServiceEx;
+            _navigationService.CurrentViewModelChanged += OnCurrentViewModelChanged;
+            _undoRedoManger = undoRedoManager;
+
+            UndoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo);
+            RedoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo);
+
+            _dialogCoordinator = dialogCoordinator;
+
+            NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
+
+
+            // Build the menus
+            Menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.HouseSolid },
+                Label = "Home",
+                ViewType = typeof(HomeView)
+            });
+            Menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
+                Label = "Checkout",
+                ViewType = typeof(CheckoutView)
+            });
+            Menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
+                Label = "Inventory",
+                ViewType = typeof(InventoryView)
+            });
+            OptionsMenu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.GearSolid },
+                Label = "Settings",
+                ViewType = typeof(SettingsView)
+            });
+
+            _baseTime = DateTime.Now;
+            _stopwatch.Start();
+
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200) // smooth enough but light
+            };
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+
+            _undoRedoManger.UndoRedoChanged += UndoRedoManger_UndoRedoChanged;
+
+            App.Current.Dispatcher.BeginInvoke(new Action(async () =>
+            {
+                await NavigateToDefaultPageAsync();
+            }));
+        }
+
+
+        public ObservableCollection<MenuItem> Menu { get; } = new ObservableCollection<MenuItem>();
+        public ObservableCollection<MenuItem> OptionsMenu { get; } = new ObservableCollection<MenuItem>();
         public ICommand NavigateCommand { get; }
+        public AsyncRelayCommand UndoCommand { get; set; }
+        public AsyncRelayCommand RedoCommand { get; private set; }
+        public bool CanMainBarcodeReceive { get; private set; } = true;
+
+
+        private NavigationViewModel _currentViewModel;
+        public NavigationViewModel CurrentViewModel
+        {
+            get => _currentViewModel;
+            set => SetProperty(ref _currentViewModel, value);
+        }
+
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
 
         private MenuItem _selectedMenuItem;
         public MenuItem SelectedMenuItem
@@ -65,26 +148,15 @@ namespace Mhyrenz_Interface
         private object _ribbonBarViewModel;
         public object RibbonBarViewModel
         {
-            get
-            {
-                return _ribbonBarViewModel;
-            }
-            set
-            {
-                _ribbonBarViewModel = value;
-                OnPropertyChanged(nameof(RibbonBarViewModel));
-            }
+            get => _ribbonBarViewModel;
+            set => SetProperty(ref _ribbonBarViewModel, value);
         }
 
         private bool _isReady;
         public bool IsReady
         {
             get => _isReady;
-            set
-            {
-                _isReady = value;
-                OnPropertyChanged(nameof(IsReady));
-            }
+            set => SetProperty(ref _isReady, value);
         }
 
 
@@ -92,111 +164,68 @@ namespace Mhyrenz_Interface
         public DateTime Today
         {
             get => _today;
-            set
-            {
-                _today = value;
-                OnPropertyChanged(nameof(Today));
-            }
+            set => SetProperty(ref _today, value);
         }
 
         private int _seconds;
         public int Seconds
         {
             get => _seconds;
-            set
-            {
-                _seconds = value;
-                OnPropertyChanged(nameof(Seconds));
-            }
+            set => SetProperty(ref _seconds, value);
         }
 
         private string _session;
         public string Session
         {
             get => _session;
-            set
+            set => SetProperty(ref _session, value);
+        }
+
+
+        public void SuspendMainBarcodeReceiver()
+        {
+            CanMainBarcodeReceive = false;
+        }
+
+        public void OpenMainBarcodeReceiver()
+        {
+            CanMainBarcodeReceive = true;
+        }
+
+        private async Task NavigateToDefaultPageAsync()
+        {
+            var defaultItem = Menu.FirstOrDefault(x => x.ViewType == typeof(HomeView))
+                ?? Menu.FirstOrDefault();
+
+            if (defaultItem == null)
+                return;
+
+            IsLoading = true;
+
+            try
             {
-                _session = value;
-                OnPropertyChanged(nameof(Session));
+                var navigated =
+                    await _navigationService.NavigateAsync(
+                        defaultItem.ViewType);
+
+                if (navigated)
+                    SelectedMenuItem = defaultItem;
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
-        public ICommand UndoCommand { get; set; }
-        public ICommand RedoCommand { get; private set; }
-        public bool CanMainBarcodeReceive { get; private set; } = true;
-
-        public ShellViewModel(
-            ISessionStore sessionStore,
-            IInventoryStore inventroyStore,
-            IProductService productService,
-            INavigationServiceEx navigationServiceEx,
-            NavigationViewModelFactory viewModelFactory,
-            IDialogCoordinator dialogCoordinator,
-            IUndoRedoManager undoRedoManager,
-            ISerialBarcodeService serialBarcodeService)
+        private void OnCurrentViewModelChanged(NavigationViewModel vm)
         {
+            CurrentViewModel = vm;
+        }
 
-            serialBarcodeService.OnSerialConnected += SerialBarcodeService_OnSerialConnected;
-            serialBarcodeService.OnSerialDisconnected += SerialBarcodeService_OnSerialDisconnected;
-            serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
-
-            serialBarcodeService.Start("COM2");
-
-            sessionStore.StateChanged += SessionStore_SessionChanged;
-            Session = sessionStore.CurrentSession.Period.ToString("ddd MMM d, yyyy");
-
-            _navigationServiceEx = navigationServiceEx;
-            _navigationServiceEx.Navigated += OnNavigated;
-            _undoRedoManger = undoRedoManager;
-
-            UndoCommand = new RelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo);
-            RedoCommand = new RelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo);
-
-            _dialogCoordinator = dialogCoordinator;
-
-            NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
-
-            _viewModelFactory = viewModelFactory;
-
-            // Build the menus
-            this.Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.HouseSolid },
-                Label = "Home",
-                NavigationType = typeof(HomeView)
-            });
-            this.Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
-                Label = "Checkout",
-                NavigationType = typeof(CheckoutView)
-            });
-            this.Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
-                Label = "Inventory",
-                NavigationType = typeof(InventoryView)
-            });
-            this.OptionsMenu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.GearSolid },
-                Label = "Settings",
-                NavigationType = typeof(SettingsView)
-            });
-
-            _navigationServiceEx.Navigate(typeof(HomeView));
-            _inventoryStore = inventroyStore;
-            _productService = productService;
-
-            _baseTime = DateTime.Now;
-            _stopwatch.Start();
-
-            _timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(200) // smooth enough but light
-            };
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
+        private void UndoRedoManger_UndoRedoChanged(object sender, EventArgs e)
+        {
+            UndoCommand.OnCanExecuteChanged();
+            RedoCommand.OnCanExecuteChanged();
         }
 
         private void SessionStore_SessionChanged(Session obj)
@@ -227,66 +256,63 @@ namespace Mhyrenz_Interface
             //throw new NotImplementedException();
         }
 
-        private void UndoRedoActionCommand(object parameter)
+        private async Task UndoRedoActionCommand(object parameter)
         {
-            switch (parameter.CastTo<ActionType>())
+            switch ((ActionType)parameter)
             {
                 case ActionType.Undo:
-                    _undoRedoManger.Undo();
+                    await _undoRedoManger.Undo();
                     break;
                 case ActionType.Redo:
-                    _undoRedoManger.Redo();
+                    await _undoRedoManger.Redo();
                     break;
             }
         }
 
-        public void OnTransitionComplete()
+        private async void Navigate(NavigationCommandParams parameters)
         {
-            _navigationServiceEx.TransitionComplete();
-        }
+            var isMainMenu = ReferenceEquals(parameters.MenuItem, Menu);
 
-        private void Navigate(NavigationCommandParams parameters)
-        {
-            var selectedItem = ReferenceEquals(parameters.MenuItem, Menu)
-                ? parameters.Menu.SelectedItem
-                : parameters.Menu.SelectedOptionsItem;
+            var menuItem = isMainMenu
+                ? parameters.Menu.SelectedItem as MenuItem
+                : parameters.Menu.SelectedOptionsItem as MenuItem;
 
-            if (selectedItem is MenuItem menuItem && menuItem.NavigationType != null)
+            if (menuItem == null)
+                return;
+
+            IsLoading = true;
+
+            var navigated = false;
+
+            try
             {
-                _navigationServiceEx.Navigate(menuItem.NavigationType);
+                navigated = await _navigationService.NavigateAsync(menuItem.ViewType);
+            }
+            finally
+            {
+                if (navigated)
+                {
+                    if (isMainMenu)
+                    {
+                        SelectedMenuItem = menuItem;
+                        SelectedOptionsMenuItem = null;
+                    }
+                    else
+                    {
+                        SelectedOptionsMenuItem = menuItem;
+                        SelectedMenuItem = null;
+                    }
+                }
+
+                IsLoading = false;
             }
         }
 
-        private void OnNavigated(object sender, NavigationEventArgs e)
-        {
-            var contentType = e.Content?.GetType();
-            var lastOptionsMenuItem = SelectedOptionsMenuItem;
-
-            //Debug.WriteLine($"Navigated to: {contentType?.Name}");
-
-            SelectedMenuItem = Menu.FirstOrDefault(x => x.NavigationType == contentType);
-            SelectedOptionsMenuItem = OptionsMenu.FirstOrDefault(x => x.NavigationType == contentType);
-
-            UpdateCurrentViewModel(contentType);
-
-
-        }
-
-        private void UpdateCurrentViewModel(Type viewType)
-        {
-            var vm = _viewModelFactory.CreateViewModel(viewType);
-            _navigationServiceEx.CurrentViewModel = vm;
-            OnPropertyChanged(nameof(CurrentViewModel));
-        }
-
-        internal void SuspendMainBarcodeReceiver()
-        {
-            CanMainBarcodeReceive = false;
-        }
-
-        internal void OpenMainBarcodeReceiver()
-        {
-            CanMainBarcodeReceive = true;
-        }
+        //public override void Dispose()
+        //{
+        //    _navigationService.CurrentViewModelChanged -= OnCurrentViewModelChanged;
+        //    CurrentViewModel?.Dispose();
+        //    base.Dispose();
+        //}
     }
 }

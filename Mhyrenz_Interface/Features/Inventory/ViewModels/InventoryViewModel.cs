@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,12 +12,11 @@ using GongSolutions.Wpf.DragDrop;
 using HandyControl.Controls;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
-using Mhyrenz_Interface.Core;
 using Mhyrenz_Interface.Core.MVVM;
+using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
-using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
@@ -45,7 +45,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         void RowIntoView(int category, int[] products);
     }
 
-    public class InventoryViewModel : NavigationViewModel, IInventoryGridHost
+    public class InventoryViewModel : NavigationViewModel, IInventoryGridHost, IAsyncInitializable
     {
 
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
@@ -240,9 +240,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
             InventoryDragHandler = new InventoryDragSource(this);
-
-
-            LoadTabItems();
         }
 
 
@@ -250,13 +247,43 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private void EnsureTabViewModel(InventoryTabItem tab)
         {
-            if (tab.ContentViewModel != null)
+            var contentViewModel = tab.ContentViewModel;
+            if (contentViewModel != null)
                 return;
 
-            var vm = _inventoryDataGridViewModelFactory(this);
-            vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
+            contentViewModel.Load();
+            contentViewModel.SelectedItemsChanged += Vm_SelectedItemsChanged;
 
-            tab.SetViewModel(vm);
+            tab.SetViewModel(contentViewModel);
+        }
+
+        public async Task InitializeAsync(CancellationToken token)
+        {
+            List<InventoryTabItem> tabs = new List<InventoryTabItem>();
+
+            token.ThrowIfCancellationRequested();
+            var inventoryDataGridVm = _inventoryDataGridViewModelFactory(this);
+            token.ThrowIfCancellationRequested();
+
+            await UiTimeSlicer.RunAsync(
+                _categorystore.CategoriesFilter,
+                x =>
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var item = _inventoryTabItemFactory(x.Key, x.Value);
+                    item.ContentViewModel = inventoryDataGridVm;
+
+                    tabs.Add(item);
+                });
+            token.ThrowIfCancellationRequested();
+
+            token.ThrowIfCancellationRequested();
+            TabItems.Clear();
+            TabItems.AddRange(tabs);
+            token.ThrowIfCancellationRequested();
+
+            SelectedItem = TabItems.FirstOrDefault();
         }
 
         public override void Dispose()
@@ -293,16 +320,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             base.Dispose();
         }
 
-        private void LoadTabItems()
-        {
-            TabItems.Clear();
-
-            foreach (var category in _categorystore.CategoriesFilter)
-            {
-                AddTabItem(category.Key, category.Value);
-            }
-        }
-
         #endregion
 
         #region Public Methods
@@ -314,6 +331,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
 
                 InventoryTabItem newTab = tabItems[category];
+
+                EnsureTabViewModel(newTab);
+
                 var vm = newTab.ContentViewModel;
                 bool canSelectTab = false;
                 if (newTab != SelectedItem)

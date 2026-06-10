@@ -1,25 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Mhyrenz_Interface.Core;
-using Mhyrenz_Interface.Core.MVVM;
-using Mhyrenz_Interface.Domain.Models;
+﻿using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Services.Settings;
-using Microsoft.Extensions.Options;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
     public class ColumnSettingViewModel : BaseViewModel
     {
-        private readonly InventoryDataGridColumnSetting _columnSetting;
-        private readonly ConfigManager<InventoryDataGridSettings> _inventoryDataGridSettings;
-        private readonly IOptionsMonitor<InventoryDataGridSettings> _inventoryDataGridSettingsProvider;
 
-        public ColumnSettingViewModel(InventoryDataGridColumnSetting columnSetting, ConfigManager<InventoryDataGridSettings> inventoryDataGridSettings, IOptionsMonitor<InventoryDataGridSettings> inventoryDataGridSettingsProvider)
+        public ColumnSettingViewModel(InventoryDataGridColumnSetting columnSetting)
         {
-            _columnSetting = columnSetting;
-            _inventoryDataGridSettings = inventoryDataGridSettings;
-            _inventoryDataGridSettingsProvider = inventoryDataGridSettingsProvider;
+            ColumnSetting = columnSetting;
         }
 
         public void Initialize(bool isVisible, int displayIndex, string name, bool hidden, bool isDraggable, bool placeOrderBound)
@@ -29,28 +18,23 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             IsDraggable = isDraggable;
             PlaceOrderBound = placeOrderBound;
 
-            // Sync to model without saving
-            _columnSetting.IsVisible = isVisible;
-            _columnSetting.DisplayIndex = displayIndex;
+            ColumnSetting.IsVisible = isVisible;
+            ColumnSetting.DisplayIndex = displayIndex;
 
             OnPropertyChanged(null);
-
-            _isSaveEnabled = true;
         }
 
-        private bool _isSaveEnabled;
+        public InventoryDataGridColumnSetting ColumnSetting { get; }
 
         public string Name { get; set; }
 
         public bool IsVisible
         {
-            get => _columnSetting.IsVisible;
+            get => ColumnSetting.IsVisible;
             set
             {
-                _columnSetting.IsVisible = value;
-
+                ColumnSetting.IsVisible = value;
                 OnPropertyChanged(nameof(IsVisible));
-                _isSaveEnabled = true;
             }
         }
 
@@ -60,32 +44,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public int DisplayIndex
         {
-            get => _columnSetting.DisplayIndex;
+            get => ColumnSetting.DisplayIndex;
             set
             {
-                _columnSetting.DisplayIndex = value;
+                ColumnSetting.DisplayIndex = value;
                 OnPropertyChanged(nameof(DisplayIndex));
             }
-        }
-
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            base.OnPropertyChanged(propertyName);
-            if (_isSaveEnabled)
-            {
-                var settings = _inventoryDataGridSettingsProvider.CurrentValue
-                    .Where(x => x.Header != Name)
-                    .ToList();
-
-                settings.Add(_columnSetting);
-
-                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(settings));
-            }
-        }
-
-        internal void SuppressSave()
-        {
-            _isSaveEnabled = false;
         }
     }
 }

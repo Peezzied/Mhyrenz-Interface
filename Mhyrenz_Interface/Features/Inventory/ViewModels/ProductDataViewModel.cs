@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Features.Inventory.Views;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
-using ObservableCollections;
-using RelayCommand = Mhyrenz_Interface.Core.MVVM.RelayCommand;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
@@ -51,21 +51,16 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _serialBarcodeService = serialBarcodeService;
             _navigationService = navigationServiceEx;
 
-            GoToItemCommand = new RelayCommand(GoToItemActionCommand);
-            //if (Item.Extras != null)
-            //{
-            //    Extras = new ObservableDictionary<string, PrimativeNotifyProperty<object>>(Item.Extras.ToDictionary(k => k.Key, v => new PrimativeNotifyProperty<object>(v.Value)));
-            //    Extras.ValueChanged += Extras_ValueChanged;
-            //}
+            GoToItemCommand = new AsyncRelayCommand(GoToItemActionCommand);
         }
         public void LoadReceiver()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
         }
 
-        private void GoToItemActionCommand(object obj)
+        private async Task GoToItemActionCommand(object obj)
         {
-            _navigationService.Navigate(typeof(InventoryView), vm =>
+            await _navigationService.NavigateAsync(typeof(InventoryView), vm =>
             {
                 var view = vm as InventoryViewModel;
                 view.SelectTab(CategoryId);

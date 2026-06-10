@@ -77,7 +77,7 @@
                 <TabControl.ContentTemplate>
                     <DataTemplate>
                         <inventory:InventoryDataGrid DataContext="{Binding ContentViewModel}" Layout="Detailed" TabOwner="{Binding SelectedItem,
-                    RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
+                            RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
             </TabControl>

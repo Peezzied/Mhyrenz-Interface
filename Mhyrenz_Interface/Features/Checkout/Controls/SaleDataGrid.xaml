@@ -6,6 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
+             xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Shared.Columns"
@@ -21,11 +22,17 @@
              d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:Width="450">
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
-              ItemsSource="{Binding Transactions}"
+              Name="DataGrid"
+              ItemsSource="{Binding DataContext.Transactions, IsAsync=True, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
+              d:ItemsSource="{Binding Transactions}"
+              SelectionChanged="DataGrid_SelectionChanged"
               GridLinesVisibility="Horizontal"
               AutoGenerateColumns="False"
               CanUserResizeColumns="False"
               EnableRowVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              VirtualizingPanel.IsContainerVirtualizable="True"
               dd:DragDrop.IsDropTarget="True"
               mah:DataGridHelper.CellPadding="0 6"
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
@@ -62,19 +69,25 @@
                         <ContextMenu>
                             <MenuItem
                                 Header="Remove"
-                                Command="{Binding
-                                    DataContext.RemoveCommand,
-                                    RelativeSource={
-                                        RelativeSource AncestorType=DataGrid
-                                    }}"
-                                CommandParameter="{Binding}" />
+                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
 
                             <MenuItem Header="Discount" ItemsSource="{markupEx:EnumValues {x:Type model:Discount}}">
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                         <Setter Property="Header" Value="{Binding}" />
-                                        <Setter Property="Command" Value="{Binding DataContext.DiscountCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                                        <Setter Property="Command" Value="{Binding DataContext.DiscountCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        <Setter Property="CommandParameter">
+                                            <Setter.Value>
+                                                <MultiBinding>
+                                                    <MultiBinding.Converter>
+                                                        <converters:DiscountCommandParamsConverter />
+                                                    </MultiBinding.Converter>
+                                                    <Binding />
+                                                    <Binding Path="SelectedItems" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
+                                                </MultiBinding>
+                                            </Setter.Value>
+                                        </Setter> 
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
                             </MenuItem>

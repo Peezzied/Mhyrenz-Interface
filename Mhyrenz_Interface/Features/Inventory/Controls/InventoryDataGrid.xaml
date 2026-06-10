@@ -39,7 +39,7 @@
 
             <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
 
-            <hc:BindingProxy x:Key="UserControlContext" Value="{Binding}"/>
+            <hc:BindingProxy x:Key="InventoryDataGridContext" Value="{Binding}"/>
 
             <!--#region IdColumn-->
             <Style x:Key="IdColumnElementStyle"
@@ -60,66 +60,28 @@
             </Style>
 
             <DataTemplate x:Key="NameColumnCellTemplate">
-                <ContentControl Content="{Binding}">
-                    <ContentControl.Style>
-                        <Style TargetType="ContentControl">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <controls:MaxLinesTextBlock Text="{Binding Name}"
-                                                     LineHeight="16"
-                                                     MaxLines="2"
-                                                     FontFamily="Arial"
-                                                     Padding="4"
-                                                     Width="Auto"/>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <controls:MaxLinesTextBlock Text="{Binding Name}"
+                                 MaxLines="2"
+                                 FontFamily="Arial"
+                                 Padding="4"
+                                 LineHeight="16"
+                                 Width="Auto"/>
 
-                            <Style.Triggers>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding Batch, Converter={StaticResource Object2BooleanConverter}}"
-                                       Value="True"/>
-                                        <Condition Binding="{Binding Value.BatchColumn, Source={StaticResource UserControlContext}}"
-                                       Value="False"/>
-                                    </MultiDataTrigger.Conditions>
-
-                                    <MultiDataTrigger.Setters>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="3*" />
-                                                            <ColumnDefinition Width="*" MinWidth="50"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <controls:MaxLinesTextBlock Text="{Binding Name}"
-                                                                     MaxLines="2"
-                                                                     FontFamily="Arial"
-                                                                     Padding="4"
-                                                                     LineHeight="16"
-                                                                     Width="Auto"/>
-
-                                                        <controls:MaxLinesTextBlock Grid.Column="1"
-                                                                     Text="{Binding Batch}"
-                                                                     MaxLines="2"
-                                                                     FontFamily="Arial"
-                                                                     LineHeight="16"
-                                                                     Padding="4"
-                                                                     Foreground="Red"
-                                                                     Width="Auto"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiDataTrigger.Setters>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ContentControl.Style>
-                </ContentControl>
+                    <controls:MaxLinesTextBlock Grid.Column="1"
+                                 Visibility="{Binding Path=Value.ColumnsSettings[^Batch].IsVisible, Converter={StaticResource Boolean2VisibilityReConverter}, Source={StaticResource InventoryDataGridContext}}"
+                                 Text="{Binding Batch}"
+                                 MaxLines="2"
+                                 FontFamily="Arial"
+                                 LineHeight="16"
+                                 Padding="4"
+                                 Foreground="Red"
+                                 Width="Auto"/>
+                </Grid>
             </DataTemplate>
 
             <DataTemplate x:Key="NameColumnCellEditingTemplate">
@@ -253,15 +215,15 @@
             </DataTemplate>
 
             <Style x:Key="DataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid.Azure}">
-                <Setter Property="EnableColumnVirtualization" Value="True"/>
                 <Setter Property="CanUserSortColumns" Value="False"/>
                 <Setter Property="EnableRowVirtualization" Value="True"/>
                 <Setter Property="EnableColumnVirtualization" Value="True"/>
                 <Setter Property="GridLinesVisibility" Value="All"/>
-                <Setter Property="ItemsSource" Value="{Binding Inventory}"/>
+                <Setter Property="ItemsSource" Value="{Binding Inventory, IsAsync=True}"/>
                 <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
                 <!--<Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>-->
                 <Setter Property="VirtualizingPanel.CacheLength" Value="1"/>
                 <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
@@ -295,7 +257,6 @@
                           dd:DragDrop.UseDefaultDragAdorner="True">
                     <i:Interaction.Behaviors>
                         <behaviors:InventoryDataGridBehavior/>
-                        <behaviors:InventoryDataGridCompact/>
                     </i:Interaction.Behaviors>
                     <DataGrid.Resources>
                         <Style
@@ -365,7 +326,7 @@
             </DataTemplate>
 
             <DataTemplate x:Key="DataGridDetailedLayout">
-                <DataGrid FrozenColumnCount="3" 
+                <DataGrid FrozenColumnCount="2" 
                           SelectionMode="Extended"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=view:InventoryView}}"
                           dd:DragDrop.IsDragSource="True"
@@ -373,7 +334,7 @@
                     <DataGrid.Style>
                         <Style TargetType="DataGrid" BasedOn="{StaticResource DataGridStyle}">
                             <Setter Property="RowDetailsTemplate" Value="{x:Null}"/>
-                            <Style.Triggers>
+                            <!--<Style.Triggers>
                                 <DataTrigger Value="True">
                                     <DataTrigger.Binding>
                                         <MultiBinding Converter="{StaticResource OrConverter}">
@@ -383,15 +344,12 @@
                                     </DataTrigger.Binding>
                                     <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
                                 </DataTrigger>
-                            </Style.Triggers>
+                            </Style.Triggers>-->
                         </Style>
                     </DataGrid.Style>
                     <DataGrid.CellStyle>
                         <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="2">
-                                    <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-                                </DataTrigger>
                                 <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Column.DisplayIndex}" Value="1">
                                     <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent3}" />
                                 </DataTrigger>

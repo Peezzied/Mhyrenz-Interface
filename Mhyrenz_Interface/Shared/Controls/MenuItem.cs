@@ -8,9 +8,9 @@ namespace Mhyrenz_Interface.Shared.Controls
     {
 
         public static readonly DependencyProperty NavigationTypeProperty = DependencyProperty.Register(
-          nameof(NavigationType), typeof(Type), typeof(MenuItem), new PropertyMetadata(default(Type)));
+          nameof(ViewType), typeof(Type), typeof(MenuItem), new PropertyMetadata(default(Type)));
 
-        public Type NavigationType
+        public Type ViewType
         {
             get => (Type)this.GetValue(NavigationTypeProperty);
             set => this.SetValue(NavigationTypeProperty, value);

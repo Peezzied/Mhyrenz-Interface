@@ -21,21 +21,6 @@
             <Setter Property="ShowDefaultCloseButton" Value="True" />
             <Setter Property="BorderThickness" Value="0,1,0,0"/>
             <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Control.Border}"/>
-            <Setter Property="HeaderItemTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Header}" />
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <controls:SaleTabContent/>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-
         </Style>
     </UserControl.Resources>
     <hc:DrawerContainer>
@@ -51,16 +36,38 @@
                     </ContentControl>
                 </Border>
             </hc:Drawer>
-            <dragablz:TabablzControl x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemsSource="{Binding SaleTabItems}" >
-                <dragablz:TabablzControl.HeaderSuffixContent>
-                    <Button
-                        HorizontalAlignment="Left"
-                        Style="{StaticResource AddItemCommandButtonStyle}"
-                        Command="{Binding AddSaleCommand}"
-                        ToolTip="New Sale"
-                        Padding="8"/>
-                </dragablz:TabablzControl.HeaderSuffixContent>
-            </dragablz:TabablzControl>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <dragablz:TabablzControl VerticalAlignment="Top" x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemsSource="{Binding SaleTabItems}" >
+                    <dragablz:TabablzControl.HeaderSuffixContent>
+                        <Button
+                            HorizontalAlignment="Left"
+                            Style="{StaticResource AddItemCommandButtonStyle}"
+                            Command="{Binding AddSaleCommand}"
+                            ToolTip="New Sale"
+                            Padding="8"/>
+                    </dragablz:TabablzControl.HeaderSuffixContent>
+                    <dragablz:TabablzControl.ContentTemplate>
+                        <DataTemplate>
+                        </DataTemplate>
+                    </dragablz:TabablzControl.ContentTemplate>
+                    <dragablz:TabablzControl.HeaderItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Header}" />
+                        </DataTemplate>
+                    </dragablz:TabablzControl.HeaderItemTemplate>
+                </dragablz:TabablzControl>
+                <ContentPresenter Grid.Row="1" Content="{Binding SelectedItem, ElementName=TabControl}">
+                    <ContentPresenter.ContentTemplate>
+                        <DataTemplate>
+                            <controls:SaleTabContent/>
+                        </DataTemplate>
+                    </ContentPresenter.ContentTemplate>
+                </ContentPresenter>
+            </Grid>
         </Grid>
     </hc:DrawerContainer>
 </UserControl>

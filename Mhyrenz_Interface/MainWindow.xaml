@@ -10,7 +10,6 @@
         xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
         xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:core="clr-namespace:Mhyrenz_Interface.Core"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
         Title="MainWindow" MinHeight="500">
@@ -59,17 +58,17 @@
                           SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
                           SelectedOptionsItem="{Binding SelectedOptionsMenuItem, Mode=TwoWay}">
                 <mah:HamburgerMenu.ItemCommandParameter>
-                <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
-                    <Binding RelativeSource="{RelativeSource Self}"/>
-                    <Binding Path="Menu"/>
-                </MultiBinding>
-            </mah:HamburgerMenu.ItemCommandParameter>
-            <mah:HamburgerMenu.OptionsItemCommandParameter>
-                <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
-                    <Binding RelativeSource="{RelativeSource Self}"/>
-                    <Binding Path="OptionsMenu"/>
-                </MultiBinding>
-            </mah:HamburgerMenu.OptionsItemCommandParameter>
+                    <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
+                        <Binding RelativeSource="{RelativeSource Self}"/>
+                        <Binding Path="Menu"/>
+                    </MultiBinding>
+                </mah:HamburgerMenu.ItemCommandParameter>
+                <mah:HamburgerMenu.OptionsItemCommandParameter>
+                    <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
+                        <Binding RelativeSource="{RelativeSource Self}"/>
+                        <Binding Path="OptionsMenu"/>
+                    </MultiBinding>
+                </mah:HamburgerMenu.OptionsItemCommandParameter>
                 <mah:HamburgerMenu.Content>
                     <hc:SimplePanel>
                         <hc:ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" IsInertiaEnabled="True" IsPenetrating="True">
@@ -81,11 +80,33 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <controls:RibbonBar/>
-                            <ContentPresenter 
-                            Grid.Row="1"
-                            DataContext="{Binding CurrentViewModel, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Content="{Binding NavigationFrame, RelativeSource={RelativeSource AncestorType=Window}}" />
-                            <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" />
+                            <Grid Grid.Row="1">
+                                <ContentControl Content="{Binding CurrentViewModel}"
+                                                xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
+                                                xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
+                                                xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
+                                                xmlns:checkoutVm="clr-namespace:Mhyrenz_Interface.Features.Checkout.ViewModels"
+                                                xmlns:home="clr-namespace:Mhyrenz_Interface.Features.Home.Views"
+                                                xmlns:homeVm="clr-namespace:Mhyrenz_Interface.Features.Home.ViewModels"
+                                                xmlns:settings="clr-namespace:Mhyrenz_Interface.Features.Settings.Views"
+                                                xmlns:settingsVm="clr-namespace:Mhyrenz_Interface.Features.Settings.ViewModels">
+                                    <ContentControl.Resources>
+                                        <DataTemplate DataType="{x:Type inventoryVm:InventoryViewModel}">
+                                            <inventory:InventoryView/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="{x:Type checkoutVm:CheckoutViewModel}">
+                                            <checkout:CheckoutView/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="{x:Type homeVm:HomeViewModel}">
+                                            <home:HomeView/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="{x:Type settingsVm:SettingsViewModel}">
+                                            <settings:SettingsView/>
+                                        </DataTemplate>
+                                    </ContentControl.Resources>
+                                </ContentControl>
+                                <hc:LoadingCircle Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </Grid>
                         </Grid>
                     </hc:SimplePanel>
                 </mah:HamburgerMenu.Content>

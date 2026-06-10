@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Core.MVVM
 {
     public delegate TCommand CreateCommand<out TCommand>(params object[] parameters);
-    public abstract class BaseAsyncCommand : ICommandAsync, IRaiseCanExecuteChanged
+
+    public abstract class BaseAsyncCommand : BaseCommand
     {
         private bool _isExecuting;
         public bool IsExecuting
@@ -21,14 +20,12 @@ namespace Mhyrenz_Interface.Core.MVVM
             }
         }
 
-        public event EventHandler CanExecuteChanged;
-
-        public virtual bool CanExecute(object parameter)
+        public override bool CanExecute(object parameter)
         {
             return !IsExecuting;
         }
 
-        public virtual async void Execute(object parameter)
+        public override async void Execute(object parameter)
         {
             IsExecuting = true;
 
@@ -38,20 +35,5 @@ namespace Mhyrenz_Interface.Core.MVVM
         }
 
         public abstract Task ExecuteAsync(object parameter);
-
-        public void OnCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, new EventArgs());
-        }
-    }
-
-    public interface IRaiseCanExecuteChanged
-    {
-        void OnCanExecuteChanged();
-    }
-
-    public interface ICommandAsync : ICommand
-    {
-        Task ExecuteAsync(object parameter);
     }
 }

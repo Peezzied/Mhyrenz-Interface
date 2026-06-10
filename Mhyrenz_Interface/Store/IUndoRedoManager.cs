@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.UndoRedo;
 
 namespace Mhyrenz_Interface.Store
@@ -9,12 +10,13 @@ namespace Mhyrenz_Interface.Store
         bool CanRedo { get; }
 
         event Action<ActionType, UndoRedoEventArgs> UndoRedoEvent;
+        event EventHandler UndoRedoChanged;
 
         void Clear();
         void Execute(IUndoableCommand command);
         bool Push(IUndoableCommand command);
-        void Redo();
+        Task Redo();
         bool ShowWarning(Action rejectEffect = null);
-        void Undo();
+        Task Undo();
     }
 }

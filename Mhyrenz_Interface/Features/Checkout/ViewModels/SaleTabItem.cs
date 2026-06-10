@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using GongSolutions.Wpf.DragDrop;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
@@ -24,9 +24,9 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             string header,
             Sale sale,
             CheckoutViewModel parent,
-            InventoryDataGridViewModel inventoryDataGridViewModel,
             IUndoRedoManager undoRedoManager,
             ITransactionStore transactionStore,
+            ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> transactionView,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
             CreateCommand<CheckoutCommand> checkoutCommand,
             CreateCommand<TransactionVMCommandPurchase> transctionPurchaseCommand,
@@ -36,6 +36,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _undoRedoManager = undoRedoManager;
             _transactionStore = transactionStore;
             _parent = parent;
+            _transactionView = transactionView;
 
             CheckoutCommand = new RelayCommand(CheckoutAction, ValidateCheckout);
             VoidCommand = new AsyncRelayCommand(VoidAction);
@@ -43,16 +44,27 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             Sale = sale;
             Header = header;
 
-            InventoryDataGridViewModel = inventoryDataGridViewModel;
-
             _checkoutCommand = checkoutCommand;
             _transctionPurchaseCommand = transctionPurchaseCommand;
             _transactionPropCommand = transactionPropCommand;
             SaleDropHandler = new SaleDropTarget(this, transactionStore);
 
+            RemoveCommand = new RelayCommand(RemoveAction);
+            DiscountCommand = new RelayCommand(DiscountAction);
+
         }
 
-        private ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
+        private void RemoveAction(object obj)
+        {
+            throw new NotImplementedException(); // TODO execute standalone undo redo command
+        }
+
+        private void DiscountAction(object obj)
+        {
+            throw new NotImplementedException(); // TODO execute standalone undo redo command
+        }
+
+        private readonly ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
 
         private bool _isLoaded;
         private bool _disposed;
@@ -73,17 +85,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             return !HasErrors && Due > 0;
         }
 
-        private NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> _transactions;
-        public NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> Transactions
-        {
-            get => _transactions;
-            private set
-            {
-                _transactions = value;
-                OnPropertyChanged(nameof(Transactions));
-            }
-        }
-
         private Sale _sale;
         public Sale Sale
         {
@@ -97,6 +98,17 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         }
 
         public string Header { get; set; }
+
+        private IEnumerable<TransactionDataViewModel> _selectedItems;
+        public IEnumerable<TransactionDataViewModel> SelectedItems
+        {
+            get => _selectedItems;
+            set
+            {
+                _selectedItems = value;
+                OnPropertyChanged(nameof(SelectedItems));
+            }
+        }
 
         public decimal Change
         {
@@ -127,14 +139,12 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
         }
 
-        public InventoryDataGridViewModel InventoryDataGridViewModel { get; }
-
         private readonly CreateCommand<CheckoutCommand> _checkoutCommand;
         private readonly CreateCommand<TransactionVMCommandPurchase> _transctionPurchaseCommand;
         private readonly CreateCommand<TransactionVMCommandDiscount> _transactionPropCommand;
 
         public SaleDropTarget SaleDropHandler { get; }
-
+        public RelayCommand RemoveCommand { get; }
         public RelayCommand CheckoutCommand { get; private set; }
         public AsyncRelayCommand VoidCommand { get; private set; }
 
@@ -144,8 +154,9 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly CheckoutViewModel _parent;
 
         public bool IsEditCancelled { get; set; }
+        public RelayCommand DiscountCommand { get; }
 
-        public void Load()
+        public async void Load()
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(SaleTabItem));
@@ -153,19 +164,17 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             if (_isLoaded)
                 return;
 
-            _transactionView = _transactionStore.Store.Source.CreateView(v => v);
-            _transactionView.AttachFilter(TransactionFilter);
-            _transactionView.ViewChanged += View_ViewChanged;
+            await Task.Run(() =>
+            {
+                _transactionView.AttachFilter(TransactionFilter);
 
-            Transactions = _transactionView.ToNotifyCollectionChanged(
-                SynchronizationContextCollectionEventDispatcher.Current);
+                _transactionView.ViewChanged += View_ViewChanged;
 
-            foreach (var (_, view) in _transactionView.Filtered)
-                view.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
+                foreach (var (_, view) in _transactionView.Filtered)
+                    view.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
 
-            _transactionStore.SaleChange += TransactionStore_SaleChange;
-
-            //InventoryDataGridViewModel.InventoryView.AttachFilter(x => x.NetQty > 0);
+                _transactionStore.SaleChange += TransactionStore_SaleChange;
+            });
 
             _isLoaded = true;
         }
@@ -185,11 +194,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                     view.TrackedPropertyChanged -= Transaction_TrackedPropertyChanged;
 
                 _transactionView.Dispose();
-                _transactionView = null;
             }
-
-            Transactions?.Dispose();
-            Transactions = null;
 
             _isLoaded = false;
         }
@@ -335,7 +340,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                     dropInfo.DropTargetAdorner = null;
                 }
             }
-             
+
             public override void Drop(IDropInfo dropInfo)
             {
                 var product = (dropInfo.Data as ProductDataViewModel).Item;

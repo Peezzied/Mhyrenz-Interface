@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Features.Checkout.ViewModels;
 
 namespace Mhyrenz_Interface.Shared.Converters
 {

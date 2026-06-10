@@ -473,6 +473,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Bootstrap\AppPresenter.cs" />
+    <Compile Include="Core\MVVM\BaseCommand.cs" />
+    <Compile Include="Core\MVVM\ICommandAsync.cs" />
+    <Compile Include="Core\MVVM\IRaiseCanExecuteChanged.cs" />
+    <Compile Include="Core\Utilities\UiTimeSlicer.cs" />
     <Compile Include="Shared\Adorners\RowFlashAdorner.cs" />
     <Compile Include="Features\Inventory\Commands\AddCommand.cs" />
     <Compile Include="Features\Checkout\Commands\CheckoutCommand.cs" />
@@ -481,6 +485,7 @@
     <Compile Include="Core\UndoRedo\IUndoRedoBound.cs" />
     <Compile Include="Features\Inventory\Commands\ProductVMPropertyChangeCommand.cs" />
     <Compile Include="Shared\Behaviors\IFlashRequestable.cs" />
+    <Compile Include="Shared\Converters\DiscountCommandParamsConverter.cs" />
     <Compile Include="Startup\CreateSessionCommand.cs" />
     <Compile Include="Features\Inventory\Commands\DeleteCommand.cs" />
     <Compile Include="Features\Inventory\Commands\LoadCategoriesCommand.cs" />
@@ -495,7 +500,6 @@
     <Compile Include="Features\Inventory\Controls\InventoryDataGridColumn.cs" />
     <Compile Include="Shared\Attached\ValidationHelper.cs" />
     <Compile Include="Features\Inventory\Behaviors\BarcodeCellBehavior.cs" />
-    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridCompact.cs" />
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridAdorned.cs" />
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDetailed.cs" />
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDelete.cs" />
@@ -629,7 +633,7 @@
     <Compile Include="Features\Home\View\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Features\Inventory\Views\Inventory.cs">
+    <Compile Include="Features\Inventory\Views\InventoryView.cs">
       <DependentUpon>InventoryView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Features\Settings\Views\SettingsView.xaml.cs">
