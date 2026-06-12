@@ -23,7 +23,7 @@
              d:DesignHeight="450" d:Width="450">
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
               Name="DataGrid"
-              ItemsSource="{Binding DataContext.Transactions, IsAsync=True, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
+              ItemsSource="{Binding DataContext.Transactions, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
               d:ItemsSource="{Binding Transactions}"
               SelectionChanged="DataGrid_SelectionChanged"
               GridLinesVisibility="Horizontal"

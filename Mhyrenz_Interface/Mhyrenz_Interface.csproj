@@ -474,6 +474,7 @@
     </ApplicationDefinition>
     <Compile Include="Bootstrap\AppPresenter.cs" />
     <Compile Include="Core\MVVM\BaseCommand.cs" />
+    <Compile Include="Core\MVVM\FlyoutViewModel.cs" />
     <Compile Include="Core\MVVM\ICommandAsync.cs" />
     <Compile Include="Core\MVVM\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Core\Utilities\UiTimeSlicer.cs" />
@@ -485,6 +486,11 @@
     <Compile Include="Core\UndoRedo\IUndoRedoBound.cs" />
     <Compile Include="Features\Inventory\Commands\ProductVMPropertyChangeCommand.cs" />
     <Compile Include="Shared\Behaviors\IFlashRequestable.cs" />
+    <Compile Include="Shared\Controls\FlyoutHeader.xaml.cs">
+      <DependentUpon>FlyoutHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Shared\Controls\HotButton.cs" />
+    <Compile Include="Shared\Converters\DiscountToBoolConverter.cs" />
     <Compile Include="Shared\Converters\DiscountCommandParamsConverter.cs" />
     <Compile Include="Startup\CreateSessionCommand.cs" />
     <Compile Include="Features\Inventory\Commands\DeleteCommand.cs" />
@@ -680,6 +686,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Shared\Controls\FlyoutHeader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Shared\Controls\RibbonBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -717,6 +727,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Shared\Templates\DragablzMahApps.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Shared\Templates\HotButtonStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

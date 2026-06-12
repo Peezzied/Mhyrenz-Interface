@@ -8,9 +8,9 @@ using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class CompletedSaleViewModel : BaseViewModel
+    public class CompletedSaleViewModel : FlyoutViewModel
     {
-        public CompletedSaleViewModel(ICheckoutService checkoutService)
+        public CompletedSaleViewModel(ICheckoutService checkoutService): base(title: "Today's Sales History")
         {
             App.Current.Dispatcher.BeginInvoke(new Action(async () =>
             {

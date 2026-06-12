@@ -71,7 +71,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId);
         Task<Sale> CompleteSale(int saleId, decimal received);
         Task<Sale> Create(Guid sessionId);
-        Task DiscardSale(int saleId, bool asComplete = false);
+        Task DiscardSale(int saleId);
         Task<IReadOnlyList<Sale>> GetActive();
         Task<IReadOnlyList<Sale>> GetHistory();
         Task<bool> HasTransactions();

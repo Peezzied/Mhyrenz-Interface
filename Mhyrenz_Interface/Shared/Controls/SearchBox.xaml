@@ -8,8 +8,8 @@
              xmlns:local="clr-namespace:Mhyrenz_Interface.Shared.Controls"
              mc:Ignorable="d"
              d:Width="400">
-    <hc:SimplePanel Height="40">
-        <hc:SearchBar FontFamily="{StaticResource Geist}" Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}" FontSize="16" hc:InfoElement.ShowClearButton="True" hc:InfoElement.Placeholder="Search a product..." Style="{StaticResource SearchBarPlus}"/>
+    <hc:SimplePanel Height="35">
+        <hc:SearchBar FontFamily="{StaticResource Geist}" Text="{Binding SearchBar, UpdateSourceTrigger=PropertyChanged}" FontSize="14" hc:InfoElement.ShowClearButton="True" hc:InfoElement.Placeholder="Search a product..." Style="{StaticResource SearchBarPlus}"/>
         <!--<TextBox VerticalAlignment="Center"
             FontSize="16"
             Height="30"

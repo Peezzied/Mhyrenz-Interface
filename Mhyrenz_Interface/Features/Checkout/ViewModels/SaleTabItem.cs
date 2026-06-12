@@ -50,6 +50,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             SaleDropHandler = new SaleDropTarget(this, transactionStore);
 
             RemoveCommand = new RelayCommand(RemoveAction);
+            RemoveCommand = new RelayCommand(RemoveAction);
             DiscountCommand = new RelayCommand(DiscountAction);
 
         }
@@ -121,9 +122,11 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 return 0;
             }
         }
+
         public decimal Due => Sale.Total;
         public int Items => Sale.Transactions.Count;
         public decimal Discount => Sale.Total - Sale.SubTotal;
+        public bool HasDiscount => Discount > 0;
 
         private decimal _received;
         public decimal Received
@@ -156,7 +159,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public bool IsEditCancelled { get; set; }
         public RelayCommand DiscountCommand { get; }
 
-        public async void Load()
+        public void Load()
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(SaleTabItem));
@@ -164,17 +167,14 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             if (_isLoaded)
                 return;
 
-            await Task.Run(() =>
-            {
-                _transactionView.AttachFilter(TransactionFilter);
+            _transactionView.AttachFilter(TransactionFilter);
 
-                _transactionView.ViewChanged += View_ViewChanged;
+            _transactionView.ViewChanged += View_ViewChanged;
 
-                foreach (var (_, view) in _transactionView.Filtered)
-                    view.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
+            foreach (var (_, view) in _transactionView.Filtered)
+                view.TrackedPropertyChanged += Transaction_TrackedPropertyChanged;
 
-                _transactionStore.SaleChange += TransactionStore_SaleChange;
-            });
+            _transactionStore.SaleChange += TransactionStore_SaleChange;
 
             _isLoaded = true;
         }
@@ -192,8 +192,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
                 foreach (var (_, view) in _transactionView.Filtered)
                     view.TrackedPropertyChanged -= Transaction_TrackedPropertyChanged;
-
-                _transactionView.Dispose();
             }
 
             _isLoaded = false;

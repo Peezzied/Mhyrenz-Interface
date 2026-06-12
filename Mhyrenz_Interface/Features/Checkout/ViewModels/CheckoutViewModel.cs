@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Dragablz;
 using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
@@ -49,8 +51,27 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             InventoryDragHandler = new InventoryDragSource(this);
 
             _transactionView = _transactionStore.Store.Source.CreateView(v => v);
+
+            _searchTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(300)
+            };
+
+            _searchTimer.Tick += SearchDebouce;
+
+            Transactions = _transactionView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
         }
 
+        private void SearchDebouce(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+
+            InventoryDataGridViewModel.InventoryView.AttachFilter(
+                p => string.IsNullOrWhiteSpace(_searchBar) ||
+                     p.Name.IndexOf(_searchBar, StringComparison.OrdinalIgnoreCase) >= 0
+            );
+        }
 
         public async Task InitializeAsync(CancellationToken token)
         {
@@ -74,9 +95,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             InventoryDataGridViewModel.IsReadOnly = true;
 
             List<SaleTabItem> tabs = new List<SaleTabItem>();
-
-            Transactions = _transactionView.ToNotifyCollectionChanged(
-                SynchronizationContextCollectionEventDispatcher.Current);
 
             token.ThrowIfCancellationRequested();
             await UiTimeSlicer.RunAsync(
@@ -112,7 +130,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public async void DropCurrentTab(SaleTabItem saleTabItem, bool asCompleted)
         {
-            await _checkoutService.DiscardSale(saleTabItem.Sale.Id, asCompleted);
+            if (!asCompleted)
+                await _checkoutService.DiscardSale(saleTabItem.Sale.Id);
             await CreateOrIgnore();
 
             saleTabItem.Dispose();
@@ -187,6 +206,24 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public InventoryDataGridViewModel InventoryDataGridViewModel { get; set; }
 
+        private string _searchBar;
+        public string SearchBar
+        {
+            get => _searchBar;
+            set
+            {
+                if (_searchBar == value)
+                    return;
+
+                _searchBar = value;
+                OnPropertyChanged(nameof(SearchBar));
+
+                _searchTimer.Stop();
+                _searchTimer.Start();
+            }
+        }
+
+
         private CompletedSaleViewModel completedSaleViewModel;
 
         private bool _isInitialized = false;
@@ -208,6 +245,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public InventoryDragSource InventoryDragHandler { get; }
 
         private readonly ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
+        private readonly DispatcherTimer _searchTimer;
 
         public NotifyCollectionChangedSynchronizedViewList<TransactionDataViewModel> Transactions { get; private set; }
 
@@ -280,6 +318,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             if (ReferenceEquals(_shellViewModel.RibbonBarViewModel, this))
                 _shellViewModel.RibbonBarViewModel = null;
+
+            _searchTimer.Tick -= SearchDebouce;
 
             AddSaleCommand = null;
 

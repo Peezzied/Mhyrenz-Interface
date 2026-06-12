@@ -5,88 +5,108 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
              xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
              xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
              xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Controls"
              mc:Ignorable="d" 
              d:Background="White"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid Margin="14">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="9*"/>
             <ColumnDefinition Width="14"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <local:SaleDataGrid 
-                xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
-                d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
-                Grid.Row="0"/>
-            <Border BorderBrush="Red" BorderThickness="0 1 0 0" Grid.Row="1" Padding="10">
-                <hc:UniformSpacingPanel Spacing="5" Orientation="Vertical">
-                    <hc:Row>
-                        <hc:Col Span="12">
-                            <hc:UniformSpacingPanel Spacing="10" ItemVerticalAlignment="Center">
-                                <TextBlock VerticalAlignment="Center" FontSize="14" Text="Receive"/>
-                                <mah:NumericUpDown Minimum="0" MinWidth="100" Padding="10 0" StringFormat="C" d:Value="1000" 
+        <Border BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="1.5">
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <local:SaleDataGrid 
+                    xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
+                    d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
+                    Grid.Row="0"/>
+                <Border BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="0 1 0 0" Grid.Row="1">
+                    <hc:UniformSpacingPanel Spacing="5" Orientation="Vertical">
+                        <Grid Margin="14 8 14 5">
+                            <hc:UniformSpacingPanel Spacing="20" ItemVerticalAlignment="Center">
+                                <TextBlock VerticalAlignment="Center" FontWeight="Medium" FontSize="14" Text="Received Cash" />
+                                <mah:NumericUpDown FontWeight="Medium" Minimum="0" Height="30" MinWidth="100" Padding="10 0" StringFormat="C" d:Value="1000" 
                                     Value="{Binding Received, UpdateSourceTrigger=PropertyChanged,
                                     ValidatesOnNotifyDataErrors=True,
                                     NotifyOnValidationError=True}">
                                 </mah:NumericUpDown>
                             </hc:UniformSpacingPanel>
-                        </hc:Col>
-                        <hc:Col Span="12" VerticalAlignment="Bottom" Width="100" HorizontalAlignment="Right">
-                            <hc:SimpleStackPanel>
-                                <hc:Row>
-                                    <hc:Col Span="12">
-                                        <TextBlock Text="Items"/>
-                                    </hc:Col>
-                                    <hc:Col Span="12" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding Items, StringFormat={}{0}x}" d:Text="10x"/>
-                                    </hc:Col>
-                                </hc:Row>
-                                <hc:Row Visibility="Collapsed" d:Visibility="Visible">
-                                    <hc:Col Span="12">
-                                        <TextBlock Text="Discount"/>
-                                    </hc:Col>
-                                    <hc:Col Span="12" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding Discount, StringFormat={}{0:P0}}" d:Text="20%"/>
-                                    </hc:Col>
-                                </hc:Row>
-                            </hc:SimpleStackPanel>
-                        </hc:Col>
-                    </hc:Row>
-                    <hc:DashedBorder BorderDashThickness="2" BorderDashArray="10, 5" BorderThickness="0 .5 0 0" BorderBrush="Black">
-                        <hc:Row>
-                            <hc:Col Span="12">
-                                <hc:UniformSpacingPanel Orientation="Vertical">
-                                    <TextBlock Text="Change"/>
-                                    <TextBlock Text="{Binding Change, StringFormat=C}" d:Text="10"/>
-                                </hc:UniformSpacingPanel>
-                            </hc:Col>
-                            <hc:Col Span="12" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <hc:UniformSpacingPanel Spacing="20">
-                                    <TextBlock Text="Payment Due"/>
-                                    <TextBlock Text="{Binding Due, StringFormat=C}" d:Text="670"/>
-                                </hc:UniformSpacingPanel>
-                            </hc:Col>
-                        </hc:Row>
-                    </hc:DashedBorder>
-                    <hc:Row Margin="0 10 0 0">
-                        <hc:Col Span="12" HorizontalAlignment="Left">
-                            <Button Command="{Binding VoidCommand}">Void Sale</Button>
-                        </hc:Col>
-                        <hc:Col Span="12" HorizontalAlignment="Right">
-                            <Button Command="{Binding CheckoutCommand}">Checkout/Save Sale</Button>
-                        </hc:Col>
-                    </hc:Row>
-                </hc:UniformSpacingPanel>
-            </Border>
-        </Grid>
-        <inventory:InventoryDataGrid DataContext="{Binding DataContext.InventoryDataGridViewModel, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}" Grid.Column="2" Layout="Compacted" />
+                            <hc:UniformSpacingPanel VerticalAlignment="Center" Spacing="20" HorizontalAlignment="Right">
+                                <TextBlock Text="Items" FontSize="14" Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundBaseMediumHigh}"/>
+                                <TextBlock Text="{Binding Items, StringFormat={}{0}x}" FontSize="14" d:Text="10x" Foreground="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumHigh}"/>
+                            </hc:UniformSpacingPanel>
+                        </Grid>
+                        <hc:DashedBorder Margin="10 0 10 4" BorderDashArray="5, 2" Padding="4 8 4 0" BorderThickness="0 1 0 0" BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}">
+                            <hc:Row>
+                                <hc:Col Span="10">
+                                    <hc:UniformSpacingPanel Orientation="Vertical" Spacing="4">
+                                        <TextBlock FontWeight="Medium" FontSize="14" Text="Change"/>
+                                        <TextBlock FontWeight="Medium" FontSize="18" Text="{Binding Change, StringFormat=C}" d:Text="₱10"/>
+                                    </hc:UniformSpacingPanel>
+                                </hc:Col>
+                                <hc:Col Span="14">
+                                    <hc:SimpleStackPanel VerticalAlignment="Center">
+                                        <!--<hc:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <TextBlock VerticalAlignment="Center" Margin="0 0 17 0" HorizontalAlignment="Right" FontWeight="DemiBold" FontSize="18" Text="Payment Due"/>
+                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="24" FontWeight="Medium" Text="{Binding Due, StringFormat=C}" d:Text="₱670"/>
+                                        </hc:SimpleStackPanel>-->
+                                        <hc:Row Gutter="0">
+                                            <hc:Col Span="15">
+                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="DemiBold" FontSize="18" Text="Payment Due"/>
+                                            </hc:Col>
+                                            <hc:Col Span="9">
+                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="24" FontWeight="Medium" Text="{Binding Due, StringFormat=C}" d:Text="₱670"/>
+                                            </hc:Col>
+                                        </hc:Row>
+                                        <hc:Row Visibility="{Binding HasDiscount, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible">
+                                            <hc:Col Span="15">
+                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="Medium" FontSize="14" Text="Discount" Foreground="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumHigh}"/>
+                                            </hc:Col>
+                                            <hc:Col Span="9">
+                                                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="14" FontWeight="Normal" Text="{Binding Discount, StringFormat=C}" d:Text="₱670" Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeGray}"/>
+                                            </hc:Col>
+                                        </hc:Row>
+                                    </hc:SimpleStackPanel>
+                                </hc:Col>
+                            </hc:Row>
+                        </hc:DashedBorder>
+                        <Border Background="{StaticResource MahApps.Brushes.SystemControlBackgroundChromeMedium}" BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="0 1 0 0" Padding="14 8">
+                            <hc:Row>
+                                <hc:Col Span="12" HorizontalAlignment="Left">
+                                    <controls:HotButton KeyBind="F5" Height="35" Padding="12 0" FontWeight="DemiBold" Command="{Binding VoidCommand}">VOID SALE</controls:HotButton>
+                                </hc:Col>
+                                <hc:Col Span="12" HorizontalAlignment="Right">
+                                    <controls:HotButton KeyBind="F6" Height="35" Padding="12 0" FontWeight="DemiBold" Command="{Binding CheckoutCommand}">CHECKOUT SALE</controls:HotButton>
+                                </hc:Col>
+                            </hc:Row>
+                        </Border>
+                    </hc:UniformSpacingPanel>
+                </Border>
+            </Grid>
+        </Border>
+        <Border BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="1.5" Grid.Column="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Border Padding="6" Background="{StaticResource MahApps.Brushes.SystemControlBackgroundChromeMedium}">
+                    <controls:SearchBox DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}" HorizontalAlignment="Left" Grid.Column="0" Width="375"/>
+                </Border>
+                <Border Grid.Row="1" BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="0 1 0 0">
+                    <inventory:InventoryDataGrid 
+                        DataContext="{Binding DataContext.InventoryDataGridViewModel, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}" 
+                        Layout="Compacted" />
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

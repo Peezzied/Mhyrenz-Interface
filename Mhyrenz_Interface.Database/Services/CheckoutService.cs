@@ -212,12 +212,14 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 return await context.Sales
                     .AsNoTracking()
+                    .Include(s => s.Transactions)
+                        .ThenInclude(t => t.Product)
                     .Where(s => s.Completed_at != null)
                     .ToListAsync();
             }
         }
 
-        public async Task DiscardSale(int saleId, bool asComplete = false)
+        public async Task DiscardSale(int saleId)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -228,8 +230,7 @@ namespace Mhyrenz_Interface.Database.Services
 
                 context.Transactions.RemoveRange(sale.Transactions);
 
-                if (!asComplete)
-                    context.Sales.Remove(sale);
+                context.Sales.Remove(sale);
 
                 await context.SaveChangesAsync();
             }

@@ -17,6 +17,7 @@
                 <hc:Theme/>
 
                 <ResourceDictionary Source="/Shared/Templates/IconButtonWithTipStyle.xaml"/>
+                <ResourceDictionary Source="/Shared/Templates/HotButtonStyle.xaml"/>
                 <ResourceDictionary Source="/Shared/Templates/DragablzMahApps.xaml"/>
 
 
