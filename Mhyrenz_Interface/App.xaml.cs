@@ -25,7 +25,6 @@ using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
-using Mhyrenz_Interface.Features.Settings.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Startup;
@@ -50,7 +49,6 @@ namespace Mhyrenz_Interface
     {
         private IHost _appHost;
         private readonly string _appsettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-        private readonly string _userpreferencesPath = Path.Combine(AppContext.BaseDirectory, "user.preferences.json");
         public static IServiceProvider ServiceProvider { get; set; }
         public static AppPresenter Presenter { get; set; }
 
@@ -60,8 +58,6 @@ namespace Mhyrenz_Interface
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.AddJsonFile(_appsettingsPath, optional: false, reloadOnChange: true);
-                    config.AddJsonFile(_userpreferencesPath, optional: true, reloadOnChange: true);
-
 #if DEBUG
                     config.AddUserSecrets<App>();
 #endif
@@ -120,7 +116,6 @@ namespace Mhyrenz_Interface
 
             services
                 .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<AppSettings>>(s, _appsettingsPath))
-                .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<InventoryDataGridSettings>>(s, _userpreferencesPath))
 
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton(new InventoryDbContextFactory(inventoryConfig))
@@ -176,7 +171,6 @@ namespace Mhyrenz_Interface
                 .AddViewModelFactory<HomeViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<InventoryViewModel>(resolveFromContainer: true)
                 .AddViewModelFactory<CheckoutViewModel>(resolveFromContainer: true)
-                .AddViewModelFactory<SettingsViewModel>(resolveFromContainer: true)
 
                 .AddCommandFactory<DeleteCommand>()
                 .AddCommandFactory<AddCommand>()

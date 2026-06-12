@@ -39,23 +39,19 @@ namespace Mhyrenz_Interface.Navigation
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
         private readonly CreateViewModel<CheckoutViewModel> _createTransactionsViewModel;
-        private readonly CreateViewModel<SettingsViewModel> _createSettingsViewModel;
         private readonly Dictionary<Type, (Type viewModelType, Delegate factory)> _viewsSet = new Dictionary<Type, (Type, Delegate)>();
 
         public NavigationViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
             CreateViewModel<InventoryViewModel> createInventoryViewModel,
-            CreateViewModel<CheckoutViewModel> createTransactionsViewModel,
-            CreateViewModel<SettingsViewModel> createSettingsViewModel)
+            CreateViewModel<CheckoutViewModel> createTransactionsViewModel)
         {
             _createHomeViewModel = createHomeViewModel;
             _createInventoryViewModel = createInventoryViewModel;
             _createTransactionsViewModel = createTransactionsViewModel;
-            _createSettingsViewModel = createSettingsViewModel;
 
             _viewsSet[typeof(HomeView)] = (typeof(HomeViewModel), _createHomeViewModel);
             _viewsSet[typeof(InventoryView)] = (typeof(InventoryViewModel), _createInventoryViewModel);
             _viewsSet[typeof(CheckoutView)] = (typeof(CheckoutViewModel), _createTransactionsViewModel);
-            _viewsSet[typeof(SettingsView)] = (typeof(SettingsViewModel), _createSettingsViewModel);
         }
 
         public NavigationViewModel CreateViewModel(object parameter)

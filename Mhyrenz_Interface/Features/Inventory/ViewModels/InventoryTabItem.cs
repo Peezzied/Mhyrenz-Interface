@@ -72,8 +72,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             Category category,
             Predicate<ProductDataViewModel> filter,
             CreateViewModel<ColumnSettingViewModel> columnSettingViewModelFactory,
-            ConfigManager<InventoryDataGridSettings> inventoryDataGridSettings,
-            IOptionsMonitor<InventoryDataGridSettings> inventoryDataGridSettingsProvider,
             ICategoryStore categoryStore,
             CreateCommand<ProductVMCommandPurchase> productCommandPurchase,
             CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp,
@@ -92,8 +90,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _filter = filter;
 
             _columnSettingViewModelFactory = columnSettingViewModelFactory;
-            _inventoryDataGridSettings = inventoryDataGridSettings;
-            _inventoryDataGridSettingsProvider = inventoryDataGridSettingsProvider;
 
             ColumnsView = new ObservableCollection<ColumnSettingViewModel>();
             Columns = new ObservableDictionary<string, ColumnSettingViewModel>();
@@ -205,7 +201,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             var newEntries = new Dictionary<string, ColumnSettingViewModel>(); // no notifications yet
             var newColumnsView = new List<ColumnSettingViewModel>();
 
-            var settings = (_inventoryDataGridSettingsProvider.CurrentValue ?? new InventoryDataGridSettings())
+            var settings = (InventoryGridSettingsStore.Load() ?? new InventoryDataGridSettings())
                 .ToDictionary(k => k.Header, v => v);
 
 
@@ -225,7 +221,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     needsSave = true;
                 }
 
-                var columnSettingViewModel = _columnSettingViewModelFactory(new InventoryDataGridColumnSetting(setting));
+                var columnSettingViewModel = _columnSettingViewModelFactory(setting);
 
                 columnSettingViewModel.Initialize(
                     isVisible: setting.IsVisible,
@@ -240,7 +236,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
 
             if (needsSave)
-                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(settings.Values));
+                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(settings.Values));
 
             // --- Phase 2: apply atomically so bindings only cascade once the dict is complete ---
 
@@ -290,7 +286,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             ColumnsChanged?.Invoke(); // update the view
 
-            _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
+            InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
         }
 
         private bool _reorderEnabled = true;
@@ -320,16 +316,16 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                         item.IsVisible = false;
                     }
                 }
-                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
+                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
             else
             { // restore
-                foreach (var item in _inventoryDataGridSettingsProvider.CurrentValue)
+                foreach (var item in InventoryGridSettingsStore.Load())
                 {
                     var col = Columns[item.Header];
                     col.IsVisible = item.IsVisible;
                 }
-                _inventoryDataGridSettings.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
+                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
 
         }

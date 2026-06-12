@@ -83,12 +83,6 @@ namespace Mhyrenz_Interface
                 Label = "Inventory",
                 ViewType = typeof(InventoryView)
             });
-            OptionsMenu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.GearSolid },
-                Label = "Settings",
-                ViewType = typeof(SettingsView)
-            });
 
             _baseTime = DateTime.Now;
             _stopwatch.Start();

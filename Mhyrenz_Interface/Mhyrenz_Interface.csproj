@@ -583,6 +583,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Bootstrap\StartupManager.cs" />
     <Compile Include="Store\CategoryStore.cs" />
+    <Compile Include="Store\InventoryGridSettingsStore.cs" />
     <Compile Include="Store\ICategoryStore.cs" />
     <Compile Include="Store\IInventroyStore.cs" />
     <Compile Include="Store\IOrderStore.cs" />
