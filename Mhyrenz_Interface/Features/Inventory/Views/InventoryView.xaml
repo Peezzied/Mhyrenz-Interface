@@ -52,7 +52,7 @@
                 </Grid.ColumnDefinitions>
                 <controls:SearchBox Grid.Column="0" FontSize="14.22"/>
                 <hc:UniformSpacingPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
-                    <controls:IconButtonWithTip IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
+                    <controls:IconButtonWithTip Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
                         <controls:IconButtonWithTip.IconContent>
                             <iconPacks:PackIconFontAwesome Kind="TrashCanSolid" />
                         </controls:IconButtonWithTip.IconContent>

@@ -98,12 +98,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _inventoryStore = inventoryStore;
         }
 
-        public void SetViewModel(InventoryDataGridViewModel inventoryDataGridViewModel)
-        {
-            ContentViewModel = inventoryDataGridViewModel;
-            ContentViewModel.ColumnsSettings = Columns;
-        }
-
         private void InventoryView_ViewChanged(in SynchronizedViewChangedEventArgs<ProductDataViewModel, ProductDataViewModel> e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -316,7 +310,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                         item.IsVisible = false;
                     }
                 }
-                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
             else
             { // restore
@@ -325,7 +318,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     var col = Columns[item.Header];
                     col.IsVisible = item.IsVisible;
                 }
-                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
 
         }

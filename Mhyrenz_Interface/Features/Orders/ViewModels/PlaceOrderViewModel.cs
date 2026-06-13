@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
+using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Services;
@@ -15,33 +16,41 @@ using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Sette
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
 {
-    public class PlaceOrderViewModel : BaseViewModel
+    public class PlaceOrderViewModel : FlyoutViewModel
     {
         private readonly IOrderStore _orderStore;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly CreateCommand<PlaceOrderVMCommandQty> _placeOrderQtyCommand;
         private readonly IOrderService _orderService;
 
-        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand, IOrderService orderService)
+        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand, IOrderService orderService) :
+            base(title: "Place Order")
         {
             _orderStore = orderStore;
             _undoRedoManager = undoRedoManager;
             _placeOrderQtyCommand = placeOrderQtyCommand;
             _orderService = orderService;
+
             OrderView = orderStore.Store.Source.CreateView(v => v);
             Orders = OrderView.ToNotifyCollectionChanged();
 
             OrderView.ViewChanged += OrderView_ViewChanged;
 
-            foreach (var (Value, View) in OrderView.Unfiltered)
-            {
-                View.TrackedPropertyChanged += OrderView_TrackedPropertyChanged;
-            }
-
             OrderDropHandler = new OrderDropTarget(this, orderStore);
 
             EmailCommand = new AsyncRelayCommand(EmailAction, CanEmailCommand);
             SendTelegramCommand = new AsyncRelayCommand(SendTelegramAction, CanSendTelegramCommand);
+        }
+
+        public void Load()
+        {
+            App.Current.BeginInvoke(new System.Action(() =>
+            {
+                foreach (var (Value, View) in OrderView.Unfiltered)
+                {
+                    View.TrackedPropertyChanged += OrderView_TrackedPropertyChanged;
+                }
+            }));
         }
 
         private async Task SendTelegramAction(object arg)
@@ -136,6 +145,11 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         public override void Dispose()
         {
             OrderView.ViewChanged -= OrderView_ViewChanged;
+
+            foreach (var (Value, View) in OrderView.Unfiltered)
+            {
+                View.TrackedPropertyChanged -= OrderView_TrackedPropertyChanged;
+            }
         }
 
 

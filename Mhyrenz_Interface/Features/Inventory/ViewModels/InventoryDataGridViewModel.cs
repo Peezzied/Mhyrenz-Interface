@@ -31,7 +31,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             {
                 _selectedItems = value;
 
-                SelectedItemsChanged?.Invoke(value.Any());
+                SelectedItemsChanged?.Invoke();
             }
         }
 
@@ -39,7 +39,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public SelectionRowsInfo SelectionInfo { get; set; }
 
-        public event Action<bool> SelectedItemsChanged;
+        public event Action SelectedItemsChanged;
         public event Action SwitchSelectedItem;
         public event Action OnLoad;
 

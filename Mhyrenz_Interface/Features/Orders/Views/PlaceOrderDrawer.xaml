@@ -12,52 +12,60 @@
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="400" d:Background="White">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Orders}" 
-                  AutoGenerateColumns="False"
-                  GridLinesVisibility="Horizontal"
-                  CanUserResizeColumns="False"
-                  dd:DragDrop.IsDropTarget="True"
-                  dd:DragDrop.DropHandler="{Binding OrderDropHandler}"
-                  dd:DragDrop.UseDropTargetHint="True"
-                  mah:DataGridHelper.CellPadding="4 2"
-                  CellStyle="{StaticResource DataGridCell}"
-                  Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
-                  RowStyle="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
-            <i:Interaction.Behaviors>
-                <behaviors:DataGridFlashBehavior WatchedItemsSource="Orders"/>
-            </i:Interaction.Behaviors>
-            <DataGrid.Columns>
-                <columns:NumberColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="0"/>
-                <DataGridTemplateColumn Width="Auto" Header="Category" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <controls:CategoryTag
-                                FontSize="11"
-                                CategoryName="{Binding CategoryName, Mode=OneTime}"
-                                CategoryColor="{Binding CategoryColor, Mode=OneTime}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellStyle>
-                        <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
-                            
-                        </Style>
-                    </DataGridTemplateColumn.CellStyle>
-                </DataGridTemplateColumn>
-                <columns:TextColumn Width="*" Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
-                <columns:NumberColumn Header="Retail" Width="70" IsReadOnly="True" Binding="{Binding RetailPrice, StringFormat=C}"/>
-                <columns:NumberColumn Header="List" Width="70" IsReadOnly="True" Binding="{Binding ListPrice, StringFormat=C}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <Grid Grid.Row="1" Margin="20">
-            <hc:UniformSpacingPanel Orientation="Vertical" Spacing="12">
-                <Button Command="{Binding EmailCommand}">Generate Email</Button>
-                <Button Command="{Binding SendTelegramCommand}">Send to Telegram</Button>
-            </hc:UniformSpacingPanel>
+    <Border BorderBrush="{StaticResource MahApps.Brushes.SystemControlForegroundBaseLow}" BorderThickness="0 0 1 0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <controls:FlyoutHeader/>
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" 
+              AutoGenerateColumns="False"
+              GridLinesVisibility="Horizontal"
+              EnableRowVirtualization="True"
+              VirtualizingPanel.IsContainerVirtualizable="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              CanUserResizeColumns="False"
+              dd:DragDrop.IsDropTarget="True"
+              dd:DragDrop.DropHandler="{Binding OrderDropHandler}"
+              dd:DragDrop.UseDropTargetHint="True"
+              mah:DataGridHelper.CellPadding="4 2"
+              CellStyle="{StaticResource DataGridCell}"
+              Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
+              RowStyle="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
+                <i:Interaction.Behaviors>
+                    <behaviors:DataGridFlashBehavior WatchedItemsSource="Orders"/>
+                </i:Interaction.Behaviors>
+                <DataGrid.Columns>
+                    <columns:NumberColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="0"/>
+                    <DataGridTemplateColumn Width="Auto" Header="Category" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <controls:CategoryTag
+                            FontSize="11"
+                            CategoryName="{Binding CategoryName, Mode=OneTime}"
+                            CategoryColor="{Binding CategoryColor, Mode=OneTime}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+
+                            </Style>
+                        </DataGridTemplateColumn.CellStyle>
+                    </DataGridTemplateColumn>
+                    <columns:TextColumn Width="*" Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
+                    <columns:NumberColumn Header="Retail" Width="70" IsReadOnly="True" Binding="{Binding RetailPrice, StringFormat=C}"/>
+                    <columns:NumberColumn Header="List" Width="70" IsReadOnly="True" Binding="{Binding ListPrice, StringFormat=C}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Grid Grid.Row="2" Margin="20">
+                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="12">
+                    <Button Command="{Binding EmailCommand}">Generate Email</Button>
+                    <Button Command="{Binding SendTelegramCommand}">Send to Telegram</Button>
+                </hc:UniformSpacingPanel>
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </UserControl>

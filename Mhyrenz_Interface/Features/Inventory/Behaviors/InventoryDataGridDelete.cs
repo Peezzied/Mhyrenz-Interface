@@ -21,13 +21,6 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
             set => SetValue(CommandProperty, value);
         }
 
-        private readonly IInventoryStore _inventoryStore;
-
-        public InventoryDataGridDelete()
-        {
-            _inventoryStore = App.ServiceProvider.GetRequiredService<IInventoryStore>();
-        }
-
         protected override void OnAttached()
         {
             CommandManager.AddPreviewExecutedHandler(AssociatedObject, OnPreviewExecuted);

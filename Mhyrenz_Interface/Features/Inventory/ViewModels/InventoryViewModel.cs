@@ -64,14 +64,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private string _searchBar = string.Empty;
         private InventoryTabItem _selectedItem;
-        private bool _canDelete = false;
         private bool _addProductIsOpen = false;
         private AddProductViewModel _addProductViewModel;
         private bool _placeOrderIsOpen;
         private PlaceOrderViewModel _placeOrderViewModel;
         private bool IsSwitchReady = false;
         private ProductDataViewModel AddedProduct;
-
+        private InventoryDataGridViewModel _inventoryDataGridVm;
 
         public InventoryDragSource InventoryDragHandler { get; }
 
@@ -107,20 +106,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
                 if (_selectedItem != null)
                 {
-                    EnsureTabViewModel(_selectedItem);
-
                     _selectedItem.ColumnsLoaded += SelectedItem_ColumnsLoaded;
                     _selectedItem.Load();
                     _mainViewModel.RibbonBarViewModel = _selectedItem;
 
-                    CanDelete =
-                        _selectedItem.ContentViewModel
-                            ?.SelectedItems
-                            ?.Any() == true;
-                }
-                else
-                {
-                    CanDelete = false;
+                    DeleteProductCommand.OnCanExecuteChanged();
                 }
 
                 OnPropertyChanged(nameof(SelectedItem));
@@ -135,18 +125,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 _selectedItem.PlaceOrderMode(true);
         }
 
-        public bool CanDelete
-        {
-            get => _canDelete;
-            set
-            {
-                _canDelete = value;
-                OnPropertyChanged(nameof(CanDelete));
-            }
-        }
-
         public ObservableCollection<InventoryTabItem> TabItems { get; private set; } = new ObservableCollection<InventoryTabItem>();
-        public ICommand DeleteProductCommand { get; set; }
+        public RelayCommand DeleteProductCommand { get; set; }
 
 
 
@@ -235,34 +215,29 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             //_categorystore.Updated += CategoryStore_Updated;
             PlaceOrderCommand = new RelayCommand(PlaceOrderAction);
             AddProductCommand = new RelayCommand(ShowProductAdd);
-            DeleteProductCommand = new RelayCommand(DeleteCommand);
+            DeleteProductCommand = new RelayCommand(DeleteCommand, CanDeleteCommand);
             _deleteCommand = deleteCommand();
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
             InventoryDragHandler = new InventoryDragSource(this);
         }
 
+        private bool CanDeleteCommand(object obj)
+        {
+            return _inventoryDataGridVm.SelectedItems?.Any() ?? false;
+        }
+
 
         #region Lifecycle
-
-        private void EnsureTabViewModel(InventoryTabItem tab)
-        {
-            var contentViewModel = tab.ContentViewModel;
-            if (contentViewModel != null)
-                return;
-
-            contentViewModel.Load();
-            contentViewModel.SelectedItemsChanged += Vm_SelectedItemsChanged;
-
-            tab.SetViewModel(contentViewModel);
-        }
 
         public async Task InitializeAsync(CancellationToken token)
         {
             List<InventoryTabItem> tabs = new List<InventoryTabItem>();
 
             token.ThrowIfCancellationRequested();
-            var inventoryDataGridVm = _inventoryDataGridViewModelFactory(this);
+            _inventoryDataGridVm = _inventoryDataGridViewModelFactory(this);
+            _inventoryDataGridVm.Load();
+            _inventoryDataGridVm.SelectedItemsChanged += Vm_SelectedItemsChanged;
             token.ThrowIfCancellationRequested();
 
             await UiTimeSlicer.RunAsync(
@@ -272,7 +247,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     token.ThrowIfCancellationRequested();
 
                     var item = _inventoryTabItemFactory(x.Key, x.Value);
-                    item.ContentViewModel = inventoryDataGridVm;
+                    item.ContentViewModel = _inventoryDataGridVm;
 
                     tabs.Add(item);
                 });
@@ -301,12 +276,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 _selectedItem = null;
             }
 
+            _inventoryDataGridVm.SelectedItemsChanged -= Vm_SelectedItemsChanged;
+
             foreach (var item in TabItems.ToList())
             {
                 item.ColumnsLoaded -= SelectedItem_ColumnsLoaded;
-
-                if (item.ContentViewModel != null)
-                    item.ContentViewModel.SelectedItemsChanged -= Vm_SelectedItemsChanged;
 
                 item.Dispose();
             }
@@ -331,8 +305,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
 
                 InventoryTabItem newTab = tabItems[category];
-
-                EnsureTabViewModel(newTab);
 
                 var vm = newTab.ContentViewModel;
                 bool canSelectTab = false;
@@ -406,9 +378,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             AddProductViewModel = null;
         }
 
-        private void Vm_SelectedItemsChanged(bool state)
+        private void Vm_SelectedItemsChanged()
         {
-            CanDelete = state;
+            DeleteProductCommand.OnCanExecuteChanged();
         }
 
         private void Vm_RowIntoView(ProductDataViewModel item)
@@ -463,6 +435,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             PlaceOrderIsOpen = true;
 
             SelectedItem.PlaceOrderMode(PlaceOrderIsOpen);
+
+            PlaceOrderViewModel.Load();
         }
 
         #endregion

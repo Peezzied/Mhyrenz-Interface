@@ -48,10 +48,6 @@ namespace Mhyrenz_Interface.Store
             }
 
             var vm = _createViewModel(order);
-            var categoryId = order.Product.CategoryId;
-
-            vm.CategoryColor = _categoryStore.Colors[categoryId];
-            vm.CategoryName = _categoryStore.Categories[categoryId].Name;
 
             Store.Add(vm);
 
@@ -61,15 +57,7 @@ namespace Mhyrenz_Interface.Store
         public async Task InitializeAsync()
         {
             var orders = (await _orderService.GetOrders())
-                .Select(order =>
-                {
-                    var vm = _createViewModel(order);
-
-                    vm.CategoryColor = _categoryStore.Colors[order.Product.CategoryId];
-                    vm.CategoryName = _categoryStore.Categories[order.Product.CategoryId].Name;
-
-                    return vm;
-                })
+                .Select(order => _createViewModel(order))
                 .ToList();
 
             Store.AddRange(orders);
