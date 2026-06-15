@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              xmlns:core="clr-namespace:Mhyrenz_Interface.Core.UndoRedo"
              d:DesignHeight="50" d:DesignWidth="800">
-    <Grid Background="Black">
+    <Grid Background="#1E1F25">
         <hc:FlexPanel Margin="30, 0" FlexDirection="Row" JustifyContent="SpaceBetween">
             <hc:UniformSpacingPanel Spacing="30" Grid.Row="0" Orientation="Horizontal">
                 <hc:UniformSpacingPanel Spacing="7" Orientation="Horizontal">
@@ -40,7 +40,7 @@
                 </ContentControl>
             </hc:UniformSpacingPanel>
             <hc:UniformSpacingPanel Spacing="20" VerticalAlignment="Center">
-                <hc:Shield FontSize="14" Subject="session" d:Status="Fri, August 08" Status="{Binding Session}"/>
+                <hc:Shield FontSize="14" Subject="session" d:Status="Fri, August 08" Visibility="{Binding HasSession, Converter={StaticResource BooleanToVisibilityConverter}}" Status="{Binding SessionPeriod, StringFormat={}{0:ddd MMM d, yyyy}}"/>
                 <hc:UniformSpacingPanel Spacing="1" Orientation="Vertical">
                     <TextBlock FontSize="14" Foreground="White" d:Text="Fri Aug 08, 7:41 PM" Text="{Binding Today, StringFormat='{}{0:ddd MMM dd, h:mm tt}'}"/>
                     <ProgressBar Style="{StaticResource ProgressBarFlat}" Value="{Binding Seconds}" Maximum="60" Height="3"/>

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using HandyControl.Controls;
 using HandyControl.Tools;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Startup;
-using Mhyrenz_Interface.Startup.ViewModels;
 using Mhyrenz_Interface.Store;
 using Microsoft.Extensions.DependencyInjection;
 using Window = System.Windows.Window;
@@ -40,17 +40,14 @@ namespace Mhyrenz_Interface.Bootstrap
                 }));
         }
 
-        public async Task ShowStartUpAsync()
-        {
-            var vm = await StartupViewModel.LoadStartupViewModel(_serviceProvider);
-            var startUp = _serviceProvider.GetRequiredService<CreateWindow<StartupWindow>>().Invoke(vm);
-            ShowWindow(startUp);
-        }
-
-        public void ShowMainWindowAsync()
+        public async Task ShowMainWindowAsync()
         {
             var vm = _serviceProvider.GetRequiredService<ShellViewModel>();
+
             var mainWindow = _serviceProvider.GetRequiredService<CreateWindow<MainWindow>>().Invoke(vm);
+
+            await vm.InitializeAsync(CancellationToken.None);
+
             ShowWindow(mainWindow);
         }
         private void ShowWindow(Window startUp)

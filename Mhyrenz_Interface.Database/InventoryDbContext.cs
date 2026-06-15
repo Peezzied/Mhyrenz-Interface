@@ -27,6 +27,8 @@ namespace Mhyrenz_Interface.Database
                 .HasQueryFilter(i => !i.IsDeleted)
                 .HasIndex(i => i.Barcode)
                 .IsUnique();
+            modelBuilder.Entity<Session>()
+                .HasQueryFilter(i => i.IsActive);
             modelBuilder.Entity<Transaction>()
                 .HasQueryFilter(i => !i.Product.IsDeleted);
         }

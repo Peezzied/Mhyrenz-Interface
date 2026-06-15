@@ -17,27 +17,10 @@ namespace Mhyrenz_Interface.Database.Services
     public class CheckoutService : ICheckoutService
     {
         private readonly InventoryDbContextFactory _inventoryDbContextFactory;
-        private readonly ISessionService _sessionService;
 
-        public CheckoutService(InventoryDbContextFactory inventoryDbContextFactory, ISessionService sessionService)
+        public CheckoutService(InventoryDbContextFactory inventoryDbContextFactory)
         {
             _inventoryDbContextFactory = inventoryDbContextFactory;
-            _sessionService = sessionService;
-        }
-
-        public async Task<bool> HasTransactions()
-        {
-            using (var context = _inventoryDbContextFactory.CreateDbContext())
-            {
-                var session = await _sessionService.GetSession();
-
-                if (session == null)
-                    return false;
-
-                return await context.Transactions
-                    .Include(t => t.Session)
-                    .AnyAsync(x => x.Session.Id == session.Id);
-            }
         }
 
         public async Task<CheckoutResult> AddItem(int saleId, int productId, int amount = 1)
@@ -46,7 +29,6 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 var sale = await context.Sales
                     .Include(s => s.Transactions)
-                    .Include(s => s.Session)
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
@@ -76,18 +58,6 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-
-        public async Task<int> InactiveTransactionsCount()
-        {
-            using (var context = _inventoryDbContextFactory.CreateDbContext())
-            {
-                var session = await _sessionService.GetSession();
-                return await context.Transactions
-                    .Where(t => t.SessionId != session.Id)
-                    .CountAsync();
-            }
-        }
-
         public async Task<Product> AddItem(int productId, Guid sessionId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
@@ -112,13 +82,11 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 var sale = await context.Sales
                     .Include(s => s.Transactions)
-                    .Include(s => s.Session)
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
                 var transaction = await context.Transactions
                     .Include(t => t.Product)
-                    .Where(t => t.Session.Id == sale.Session.Id)
                     .FirstOrDefaultAsync(t =>
                         t.Id == transactionId &&
                         t.SaleId == saleId)
@@ -280,13 +248,11 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 var sale = await context.Sales
                     .Include(s => s.Transactions)
-                    .Include(s => s.Session)
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
                 var transaction = await context.Transactions
                     .Include(t => t.Product)
-                    .Where(t => t.Session.Id == sale.Session.Id)
                     .FirstOrDefaultAsync(t =>
                         t.Id == transactionId &&
                         t.SaleId == saleId)

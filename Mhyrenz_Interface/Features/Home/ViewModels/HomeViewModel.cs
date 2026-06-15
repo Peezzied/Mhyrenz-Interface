@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
-using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Core.MVVM;
-using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
@@ -16,10 +14,11 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
     {
         private readonly IInventoryStore _inventoryStore;
         private readonly ICategoryStore _categoryStore;
-        private readonly OverviewChartViewModel _overviewChartViewModel;
         private readonly ISessionStore _sessionStore;
-        private readonly IDialogCoordinator _dialogCoordinator;
-        private readonly InfoPanelViewModel _infoPanelViewModel;
+
+        public CompletedSaleViewModel CompletedSaleViewModel { get; }
+        public ActionViewModel ActionViewModel { get; }
+
         private InventoryDataGridViewModel _invetoryDataGridContext;
         public InventoryDataGridViewModel InventoryDataGridContext
         {
@@ -30,10 +29,8 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                 OnPropertyChanged(nameof(InventoryDataGridContext));
             }
         }
-        public ICommand RegisterCommand { get; private set; }
-        public ICommand OpenStartupCommand { get; set; }
-        public OverviewChartViewModel OverviewChartViewModel => _overviewChartViewModel;
-        public InfoPanelViewModel InfoPanelViewModel => _infoPanelViewModel;
+
+        public OverviewChartViewModel OverviewChartViewModel { get; }
         public string Bindtest { get; private set; }
 
         private bool _isRegistering;
@@ -47,23 +44,32 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             }
         }
 
-        public IncomingPanelViewModel IncomingPanelViewModel { get; set; }
+        public decimal Profit => _inventoryStore.Store.Sum(p => p.NetRetailPrice);
+        public decimal Sales => _inventoryStore.Store.Sum(p => p.Item.Profit);
+        public int Customers => CompletedSaleViewModel.CompletedSales.Count;
 
-        private int currentCount = 0;
-        private readonly int maxItems = 14;
-
-        private string _searchBar = string.Empty;
-        public string SearchBar
+        private Brush _categoryColor;
+        public Brush CategoryColor
         {
-            get => _searchBar;
+            get => _categoryColor;
             set
             {
-                _searchBar = value;
-                OnPropertyChanged(nameof(SearchBar));
-
-                currentCount = 0;
+                _categoryColor = value;
+                OnPropertyChanged(nameof(CategoryColor));
             }
         }
+
+        private string _categoryName;
+        public string CategoryName
+        {
+            get => _categoryName;
+            set
+            {
+                _categoryName = value;
+                OnPropertyChanged(nameof(CategoryName));
+            }
+        }
+
 
         public HomeViewModel(
             IInventoryStore inventroyStore,
@@ -71,106 +77,43 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
-            IDialogCoordinator dialogCoordinator,
-            IncomingPanelViewModel incomingPanelViewModel,
-            ShellViewModel shellViewModel,
-            CreateViewModel<InventoryDataGridViewModel> inventoryDataGridViewModelFactory) : base(navigationServiceEx)
+            ActionViewModel actionViewModel,
+            CompletedSaleViewModel completedSaleViewModel) : base(navigationServiceEx)
         {
             _inventoryStore = inventroyStore;
             _categoryStore = categoryStore;
-            _overviewChartViewModel = overviewChartViewModel;
-
-            //InventoryDataGridContext = inventoryDataGridViewModelFactory(this);
-            IncomingPanelViewModel = incomingPanelViewModel;
-
-            _infoPanelViewModel = new InfoPanelViewModel(_inventoryStore);
-
             _sessionStore = sessionStore;
-            _sessionStore.StateChanged += SessionStore_StateChanged;
-            Bindtest = _sessionStore.CurrentSession?.Period.ToString("M") ?? "No Session";
 
-            base.TransitionCompleted += OnTransitionComplete;
+            OverviewChartViewModel = overviewChartViewModel;
+            CompletedSaleViewModel = completedSaleViewModel;
+            ActionViewModel = actionViewModel;
 
-            _dialogCoordinator = dialogCoordinator;
-
-            DeferLoad();
-
-            OpenStartupCommand = new AsyncRelayCommand(OpenStartupActionCommand);
-            //TODO RegisterCommand = new SalesRegisterCommand();
-        }
-
-        private void SessionStore_StateChanged(Session obj)
-        {
-
-        }
-
-        private async Task OpenStartupActionCommand(object arg)
-        {
-            await App.Presenter.ShowStartUpAsync();
-        }
-
-        private void OnPromptSessionRequest()
-        {
-            _dialogCoordinator.ShowModalMessageExternal(this, "Hello world", "Hello world");
-        }
-
-        public override void Dispose()
-        {
-            //InventoryDataGridContext.Dispose();
-
-            _overviewChartViewModel.Dispose();
-            _infoPanelViewModel.Dispose();
-            base.TransitionCompleted -= OnTransitionComplete;
-        }
-
-        private void OnTransitionComplete()
-        {
-            //App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            //{
-            //    Inventory = _inventoryStore.ProductsCollectionView;
-            //    OnPropertyChanged(nameof(Inventory));
-
-            //    Transactions = CollectionViewSource.GetDefaultView(_transactionStore.Transactions);
-            //    OnPropertyChanged(nameof(Transactions));
-            //}), DispatcherPriority.ContextIdle);
-        }
-
-        private void DeferLoad()
-        {
-            //InventoryDataGridContext.Inventory = CollectionViewSource.GetDefaultView(_inventoryStore.Products);
-            //InventoryDataGridContext.Inventory.Filter += FilterProducts;
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-
-                if (_categoryStore.Colors.Any())
+                if (_categoryStore.Colors.Count != 0)
                     foreach (var item in _inventoryStore.Store)
                     {
                         item.CategoryColor = _categoryStore.Colors[item.CategoryId];
                     }
 
+                var topCategory = OverviewChartViewModel.CategoryChartData
+                    .Where(c => c.Sales.Value > 0)
+                    .OrderByDescending(c => c.Sales.Value)
+                    .FirstOrDefault()?.Category;
+
+                if (topCategory == null)
+                    return;
+
+                CategoryName = topCategory.Name;
+                CategoryColor = _categoryStore.Colors[topCategory.Id];
             }), DispatcherPriority.ContextIdle);
         }
 
-        private bool FilterProducts(object obj)
+        public override void Dispose()
         {
-            if (obj is ProductDataViewModel productDataViewModel)
-            {
-                var search = productDataViewModel.Name?.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0;
-
-                if (!search)
-                    return false;
-
-                if (currentCount >= maxItems)
-                    return false;
-
-                currentCount++;
-                return true;
-
-            }
-            else return false;
-
+            CompletedSaleViewModel.Dispose();
+            OverviewChartViewModel.Dispose();
         }
-
     }
 
     public interface ISalesRegisterHost

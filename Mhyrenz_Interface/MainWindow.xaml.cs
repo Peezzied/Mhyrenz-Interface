@@ -1,5 +1,11 @@
 ﻿using System.Windows;
+using System.Windows.Data;
 using MahApps.Metro.Controls;
+using MahApps.Metro.IconPacks;
+using Mhyrenz_Interface.Features.Checkout.Views;
+using Mhyrenz_Interface.Features.Home.Views;
+using Mhyrenz_Interface.Features.Inventory.Views;
+using Mhyrenz_Interface.Shared.Controls;
 using Mhyrenz_Interface.Store;
 using MessageBox = HandyControl.Controls.MessageBox;
 
@@ -17,7 +23,35 @@ namespace Mhyrenz_Interface
             DataContext = shellVIewModel;
             _undoRedoManager = undoRedoManager;
 
-            Closing += MainWindow_Closing;
+            Closing += MainWindow_Closing;  
+
+            var menu = shellVIewModel.Menu;
+
+            menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.HouseSolid },
+                Label = "Home",
+                ViewType = typeof(HomeView)
+            });
+            var checkout = new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
+                Label = "Checkout",
+                ViewType = typeof(CheckoutView)
+            };
+            BindingOperations.SetBinding(checkout, MenuItem.IsEnabledProperty, new Binding(nameof(ShellViewModel.HasSession))
+            {
+                Source = shellVIewModel,
+                Mode = BindingMode.OneWay
+            });
+            menu.Add(checkout);
+            menu.Add(new MenuItem()
+            {
+                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
+                Label = "Inventory",
+                ViewType = typeof(InventoryView)
+            });
+
             InitializeComponent();
         }
 

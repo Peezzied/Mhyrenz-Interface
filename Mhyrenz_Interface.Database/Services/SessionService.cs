@@ -52,13 +52,22 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             }
         }
 
+        public async Task LockSession()
+        {
+            var session = GetSession();
+
+            using (InventoryDbContext context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                
+            }
+        }
+
         public async Task<Session> GetSession()
         {
             using (InventoryDbContext context = _inventoryDbContextFactory.CreateDbContext())
             {
                 var entity = await context.Sessions
                     .Include(s => s.Sales)
-                    .OrderByDescending(s => s.Period)
                     .FirstOrDefaultAsync();
                 return entity;
             }

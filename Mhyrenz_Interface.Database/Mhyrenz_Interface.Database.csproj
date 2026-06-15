@@ -48,9 +48,9 @@
     <Compile Include="InventoryDbContext.cs" />
     <Compile Include="InventoryDbContextFactory.cs" />
     <Compile Include="InventoryDbContextFactoryDesignTime.cs" />
-    <Compile Include="Migrations\20260604115250_Order.cs" />
-    <Compile Include="Migrations\20260604115250_Order.Designer.cs">
-      <DependentUpon>20260604115250_Order.cs</DependentUpon>
+    <Compile Include="Migrations\20260615100627_Session.cs" />
+    <Compile Include="Migrations\20260615100627_Session.Designer.cs">
+      <DependentUpon>20260615100627_Session.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\InventoryDbContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

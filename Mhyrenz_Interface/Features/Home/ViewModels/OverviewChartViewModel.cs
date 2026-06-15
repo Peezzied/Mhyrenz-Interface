@@ -32,7 +32,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             set
             {
                 _sales = value;
-                OnPropertyChanged("Sales");
+                OnPropertyChanged(nameof(Sales));
             }
         }
 
@@ -48,9 +48,10 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         private readonly ICategoryStore _categoryStore;
         private readonly IInventoryStore _inventoryStore;
 
-        public string Bindtest { get; set; } = "Hello, World! from OverviewChartViewModel!";
         public ObservableCollection<PieSeries<ObservableValue>> SalesByCategory { get; private set; }
             = new ObservableCollection<PieSeries<ObservableValue>>();
+
+        public bool HasSales => SalesByCategory.Where(c => c.Values.First().Value > 0).Any();
 
         public ObservableCollection<CategoryChartViewModel> CategoryChartData
             = new ObservableCollection<CategoryChartViewModel>();

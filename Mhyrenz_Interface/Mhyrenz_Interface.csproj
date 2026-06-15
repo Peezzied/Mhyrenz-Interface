@@ -478,6 +478,16 @@
     <Compile Include="Core\MVVM\ICommandAsync.cs" />
     <Compile Include="Core\MVVM\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Core\Utilities\UiTimeSlicer.cs" />
+    <Compile Include="Features\Checkout\Controls\CompletedSalesTreeView.xaml.cs">
+      <DependentUpon>CompletedSalesTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Features\Home\Controls\ActionButton.cs" />
+    <Compile Include="Features\Home\Controls\SessionBox.xaml.cs">
+      <DependentUpon>SessionBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Features\Home\Converters\BooleanToVirtualVisibilityConverter.cs" />
+    <Compile Include="Features\Home\ViewModels\ActionViewModel.cs" />
+    <Compile Include="Features\Home\ViewModels\SessionBoxContext.cs" />
     <Compile Include="Shared\Adorners\RowFlashAdorner.cs" />
     <Compile Include="Features\Inventory\Commands\AddCommand.cs" />
     <Compile Include="Features\Checkout\Commands\CheckoutCommand.cs" />
@@ -492,7 +502,6 @@
     <Compile Include="Shared\Controls\HotButton.cs" />
     <Compile Include="Shared\Converters\DiscountToBoolConverter.cs" />
     <Compile Include="Shared\Converters\DiscountCommandParamsConverter.cs" />
-    <Compile Include="Startup\CreateSessionCommand.cs" />
     <Compile Include="Features\Inventory\Commands\DeleteCommand.cs" />
     <Compile Include="Features\Inventory\Commands\LoadCategoriesCommand.cs" />
     <Compile Include="Features\Inventory\Commands\ProductVMCommandCommonProp.cs" />
@@ -524,9 +533,6 @@
     <Compile Include="Shared\Columns\NumberColumn.cs" />
     <Compile Include="Shared\Columns\TextColumn.cs" />
     <Compile Include="Shared\Controls\IconButtonWithTip.cs" />
-    <Compile Include="Features\Home\Controls\IncomingItemPanel.xaml.cs">
-      <DependentUpon>IncomingItemPanel.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Features\Home\Controls\InfoPanel.xaml.cs">
       <DependentUpon>InfoPanel.xaml</DependentUpon>
     </Compile>
@@ -582,6 +588,7 @@
     <Compile Include="Core\MVVM\ValidationViewModel.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Bootstrap\StartupManager.cs" />
+    <Compile Include="Startup\Splash.xaml.cs" />
     <Compile Include="Store\CategoryStore.cs" />
     <Compile Include="Store\InventoryGridSettingsStore.cs" />
     <Compile Include="Store\ICategoryStore.cs" />
@@ -617,11 +624,8 @@
     <Compile Include="Core\Utilities\IViewModelFactory.cs" />
     <Compile Include="Navigation\NavigationViewModelFactory.cs" />
     <Compile Include="DesignTime\FakeCompletedSaleViewModel.cs" />
-    <Compile Include="DesignTime\FakeInfoPanelViewModel.cs" />
     <Compile Include="DesignTime\FakeTransactionDataGridViewModel.cs" />
     <Compile Include="Features\Home\ViewModels\HomeViewModel.cs" />
-    <Compile Include="Features\Home\ViewModels\IncomingPanelViewModel.cs" />
-    <Compile Include="Features\Home\ViewModels\InfoPanelViewModel.cs" />
     <Compile Include="Features\Inventory\ViewModels\InventoryDataGridViewModel.cs" />
     <Compile Include="Features\Inventory\ViewModels\InventoryTabItem.cs" />
     <Compile Include="Features\Inventory\ViewModels\InventoryViewModel.cs" />
@@ -631,10 +635,8 @@
     <Compile Include="Features\Orders\ViewModels\PlaceOrderViewModel.cs" />
     <Compile Include="Features\Inventory\ViewModels\ProductDataViewModel.cs" />
     <Compile Include="Features\Checkout\ViewModels\SaleTabItem.cs" />
-    <Compile Include="Startup\ViewModels\SessionBoxContext.cs" />
     <Compile Include="Features\Settings\ViewModels\SettingsViewModel.cs" />
     <Compile Include="ShellViewModel.cs" />
-    <Compile Include="Startup\ViewModels\StartupViewModel.cs" />
     <Compile Include="Features\Checkout\ViewModels\TransactionDataViewModel.cs" />
     <Compile Include="Features\Checkout\ViewModels\CheckoutViewModel.cs" />
     <Compile Include="Features\Home\View\HomeView.xaml.cs">
@@ -646,15 +648,21 @@
     <Compile Include="Features\Settings\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Startup\Splash.xaml.cs">
-      <DependentUpon>Splash.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Startup\StartupWindow.xaml.cs">
-      <DependentUpon>StartupWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Features\Checkout\Views\CheckoutView.cs">
       <DependentUpon>CheckoutView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Features\Checkout\Controls\CompletedSalesTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Features\Home\Controls\SessionBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Features\Home\Templates\ActionButtonStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Features\Inventory\Views\AddProductDrawer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -664,10 +672,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Features\Checkout\Views\CompletedSales.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Features\Home\Controls\IncomingItemPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -755,6 +759,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Startup\Splash.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Test\TestWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -768,14 +776,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Features\Settings\Views\SettingsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Startup\Splash.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Startup\StartupWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -839,6 +839,12 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.resources.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.NetAnalyzers.10.0.300\analyzers\dotnet\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\Mhyrenz_Interface_IconLarge.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Images\Bg_Pattern.svg" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

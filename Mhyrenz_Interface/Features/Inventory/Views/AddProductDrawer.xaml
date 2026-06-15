@@ -45,11 +45,7 @@
                             <Grid Grid.Row="1" SnapsToDevicePixels="true" x:Name="root" >
                                 <mah:NumericUpDown attach:ValidationHelper.HasError="{Binding Path=(attach:ParentValidationHelper.HasError), RelativeSource={RelativeSource TemplatedParent}, Mode=OneWayToSource}" TextAlignment="Center" StringFormat="{Binding Path=(local:NumericUpDownEx.StringFormat),RelativeSource={RelativeSource TemplatedParent}}" Minimum="0">
                                     <mah:NumericUpDown.Value>
-                                        <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" NotifyOnValidationError="True">
-                                            <Binding.ValidationRules>
-                                                <vm:NotBlank />
-                                            </Binding.ValidationRules>
-                                        </Binding>
+                                        <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}" NotifyOnValidationError="True"/>
                                     </mah:NumericUpDown.Value>
                                     <mah:NumericUpDown.Style>
                                         <Style TargetType="mah:NumericUpDown">

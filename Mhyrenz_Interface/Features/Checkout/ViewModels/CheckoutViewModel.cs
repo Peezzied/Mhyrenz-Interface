@@ -80,7 +80,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             token.ThrowIfCancellationRequested();
 
             token.ThrowIfCancellationRequested();
-            _startSaleCount = await _checkoutService.InactiveTransactionsCount();
+            _startSaleCount = _transactionStore.Store.Count;
             token.ThrowIfCancellationRequested();
 
             if (sales.Count == 0)

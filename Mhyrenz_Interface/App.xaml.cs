@@ -27,8 +27,6 @@ using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Converters;
-using Mhyrenz_Interface.Startup;
-using Mhyrenz_Interface.Startup.ViewModels;
 using Mhyrenz_Interface.Store;
 using Mhyrenz_Interface.Test;
 using Microsoft.EntityFrameworkCore;
@@ -86,7 +84,7 @@ namespace Mhyrenz_Interface
 
             await Presenter.AppInit();
 
-            await Presenter.ShowStartUpAsync();
+            await Presenter.ShowMainWindowAsync();
             Presenter.SplashComplete();
 
             base.OnStartup(e);
@@ -153,8 +151,9 @@ namespace Mhyrenz_Interface
                 .AddSingleton<IOrderService, OrderService>()
                 .AddSingleton<IOrderStore, OrderStore>()
 
-                .AddTransient<IncomingPanelViewModel>()
                 .AddTransient<OverviewChartViewModel>()
+                .AddTransient<ActionViewModel>()
+                .AddTransient<CompletedSaleViewModel>()
 
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()
@@ -174,7 +173,6 @@ namespace Mhyrenz_Interface
 
                 .AddCommandFactory<DeleteCommand>()
                 .AddCommandFactory<AddCommand>()
-                .AddCommandFactory<CreateSessionCommand>()
                 .AddCommandFactory<LoadCategoriesCommand>()
                 .AddCommandFactory<CheckoutCommand>()
                 .AddCommandFactory<TransactionVMCommandDiscount, TransactionVMCommandDiscount.DTO>()
@@ -183,17 +181,9 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()
                 .AddCommandFactory<PlaceOrderVMCommandQty, PlaceOrderVMCommandQty.DTO>()
 
-                .AddSingleton<StartupViewModel>()
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<TestWindowViewModel>()
 
-                .AddSingleton<CreateWindow<StartupWindow>>(s =>
-                {
-                    return (viewModel) =>
-                    {
-                        return ActivatorUtilities.CreateInstance<StartupWindow>(s, viewModel);
-                    };
-                })
                 .AddSingleton<CreateWindow<MainWindow>>(s =>
                 {
                     return (viewModel) =>

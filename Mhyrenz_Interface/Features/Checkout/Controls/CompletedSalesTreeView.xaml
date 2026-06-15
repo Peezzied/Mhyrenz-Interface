@@ -1,0 +1,224 @@
+﻿<UserControl x:Class="Mhyrenz_Interface.Features.Checkout.Controls.CompletedSalesTreeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
+             xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
+             xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
+             xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"    
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:Background="White"
+             d:DataContext="{d:DesignInstance
+               Type=fake:FakeCompletedSaleViewModel,
+               IsDesignTimeCreatable=True}">
+    <Grid>
+        <hc:ToggleBlock d:IsChecked="True" IsChecked="{Binding HasCompletedSales, Mode=OneWay}" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
+            <hc:ToggleBlock.CheckedContent>
+                <TreeView Background="Transparent" Margin="15 0 15 0" Grid.Row="1" ItemsSource="{Binding CompletedSales}" Style="{StaticResource MahApps.Styles.TreeView.Virtualized}"
+                    Name="TreeView" BorderThickness="0">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Transactions}">
+
+                            <Grid Margin="0">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- LEFT: SALE HEADER -->
+                                <StackPanel Grid.Row="0"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                                    <StackPanel.Resources>
+                                        <converters:DiscountToBoolConverter x:Key="DiscountToBoolConverter" />
+                                    </StackPanel.Resources>
+
+                                    <!-- SALE ICON -->
+                                    <hc:ToggleBlock Margin="0 0 6 0" IsChecked="{Binding Discount, Converter={StaticResource DiscountToBoolConverter}}">
+
+                                        <!-- FALSE STATE: NO DISCOUNT -->
+                                        <hc:ToggleBlock.UnCheckedContent>
+                                            <iconPacks:PackIconMaterial Kind="ReceiptTextOutline"
+                                       Width="14"
+                                       Height="14"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource MahApps.Brushes.AccentBase}" />
+                                        </hc:ToggleBlock.UnCheckedContent>
+
+                                        <!-- TRUE STATE: HAS DISCOUNT -->
+                                        <hc:ToggleBlock.CheckedContent>
+                                            <Border
+                                        Padding="4 0"
+                                        CornerRadius="6"
+                                        Background="{DynamicResource MahApps.Brushes.AccentBase}"
+                                        VerticalAlignment="Center"
+                                        Opacity="0.85">
+                                                <TextBlock Foreground="White"
+                                           FontSize="9"
+                                           FontWeight="SemiBold"
+                                           Margin="2 0"
+                                           Text="{Binding Discount}" />
+                                            </Border>
+                                        </hc:ToggleBlock.CheckedContent>
+                                    </hc:ToggleBlock>
+
+                                    <!-- SALE NAME -->
+                                    <TextBlock FontSize="14"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding SaleName,
+                                            FallbackValue=Walk-in Customer}" />
+
+
+                                </StackPanel>
+
+                                <!-- RIGHT: TOTAL -->
+                                <StackPanel Grid.Row="0"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+
+                                    <iconPacks:PackIconMaterial Kind="CashMultiple"
+                                       Width="14"
+                                       Height="14"
+                                       Margin="0 4 4 0"
+                                       Foreground="Gray"
+                                       VerticalAlignment="Center"/>
+
+                                    <TextBlock FontSize="15"
+                                       FontWeight="Bold"
+                                       Text="{Binding Total, StringFormat={}{0:C}}" />
+                                </StackPanel>
+                                <!-- DATE (LEFT SIDE OF STRIP) -->
+                                <StackPanel Orientation="Horizontal"
+                                    Grid.Row="1"
+                                    VerticalAlignment="Center"
+                                    Margin="0 6 0 0">
+
+                                    <iconPacks:PackIconMaterial Kind="CalendarClock"
+                                       Width="12"
+                                       Height="12"
+                                       Margin="0 0 4 0"
+                                       Foreground="Gray"/>
+
+                                    <TextBlock Foreground="Gray"
+                                       FontSize="11"
+                                       Text="{Binding Completed_at,
+                                                      StringFormat={}{0:MMM dd • hh:mm tt}}" />
+                                </StackPanel>
+
+                                <!-- SECOND ROW: RIGHT-ALIGNED FINANCIAL DETAILS -->
+                                <StackPanel Grid.Row="1"
+                                    Grid.ColumnSpan="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="0 6 0 0">
+
+
+
+                                    <!-- SUBTOTAL -->
+                                    <StackPanel Orientation="Horizontal"
+                                        Margin="0 0 12 0"
+                                        VerticalAlignment="Center">
+
+                                        <TextBlock Foreground="Gray"
+                                           FontSize="11"
+                                           Text="Sub: " />
+
+                                        <TextBlock FontSize="11"
+                                            Text="{Binding SubTotal, StringFormat={}{0:C}}" />
+                                    </StackPanel>
+
+                                    <!-- CASH -->
+                                    <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+
+                                        <TextBlock Foreground="Gray"
+                                           FontSize="11"
+                                           Text="Cash: " />
+
+                                        <TextBlock FontSize="11"
+                                            Text="{Binding Paid, StringFormat={}{0:C}}" />
+                                    </StackPanel>
+
+                                </StackPanel>
+
+                            </Grid>
+                            <HierarchicalDataTemplate.ItemTemplate>
+                                <DataTemplate>
+
+                                    <Grid>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- LEFT: product -->
+                                        <StackPanel Orientation="Horizontal">
+
+                                            <iconPacks:PackIconMaterial Kind="PackageVariant"
+                                               Width="12"
+                                               Height="12"
+                                               Margin="0 0 6 0"
+                                               Foreground="Gray"
+                                               VerticalAlignment="Center"/>
+
+                                            <controls:MaxLinesTextBlock Text="{Binding Product.Name}"
+                                                MaxLines="2"
+                                                LineHeight="16"
+                                                FontSize="12"
+                                                VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- RIGHT: amount -->
+                                        <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal">
+
+                                            <TextBlock Text="x"
+                                               Foreground="Gray"
+                                               FontSize="12"
+                                               Margin="0 0 4 0"/>
+
+                                            <TextBlock Text="{Binding Amount}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Margin="0 0 10 0"/>
+
+                                            <TextBlock Text="{Binding LineTotal, StringFormat={}{0:C}}"
+                                                FontSize="12"/>
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                </DataTemplate>
+                            </HierarchicalDataTemplate.ItemTemplate>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource MahApps.Styles.TreeViewItem}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="10"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Control.Border}"/>
+                            <Setter Property="BorderThickness" Value="0 0 0 1"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </hc:ToggleBlock.CheckedContent>
+            <hc:ToggleBlock.UnCheckedContent>
+                <hc:Empty hc:Empty.ShowEmpty="true"/>
+            </hc:ToggleBlock.UnCheckedContent>
+        </hc:ToggleBlock>
+    </Grid>
+</UserControl>

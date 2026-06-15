@@ -80,7 +80,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <controls:RibbonBar/>
-                            <Grid Grid.Row="1">
+                            <Grid Grid.Row="1" Background="#F4F6F8">
                                 <ContentControl Content="{Binding CurrentViewModel}"
                                                 xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
                                                 xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"

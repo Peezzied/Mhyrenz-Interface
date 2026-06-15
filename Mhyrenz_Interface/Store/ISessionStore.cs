@@ -7,7 +7,7 @@ namespace Mhyrenz_Interface.Store
     public interface ISessionStore
     {
         Session CurrentSession { get; set; }
-        event Action<Session> StateChanged;
+        event Action<Session> SessionChanged;
 
         Task<Session> UpdateSession();
     }

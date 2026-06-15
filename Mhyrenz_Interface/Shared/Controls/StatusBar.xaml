@@ -18,7 +18,7 @@
             <SolidColorBrush Color="{DynamicResource MahApps.Colors.Accent}"/>
         </StatusBar.Background>
         <StatusBarItem>
-            <hc:UniformSpacingPanel Spacing="7" Orientation="Horizontal">
+            <hc:UniformSpacingPanel Spacing="7" Orientation="Horizontal" ItemVerticalAlignment="Center">
                 <controls:IconButtonWithTip Padding="0" TipTextColor="{StaticResource MahApps.Brushes.Gray1}" Tiptext="Barcode Settings" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
                     <controls:IconButtonWithTip.IconContent>
                         <iconPacks:PackIconMaterial Foreground="White" d:Kind="Barcode" Height="Auto">
@@ -52,6 +52,7 @@
                     </TextBlock.Style>
                 </TextBlock>
             </hc:UniformSpacingPanel>
+
         </StatusBarItem>
     </StatusBar>
 </UserControl>

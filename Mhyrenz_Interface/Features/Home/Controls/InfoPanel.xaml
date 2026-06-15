@@ -10,20 +10,14 @@
              mc:Ignorable="d" 
              d:DesignWidth="700">
     <UserControl.Resources>
-        <Style TargetType="TextBlock" >
-            <Setter Property="FontSize" Value="22.78"/>
-        </Style>
-        <Style x:Key="Heading" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14.22"/>
-        </Style>
         <DataTemplate x:Key="Info">
             <Border BorderThickness="0,0,0,3" BorderBrush="Gray" Padding="10" Background="White">
                 <hc:UniformSpacingPanel Orientation="Vertical" Spacing="10">
                     <hc:UniformSpacingPanel Spacing="40">
-                        <TextBlock Text="{Binding Heading}" Style="{StaticResource Heading}"/>
+                        <TextBlock Text="{Binding Heading}" FontSize="14"/>
                         <iconPacks:PackIconUnicons Width="11" Kind="ReceiptAltLine"/>
                     </hc:UniformSpacingPanel>
-                    <TextBlock Text="{Binding Content}" Style="{StaticResource {x:Type TextBlock}}"/>
+                    <TextBlock Text="{Binding Content}" FontSize="24"/>
                 </hc:UniformSpacingPanel>
             </Border>
         </DataTemplate>
@@ -37,7 +31,7 @@
         <ItemsControl ItemsSource="{Binding InfoCards}" ItemTemplate="{StaticResource Info}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <hc:FlexPanel JustifyContent="SpaceBetween" FlexWrap="NoWrap"/>
+                    <hc:FlexPanel JustifyContent="SpaceBetween" FlexWrap="Wrap"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>

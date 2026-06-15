@@ -8,97 +8,282 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:converter="clr-namespace:Mhyrenz_Interface.Shared.Converters"
       xmlns:controls="clr-namespace:Mhyrenz_Interface.Features.Home.Controls"
+      xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
+      xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
       xmlns:shared="clr-namespace:Mhyrenz_Interface.Shared.Controls"
       xmlns:vm="clr-namespace:Mhyrenz_Interface.DesignTime"
       xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
       Dialog:DialogParticipation.Register="{Binding}"
       mc:Ignorable="d" 
-      d:DesignHeight="800" d:DesignWidth="1280"
+      d:DesignHeight="800" d:DesignWidth="1280" d:Background="#F4F6F8"
 >
     <UserControl.Resources>
-        <converter:String2BooleanConverter x:Key="String2BooleanConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Features/Home/Templates/ActionButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <converter:String2BooleanConverter x:Key="String2BooleanConverter"/>
+            <converter:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="400"/>
-        </Grid.ColumnDefinitions>
-        <DockPanel LastChildFill="True" Margin="30">
-            <hc:Shield DockPanel.Dock="Top" Subject="Session" Status="{Binding Bindtest}" />
-            <TextBlock FontSize="32" FontFamily="{StaticResource Inter}"  DockPanel.Dock="Top">Dashboard</TextBlock>
-            <shared:SearchBox DockPanel.Dock="Top" Margin="0,13,0,17" />
-            <Grid Height="Auto" >
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="420"/>
+            </Grid.ColumnDefinitions>
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="546*"/>
-                    <RowDefinition Height="95*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
-                <ContentControl Content="{Binding}" >
-                    <ContentControl.Style>
-                        <Style TargetType="ContentControl">
-                            <Setter Property="VerticalAlignment" Value="Stretch"/>
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="53*" />
-                                                <ColumnDefinition Width="25"/>
-                                                <ColumnDefinition Width="29*" />
-                                            </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <hc:UniformSpacingPanel HorizontalAlignment="Left" Orientation="Vertical">
+                        <Image HorizontalAlignment="Left" Source="/Resources/Images/Mhyrenz_Interface_IconLarge.png" Width="190" Height="Auto" />
+                        <TextBlock Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Text="Mhyrenz Pharamacy" TextAlignment="Center" FontWeight="DemiBold" FontSize="12"/>
+                    </hc:UniformSpacingPanel>
+                    <hc:UniformSpacingPanel Width="190" VerticalAlignment="Center" Orientation="Vertical" Grid.Column="1" HorizontalAlignment="Right" Spacing="5">
+                        <Border Padding="10 5" Background="{StaticResource MahApps.Brushes.Accent4}">
+                            <TextBlock Text="TOTAL SALES" FontSize="14" FontWeight="SemiBold"/>
+                        </Border>
+                        <TextBlock Text="{Binding Sales, StringFormat=C}" d:Text="20,000" Margin="5 0 0 0" FontWeight="DemiBold" FontSize="41"/>
+                    </hc:UniformSpacingPanel>
+                </Grid>
+                <Grid Grid.Row="1" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <hc:Divider LineStroke="{StaticResource MahApps.Brushes.Control.Border}"/>
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <hc:FlexPanel Margin="14 0" MaxWidth="800" JustifyContent="SpaceBetween" Grid.Row="0" VerticalAlignment="Center">
+                            <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
+                                <iconPacks:PackIconMaterial Kind="CashMultiple"
+                                    Width="36"
+                                    Height="36"
+                                    VerticalAlignment="Top"
+                                    Foreground="{StaticResource MahApps.Brushes.SystemControlHighlightAltListAccentHigh}" />
+                                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="8">
+                                    <TextBlock FontWeight="Medium" Text="PROFIT"/>
+                                    <TextBlock FontWeight="Medium"
+                                               Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundAccent}"
+                                               d:Text="5892"
+                                               Text="{Binding Profit, StringFormat=C}"
+                                               FontSize="24"/>
+                                </hc:UniformSpacingPanel>
+                            </hc:UniformSpacingPanel>
+                            <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
+                                <iconPacks:PackIconMaterial Kind="DotsHorizontalCircle"
+                                    Width="36"
+                                    Height="36"
+                                    VerticalAlignment="Top"
+                                    Foreground="{StaticResource MahApps.Brushes.SystemControlHighlightAltListAccentHigh}" />
+                                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="8">
+                                    <TextBlock FontWeight="Medium" Text="SUNDRY SALES"/>
+                                    <TextBlock FontWeight="Medium"
+                                               Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundAccent}"
+                                               d:Text="5892"
+                                               Text="{Binding Profit, StringFormat=C}"
+                                               FontSize="24"/>
+                                </hc:UniformSpacingPanel>
+                            </hc:UniformSpacingPanel>
+                            <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
+                                <iconPacks:PackIconMaterial Kind="AccountGroup"
+                                                            Width="36"
+                                                            Height="36"
+                                                            VerticalAlignment="Top"
+                                                            Foreground="{StaticResource MahApps.Brushes.SystemControlHighlightAltListAccentHigh}" />
 
-                                            <Grid Grid.Column="0">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="*"/>
-                                                </Grid.RowDefinitions>
-                                                <Grid Grid.Row="0" VerticalAlignment="Center">
-                                                    <controls:InfoPanel DataContext="{Binding InfoPanelViewModel}" d:DataContext="{d:DesignInstance vm:FakeInfoPanelViewModel, IsDesignTimeCreatable=True}"/>
-                                                </Grid>
-                                                <controls:OverviewChart Grid.Row="1" DataContext="{Binding OverviewChartViewModel}" />
-                                            </Grid>
-                                            <UniformGrid VerticalAlignment="Top" Grid.Column="2" Columns="3">
-                                                <Button>2323</Button>
-                                                <Button>2323</Button>
-                                                <Button>2323</Button>
-                                                <Button>2323</Button>
-                                                <Button>2323</Button>
-                                                <Button>2323</Button>
-                                            </UniformGrid>
-                                        </Grid>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SearchBar, Converter={StaticResource String2BooleanConverter}}" Value="True">
-                                    <Setter Property="ContentTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <hc:TransitioningContentControl VerticalAlignment="Top" TransitionMode="Top2BottomWithFade">
-                                                    <!--<controls:InventoryDataGrid DataContext="{Binding InventoryDataGridContext}" Layout="Compacted" Height="500"/>-->
-                                                </hc:TransitioningContentControl>
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ContentControl.Style>
-                </ContentControl>
-                <hc:UniformSpacingPanel Grid.Row="1">
-                    <Button Command="{Binding RegisterCommand}">REGISTER</Button>
-                    <Button Command="{Binding OpenStartupCommand}">Create Session</Button>
-                </hc:UniformSpacingPanel>
+                                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="8">
+                                    <TextBlock Text="CUSTOMERS"
+                                               FontWeight="Medium"/>
+                                    <hc:SimpleStackPanel Orientation="Horizontal">
+                                        <TextBlock d:Text="100 " Text="{Binding Customers}"
+                                                   Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundAccent}"
+                                                   FontSize="24"/>
+                                        <TextBlock Text="Served Today"
+                                                   Margin="5 0 0 0"
+                                                   Width="50"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Bottom"
+                                                   FontSize="9"/>
+                                    </hc:SimpleStackPanel>
+                                </hc:UniformSpacingPanel>
+                            </hc:UniformSpacingPanel>
+                            <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
+                                <iconPacks:PackIconMaterial Kind="Trophy"
+                                                            Width="36"
+                                                            Height="36"
+                                                            VerticalAlignment="Top"
+                                                            Foreground="{StaticResource MahApps.Brushes.SystemControlHighlightAltListAccentHigh}" />
+                                <hc:UniformSpacingPanel Orientation="Vertical"
+                                                        Spacing="10"
+                                                        ItemHorizontalAlignment="Left">
+                                    <TextBlock Text="TOP GROSSING SALE"
+                                               FontWeight="Medium"/>
+                                    <hc:ToggleBlock d:IsChecked="True"  IsChecked="{Binding CategoryName, Converter={StaticResource String2BooleanConverter}}">
+                                        <hc:ToggleBlock.CheckedContent>
+                                            <shared:CategoryTag CategoryName="{Binding CategoryName}"
+                                                                d:CategoryName="Generic"
+                                                                CategoryColor="{Binding CategoryColor}"
+                                                                d:CategoryColor="Red"/>
+                                        </hc:ToggleBlock.CheckedContent>
+                                        <hc:ToggleBlock.UnCheckedContent>
+                                            <TextBlock Text="&lt;No Category&gt;"
+                                                       Foreground="Gray"
+                                                       FontStyle="Italic"/>
+                                        </hc:ToggleBlock.UnCheckedContent>
+                                    </hc:ToggleBlock>
+                                </hc:UniformSpacingPanel>
+                            </hc:UniformSpacingPanel>
+                        </hc:FlexPanel>
+                        <hc:ToggleBlock HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Grid.Row="1" d:IsChecked="True" IsChecked="{Binding DataContext.HasSession, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <hc:ToggleBlock.CheckedContent>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <hc:Divider Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Grid.Row="1" Content="Sales by Category" HorizontalContentAlignment="Right"/>
+                                    <controls:OverviewChart Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxWidth="700" Margin="0 12 0 0" MaxHeight="500" DataContext="{Binding OverviewChartViewModel}" />
+                                </Grid>
+                            </hc:ToggleBlock.CheckedContent>
+                            <hc:ToggleBlock.UnCheckedContent>
+                                <Button Command="{Binding ActionViewModel.CreateCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource ButtonCustom}">
+                                    <hc:DashedBorder IsHitTestVisible="True" BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMedium}" BorderThickness="1.5" BorderDashArray="6 3" Padding="40">
+                                        <hc:UniformSpacingPanel Spacing="12">
+                                            <iconPacks:PackIconMaterialLight Kind="Plus" Width="14" Height="14"/>
+                                            <TextBlock Text="Start New Session" FontSize="14" FontWeight="Medium"/>
+                                        </hc:UniformSpacingPanel>
+                                    </hc:DashedBorder>
+                                </Button>
+                            </hc:ToggleBlock.UnCheckedContent>
+                        </hc:ToggleBlock>
+                    </Grid>
+                </Grid>
             </Grid>
-        </DockPanel>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="300"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <controls:IncomingItemPanel DataContext="{Binding IncomingPanelViewModel}"/>
-            <controls:TransactionsDataGrid Grid.Row="1"/>
+            <Border Margin="40 0 0 0" Grid.Column="1" Background="#F7F9FC">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="12"
+                          ShadowDepth="2"
+                          Opacity="0.12"
+                          Color="Black"/>
+                </Border.Effect>
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Border Padding="16 10" Background="{StaticResource MahApps.Brushes.Accent4}">
+                        <TextBlock Text="Today's Sales History" FontSize="14" FontWeight="DemiBold"/>
+                    </Border>
+                    <checkout:CompletedSalesTreeView Background="Transparent" BorderThickness="1" Padding="0 10 0 0" Grid.Row="1" DataContext="{Binding CompletedSaleViewModel}" d:DataContext="{d:DesignInstance
+                       Type=fake:FakeCompletedSaleViewModel,
+                       IsDesignTimeCreatable=True}"/>
+                </Grid>
+            </Border>
         </Grid>
-
+        <Border DataContext="{Binding ActionViewModel}" Padding="30 16" Grid.Row="1" Background="{StaticResource MahApps.Brushes.Accent4}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <hc:ToggleBlock  HorizontalAlignment="Left" d:IsChecked="False"  DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" IsChecked="{Binding HasSession, Mode=OneWay}">
+                    <hc:ToggleBlock.CheckedContent>
+                        <hc:UniformSpacingPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="6">
+                            <TextBlock Text="Running Session"
+                               FontWeight="Medium"
+                               FontSize="14"
+                               Opacity="0.8"/>
+                            <TextBlock d:Text="Saturday, 13 June, 2026"
+                               Text="{Binding SessionPeriod, StringFormat={}{0:dddd, dd MMMM, yyyy}}"
+                               FontWeight="Medium"
+                               FontSize="30"/>
+                        </hc:UniformSpacingPanel>
+                    </hc:ToggleBlock.CheckedContent>
+                    <hc:ToggleBlock.UnCheckedContent>
+                        <hc:UniformSpacingPanel Orientation="Vertical">
+                            <TextBlock
+                               FontSize="34"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"
+                               Text="Session not found."/>
+                            <TextBlock TextWrapping="Wrap" Margin="0 7" Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Text="There is currently no active business session. Create one to start processing sales."/>
+                        </hc:UniformSpacingPanel>
+                    </hc:ToggleBlock.UnCheckedContent>
+                </hc:ToggleBlock>
+                <hc:UniformSpacingPanel Grid.Column="2" Spacing="10">
+                    <controls:ActionButton
+                        Command="{Binding RegisterCommand}"
+                        Text="Register Sales"
+                        IconKind="ClipboardText"
+                        BorderBrush="#43A047"
+                        Background="#4CAF50"
+                        Foreground="White"
+                        hc:BackgroundSwitchElement.MouseHoverBackground="#43A047"
+                        hc:BackgroundSwitchElement.MouseDownBackground="#388E3C"/>
+                    <controls:ActionButton
+                        Command="{Binding SundryCommand}"
+                        Text="Sundry Options"
+                        IconKind="FormatListBulleted"
+                        Background="#F59E0B"
+                        BorderBrush="#D97706"
+                        Foreground="White"
+                        hc:BackgroundSwitchElement.MouseHoverBackground="#D97706"
+                        hc:BackgroundSwitchElement.MouseDownBackground="#B45309"/>
+                    <hc:Divider Orientation="Vertical" LineStroke="#AFC7DB"/>
+                    <controls:ActionButton x:Name="EditSession"
+                        Command="{Binding EditCommand}"
+                        Text="Edit Session"
+                        IconKind="Pencil"
+                        BorderBrush="#CBD5E1"
+                        Foreground="#64748B"
+                        hc:BackgroundSwitchElement.MouseHoverBackground="#F8FAFC"
+                        hc:BackgroundSwitchElement.MouseDownBackground="#E2E8F0"/>
+                    <controls:ActionButton
+                        Command="{Binding CreateCommand}"
+                        Text="Create Session"
+                        IconKind="ClipboardPlus"
+                        BorderBrush="#B6CDE0"
+                        Foreground="#2563EB"
+                        hc:BackgroundSwitchElement.MouseHoverBackground="#F1F5F9"
+                        hc:BackgroundSwitchElement.MouseDownBackground="#E2E8F0"/>
+                    <controls:ActionButton
+                        Command="{Binding DeleteCommand}"
+                        Text="Discard Session"
+                        IconKind="Delete"
+                        BorderBrush="#E5B8B8"
+                        Foreground="#DC2626"
+                        hc:BackgroundSwitchElement.MouseHoverBackground="#FEF2F2"
+                        hc:BackgroundSwitchElement.MouseDownBackground="#FEE2E2"/>
+                </hc:UniformSpacingPanel>
+                <Popup PlacementTarget="{Binding ElementName=EditSession}"
+                   Placement="Bottom" StaysOpen="False" AllowsTransparency="True" IsOpen="{Binding ShowCalendar, Mode=TwoWay}" >
+                    <Border Padding="0 0 0 10" Background="Transparent" VerticalAlignment="Top">
+                        <hc:UniformSpacingPanel Orientation="Vertical" VerticalAlignment="Top">
+                            <Calendar Name="CalendarControl" SelectedDate="{Binding EditCalendarDate}"/>
+                            <Grid Margin="10,0">
+                                <Button x:Name="SaveChanges" Command="{Binding SaveEditCommand}" Content="Save Changes" Style="{DynamicResource ButtonPrimary}" HorizontalAlignment="Stretch"/>
+                            </Grid>
+                        </hc:UniformSpacingPanel>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

@@ -2,28 +2,26 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using MahApps.Metro.Controls.Dialogs;
-using MahApps.Metro.IconPacks;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
-using Mhyrenz_Interface.Features.Checkout.Views;
 using Mhyrenz_Interface.Features.Home.Views;
-using Mhyrenz_Interface.Features.Inventory.Views;
-using Mhyrenz_Interface.Features.Settings.Views;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
+using Microsoft.ApplicationInsights.DataContracts;
 using MenuItem = Mhyrenz_Interface.Shared.Controls.MenuItem;
 
 namespace Mhyrenz_Interface
 {
-    public class ShellViewModel : BaseViewModel
+    public class ShellViewModel : BaseViewModel, IAsyncInitializable
     {
         private readonly INavigationServiceEx _navigationService;
         private readonly IInventoryStore _inventoryStore;
@@ -33,7 +31,7 @@ namespace Mhyrenz_Interface
         private readonly DispatcherTimer _timer;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private readonly DateTime _baseTime;
-
+        private readonly ISessionStore _sessionStore;
 
         public ShellViewModel(
             ISessionStore sessionStore,
@@ -49,8 +47,8 @@ namespace Mhyrenz_Interface
 
             serialBarcodeService.Start("COM2");
 
-            sessionStore.StateChanged += SessionStore_SessionChanged;
-            Session = sessionStore.CurrentSession.Period.ToString("ddd MMM d, yyyy");
+            _sessionStore = sessionStore;
+            _sessionStore.SessionChanged += SessionStore_SessionChanged;
 
             _navigationService = navigationServiceEx;
             _navigationService.CurrentViewModelChanged += OnCurrentViewModelChanged;
@@ -63,27 +61,6 @@ namespace Mhyrenz_Interface
 
             NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
 
-
-            // Build the menus
-            Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.HouseSolid },
-                Label = "Home",
-                ViewType = typeof(HomeView)
-            });
-            Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.CashRegisterSolid },
-                Label = "Checkout",
-                ViewType = typeof(CheckoutView)
-            });
-            Menu.Add(new MenuItem()
-            {
-                Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.FolderSolid },
-                Label = "Inventory",
-                ViewType = typeof(InventoryView)
-            });
-
             _baseTime = DateTime.Now;
             _stopwatch.Start();
 
@@ -95,13 +72,14 @@ namespace Mhyrenz_Interface
             _timer.Start();
 
             _undoRedoManger.UndoRedoChanged += UndoRedoManger_UndoRedoChanged;
-
-            App.Current.Dispatcher.BeginInvoke(new Action(async () =>
-            {
-                await NavigateToDefaultPageAsync();
-            }));
         }
 
+        public async Task InitializeAsync(CancellationToken token)
+        {
+            await NavigateToDefaultPageAsync();
+
+            await _sessionStore.UpdateSession();
+        }
 
         public ObservableCollection<MenuItem> Menu { get; } = new ObservableCollection<MenuItem>();
         public ObservableCollection<MenuItem> OptionsMenu { get; } = new ObservableCollection<MenuItem>();
@@ -168,11 +146,17 @@ namespace Mhyrenz_Interface
             set => SetProperty(ref _seconds, value);
         }
 
-        private string _session;
-        public string Session
+        public bool HasSession => SessionPeriod.HasValue;
+
+        private DateTime? _sessionPeriod;
+        public DateTime? SessionPeriod
         {
-            get => _session;
-            set => SetProperty(ref _session, value);
+            get => _sessionPeriod;
+            set
+            {
+                if (SetProperty(ref _sessionPeriod, value))
+                    OnPropertyChanged(nameof(HasSession));
+            }
         }
 
 
@@ -222,9 +206,9 @@ namespace Mhyrenz_Interface
             RedoCommand.OnCanExecuteChanged();
         }
 
-        private void SessionStore_SessionChanged(Session obj)
+        private void SessionStore_SessionChanged(Session session)
         {
-            Session = obj?.Period.ToString("ddd MMM d, yyyy");
+            SessionPeriod = session?.Period;
         }
 
         private void SerialBarcodeService_OnSerialDisconnected()

@@ -25,21 +25,6 @@ using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
-
-    public class NotBlank : ValidationRule
-    {
-        public string ErrorContent { get; set; }
-
-        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
-        {
-            if (value is null || value.ToString().IsNullOrEmpty())
-            {
-                return new ValidationResult(false, "Field is required.");
-            }
-
-            return ValidationResult.ValidResult;
-        }
-    }
     public interface IInventoryGridHost
     {
         void RowIntoView(int category, int[] products);

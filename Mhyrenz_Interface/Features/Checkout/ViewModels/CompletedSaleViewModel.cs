@@ -16,9 +16,23 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             {
                 CompletedSales.AddRange(await checkoutService.GetHistory());
             }));
+
+            CompletedSales.CollectionChanged += CompletedSales_CollectionChanged;
+        }
+
+        private void CompletedSales_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HasCompletedSales));
         }
 
         public ObservableCollection<Sale> CompletedSales { get; }
             = new ObservableCollection<Sale>();
+
+        public bool HasCompletedSales => CompletedSales.Count > 0;
+
+        public override void Dispose()
+        {
+            CompletedSales.CollectionChanged -= CompletedSales_CollectionChanged;
+        }
     }
 }

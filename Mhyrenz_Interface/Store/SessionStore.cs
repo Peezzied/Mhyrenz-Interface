@@ -21,7 +21,7 @@ namespace Mhyrenz_Interface.Store
             set
             {
                 _currentSession = value;
-                StateChanged?.Invoke(_currentSession);
+                SessionChanged?.Invoke(_currentSession);
             }
         }
 
@@ -31,6 +31,6 @@ namespace Mhyrenz_Interface.Store
             return CurrentSession;
         }
 
-        public event Action<Session> StateChanged;
+        public event Action<Session> SessionChanged;
     }
 }
