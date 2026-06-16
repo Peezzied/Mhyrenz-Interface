@@ -14,16 +14,24 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
     {
         private readonly int _saleId;
         private readonly decimal _received;
+        private readonly ISessionStore _sessionStore;
         private readonly ICheckoutService _checkoutService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
 
         public bool AllowBack { get; private set; } = true;
 
-        public CheckoutCommand(int saleId, decimal received, ICheckoutService checkoutService, IUndoRedoManager undoRedoManager, ITransactionStore transactionStore)
+        public CheckoutCommand(
+            int saleId,
+            decimal received,
+            ISessionStore sessionStore,
+            ICheckoutService checkoutService,
+            IUndoRedoManager undoRedoManager,
+            ITransactionStore transactionStore)
         {
             _saleId = saleId;
             _received = received;
+            _sessionStore = sessionStore;
             _checkoutService = checkoutService;
             _undoRedoManager = undoRedoManager;
             _transactionStore = transactionStore;
@@ -47,6 +55,8 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
                 return;
 
             var sale = await _checkoutService.CompleteSale(_saleId, _received);
+
+            await _sessionStore.UpdateSession();
 
             _transactionStore.OnSaleChange(sale);
         }

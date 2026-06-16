@@ -97,18 +97,20 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             if (first != MessageBoxResult.Yes)
                 return;
 
-            if (!_sessionStore.CurrentSession.Sales.Any())
+            var hasAgnosticTransactions = _transactionStore.Store.Where(t => t.Transaction.SaleId == null).Any();
+
+            if (!(await _checkoutService.HasCompletedSales()) && !hasAgnosticTransactions)
             {
                 MessageBox.Show(
-                    "Cannot register the session without any sales.",
-                    "Empty Sales",
+                    "Cannot register the session without any sales or transactions.",
+                    "Empty Session",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
 
                 return;
             }
 
-            if (_transactionStore.Store.Count > 0)
+            if (await _checkoutService.HasActiveSales())
             {
                 MessageBox.Show(
                     "Complete the active sales first.",
@@ -117,6 +119,15 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                     MessageBoxImage.Error);
 
                 return;
+            }
+
+            if (hasAgnosticTransactions)
+            {
+                MessageBox.Show(
+                    "Purchases made directly inside of the inventory will be collected to a single sale record.",
+                    "Agnostic Transactions Detected",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
 
             var second = MessageBox.Show(

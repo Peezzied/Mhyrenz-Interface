@@ -46,23 +46,20 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
     public class OverviewChartViewModel : BaseViewModel
     {
         private readonly ICategoryStore _categoryStore;
-        private readonly IInventoryStore _inventoryStore;
+        private readonly ITransactionStore _transactionStore;
 
         public ObservableCollection<PieSeries<ObservableValue>> SalesByCategory { get; private set; }
             = new ObservableCollection<PieSeries<ObservableValue>>();
 
         public bool HasSales => SalesByCategory.Where(c => c.Values.First().Value > 0).Any();
 
-        public ObservableCollection<CategoryChartViewModel> CategoryChartData
-            = new ObservableCollection<CategoryChartViewModel>();
+        public List<CategoryChartViewModel> CategoryChartData
+            = new List<CategoryChartViewModel>();
 
-        public OverviewChartViewModel(ICategoryStore categoryStore, IInventoryStore inventoryStore)
+        public OverviewChartViewModel(ICategoryStore categoryStore, ITransactionStore transactionStore)
         {
             _categoryStore = categoryStore;
-            _inventoryStore = inventoryStore;
-
-            _inventoryStore.PurchaseEvent += InventoryStore_PurchaseEvent;
-            _inventoryStore.Loaded += InventoryStore_Loaded;
+            _transactionStore = transactionStore;
 
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -70,19 +67,12 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             }));
         }
 
-        // No longer needs to create ICollectionView per category —
-        // just filter the dictionary values directly
-        private IEnumerable<ProductDataViewModel> GetProductsByCategory(Category category)
+        public override void Dispose()
         {
-            return _inventoryStore.Store
-                .Where(p => p.CategoryId == category.Id);
-        }
-
-        private decimal GetSalesForCategory(Category category)
-        {
-            return GetProductsByCategory(category)
-                .Where(p => p.Purchase > 0)
-                .Sum(x => x.NetRetailPrice);
+            foreach (var item in SalesByCategory)
+            {
+                item.PointCreated -= Item_PointCreated;
+            }
         }
 
         private void Item_PointCreated(ChartPoint<ObservableValue, LiveChartsCore.SkiaSharpView.Drawing.Geometries.DoughnutGeometry, LiveChartsCore.SkiaSharpView.Drawing.Geometries.LabelGeometry> obj)
@@ -93,39 +83,21 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                 .CastTo<SolidColorBrush>();
         }
 
-        private void InventoryStore_Loaded()
-        {
-            RefreshChart();
-        }
-
-        public override void Dispose()
-        {
-            _inventoryStore.PurchaseEvent -= InventoryStore_PurchaseEvent;
-            _inventoryStore.Loaded -= InventoryStore_Loaded;
-        }
-
-        private void InventoryStore_PurchaseEvent(object sender, InventoryStoreEventArgs e)
-        {
-            RefreshChart();
-        }
-
-        private void RefreshChart()
-        {
-            foreach (var item in CategoryChartData)
-            {
-                item.Sales.Value = (double)GetSalesForCategory(item.Category);
-            }
-        }
-
         private void LoadChart()
         {
             CategoryChartData.Clear();
+
+            var categoryBySales = _transactionStore.Store
+                .GroupBy(t => t.Product.CategoryId)
+                .ToDictionary(k => k.Key, v => (double)v.Sum(t => t.TotalPrice));
 
             var chartData = _categoryStore.Categories.Select(category => new CategoryChartViewModel
             {
                 Category = category.Value,
                 Name = category.Value.Name,
-                Sales = new ObservableValue((double)GetSalesForCategory(category.Value))
+                Sales = new ObservableValue(categoryBySales.TryGetValue(category.Value.Id, out var sales)
+                    ? sales
+                    : 0)
             });
 
             CategoryChartData.AddRange(chartData);

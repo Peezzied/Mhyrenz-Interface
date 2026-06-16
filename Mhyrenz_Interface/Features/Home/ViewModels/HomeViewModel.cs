@@ -16,6 +16,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
     public class HomeViewModel : NavigationViewModel, IAsyncInitializable
     {
         private readonly ICheckoutService _checkoutService;
+        private readonly ISessionStore _sessionStore;
         private readonly ITransactionStore _transactionStore;
 
         public CompletedSaleViewModel CompletedSaleViewModel { get; }
@@ -71,6 +72,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
 
         public HomeViewModel(ICheckoutService checkoutService,
+            ISessionStore sessionStore,
             ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             ICategoryStore categoryStore,
@@ -80,6 +82,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             CompletedSaleViewModel completedSaleViewModel) : base(navigationServiceEx)
         {
             _checkoutService = checkoutService;
+            _sessionStore = sessionStore;
             _transactionStore = transactionStore;
 
             OverviewChartViewModel = overviewChartViewModel;
@@ -110,20 +113,27 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         public async Task InitializeAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-
-            Profit = _transactionStore.Store.Sum(t =>
-                Transaction.CalculateProfit(
-                    t.RetailPrice,
-                    t.Transaction.CostPrice,
-                    t.Qty));
+            var sales = await _checkoutService.GetSalesHistory();
 
             token.ThrowIfCancellationRequested();
 
-            var history = await _checkoutService.GetHistory();
+            // TODO account the sundry once it's available
+            Profit = sales
+                .SelectMany(s => s.Transactions)
+                .Sum(t => Transaction.CalculateProfit(t.RetailPrice, t.CostPrice, t.Amount)) 
+                + _transactionStore.Store
+                    .Where(t => t.Transaction.SaleId == null)
+                    .Sum(t => Transaction.CalculateProfit(
+                        t.Transaction.RetailPrice,
+                        t.Transaction.CostPrice,
+                        t.Transaction.Amount));
 
             token.ThrowIfCancellationRequested();
 
-            Sales = history.Sum(s => s.Total);
+            Sales = sales.Sum(s => s.Total)
+                + _transactionStore.Store
+                    .Where(t => t.Transaction.SaleId == null)
+                    .Sum(t => t.TotalPrice);
         }
 
         public override void Dispose()

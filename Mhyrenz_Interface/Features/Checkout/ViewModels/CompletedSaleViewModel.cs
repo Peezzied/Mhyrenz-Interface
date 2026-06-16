@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         {
             App.Current.Dispatcher.BeginInvoke(new Action(async () =>
             {
-                CompletedSales.AddRange(await checkoutService.GetHistory());
+                CompletedSales.AddRange(await checkoutService.GetSalesHistory());
             }));
 
             CompletedSales.CollectionChanged += CompletedSales_CollectionChanged;

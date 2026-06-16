@@ -70,10 +70,19 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         Task<Product> AddItem(int productId, Guid sessionId, int amount = 1);
         Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId);
         Task<Sale> CompleteSale(int saleId, decimal received);
+
+        /// <summary>
+        /// Collect transactions without sale id to a single sale.
+        /// </summary>
+        /// <returns></returns>
+        Task ConvertAgnosticTransactions(Guid sessionId);
         Task<Sale> Create(Guid sessionId);
         Task DiscardSale(int saleId);
-        Task<IReadOnlyList<Sale>> GetActive();
-        Task<IReadOnlyList<Sale>> GetHistory();
+        Task<IReadOnlyList<Sale>> GetActiveSales();
+        Task<IReadOnlyList<Transaction>> GetAllTransactions();
+        Task<IReadOnlyList<Sale>> GetSalesHistory();
+        Task<bool> HasActiveSales();
+        Task<bool> HasCompletedSales();
 
 
         /// <summary>

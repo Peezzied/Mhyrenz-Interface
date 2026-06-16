@@ -81,7 +81,7 @@ namespace Mhyrenz_Interface.Store
 
         public async Task InitializeAsync()
         {
-            var transactions = (await _checkoutService.GetActive()).SelectMany(sale => sale.Transactions)
+            var transactions = (await _checkoutService.GetAllTransactions())
                 .Select(transaction => _transactionDataViewModel(transaction))
                 .ToList();
 

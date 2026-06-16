@@ -153,7 +153,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<IReadOnlyList<Sale>> GetActive()
+        public async Task<IReadOnlyList<Sale>> GetActiveSales()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -161,11 +161,9 @@ namespace Mhyrenz_Interface.Database.Services
                 .AsNoTracking()
                 .Include(s => s.Transactions)
                     .ThenInclude(t => t.Product)
-                        .ThenInclude(p => p.Category) // TODO: remove this
                 .Include(s => s.Transactions)
                     .ThenInclude(t => t.Product)
-                        .ThenInclude(p => p.PharmaDetails)
-                .Where(s => s.Completed_at == null)
+                        .ThenInclude(p => p.PharmaDetails) // TODO: can be drop
                 .ToListAsync();
 
                 await ApplyProductPurchase(context, sales);
@@ -174,7 +172,46 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<IReadOnlyList<Sale>> GetHistory()
+        public async Task<IReadOnlyList<Transaction>> GetAllTransactions()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var transactions = await context.Transactions
+                .AsNoTracking()
+                .Include(t => t.Product)
+                    .ThenInclude(p => p.PharmaDetails)
+                .ToListAsync();
+
+                foreach (var transaction in transactions)
+                {
+                    transaction.Product.Purchase = transaction.Amount;
+                }
+
+                return transactions;
+            }
+        }
+
+        public async Task<bool> HasCompletedSales()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return await context.Transactions
+                    .AsNoTracking()
+                    .AnyAsync(t => t.Sale.Completed_at != null);
+            }
+        }
+
+        public async Task<bool> HasActiveSales()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return await context.Transactions
+                    .AsNoTracking()
+                    .AnyAsync(t => t.SaleId != null && t.Sale.Completed_at == null);
+            }
+        }
+
+        public async Task<IReadOnlyList<Sale>> GetSalesHistory()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -272,6 +309,36 @@ namespace Mhyrenz_Interface.Database.Services
                     Sale = sale,
                     Transaction = transaction
                 };
+            }
+        }
+
+        public async Task ConvertAgnosticTransactions(Guid sessionId)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var sale = new Sale
+                {
+                    Created_at = DateTime.Now,
+                    SessionId = sessionId,
+                    Total = 0,
+                    SubTotal = 0
+                };
+
+                await context.Sales.AddAsync(sale);
+                await context.SaveChangesAsync(); // sale.Id is now populated
+
+                var transactionData = await context.Transactions
+                    .AsNoTracking()
+                    .Where(t => t.SaleId == null)
+                    .Select(t => new { t.Id, t.RetailPrice, t.Amount })
+                    .ToListAsync();
+
+                var lineTotal = transactionData.Sum(t => t.RetailPrice * t.Amount);
+
+                sale.Total = lineTotal;
+                sale.SubTotal = lineTotal;
+
+                await context.SaveChangesAsync();
             }
         }
 

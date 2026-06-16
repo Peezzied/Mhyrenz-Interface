@@ -24,6 +24,7 @@ namespace Mhyrenz_Interface.Domain.Models
         public ICollection<Transaction> Transactions { get; private set; }
             = new List<Transaction>();
 
+        [Obsolete]
         public Guid SessionId { get; set; }
         public Session Session { get; set; }
 

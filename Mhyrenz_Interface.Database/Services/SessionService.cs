@@ -75,12 +75,14 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
 
         public async Task RecordSession()
         {
-            await _productService.ApplyPurchases();
-
             using (InventoryDbContext context = _inventoryDbContextFactory.CreateDbContext())
             {
+                await _productService.ApplyPurchases();
+
                 var session = await context.Sessions
                     .FirstAsync();
+
+                await _checkoutService.ConvertAgnosticTransactions(session.Id);
 
                 await _databaseSnapshotService.ExportSnapshot(session);
 

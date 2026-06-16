@@ -76,7 +76,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public async Task InitializeAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            var sales = await _checkoutService.GetActive();
+            var sales = await _checkoutService.GetActiveSales();
             token.ThrowIfCancellationRequested();
 
             token.ThrowIfCancellationRequested();

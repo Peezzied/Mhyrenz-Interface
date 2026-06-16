@@ -30,6 +30,7 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public Sale Sale { get; set; }
 
+        [Obsolete]
         public Guid SessionId { get; set; }
         //public Session Session { get; set; }
 
