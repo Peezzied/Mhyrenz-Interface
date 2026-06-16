@@ -161,7 +161,7 @@ namespace Mhyrenz_Interface.Database.Services
                 .AsNoTracking()
                 .Include(s => s.Transactions)
                     .ThenInclude(t => t.Product)
-                        .ThenInclude(p => p.Category)
+                        .ThenInclude(p => p.Category) // TODO: remove this
                 .Include(s => s.Transactions)
                     .ThenInclude(t => t.Product)
                         .ThenInclude(p => p.PharmaDetails)
@@ -259,8 +259,9 @@ namespace Mhyrenz_Interface.Database.Services
                     ?? throw new InvalidOperationException("Transaction not found.");
 
                 sale.Discount = discountInfo.Discount;
+
                 transaction.Discount = discountInfo.Discount;
-                transaction.DiscountRate = discountInfo.DiscountRate;
+                transaction.ApplyDiscount(discountInfo.DiscountRate);
 
                 sale.RecalculateTotals();
 
@@ -274,17 +275,17 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Transaction> Update(int id, Transaction product)
+        public async Task<Transaction> Update(int id, Transaction transaction)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                product.Id = id;
+                transaction.Id = id;
 
-                context.Transactions.Update(product);
+                context.Transactions.Update(transaction);
 
                 await context.SaveChangesAsync();
 
-                return product;
+                return transaction;
             }
         }
 

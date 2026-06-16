@@ -63,16 +63,6 @@ namespace Mhyrenz_Interface.Store
         }
         #endregion
 
-        [Obsolete("Not still implemented yet")]
-        public async Task Register(IEnumerable<Product> transactions)
-        {
-            // TODO implement registering transaction with trasaction service
-
-            var products = await _productService.GetAll();
-
-            LoadProducts(products);
-        }
-
         public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
         {
             RemoveProductEvent?.Invoke(this, products);

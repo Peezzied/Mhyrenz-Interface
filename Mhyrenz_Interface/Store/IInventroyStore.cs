@@ -14,7 +14,6 @@ namespace Mhyrenz_Interface.Store
         event EventHandler<IEnumerable<ProductDataViewModel>> RemoveProductEvent;
         event Action Loaded;
 
-        Task Register(IEnumerable<Product> transactions);
         void LoadProducts(IEnumerable<Product> products);
         Task InitializeAsync();
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);

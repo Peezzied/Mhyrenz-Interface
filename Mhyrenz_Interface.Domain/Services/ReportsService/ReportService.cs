@@ -13,11 +13,11 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
 {
     public class ReportService : IReportService
     {
-        private readonly ICachePath _cachePath;
+        private readonly string _path;
 
-        public ReportService(ICachePath cachePath)
+        public ReportService()
         {
-            _cachePath = cachePath;
+            _path = "";
         }
 
         public void Export(IEnumerable<Product> allProducts, Session session, Dispatcher dispatcher)
@@ -26,7 +26,7 @@ namespace Mhyrenz_Interface.Domain.Services.ReportsService
                 .GroupBy(p => p.Category)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var path = Path.Combine(_cachePath.Dir, "Inventory template.xlsx");
+            var path = Path.Combine(_path, "Inventory template.xlsx");
             var templateBytes = File.ReadAllBytes(path);
 
             var tasks = new List<Task<(string SheetName, IXLWorksheet Sheet)>>();

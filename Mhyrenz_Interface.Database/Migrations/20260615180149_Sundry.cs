@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class Session : Migration
+    public partial class Sundry : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -35,10 +35,30 @@ namespace Mhyrenz_Interface.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SalesRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SessionId = table.Column<Guid>(nullable: false),
+                    Sales = table.Column<decimal>(nullable: false),
+                    Profit = table.Column<decimal>(nullable: false),
+                    SundryProfit = table.Column<decimal>(nullable: false),
+                    SundrySales = table.Column<decimal>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    SalesCount = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SalesRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sessions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    Code = table.Column<string>(nullable: true),
                     Period = table.Column<DateTime>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false)
@@ -46,6 +66,17 @@ namespace Mhyrenz_Interface.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sessions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sundry",
+                columns: table => new
+                {
+                    Sales = table.Column<decimal>(nullable: false),
+                    Profit = table.Column<decimal>(nullable: false)
+                },
+                constraints: table =>
+                {
                 });
 
             migrationBuilder.CreateTable(
@@ -96,7 +127,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     SupplierId = table.Column<int>(nullable: false),
                     Qty = table.Column<int>(nullable: false),
                     RetailPrice = table.Column<decimal>(nullable: false),
-                    ListPrice = table.Column<decimal>(nullable: false),
+                    CostPrice = table.Column<decimal>(nullable: false),
                     Barcode = table.Column<string>(nullable: true),
                     Expiry = table.Column<DateTime>(nullable: true),
                     Batch = table.Column<string>(nullable: true),
@@ -158,6 +189,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     SessionId = table.Column<Guid>(nullable: false),
                     Amount = table.Column<int>(nullable: false),
                     RetailPrice = table.Column<decimal>(nullable: false),
+                    CostPrice = table.Column<decimal>(nullable: false),
                     Discount = table.Column<int>(nullable: false),
                     DiscountRate = table.Column<decimal>(nullable: false)
                 },
@@ -176,12 +208,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                         principalTable: "Sales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Transactions_Sessions_SessionId",
-                        column: x => x.SessionId,
-                        principalTable: "Sessions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -216,6 +242,12 @@ namespace Mhyrenz_Interface.Database.Migrations
                 column: "SessionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Sessions_Code",
+                table: "Sessions",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ProductId",
                 table: "Transactions",
                 column: "ProductId");
@@ -224,17 +256,18 @@ namespace Mhyrenz_Interface.Database.Migrations
                 name: "IX_Transactions_SaleId",
                 table: "Transactions",
                 column: "SaleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_SessionId",
-                table: "Transactions",
-                column: "SessionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "SalesRecords");
+
+            migrationBuilder.DropTable(
+                name: "Sundry");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

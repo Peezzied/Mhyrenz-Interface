@@ -10,5 +10,6 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
         Task<Session> GetSession();
         Task<Session> EditSession(Guid id, DateTime period);
         Task<Session> GenerateSession(Session session);
+        Task RecordSession();
     }
 }

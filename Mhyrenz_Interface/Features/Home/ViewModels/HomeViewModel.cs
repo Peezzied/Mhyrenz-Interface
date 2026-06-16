@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Mhyrenz_Interface.Core.MVVM;
+using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Navigation;
@@ -10,11 +13,10 @@ using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Home.ViewModels
 {
-    public class HomeViewModel : NavigationViewModel, ISalesRegisterHost
+    public class HomeViewModel : NavigationViewModel, IAsyncInitializable
     {
-        private readonly IInventoryStore _inventoryStore;
-        private readonly ICategoryStore _categoryStore;
-        private readonly ISessionStore _sessionStore;
+        private readonly ICheckoutService _checkoutService;
+        private readonly ITransactionStore _transactionStore;
 
         public CompletedSaleViewModel CompletedSaleViewModel { get; }
         public ActionViewModel ActionViewModel { get; }
@@ -23,29 +25,26 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         public InventoryDataGridViewModel InventoryDataGridContext
         {
             get => _invetoryDataGridContext;
-            set
-            {
-                _invetoryDataGridContext = value;
-                OnPropertyChanged(nameof(InventoryDataGridContext));
-            }
+            set => SetProperty(ref _invetoryDataGridContext, value);
         }
 
         public OverviewChartViewModel OverviewChartViewModel { get; }
         public string Bindtest { get; private set; }
 
-        private bool _isRegistering;
-        public bool IsRegistering
+        private decimal _sales;
+        public decimal Sales
         {
-            get => _isRegistering;
-            set
-            {
-                _isRegistering = value;
-                OnPropertyChanged(nameof(IsRegistering));
-            }
+            get => _sales;
+            set => SetProperty(ref _sales, value);
         }
 
-        public decimal Profit => _inventoryStore.Store.Sum(p => p.NetRetailPrice);
-        public decimal Sales => _inventoryStore.Store.Sum(p => p.Item.Profit);
+        private decimal _profit;
+        public decimal Profit
+        {
+            get => _profit;
+            set => SetProperty(ref _profit, value);
+        }
+
         public int Customers => CompletedSaleViewModel.CompletedSales.Count;
 
         private Brush _categoryColor;
@@ -71,18 +70,17 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         }
 
 
-        public HomeViewModel(
+        public HomeViewModel(ICheckoutService checkoutService,
+            ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             ICategoryStore categoryStore,
-            ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
             ActionViewModel actionViewModel,
             CompletedSaleViewModel completedSaleViewModel) : base(navigationServiceEx)
         {
-            _inventoryStore = inventroyStore;
-            _categoryStore = categoryStore;
-            _sessionStore = sessionStore;
+            _checkoutService = checkoutService;
+            _transactionStore = transactionStore;
 
             OverviewChartViewModel = overviewChartViewModel;
             CompletedSaleViewModel = completedSaleViewModel;
@@ -90,10 +88,10 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (_categoryStore.Colors.Count != 0)
-                    foreach (var item in _inventoryStore.Store)
+                if (categoryStore.Colors.Count != 0)
+                    foreach (var item in inventroyStore.Store)
                     {
-                        item.CategoryColor = _categoryStore.Colors[item.CategoryId];
+                        item.CategoryColor = categoryStore.Colors[item.CategoryId];
                     }
 
                 var topCategory = OverviewChartViewModel.CategoryChartData
@@ -105,8 +103,27 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                     return;
 
                 CategoryName = topCategory.Name;
-                CategoryColor = _categoryStore.Colors[topCategory.Id];
+                CategoryColor = categoryStore.Colors[topCategory.Id];
             }), DispatcherPriority.ContextIdle);
+        }
+
+        public async Task InitializeAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            Profit = _transactionStore.Store.Sum(t =>
+                Transaction.CalculateProfit(
+                    t.RetailPrice,
+                    t.Transaction.CostPrice,
+                    t.Qty));
+
+            token.ThrowIfCancellationRequested();
+
+            var history = await _checkoutService.GetHistory();
+
+            token.ThrowIfCancellationRequested();
+
+            Sales = history.Sum(s => s.Total);
         }
 
         public override void Dispose()
@@ -114,10 +131,5 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             CompletedSaleViewModel.Dispose();
             OverviewChartViewModel.Dispose();
         }
-    }
-
-    public interface ISalesRegisterHost
-    {
-        bool IsRegistering { get; set; }
     }
 }

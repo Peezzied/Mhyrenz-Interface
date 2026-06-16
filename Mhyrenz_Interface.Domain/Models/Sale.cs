@@ -45,6 +45,7 @@ namespace Mhyrenz_Interface.Domain.Models
                     ProductId = product.Id,
                     Amount = amount,
                     RetailPrice = product.RetailPrice,
+                    CostPrice = product.CostPrice,
                     SessionId = sessionId
                 };
                 Transactions.Add(transaction);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows;
 using HandyControl.Controls;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
@@ -8,6 +9,7 @@ using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Features.Home.Controls;
 using Mhyrenz_Interface.Store;
+using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.Features.Home.ViewModels
 {
@@ -21,7 +23,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         private readonly ICheckoutService _checkoutService;
         private readonly CreateViewModel<SessionBoxContext> _sessionBoxContext;
 
-        public RelayCommand RegisterCommand { get; }
+        public AsyncRelayCommand RegisterCommand { get; }
         public RelayCommand SundryCommand { get; }
         public RelayCommand EditCommand { get; }
         public RelayCommand CreateCommand { get; }
@@ -75,7 +77,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             _checkoutService = checkoutService;
             _sessionBoxContext = sessionBoxContext;
 
-            RegisterCommand = new RelayCommand(RegisterActionCommand, CanRegisterCommand);
+            RegisterCommand = new AsyncRelayCommand(RegisterActionCommand, CanRegisterCommand);
             SundryCommand = new RelayCommand(SundryActionCommand, CanSundryCommand);
             CreateCommand = new RelayCommand(CreateActionCommand, CanCreateCommand);
             EditCommand = new RelayCommand(EditSessionActionCommand, CanEditCommand);
@@ -83,16 +85,49 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             DeleteCommand = new AsyncRelayCommand(DeleteActionCommand, CanDeleteCommand);
         }
 
+        private async Task RegisterActionCommand(object arg)
+        {
+            var first = MessageBox.Show(
+                "Are you sure you want to register this session?",
+                "Confirm Action",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (first != MessageBoxResult.Yes)
+                return;
+
+            if (_transactionStore.Store.Count > 0)
+            {
+                MessageBox.Show(
+                    "Complete the active sales first.",
+                    "Active Sales",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                return;
+            }
+
+            var second = MessageBox.Show(
+                "This will lock the session and prevent further changes. Continue?",
+                "Final Confirmation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (second != MessageBoxResult.Yes)
+                return;
+
+            await _sessionService.RecordSession();
+
+            await _sessionStore.UpdateSession();
+
+            Growl.Success("Session has been registered successfully.");
+        }
+
         private void SundryActionCommand(object obj)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); // TODO
         }
 
-
-        private void RegisterActionCommand(object obj)
-        {
-            throw new NotImplementedException();
-        }
         private bool CanSundryCommand(object obj)
         {
             return _sessionStore.CurrentSession != null;
@@ -165,7 +200,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
             CommandsOnCanExecutedChanged();
 
-            Growl.Info($"Successfully delete session \"{deletedSession.Period:D}\".");
+            Growl.Success($"Successfully delete session \"{deletedSession.Period:D}\".");
             Growl.Ask(new GrowlInfo
             {
                 Message = "Would you like to create a new session?",
@@ -175,7 +210,9 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                     if (!isConfirmed)
                         return false;
 
-                    CreateCommand.Execute(null);
+                    if (CanCreateCommand(null))
+                        CreateCommand.Execute(null);
+
                     return true;
                 }
             });

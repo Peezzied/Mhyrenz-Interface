@@ -16,7 +16,7 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public int Qty { get; set; }
         public decimal RetailPrice { get; set; }
-        public decimal ListPrice { get; set; }
+        public decimal CostPrice { get; set; }
         public string Barcode { get; set; }
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
@@ -41,10 +41,8 @@ namespace Mhyrenz_Interface.Domain.Models
         // Calculated
         public int NetQty => Qty - Purchase;
         public decimal NetRetail => Purchase * RetailPrice;
-        public decimal CostPrice => Qty * RetailPrice;
-        public decimal ProfitRevenue => RetailPrice - ListPrice;
-        public decimal Profit => Purchase * ProfitRevenue;
-        public decimal TotalListPrice => ListPrice * Qty;
+        //public decimal CostPrice => Qty * RetailPrice;
+        public decimal LineCost => CostPrice * Qty;
 
         public void Delete()
         {
@@ -54,6 +52,11 @@ namespace Mhyrenz_Interface.Domain.Models
         public void DeleteBack()
         {
             IsDeleted = false;
+        }
+
+        public void ApplyPurchase(int purchase)
+        {
+            Qty -= purchase;
         }
 
         public void AddItem(int amount, Guid sessionId)
@@ -69,6 +72,7 @@ namespace Mhyrenz_Interface.Domain.Models
                     ProductId = Id,
                     Amount = amount,
                     RetailPrice = RetailPrice,
+                    CostPrice = CostPrice,
                     SessionId = sessionId
                 });
                 return;

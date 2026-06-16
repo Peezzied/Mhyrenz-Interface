@@ -128,7 +128,7 @@ namespace Mhyrenz_Interface.Test
                 CategoryId = 1,
                 SupplierId = 1,
                 RetailPrice = 50m,
-                ListPrice = 45m,
+                CostPrice = 45m,
                 Barcode = Guid.NewGuid().ToString("N")
             };
         }

@@ -7,6 +7,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
     public interface IProductService
     {
         Task<IEnumerable<Product>> AddMany(IEnumerable<Product> entities);
+        Task ApplyPurchases();
         Task<Product> Create(Product entity);
         Task<Product> Get(int id);
         Task<IReadOnlyList<Product>> GetAll();

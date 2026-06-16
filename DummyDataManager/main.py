@@ -44,7 +44,7 @@ try:
         Name,
         Qty,
         RetailPrice,
-        ListPrice,
+        CostPrice,
         CategoryId,
         SupplierId,
         IsDeleted

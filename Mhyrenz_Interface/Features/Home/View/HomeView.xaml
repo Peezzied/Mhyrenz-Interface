@@ -158,8 +158,8 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
-                                    <hc:Divider Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Grid.Row="1" Content="Sales by Category" HorizontalContentAlignment="Right"/>
-                                    <controls:OverviewChart Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxWidth="700" Margin="0 12 0 0" MaxHeight="500" DataContext="{Binding OverviewChartViewModel}" />
+                                    <hc:Divider Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Grid.Row="0" Content="Sales by Category" HorizontalContentAlignment="Right"/>
+                                    <controls:OverviewChart Grid.Row="1" MaxWidth="700" MaxHeight="500" DataContext="{Binding OverviewChartViewModel}" />
                                 </Grid>
                             </hc:ToggleBlock.CheckedContent>
                             <hc:ToggleBlock.UnCheckedContent>

@@ -79,6 +79,31 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
+        public async Task ApplyPurchases()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var products = await context.Products
+                   .AsNoTracking()
+                   .Include(p => p.Supplier)
+                   .Include(p => p.Category)
+                   .Include(p => p.PharmaDetails)
+                   .ToListAsync();
+
+                var purchases = await GetTransactions(context);
+
+                foreach (var product in products)
+                {
+                    if (purchases.TryGetValue(product.Id, out var purchase))
+                    {
+                        product.ApplyPurchase(purchase);
+                    }
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
         private static async Task<Dictionary<int, int>> GetTransactions(InventoryDbContext context)
         {
             return await context.Transactions

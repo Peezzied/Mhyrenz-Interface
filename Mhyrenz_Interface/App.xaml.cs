@@ -135,9 +135,12 @@ namespace Mhyrenz_Interface
                 .AddSingleton<ICategoryStore, CategoryStore>()
                 .AddSingleton<ITransactionStore, TransactionStore>()
 
-                .AddSingleton<ICachePath, CachePath>()
+                //.AddSingleton<ICachePath, CachePath>()
                 .AddSingleton<IBarcodeImageCache, BarcodeImageCache>()
                 .AddSingleton<IReportService, ReportService>()
+                
+                .AddSingleton<IDatabaseSnapshotService, DatabaseSnapshotService>(s => 
+                    ActivatorUtilities.CreateInstance<DatabaseSnapshotService>(s, Path.Combine(AppContext.BaseDirectory, ".Mhyrenz Export"))) // TODO temporary
 
                 .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG
 

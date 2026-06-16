@@ -71,9 +71,13 @@ namespace Mhyrenz_Interface.Domain.Services.BarcodeCacheService
         }
 
 
-        public BarcodeImageCache(ICachePath cachePath)
+        public BarcodeImageCache()
         {
-            _cacheDir = cachePath.Dir;
+            string cacheDir = Path.Combine(Path.GetTempPath(), "Mhyrenz Interface Barcodes");
+            if (!File.Exists(cacheDir))
+                Directory.CreateDirectory(cacheDir);
+
+            _cacheDir = cacheDir;
         }
 
         public static async Task LoadBarcodeImageCache(IEnumerable<Product> products, IBarcodeImageCache instance)

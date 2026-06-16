@@ -50,7 +50,7 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
         public decimal RetailPrice => Order.Product.RetailPrice;
 
-        public decimal ListPrice => Order.Product.ListPrice;
+        public decimal ListPrice => Order.Product.CostPrice;
 
         public string CategoryName
         {

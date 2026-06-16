@@ -215,7 +215,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 }
             }
         }
-        public decimal ListPrice => Item.ListPrice;
+        public decimal ListPrice => Item.CostPrice;
 
         public string Barcode
         {

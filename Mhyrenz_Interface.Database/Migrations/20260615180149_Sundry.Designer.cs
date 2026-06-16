@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260615100627_Session")]
-    partial class Session
+    [Migration("20260615180149_Sundry")]
+    partial class Sundry
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -83,14 +83,14 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("Expiry")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("ListPrice")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -155,10 +155,45 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.ToTable("Sales");
                 });
 
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.SalesRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Profit")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Sales")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SalesCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SundryProfit")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SundrySales")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SalesRecords");
+                });
+
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Session", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -172,7 +207,21 @@ namespace Mhyrenz_Interface.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.ToTable("Sessions");
+                });
+
+            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Sundry", b =>
+                {
+                    b.Property<decimal>("Profit")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Sales")
+                        .HasColumnType("TEXT");
+
+                    b.ToTable("Sundry");
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Supplier", b =>
@@ -198,6 +247,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Discount")
                         .HasColumnType("INTEGER");
 
@@ -221,8 +273,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("SaleId");
-
-                    b.HasIndex("SessionId");
 
                     b.ToTable("Transactions");
                 });
@@ -275,12 +325,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasOne("Mhyrenz_Interface.Domain.Models.Sale", "Sale")
                         .WithMany("Transactions")
                         .HasForeignKey("SaleId");
-
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
-                        .WithMany()
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

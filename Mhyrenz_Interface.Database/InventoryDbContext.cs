@@ -13,7 +13,9 @@ namespace Mhyrenz_Interface.Database
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Product> Products { get; set; }    
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<SalesRecord> SalesRecords { get; set; }
         public DbSet<Sale> Sales { get; set; }
+        public DbSet<Sundry> Sundry { get; set; }
         public DbSet<Order> Orders { get; set;  }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
@@ -23,12 +25,16 @@ namespace Mhyrenz_Interface.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Sundry>()
+                .HasNoKey();
             modelBuilder.Entity<Product>()
                 .HasQueryFilter(i => !i.IsDeleted)
                 .HasIndex(i => i.Barcode)
                 .IsUnique();
             modelBuilder.Entity<Session>()
-                .HasQueryFilter(i => i.IsActive);
+                .HasQueryFilter(i => i.IsActive)
+                .HasIndex(x => x.Code)
+                .IsUnique();
             modelBuilder.Entity<Transaction>()
                 .HasQueryFilter(i => !i.Product.IsDeleted);
         }
