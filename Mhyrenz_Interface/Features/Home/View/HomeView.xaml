@@ -7,6 +7,7 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"  
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:converter="clr-namespace:Mhyrenz_Interface.Shared.Converters"
+      xmlns:localConverter="clr-namespace:Mhyrenz_Interface.Features.Home.Converters"
       xmlns:controls="clr-namespace:Mhyrenz_Interface.Features.Home.Controls"
       xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
       xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Controls"
@@ -25,6 +26,7 @@
 
             <converter:String2BooleanConverter x:Key="String2BooleanConverter"/>
             <converter:DetailsTextNoneConverter x:Key="DetailsTextNoneConverter"/>
+            <localConverter:BooleanToVirtualVisibilityConverter x:Key="BooleanToVirtualVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -151,6 +153,24 @@
                                 </hc:UniformSpacingPanel>
                             </hc:UniformSpacingPanel>
                         </hc:FlexPanel>
+                        <Grid Grid.Row="1" Visibility="{Binding DataContext.HasSession, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVirtualVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <hc:Divider Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Grid.Row="0" Content="Sales by Category" HorizontalContentAlignment="Right"/>
+                            <controls:OverviewChart Grid.Row="1" MaxWidth="700" MaxHeight="500" DataContext="{Binding OverviewChartViewModel}" />
+                        </Grid>
+                        <hc:SimplePanel Grid.Row="1" Visibility="{Binding DataContext.HasSession, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                            <Button Command="{Binding ActionViewModel.CreateCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource ButtonCustom}">
+                                <hc:DashedBorder IsHitTestVisible="True" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlBackgroundBaseMedium}" BorderThickness="1.5" BorderDashArray="6 3" Padding="40">
+                                    <hc:UniformSpacingPanel Spacing="12">
+                                        <iconPacks:PackIconMaterialLight Kind="Plus" Width="14" Height="14"/>
+                                        <TextBlock Text="Start New Session" FontSize="14" FontWeight="Medium"/>
+                                    </hc:UniformSpacingPanel>
+                                </hc:DashedBorder>
+                            </Button>
+                        </hc:SimplePanel>
                         <hc:ToggleBlock HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Grid.Row="1" d:IsChecked="True" IsChecked="{Binding DataContext.HasSession, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Window}}">
                             <hc:ToggleBlock.CheckedContent>
                                 <Grid>

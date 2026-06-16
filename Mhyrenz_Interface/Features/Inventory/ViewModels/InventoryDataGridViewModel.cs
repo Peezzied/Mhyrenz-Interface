@@ -50,7 +50,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private readonly IUndoRedoManager _undoRedoManager;
 
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, IInventoryStore inventoryStore, CreateCommand<DeleteCommand> deleteCommand, NavigationViewModel viewHost)
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, ISessionStore sessionStore, IInventoryStore inventoryStore, CreateCommand<DeleteCommand> deleteCommand, NavigationViewModel viewHost)
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
@@ -60,7 +60,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 SynchronizationContextCollectionEventDispatcher.Current);
 
             DeleteCommand = deleteCommand();
+
+            SessionClosed = sessionStore.CurrentSession == null;
         }
+
+        public bool SessionClosed { get; set; }
 
         private bool _isReadOnly = false;
         public bool IsReadOnly

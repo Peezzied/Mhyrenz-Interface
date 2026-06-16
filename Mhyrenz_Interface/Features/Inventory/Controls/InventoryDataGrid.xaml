@@ -327,6 +327,7 @@
 
             <DataTemplate x:Key="DataGridDetailedLayout">
                 <DataGrid FrozenColumnCount="2" 
+                          x:Name="DataGridDetailed"
                           SelectionMode="Extended"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=view:InventoryView}}"
                           dd:DragDrop.IsDragSource="True"
@@ -378,7 +379,28 @@
                         <DataGridTemplateColumn Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
                         <columns:NumberColumn local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
                         <columns:NumberColumn local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="List" Width="100" Binding="{Binding ListPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                        <columns:NumberColumn local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}"/>
+                        <columns:NumberColumn IsReadOnly="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite" NumberControlStyle="{StaticResource PurchaseStyle}">
+                            <columns:NumberColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}">
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </columns:NumberColumn.CellStyle>
+                            <columns:NumberColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </columns:NumberColumn.HeaderStyle>
+                        </columns:NumberColumn>
                         <DataGridTextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
                         <columns:NumberColumn local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"/>
                         <DataGridTemplateColumn Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}"  />

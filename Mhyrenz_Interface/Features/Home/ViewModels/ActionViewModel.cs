@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using HandyControl.Controls;
@@ -95,6 +96,17 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
             if (first != MessageBoxResult.Yes)
                 return;
+
+            if (!_sessionStore.CurrentSession.Sales.Any())
+            {
+                MessageBox.Show(
+                    "Cannot register the session without any sales.",
+                    "Empty Sales",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                return;
+            }
 
             if (_transactionStore.Store.Count > 0)
             {
