@@ -59,26 +59,29 @@ namespace Mhyrenz_Interface.Domain.Models
             Qty -= purchase;
         }
 
-        public void AddItem(int amount, Guid sessionId)
+        public Transaction AddItem(int amount, Guid sessionId)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
-            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SessionId == sessionId);
-            if (existing == null)
+            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SessionId == sessionId);
+            if (transaction == null)
             {
-                Transactions.Add(new Transaction
+                transaction = new Transaction
                 {
                     ProductId = Id,
                     Amount = amount,
                     RetailPrice = RetailPrice,
                     CostPrice = CostPrice,
                     SessionId = sessionId
-                });
-                return;
+                };
+                Transactions.Add(transaction);
+                return transaction;
             }
 
-            existing.IncreaseAmount(amount);
+            transaction.IncreaseAmount(amount);
+
+            return transaction;
         }
 
         public Transaction SubtractItem(Guid sessionId, int amount)

@@ -130,6 +130,10 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
             token.ThrowIfCancellationRequested();
 
+            token.ThrowIfCancellationRequested();
+            OverviewChartViewModel.LoadChart(sales);
+
+            token.ThrowIfCancellationRequested();
             Sales = sales.Sum(s => s.Total)
                 + _transactionStore.Store
                     .Where(t => t.Transaction.SaleId == null)

@@ -60,11 +60,6 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
         {
             _categoryStore = categoryStore;
             _transactionStore = transactionStore;
-
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                LoadChart();
-            }));
         }
 
         public override void Dispose()
@@ -83,20 +78,27 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                 .CastTo<SolidColorBrush>();
         }
 
-        private void LoadChart()
+        public void LoadChart(IEnumerable<Sale> sales)
         {
             CategoryChartData.Clear();
 
+            var completedSales = sales.Select(s => s.Id);
+
             var categoryBySales = _transactionStore.Store
                 .GroupBy(t => t.Product.CategoryId)
-                .ToDictionary(k => k.Key, v => (double)v.Sum(t => t.TotalPrice));
+                .ToDictionary(k => k.Key, v =>
+                {
+                    var transactions = v.Where(t => !t.Transaction.SaleId.HasValue || 
+                        (t.Transaction.SaleId.HasValue && completedSales.Contains(t.Transaction.SaleId.Value)));
+                    return (double)transactions.Sum(t => t.TotalPrice);
+                });
 
             var chartData = _categoryStore.Categories.Select(category => new CategoryChartViewModel
             {
                 Category = category.Value,
                 Name = category.Value.Name,
-                Sales = new ObservableValue(categoryBySales.TryGetValue(category.Value.Id, out var sales)
-                    ? sales
+                Sales = new ObservableValue(categoryBySales.TryGetValue(category.Value.Id, out var transactions)
+                    ? transactions
                     : 0)
             });
 

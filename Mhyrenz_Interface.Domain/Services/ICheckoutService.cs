@@ -67,7 +67,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<Product> AddItem(int productId, Guid sessionId, int amount = 1);
+        Task<CheckoutResult> AddItem(int productId, Guid sessionId, int amount = 1);
         Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId);
         Task<Sale> CompleteSale(int saleId, decimal received);
 
@@ -139,7 +139,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<Product> Subtract(int productId, Guid sessionId, int amount = 1);
+        Task<CheckoutResult> Subtract(int productId, Guid sessionId, int amount = 1);
         Task<Transaction> Update(int id, Transaction product);
     }
 }

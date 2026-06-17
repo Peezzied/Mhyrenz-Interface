@@ -40,7 +40,9 @@ namespace Mhyrenz_Interface.Store
                 throw new ArgumentNullException(nameof(checkoutResult.Transaction), "Transaction cannot be null in CheckoutResult.");
 
             _inventoryStore.PurchaseProduct(transaction.ProductId, transaction.Product.Purchase);
-            OnSaleChange(checkoutResult.Sale);
+
+            if (checkoutResult.Sale != null) 
+                OnSaleChange(checkoutResult.Sale);
 
             if (checkoutResult.WasRemoved)
             {

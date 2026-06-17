@@ -58,7 +58,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Product> AddItem(int productId, Guid sessionId, int amount = 1)
+        public async Task<CheckoutResult> AddItem(int productId, Guid sessionId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -67,12 +67,17 @@ namespace Mhyrenz_Interface.Database.Services
                     .FirstOrDefaultAsync(p => p.Id == productId)
                     ?? throw new InvalidOperationException("Product not found.");
 
-                product.AddItem(amount, sessionId);
+                var transaction = product.AddItem(amount, sessionId);
                 product.RecalculatePurchase();
 
                 await context.SaveChangesAsync();
 
-                return product;
+                transaction.Product = product;
+
+                return new CheckoutResult
+                {
+                    Transaction = transaction
+                };
             }
         }
 
@@ -129,7 +134,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<Product> Subtract(int productId, Guid sessionId, int amount = 1)
+        public async Task<CheckoutResult> Subtract(int productId, Guid sessionId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -140,16 +145,24 @@ namespace Mhyrenz_Interface.Database.Services
 
                 var resultTransaction = product.SubtractItem(sessionId, amount);
 
+                var checkoutResult = new CheckoutResult
+                {
+                    Transaction = resultTransaction
+                };
+
                 if (resultTransaction.Amount == 0)
                 {
                     context.Transactions.Remove(resultTransaction);
+                    checkoutResult.WasRemoved = true; 
                 }
 
                 product.RecalculatePurchase();
 
                 await context.SaveChangesAsync();
 
-                return product;
+                checkoutResult.Transaction.Product = product;
+
+                return checkoutResult;
             }
         }
 
