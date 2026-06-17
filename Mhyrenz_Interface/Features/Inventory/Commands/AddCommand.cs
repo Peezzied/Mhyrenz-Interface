@@ -44,7 +44,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
                 && CanSubmit;
         }
 
-        private void SideEffect(NavigationViewModel vm)
+        private async Task SideEffect(NavigationViewModel vm)
         {
             var view = vm as InventoryViewModel;
             view.RowIntoView(_rowInfo.Category, _rowInfo.Products);

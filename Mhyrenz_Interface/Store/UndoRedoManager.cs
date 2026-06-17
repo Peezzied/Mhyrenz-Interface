@@ -84,8 +84,13 @@ namespace Mhyrenz_Interface.Store
         {
             await _navigationService.NavigateAsync(command.CurrentViewIn);
 
-            command.SideEffect?.Invoke(
-                _navigationService.CurrentViewModel);
+            if (command.SideEffect != null)
+            {
+                await App.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await command.SideEffect(_navigationService.CurrentViewModel);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+            }
 
             UndoRedoEvent?.Invoke(
                 intent,

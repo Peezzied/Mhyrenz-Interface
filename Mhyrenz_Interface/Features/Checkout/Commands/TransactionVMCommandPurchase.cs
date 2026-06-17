@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Core.UndoRedo;
+using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Navigation;
@@ -19,6 +21,7 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
         private readonly DTO _dto;
         private readonly ICheckoutService _checkoutService;
         private readonly ITransactionStore _transactionStore;
+        private Task<CheckoutResult> _result;
 
         public TransactionVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto)
         {
@@ -28,10 +31,17 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             SideEffect = SideEffectHandler;
         }
 
-        private void SideEffectHandler(NavigationViewModel vm)
+        private async Task SideEffectHandler(NavigationViewModel vm)
         {
-            var view = vm as CheckoutViewModel;
-            //view.RowIntoView(PropertyChangedArgs.RowInfo.Sale, PropertyChangedArgs.RowInfo.Transactions);
+            await Completer();
+        }
+
+        private async Task Completer()
+        {
+            var result = await _result;
+            _transactionStore.AddToSale(result);
+
+            _dto.TransactionId = result.Transaction.Id;
         }
 
         public override async void Command(object parameter, ActionType intent)
@@ -53,17 +63,16 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
 
             if (shouldAdd)
             {
-                var result = await _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, amount);
-
-                _transactionStore.AddToSale(result);
-
-                _dto.TransactionId = result.Transaction.Id;
+                _result = _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, amount);
             }
             else
             {
-                var result = await _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, amount);
+                _result = _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, amount);
+            }
 
-                _transactionStore.AddToSale(result);
+            if (intent == ActionType.Normal)
+            {
+                await Completer();
             }
         }
 

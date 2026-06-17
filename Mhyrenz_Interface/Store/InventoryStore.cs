@@ -67,7 +67,6 @@ namespace Mhyrenz_Interface.Store
         {
             RemoveProductEvent?.Invoke(this, products);
             Store.RemoveMany(products.Select(x => x.Item.Id));
-
         }
 
         public IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products)

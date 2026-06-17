@@ -10,7 +10,7 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
         private readonly TrackPropertyHelper.Setter _setter;
         private readonly Action _propertyChangeHandler;
 
-        public Action<NavigationViewModel> SideEffect { get; set; }
+        public PostNavigation SideEffect { get; set; }
         public Type CurrentViewIn { get; }
 
         public ChangedArgs PropertyChangedArgs { get; set; }

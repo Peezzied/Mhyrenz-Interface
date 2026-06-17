@@ -25,7 +25,7 @@ namespace Mhyrenz_Interface.Navigation
             _viewModelFactory = viewModelFactory;
         }
 
-        public async Task<bool> NavigateAsync(Type viewType, Action<NavigationViewModel> postNavigationCallback = null)
+        public async Task<bool> NavigateAsync(Type viewType, PostNavigation postNavigationCallback = null)
         {
             var version = Interlocked.Increment(ref _navigationVersion);
 
@@ -69,16 +69,18 @@ namespace Mhyrenz_Interface.Navigation
                 CurrentViewModel = newVm;
                 CurrentViewModelChanged?.Invoke(CurrentViewModel);
 
-                await App.Current.Dispatcher.InvokeAsync(
-                    () =>
+                if (postNavigationCallback != null)
+                {
+                    await App.Current.Dispatcher.InvokeAsync(async () =>
                     {
-                        if (!token.IsCancellationRequested &&
-                            version == _navigationVersion)
-                        {
-                            postNavigationCallback?.Invoke(CurrentViewModel);
-                        }
-                    },
-                    DispatcherPriority.Loaded);
+                        if (token.IsCancellationRequested ||
+                            version != _navigationVersion)
+                            return;
+
+                        await postNavigationCallback(CurrentViewModel);
+                    }, DispatcherPriority.Loaded);
+                }
+
                 return true;
             }
             catch (OperationCanceledException)

@@ -10,7 +10,7 @@ namespace Mhyrenz_Interface.Core.UndoRedo
 
     public interface IUndoableCommand
     {
-        Action<NavigationViewModel> SideEffect { get; }
+        PostNavigation SideEffect { get; }
         Type CurrentViewIn { get; }
         void Execute();
         bool Undo();

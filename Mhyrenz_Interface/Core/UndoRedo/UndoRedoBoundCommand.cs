@@ -7,12 +7,12 @@ namespace Mhyrenz_Interface.Core.UndoRedo
     public class UndoRedoBoundCommand : IUndoableCommand
     {
         public IUndoRedoBound Command { get; private set; }
-        public Action<NavigationViewModel> SideEffect { get; }
+        public PostNavigation SideEffect { get; }
         public Type CurrentViewIn { get; }
 
         private readonly object _commandParameter;
 
-        public UndoRedoBoundCommand(IUndoRedoBound command, Action<NavigationViewModel> sideEffect, Type view, object commandParameter = null)
+        public UndoRedoBoundCommand(IUndoRedoBound command, PostNavigation sideEffect, Type view, object commandParameter = null)
         {
             Command = command;
             SideEffect = sideEffect;

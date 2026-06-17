@@ -93,12 +93,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private async Task GoToItemActionCommand(object obj)
         {
-            await _navigationService.NavigateAsync(typeof(InventoryView), vm =>
-            {
-                var view = vm as InventoryViewModel;
-                view.SelectTab(CategoryId);
-                view.RowIntoView(Item.CategoryId, new[] { Item.Id });
-            });
+            // TODO GoToItemActionCommand comply to new post navigation signature
+            //await _navigationService.NavigateAsync(typeof(InventoryView), vm =>
+            //{
+            //    var view = vm as InventoryViewModel;
+            //    view.SelectTab(CategoryId);
+            //    view.RowIntoView(Item.CategoryId, new[] { Item.Id });
+            //});
         }
 
         private void SerialBarcodeService_OnBarcodeReceived(string obj)

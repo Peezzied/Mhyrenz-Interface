@@ -30,7 +30,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             _undoRedoManager = undoRedoManager;
         }
 
-        private void SideEffect(NavigationViewModel vm)
+        private async Task SideEffect(NavigationViewModel vm)
         {
             var view = vm as InventoryViewModel;
 
