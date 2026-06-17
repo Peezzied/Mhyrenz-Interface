@@ -42,20 +42,6 @@
         </i:Interaction.Behaviors>
         <DataGrid.Resources>
             <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
-
-            <Style x:Key="QtyStyle" TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
-                <Setter Property="Value" Value="{Binding QtyIncrementEdit, UpdateSourceTrigger=Explicit}"/>
-                <Setter Property="Maximum" Value="{Binding MaxIncrementQty}"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
-                        <DataTrigger.Setters>
-                            <Setter Property="Maximum" Value="{Binding MaxQty}"/>
-                            <Setter Property="HideUpDownButtons" Value="True"/>
-                            <Setter Property="Value" Value="{Binding Qty, StringFormat={}{0}x, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
-                        </DataTrigger.Setters>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
         </DataGrid.Resources>
         <DataGrid.CellStyle>
             <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
@@ -97,7 +83,22 @@
             </Style>
         </DataGrid.RowStyle>
         <DataGrid.Columns>
-            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}" NumberControlStyle="{StaticResource QtyStyle}">
+            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}">
+                <columns:NumberColumn.Style>
+                    <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+                        <Setter Property="Value" Value="{Binding QtyIncrementEdit, UpdateSourceTrigger=Explicit}"/>
+                        <Setter Property="Maximum" Value="{Binding MaxIncrementQty}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
+                                <DataTrigger.Setters>
+                                    <Setter Property="Maximum" Value="{Binding MaxQty}"/>
+                                    <Setter Property="HideUpDownButtons" Value="True"/>
+                                    <Setter Property="Value" Value="{Binding Qty, StringFormat={}{0}x, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </columns:NumberColumn.Style>
                 <columns:NumberColumn.CellStyle>
                     <Style TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell.Azure}"/>
                 </columns:NumberColumn.CellStyle>

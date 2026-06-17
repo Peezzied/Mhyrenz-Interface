@@ -16,7 +16,6 @@ namespace Mhyrenz_Interface.Store
         void Execute(IUndoableCommand command);
         bool Push(IUndoableCommand command);
         Task Redo();
-        bool ShowWarning(Action rejectEffect = null);
         Task Undo();
     }
 }

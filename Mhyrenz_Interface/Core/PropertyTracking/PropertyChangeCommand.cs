@@ -5,7 +5,7 @@ using Mhyrenz_Interface.Navigation;
 namespace Mhyrenz_Interface.Core.PropertyTracking
 {
 
-    public abstract class PropertyChangeCommand<RowInfo> : IUndoableCommand, IPropertyChangedCommand
+    public abstract class PropertyChangeCommand<RowInfo> : IUndoableCommand
     {
         private readonly TrackPropertyHelper.Setter _setter;
         private readonly Action _propertyChangeHandler;
@@ -65,9 +65,5 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
             public Action PropertyChangeHandler { get; set; }
             public Type CurrentViewIn { get; set; }
         }
-    }
-
-    public interface IPropertyChangedCommand
-    {
     }
 }

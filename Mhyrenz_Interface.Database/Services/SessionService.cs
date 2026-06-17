@@ -79,6 +79,8 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
             {
                 await _productService.ApplyPurchases();
 
+                await _productService.RemovePhysically();
+
                 var session = await context.Sessions
                     .FirstAsync();
 

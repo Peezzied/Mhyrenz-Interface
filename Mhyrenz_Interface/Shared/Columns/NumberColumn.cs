@@ -1,40 +1,42 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using HandyControl.Controls;
 using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Shared.Adorners;
+using NumericUpDown = MahApps.Metro.Controls.NumericUpDown;
 using Style = System.Windows.Style;
 
 namespace Mhyrenz_Interface.Shared.Columns
 {
     public class NumberColumn : DataGridNumericUpDownColumn
     {
-        public Style NumberControlStyle
+        public Style Style
         {
-            get { return (Style)GetValue(NumberControlStyleProperty); }
-            set { SetValue(NumberControlStyleProperty, value); }
+            get { return (Style)GetValue(StyleProperty); }
+            set { SetValue(StyleProperty, value); }
         }
 
-        public static readonly DependencyProperty NumberControlStyleProperty =
-            DependencyProperty.Register(nameof(NumberControlStyle), typeof(Style), typeof(NumberColumn), new PropertyMetadata(null));
+        public static readonly DependencyProperty StyleProperty =
+            DependencyProperty.Register(nameof(Style), typeof(Style), typeof(NumberColumn), new PropertyMetadata(null));
 
 
-        private BindingBase _binding;
+        private BindingBase _displayBinding;
         public BindingBase DisplayBinding
         {
             get
             {
-                return _binding;
+                return _displayBinding;
             }
             set
             {
-                if (_binding != value)
+                if (_displayBinding != value)
                 {
-                    BindingBase binding = _binding;
-                    _binding = value;
+                    BindingBase binding = _displayBinding;
+                    _displayBinding = value;
                     CoerceValue(DataGridColumn.IsReadOnlyProperty);
                     CoerceValue(DataGridColumn.SortMemberPathProperty);
-                    OnBindingChanged(binding, _binding);
+                    OnBindingChanged(binding, _displayBinding);
                 }
             }
         }
@@ -48,7 +50,7 @@ namespace Mhyrenz_Interface.Shared.Columns
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {
             var numericUpDown = base.GenerateEditingElement(cell, dataItem) as NumericUpDown;
-            numericUpDown.Style = NumberControlStyle ?? default;
+            numericUpDown.Style = Style ?? default;
             return CellAdornerHelper.ApplyAdorner(numericUpDown, NumericUpDown.ValueProperty,
                 TreeHelper.TryFindParent<DataGrid>(cell).DataContext);
         }

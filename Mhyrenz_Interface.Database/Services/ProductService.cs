@@ -175,7 +175,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
-        public async Task<int> RemovePhysical()
+        public async Task RemovePhysically()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
@@ -184,11 +184,12 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                     .Where(p => p.IsDeleted)
                     .ToListAsync();
 
+                if (!entities.Any())
+                    return;
+
                 context.Products.RemoveRange(entities);
 
                 await context.SaveChangesAsync();
-
-                return entities.Count;
             }
         }
     }

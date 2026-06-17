@@ -157,6 +157,7 @@ namespace Mhyrenz_Interface
                 .AddTransient<OverviewChartViewModel>()
                 .AddTransient<ActionViewModel>()
                 .AddTransient<CompletedSaleViewModel>()
+                .AddTransient<PharmaDetailsViewModel>()
 
                 .AddViewModelFactory<ProductDataViewModel, Product>()
                 .AddViewModelFactory<TransactionDataViewModel, Transaction>()

@@ -16,6 +16,7 @@
 
         public string Header { get; set; }
         public int DisplayIndex { get; set; } = -1;
+        public bool PharmaColumn { get; set; } = false;
         public bool IsVisible { get; set; } = true;
     }
 }

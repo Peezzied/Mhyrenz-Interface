@@ -24,6 +24,7 @@ namespace Mhyrenz_Interface
     public class ShellViewModel : BaseViewModel, IAsyncInitializable
     {
         private readonly INavigationServiceEx _navigationService;
+        private readonly ITransactionStore _transactionStore;
         private readonly IInventoryStore _inventoryStore;
         private readonly IProductService _productService;
         private readonly IUndoRedoManager _undoRedoManger;
@@ -34,6 +35,8 @@ namespace Mhyrenz_Interface
         private readonly ISessionStore _sessionStore;
 
         public ShellViewModel(
+            ITransactionStore transactionStore,
+            IInventoryStore inventoryStore,
             ISessionStore sessionStore,
             INavigationServiceEx navigationServiceEx,
             IDialogCoordinator dialogCoordinator,
@@ -46,7 +49,8 @@ namespace Mhyrenz_Interface
             serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
 
             serialBarcodeService.Start("COM2");
-
+            _transactionStore = transactionStore;
+            _inventoryStore = inventoryStore;
             _sessionStore = sessionStore;
             _sessionStore.SessionChanged += SessionStore_SessionChanged;
 
@@ -79,6 +83,22 @@ namespace Mhyrenz_Interface
             await NavigateToDefaultPageAsync();
 
             await _sessionStore.UpdateSession();
+
+            var sales = _sessionStore.CurrentSession.Sales.Where(s => s.Completed_at == null);
+            if (sales.Any())
+            {
+                var salesSet = sales.Select(s => s.Id).ToHashSet();
+                var productsInSales = _transactionStore.Store
+                    .Where(t => t.Transaction.SaleId.HasValue && salesSet.Contains(t.Transaction.SaleId.Value))
+                    .Select(t => t.Transaction.ProductId)
+                    .ToHashSet();
+
+                foreach (var product in _inventoryStore.Store)
+                {
+                    if (productsInSales.Contains(product.Item.Id))
+                        product.HasActiveSale = true;
+                }
+            }
         }
 
         public ObservableCollection<MenuItem> Menu { get; } = new ObservableCollection<MenuItem>();

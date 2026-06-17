@@ -32,7 +32,7 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
 
         public delegate void Handler(Setter setter, Getter getter, TKey key);
 
-        public TrackPropertyHelper<TKey, TValue> Track(string propertyName, Handler handler)
+        public TrackPropertyHelper<TKey, TValue> Track(string propertyName, Handler handler, Setter setter = null, Getter getter = null)
         {
             if (string.IsNullOrEmpty(propertyName))
             {
@@ -42,34 +42,40 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
             if (_propertyName != propertyName)
                 return this;
 
-            void setter(object val, PropertyChangeOrigin origin)
+            if (setter == null)
             {
-                if (!_store.Store.TryGetValue(_key, out var vm))
-                    return;
-
-                var property = vm.GetType().GetProperty(propertyName) ?? throw new InvalidOperationException(
-                        $"Property '{propertyName}' was not found on '{typeof(TValue).Name}'.");
-                vm.TrackingOrigin = origin;
-
-                try
+                setter = (object val, PropertyChangeOrigin origin) =>
                 {
-                    property.SetValue(vm, val);
-                }
-                finally
-                {
-                    vm.TrackingOrigin = default;
-                }
+                    if (!_store.Store.TryGetValue(_key, out var vm))
+                        return;
+
+                    var property = vm.GetType().GetProperty(propertyName) ?? throw new InvalidOperationException(
+                            $"Property '{propertyName}' was not found on '{typeof(TValue).Name}'.");
+                    vm.TrackingOrigin = origin;
+
+                    try
+                    {
+                        property.SetValue(vm, val);
+                    }
+                    finally
+                    {
+                        vm.TrackingOrigin = default;
+                    }
+                };
             }
 
-            object getter()
+            if (getter == null)
             {
-                if (!_store.Store.TryGetValue(_key, out var vm))
-                    return null;
+                getter = () =>
+                {
+                    if (!_store.Store.TryGetValue(_key, out var vm))
+                        return null;
 
-                var property = vm.GetType().GetProperty(propertyName) ?? throw new InvalidOperationException(
-                        $"Property '{propertyName}' was not found on '{typeof(TValue).Name}'.");
+                    var property = vm.GetType().GetProperty(propertyName) ?? throw new InvalidOperationException(
+                            $"Property '{propertyName}' was not found on '{typeof(TValue).Name}'.");
 
-                return property.GetValue(vm);
+                    return property.GetValue(vm);
+                };
             }
 
             handler(setter, getter, _key);

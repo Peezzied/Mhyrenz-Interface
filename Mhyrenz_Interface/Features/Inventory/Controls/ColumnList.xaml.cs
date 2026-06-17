@@ -6,7 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Dragablz;
+using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.Controls
 {
@@ -33,19 +35,43 @@ namespace Mhyrenz_Interface.Features.Inventory.Controls
         {
             App.Current.Dispatcher.Invoke(new Action(() =>
             {
+                var tab = ((InventoryTabItem)DataContext);
+                var pharmaColumns = InventoryGridSettingsStore.Load().Where(s => s.PharmaColumn);
+
                 var list = DragablzItemsControl.ItemsOrganiser.Sort(DragablzItemsControl.Items.Cast<object>()
                   .Select(item => DragablzItemsControl.ItemContainerGenerator.ContainerFromItem(item) as DragablzItem))
-                  .OrderBy(x => x.LogicalIndex);
+                  .Select(x => new
+                  {
+                      x.LogicalIndex,
+                      SettingVm = (ColumnSettingViewModel)x.Content,
+                      ((ColumnSettingViewModel)x.Content).ColumnSetting
+                  });
+
+                if (!tab.IsPharma)
+                {
+                    list = list.Concat(pharmaColumns.Select(p => new
+                    {
+                        LogicalIndex = p.DisplayIndex,
+                        SettingVm = (ColumnSettingViewModel)null,
+                        ColumnSetting = p
+                    }));
+                }
+
+                list = list.OrderBy(x => x.LogicalIndex);
 
                 var index = 0;
                 foreach (var item in list)
                 {
-                    ColumnSettingViewModel content = ((ColumnSettingViewModel)item.Content);
-                    content.DisplayIndex = index;
+                    item.ColumnSetting.DisplayIndex = index;
+
+                    if (item.SettingVm != null)
+                        item.SettingVm.DisplayIndex = index;
+
                     index++;
                 }
 
-                ((InventoryTabItem)DataContext).OnColumnsChanged();
+                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(list.Select(x => x.ColumnSetting)));
+                tab.OnColumnsChanged();
 
             }), System.Windows.Threading.DispatcherPriority.ContextIdle);
         }

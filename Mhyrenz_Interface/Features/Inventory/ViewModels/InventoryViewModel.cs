@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using GongSolutions.Wpf.DragDrop;
 using HandyControl.Controls;
 using HandyControl.Data;
@@ -22,6 +23,7 @@ using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 using Microsoft.EntityFrameworkCore.Internal;
+using ObservableCollections;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
@@ -63,14 +65,21 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public ICommand AddProductCommand { get; set; }
         public ICommand ExportInventoryCommand { get; set; }
 
+        private readonly DispatcherTimer _searchTimer;
+
         public string SearchBar
         {
             get => _searchBar;
             set
             {
+                if (_searchBar == value)
+                    return;
+
                 _searchBar = value;
                 OnPropertyChanged(nameof(SearchBar));
 
+                _searchTimer.Stop();
+                _searchTimer.Start();
             }
         }
 
@@ -94,6 +103,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     _selectedItem.ColumnsLoaded += SelectedItem_ColumnsLoaded;
                     _selectedItem.Load();
                     _mainViewModel.RibbonBarViewModel = _selectedItem;
+
+                    if (!SearchBar.IsNullOrEmpty())
+                    {
+                        _searchTimer.Stop();
+                        _searchTimer.Start();
+                    }
 
                     DeleteProductCommand.OnCanExecuteChanged();
                 }
@@ -204,7 +219,27 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _deleteCommand = deleteCommand();
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
+            _searchTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(300)
+            };
+
+            _searchTimer.Tick += SearchDebouce;
+
             InventoryDragHandler = new InventoryDragSource(this);
+        }
+
+        private void SearchDebouce(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+
+            var filter = _inventoryDataGridVm.InventoryView.Filter;
+
+            _inventoryDataGridVm.InventoryView.AttachFilter(
+                p => (string.IsNullOrWhiteSpace(_searchBar) ||
+                     p.Name.IndexOf(_searchBar, StringComparison.OrdinalIgnoreCase) >= 0)
+                     && filter.IsMatch(p, p)
+            );
         }
 
         private bool CanDeleteCommand(object obj)
@@ -298,9 +333,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     SelectedItem = newTab;
                     canSelectTab = true;
                 }
-
-                if (SearchBar != string.Empty)
-                    SearchBar = string.Empty;
 
                 vm.SelectItem(canSelectTab, products);
             }), System.Windows.Threading.DispatcherPriority.Loaded);

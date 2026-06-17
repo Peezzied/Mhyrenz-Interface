@@ -41,7 +41,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         {
             if (_undoRedoManager.CanRedo)
             {
-                if (!_undoRedoManager.ShowWarning())
+                if (!UndoRedoManager.ShowWarning())
                     return;
             }
 

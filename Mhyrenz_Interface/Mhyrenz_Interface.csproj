@@ -488,6 +488,8 @@
     <Compile Include="Features\Home\Converters\BooleanToVirtualVisibilityConverter.cs" />
     <Compile Include="Features\Home\ViewModels\ActionViewModel.cs" />
     <Compile Include="Features\Home\ViewModels\SessionBoxContext.cs" />
+    <Compile Include="Features\Inventory\Columns\PurchaseColumn.cs" />
+    <Compile Include="Features\Inventory\ViewModels\PharmaDetailsViewModel.cs" />
     <Compile Include="Shared\Adorners\RowFlashAdorner.cs" />
     <Compile Include="Features\Inventory\Commands\AddCommand.cs" />
     <Compile Include="Features\Checkout\Commands\CheckoutCommand.cs" />

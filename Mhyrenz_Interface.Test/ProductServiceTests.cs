@@ -91,7 +91,7 @@ namespace Mhyrenz_Interface.Test
             }
 
             // Act
-            var deletedCount = await _service.RemovePhysical();
+            var deletedCount = await _service.RemovePhysically();
 
             // Assert
             using (var context = Factory.CreateDbContext())

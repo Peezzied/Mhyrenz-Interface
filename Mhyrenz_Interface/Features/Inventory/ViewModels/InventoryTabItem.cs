@@ -28,6 +28,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public string Name => _category.Name;
         public Brush Color => _categoryStore.Colors[_category.Id];
         public int Id => _category.Id;
+        public bool IsPharma => _category.IsPharma;
 
         public ObservableDictionary<string, ColumnSettingViewModel> Columns { get; set; }
 
@@ -134,18 +135,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             void commonPropHandler(Setter setter, Getter getter, int key)
             {
-
-                void handlePropChange()
-                {
-                    // TODO event changed hook
-                }
-
                 _undoRedoManager.Execute(_productCommandCommonProp(new ProductVMCommandCommonProp.DTO
                 {
                     Product = viewModel.Item,
                     ChangedArgs = changedArgs(getter()),
                     Setter = setter,
-                    PropertyChangeHandler = handlePropChange,
                     CurrentViewIn = typeof(InventoryView)
                 }));
             }
@@ -180,12 +174,45 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 .Track(nameof(ProductDataViewModel.Barcode), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Expiry), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Batch), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler)
                 .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, key) =>
                 {
                     args.OldValue = 0;
                     purchasePropHandler(setter, getter, key);
                 })
-                .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler);
+                .Track(nameof(PharmaDetailsViewModel.GenericName), (setter, getter, key) =>
+                {
+                    
+                }, setterPharmaDetals, getterPharmaDetails);
+
+            void setterPharmaDetals(object val, PropertyChangeOrigin origin)
+            {
+                if (!_inventoryStore.Store.TryGetValue(viewModel.Item.Id, out var vm))
+                    return;
+
+                var property = vm.GetType().GetProperty(nameof(ProductDataViewModel.PharmaDetails))
+                    .GetValue(vm);
+                vm.TrackingOrigin = origin;
+
+                try
+                {
+                    property.GetType().GetProperty(args.PropertyName).SetValue(vm, val);
+                }
+                finally
+                {
+                    vm.TrackingOrigin = default;
+                }
+            }
+
+            object getterPharmaDetails()
+            {
+                if (!_inventoryStore.Store.TryGetValue(viewModel.Item.Id, out var vm))
+                    return null;
+
+                var property = vm.GetType().GetProperty(nameof(ProductDataViewModel.PharmaDetails));
+
+                return property.GetType().GetProperty(args.PropertyName).GetValue(vm);
+            }
         }
 
         public void LoadColumns(IEnumerable<ColumnInfo> columns)
@@ -209,11 +236,16 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     setting = new InventoryDataGridColumnSetting()
                     {
                         Header = column.Header,
-                        DisplayIndex = column.DisplayIndex
+                        DisplayIndex = column.DisplayIndex,
+                        PharmaColumn = column.PharmaColumn
                     };
                     settings[column.Header] = setting;
                     needsSave = true;
                 }
+
+                // do not create columnsettingvm when the column is a pharma
+                if (column.PharmaColumn && !IsPharma)
+                    continue;
 
                 var columnSettingViewModel = _columnSettingViewModelFactory(setting);
 
@@ -241,9 +273,22 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 Columns.Add(kvp.Key, kvp.Value);
 
             foreach (var col in newEntries.Values.OrderBy(c => c.DisplayIndex))
+            {
                 ColumnsView.Add(col);
+                col.PropertyChanged += Col_PropertyChanged;
+            }
 
             OnColumnsLoaded();
+        }
+
+        private bool _placeOrderMode = false;
+
+        private void Col_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ColumnSettingViewModel.IsVisible) && !_placeOrderMode)
+            {
+                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
+            }
         }
 
         private void OnColumnsLoaded()
@@ -279,11 +324,10 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         internal void OnColumnsChanged()
         {
             ColumnsChanged?.Invoke(); // update the view
-
-            InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
         }
 
         private bool _reorderEnabled = true;
+
         public bool ReorderEnabled
         {
             get => _reorderEnabled;
@@ -296,6 +340,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         internal void PlaceOrderMode(bool placeOrderIsOpen)
         {
+            _placeOrderMode = true;
             ReorderEnabled = !placeOrderIsOpen;
             if (placeOrderIsOpen)
             {
@@ -319,7 +364,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     col.IsVisible = item.IsVisible;
                 }
             }
-
+            _placeOrderMode = false;
         }
 
         public void Unload()

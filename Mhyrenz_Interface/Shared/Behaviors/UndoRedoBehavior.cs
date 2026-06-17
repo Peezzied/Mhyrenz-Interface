@@ -164,7 +164,7 @@ namespace Mhyrenz_Interface.Shared.Behaviors
                 return;
             }
 
-            var prompt = undoRedoManager.ShowWarning(() =>
+            var prompt = UndoRedoManager.ShowWarning(() =>
             {
                 control.SetValue(dp, convertedValue);
             });

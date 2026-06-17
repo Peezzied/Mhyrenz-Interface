@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Mhyrenz_Interface.Core.MVVM;
@@ -26,6 +27,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly ICategoryStore _categoryStore;
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly INavigationServiceEx _navigationService;
+        private readonly ITransactionStore _transactionStore;
         private readonly Action _requireSession;
 
         private Product _item;
@@ -40,19 +42,50 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         }
 
         public ProductDataViewModel(ISessionStore sessionStore,
+            ITransactionStore transactionStore,
             ICategoryStore categoryStore,
             Product product,
             ISerialBarcodeService serialBarcodeService,
-            INavigationServiceEx navigationServiceEx)
+            INavigationServiceEx navigationServiceEx,
+            PharmaDetailsViewModel pharmaDetailsViewModel)
         {
             Item = product;
+            _purchaseNormal = Item.Purchase;
+
             _sessionStore = sessionStore;
             _categoryStore = categoryStore;
             _serialBarcodeService = serialBarcodeService;
             _navigationService = navigationServiceEx;
+            _transactionStore = transactionStore;
+
+            if (product.Category.IsPharma)
+            {
+                PharmaDetails = pharmaDetailsViewModel;
+                PharmaDetails.TrackedPropertyChanged += PharmaDetails_TrackedPropertyChanged;
+            }
+
+            _transactionStore.SaleChange += TransactionStore_SaleChange;
 
             GoToItemCommand = new AsyncRelayCommand(GoToItemActionCommand);
         }
+
+        private void PharmaDetails_TrackedPropertyChanged(object sender, TrackedPropertyChangedEventArgs e)
+        {
+            OnTrackedPropertyChanged(e.OldValue, e.PropertyName);
+        }
+
+        private void TransactionStore_SaleChange(object sender, Sale sale)
+        {
+            if (sale.Completed_at == null && _transactionStore.Store.TryGetValue(Transaction.CreateTransactionKey(Item.Id, sale.Id), out var _))
+            {
+                HasActiveSale = true;
+            }
+            else if (HasActiveSale)
+            {
+                HasActiveSale = false;
+            }
+        }
+
         public void LoadReceiver()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
@@ -82,7 +115,18 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public event Action BarcodeReceived;
 
-        public PharmaDetails PharmaDetails => Item.PharmaDetails;
+        private bool _hasActiveSale = false;
+        public bool HasActiveSale
+        {
+            get => _hasActiveSale;
+            set
+            {
+                _hasActiveSale = value;
+                OnPropertyChanged(nameof(HasActiveSale));
+            }
+        }
+
+        public PharmaDetailsViewModel PharmaDetails { get; set; }
 
         public int NetQty => Item.NetQty;
 
@@ -134,14 +178,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private int _purchaseNormal;
         public int PurchaseNormalEdit
         {
-            get => _purchaseNormal + Item.Purchase;
+            get => _purchaseNormal;
 
             set
             {
                 if (Item.Purchase != value)
                 {
-                    SetTrackedProperty(_purchaseNormal + Item.Purchase, value - Item.Purchase,
-                        v => _purchaseNormal = v, nameof(PurchaseNormalEdit));
+                    SetTrackedProperty(ref _purchaseNormal, value, nameof(PurchaseNormalEdit));
                     OnPropertyChanged(null);
                 }
             }
@@ -155,6 +198,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 if (Item.Purchase != value)
                 {
                     Item.Purchase = value;
+                    _purchaseNormal = Item.Purchase;
                     OnPropertyChanged(null);
                 }
             }

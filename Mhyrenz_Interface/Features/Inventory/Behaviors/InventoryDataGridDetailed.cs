@@ -142,6 +142,8 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
                             InventoryDataGridColumn.GetIgnoreReorder(x),
                         IgnoreVisibilityToggle =
                             InventoryDataGridColumn.GetIgnoreVisibilityToggle(x),
+                        PharmaColumn =
+                            InventoryDataGridColumn.GetPharmaColumn(x),
                         PlaceOrderBound =
                             InventoryDataGridColumn.GetPlaceOrderBound(x)
                     }));
@@ -161,7 +163,9 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
                             Source = vm,
                             Path = new PropertyPath(
                                 $"{nameof(InventoryDataGridViewModel.ColumnsSettings)}[{key}].{nameof(ColumnSettingViewModel.IsVisible)}"),
-                            Converter = new BooleanToVisibilityConverter()
+                            Converter = new BooleanToVisibilityConverter(),
+                            FallbackValue = Visibility.Collapsed,
+                            TargetNullValue = Visibility.Collapsed,
                         });
 
                     if (vm.ColumnsSettings.TryGetValue(key, out var setting))
@@ -305,6 +309,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
         public string Header { get; internal set; }
         public int DisplayIndex { get; internal set; }
         public bool IgnoreVisibilityToggle { get; internal set; }
+        public bool PharmaColumn { get; internal set; }
         public bool IgnoreReorder { get; internal set; }
         public bool PlaceOrderBound { get; internal set; }
     }

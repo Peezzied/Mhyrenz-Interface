@@ -16,6 +16,19 @@ namespace Mhyrenz_Interface.Features.Inventory.Controls
         public static void SetIgnoreVisibilityToggle(DependencyObject obj, bool value) => obj.SetValue(IgnoreVisibilityToggleProperty, value);
 
 
+        public static bool GetPharmaColumn(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(PharmaColumnProperty);
+        }
+
+        public static void SetPharmaColumn(DependencyObject obj, bool value)
+        {
+            obj.SetValue(PharmaColumnProperty, value);
+        }
+
+        public static readonly DependencyProperty PharmaColumnProperty =
+            DependencyProperty.RegisterAttached("PharmaColumn", typeof(bool), typeof(InventoryDataGridColumn), new PropertyMetadata(false));
+
 
         public static bool GetPlaceOrderBound(DependencyObject obj)
         {

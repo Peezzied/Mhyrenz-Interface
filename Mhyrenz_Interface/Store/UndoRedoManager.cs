@@ -102,7 +102,7 @@ namespace Mhyrenz_Interface.Store
             _undoStack.Clear();
         }
 
-        public bool ShowWarning(Action rejectEffect = null)
+        public static bool ShowWarning(Action rejectEffect = null)
         {
             MessageBoxResult prompt = MessageBox.Show("Are you sure you want to proceed with the action after the changes you've made?",
                         "Action warning",

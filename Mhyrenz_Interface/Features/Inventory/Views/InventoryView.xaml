@@ -71,6 +71,7 @@
                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                 ItemsSource="{Binding TabItems}"
                 x:Name="InventoryTabs"
+                mah:TabControlHelper.UnderlineSelectedBrush="{Binding SelectedItem.Color, Mode=OneWay}"
                 mah:TabControlHelper.Underlined="TabPanel"
                 xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Controls"
                 DisplayMemberPath="Name" Style="{StaticResource MahApps.Styles.TabControl}">
@@ -80,6 +81,7 @@
                             RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
+                
             </TabControl>
         </Grid>
     </hc:DrawerContainer>
