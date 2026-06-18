@@ -18,7 +18,7 @@ namespace Mhyrenz_Interface.Navigation
 
         public NavigationViewModel CurrentViewModel { get; private set; }
 
-        public event Action<NavigationViewModel> CurrentViewModelChanged;
+        public event Action<NavigationViewModel, Type> Navigated;
 
         public NavigationServiceEx(NavigationViewModelFactory viewModelFactory)
         {
@@ -37,13 +37,13 @@ namespace Mhyrenz_Interface.Navigation
 
             try
             {
-                if (CurrentViewModel?.GetType() == _viewModelFactory.GetViewModelType(viewType))
+                if (CurrentViewModel?.GetType() == NavigationViewModelFactory.GetViewModelType(viewType))
                     return true;
 
                 var oldVm = CurrentViewModel;
 
                 CurrentViewModel = null;
-                CurrentViewModelChanged?.Invoke(null);
+                Navigated?.Invoke(null, viewType);
 
                 if (oldVm is IAsyncDisposable asyncDisposable)
                     await asyncDisposable.DisposeAsync();
@@ -67,7 +67,7 @@ namespace Mhyrenz_Interface.Navigation
                 }
 
                 CurrentViewModel = newVm;
-                CurrentViewModelChanged?.Invoke(CurrentViewModel);
+                Navigated?.Invoke(CurrentViewModel, viewType);
 
                 if (postNavigationCallback != null)
                 {

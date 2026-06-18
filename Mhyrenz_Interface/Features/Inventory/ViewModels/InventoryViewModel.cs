@@ -27,12 +27,12 @@ using ObservableCollections;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
-    public interface IInventoryGridHost
+    public interface IDataGridTabHost
     {
-        void RowIntoView(int category, int[] products);
+        void RowIntoView(int tab, int[] items);
     }
 
-    public class InventoryViewModel : NavigationViewModel, IInventoryGridHost, IAsyncInitializable
+    public class InventoryViewModel : NavigationViewModel, IDataGridTabHost, IAsyncInitializable
     {
 
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
@@ -47,7 +47,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly IReportService _reportService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly IOrderStore _orderStore;
-        private readonly DeleteCommand _deleteCommand;
 
         private string _searchBar = string.Empty;
         private InventoryTabItem _selectedItem;
@@ -127,6 +126,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public ObservableCollection<InventoryTabItem> TabItems { get; private set; } = new ObservableCollection<InventoryTabItem>();
         public RelayCommand DeleteProductCommand { get; set; }
+
+        private readonly CreateCommand<DeleteCommand> _deleteCommand;
 
 
 
@@ -216,7 +217,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             PlaceOrderCommand = new RelayCommand(PlaceOrderAction);
             AddProductCommand = new RelayCommand(ShowProductAdd);
             DeleteProductCommand = new RelayCommand(DeleteCommand, CanDeleteCommand);
-            _deleteCommand = deleteCommand();
+            _deleteCommand = deleteCommand;
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
             _searchTimer = new DispatcherTimer
@@ -432,8 +433,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private void DeleteCommand(object parameter)
         {
-            var vm = SelectedItem.CastTo<InventoryTabItem>().ContentViewModel;
-            _deleteCommand.Execute(vm.SelectedItems);
+            var tab = (InventoryTabItem)SelectedItem;
+            var vm = tab.ContentViewModel;
+
+            _undoRedoManager.Execute(_deleteCommand(
+                tab.Id,
+                vm.SelectedItems.Select(t => t.Item.Id)));
         }
 
         private void ShowProductAdd(object parameter)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,8 @@ using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
 {
-    public class AddCommand : BaseAsyncCommand, IUndoRedoBound
+    [Obsolete]
+    public class AddCommand : UndoRedoBoundCommand
     {
         private readonly CreateCommand<DeleteCommand> _deleteCommand;
         private readonly AddProductViewModel _viewModel;
@@ -27,6 +29,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         private ProductVMRowInfo _rowInfo;
 
         public AddCommand(AddProductViewModel vm, IProductService productService, IInventoryStore inventoryStore, IUndoRedoManager undoRedoManager, CreateCommand<DeleteCommand> deleteCommand)
+            : base(typeof(InventoryView))
         {
             _viewModel = vm;
             _deleteCommand = deleteCommand;
@@ -37,12 +40,12 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
 
         public bool AllowBack { get; private set; } = true;
 
-        public override bool CanExecute(object parameter)
-        {
-            return base.CanExecute(parameter)
-                && Validator.TryValidateObject(_viewModel, new ValidationContext(_viewModel), null, validateAllProperties: true)
-                && CanSubmit;
-        }
+        //public override bool CanExecute(object parameter)
+        //{
+        //    return base.CanExecute(parameter)
+        //        && Validator.TryValidateObject(_viewModel, new ValidationContext(_viewModel), null, validateAllProperties: true)
+        //        && CanSubmit;
+        //}
 
         private async Task SideEffect(NavigationViewModel vm)
         {
@@ -50,13 +53,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             view.RowIntoView(_rowInfo.Category, _rowInfo.Products);
         }
 
-        public override void Execute(object parameter)
-        {
-            _undoRedoManager.Push(new UndoRedoBoundCommand(this, SideEffect, typeof(InventoryView), parameter));
-            base.Execute(parameter);
-        }
-
-        public override async Task ExecuteAsync(object parameter)
+        public override async Task Command()
         {
             CanSubmit = false;
             var productVm = await _productService.Create(new Product
@@ -86,39 +83,32 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             _viewModel.RaiseSubmitSuccess(_products.First());
         }
 
-        public void ExecuteRaw(object parameter)
-        {
-            base.Execute(parameter);
-        }
+        //public override async Task Redo(UndoRedoInfo info)
+        //{
+        //    // TODO utilize ExecuteRaw. Use the parameter
+        //    var product = (await _productService.RemoveManyBack(_products.Select(i => i.Item.Id))).First();
 
-        public async void Redo(object parameter = null)
-        {
-            // TODO utilize ExecuteRaw. Use the parameter
-            var product = (await _productService.RemoveManyBack(_products.Select(i => i.Item.Id))).First();
+        //    _products = _inventoryStore.AddProduct(new[] { product });
+        //    _rowInfo = new ProductVMRowInfo
+        //    {
+        //        Category = product.CategoryId,
+        //        Products = new int[] { product.Id }
+        //    };
 
-            _products = _inventoryStore.AddProduct(new[] { product });
-            _rowInfo = new ProductVMRowInfo
-            {
-                Category = product.CategoryId,
-                Products = new int[] { product.Id }
-            };
+        //    Growl.Success(new GrowlInfo
+        //    {
+        //        Message = $"Product \"{product.Name}\" has been added successfully!",
+        //        ShowDateTime = false,
+        //    });
 
-            Growl.Success(new GrowlInfo
-            {
-                Message = $"Product \"{product.Name}\" has been added successfully!",
-                ShowDateTime = false,
-            });
+        //    _viewModel.RaiseSubmitSuccess(_products.First());
+        //}
 
-            _viewModel.RaiseSubmitSuccess(_products.First());
-        }
+        //public override async Task Undo(UndoRedoInfo info)
+        //{
+        //    var deleteCmd = _deleteCommand();
 
-        public void Undo(object parameter = null)
-        {
-            var deleteCmd = _deleteCommand();
-
-            deleteCmd.ExecuteRaw(_products);
-
-            AllowBack = deleteCmd.AllowBack;
-        }
+            
+        //}
     }
 }

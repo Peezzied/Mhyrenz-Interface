@@ -15,10 +15,10 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
     {
         public ProductVMPropertyChangeCommand(DTO dto) : base(dto)
         {
-            SideEffect = SideEffectHandler;
+            Completer = CompleterHandler;
         }
 
-        protected virtual async Task SideEffectHandler(NavigationViewModel vm)
+        protected virtual async Task CompleterHandler(NavigationViewModel vm)
         {
             var view = vm as InventoryViewModel;
             view.RowIntoView(PropertyChangedArgs.RowInfo.Category, PropertyChangedArgs.RowInfo.Products);

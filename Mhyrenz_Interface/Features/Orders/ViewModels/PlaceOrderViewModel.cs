@@ -124,9 +124,9 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             var tracker = TrackPropertyHelper.Build(_orderStore, productId, propertyName)
                 .Track(nameof(OrderDataViewModel.Qty), method);
 
-            void method(Setter setter, Getter getter, int key)
+            async void method(Setter setter, Getter getter, int key)
             {
-                _placeOrderQtyCommand(new PlaceOrderVMCommandQty.DTO
+                await _placeOrderQtyCommand(new PlaceOrderVMCommandQty.DTO
                 {
                     ProductId = productId,
                     ChangedArgs = new PlaceOrderVMCommandQty.ChangedArgs

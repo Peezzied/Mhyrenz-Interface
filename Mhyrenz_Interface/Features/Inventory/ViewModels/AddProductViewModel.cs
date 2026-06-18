@@ -22,14 +22,14 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly ICategoryStore _categoryStore;
         private readonly IInventoryStore _inventoryStore;
 
-        public AddCommand AddCommand { get; private set; }
+        public AsyncRelayCommand AddCommand { get; private set; }
 
         public AddProductViewModel(ICategoryStore categoryStore, IInventoryStore inventoryStore, CreateCommand<AddCommand> addCommand)
         {
             _categoryStore = categoryStore;
             _inventoryStore = inventoryStore;
 
-            AddCommand = addCommand(this);
+            AddCommand = new AsyncRelayCommand(null);
         }
 
         public ObservableCollection<Category> Categories { get; private set; } = new ObservableCollection<Category>();

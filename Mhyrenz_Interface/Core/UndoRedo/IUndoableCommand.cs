@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Core.UndoRedo
 {
@@ -10,10 +12,13 @@ namespace Mhyrenz_Interface.Core.UndoRedo
 
     public interface IUndoableCommand
     {
-        PostNavigation SideEffect { get; }
+        PostNavigation Completer { get; }
         Type CurrentViewIn { get; }
-        void Execute();
-        bool Undo();
-        bool Redo();
+        ActionType Intent { get; set; }
+        bool Cancel { get; set; }
+
+        Task Execute();
+        Task Undo();
+        Task Redo();
     }
 }

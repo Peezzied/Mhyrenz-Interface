@@ -1,55 +1,38 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.UndoRedo;
-using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Core.PropertyTracking
 {
 
-    public abstract class PropertyChangeCommand<RowInfo> : IUndoableCommand
+    public abstract class PropertyChangeCommand<RowInfo> : UndoRedoBoundCommand
     {
         private readonly TrackPropertyHelper.Setter _setter;
         private readonly Action _propertyChangeHandler;
 
-        public PostNavigation SideEffect { get; set; }
-        public Type CurrentViewIn { get; }
-
         public ChangedArgs PropertyChangedArgs { get; set; }
 
-        public PropertyChangeCommand(DTO dto)
+        public PropertyChangeCommand(DTO dto): base(dto.CurrentViewIn)
         {
             PropertyChangedArgs = dto.ChangedArgs;
             _setter = dto.Setter;
             _propertyChangeHandler = dto.PropertyChangeHandler;
-
-            CurrentViewIn = dto.CurrentViewIn;
         }
 
-        public void Execute()
+        public override async Task Command()
         {
-            CommandHandler(PropertyChangedArgs.NewValue, ActionType.Normal);
-        }
-
-        public bool Undo()
-        {
-            _setter(PropertyChangedArgs.OldValue, PropertyChangeOrigin.UndoRedo);
-            CommandHandler(PropertyChangedArgs.OldValue, ActionType.Undo);
-            return true;
-        }
-
-        public bool Redo()
-        {
-            _setter(PropertyChangedArgs.NewValue, PropertyChangeOrigin.UndoRedo);
-            CommandHandler(PropertyChangedArgs.NewValue, ActionType.Redo);
-            return true;
-        }
-
-        private void CommandHandler(object parameter, ActionType intent)
-        {
-            Command(parameter, intent);
+            switch (Intent)
+            {
+                case ActionType.Undo:
+                    _setter(PropertyChangedArgs.NewValue, PropertyChangeOrigin.UndoRedo);
+                    break;
+                case ActionType.Redo:
+                    _setter(PropertyChangedArgs.OldValue, PropertyChangeOrigin.UndoRedo);
+                    break;
+            }
             _propertyChangeHandler?.Invoke();
         }
-
-        public abstract void Command(object parameter, ActionType intent);
 
         public class ChangedArgs
         {

@@ -1,7 +1,10 @@
-﻿using Mhyrenz_Interface.Core.PropertyTracking;
+﻿using System;
+using System.Threading.Tasks;
+using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
+using Mhyrenz_Interface.Navigation;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
 {
@@ -17,9 +20,25 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             _productService = productService;
         }
 
-        public override async void Command(object parameter, ActionType intent)
+        protected override async Task CompleterHandler(NavigationViewModel vm)
+        {
+            await base.CompleterHandler(vm);
+            await Complete();
+        }
+
+        private async Task Complete()
         {
             await _productService.Update(_dto.Product.Id, _dto.Product);
+        }
+
+        public override async Task Command()
+        {
+            await base.Command();
+
+            if (Intent == ActionType.Normal)
+            {
+                await Complete();
+            }
         }
 
         public new class DTO : PropertyChangeCommand<ProductVMRowInfo>.DTO

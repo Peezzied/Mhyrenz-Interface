@@ -69,6 +69,11 @@ namespace Mhyrenz_Interface.Store
             Store.RemoveMany(products.Select(x => x.Item.Id));
         }
 
+        public void RemoveProduct(IEnumerable<int> products)
+        {
+            Store.RemoveMany(products);
+        }
+
         public IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products)
         {
             var displayProducts = products.Select(product => _productsViewModelFactory(product))

@@ -55,7 +55,7 @@ namespace Mhyrenz_Interface
             _sessionStore.SessionChanged += SessionStore_SessionChanged;
 
             _navigationService = navigationServiceEx;
-            _navigationService.CurrentViewModelChanged += OnCurrentViewModelChanged;
+            _navigationService.Navigated += OnCurrentViewModelChanged;
             _undoRedoManger = undoRedoManager;
 
             UndoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo);
@@ -215,9 +215,12 @@ namespace Mhyrenz_Interface
             }
         }
 
-        private void OnCurrentViewModelChanged(NavigationViewModel vm)
+        private void OnCurrentViewModelChanged(NavigationViewModel vm, Type viewType)
         {
             CurrentViewModel = vm;
+
+            if (CurrentViewModel != null) 
+                SelectedMenuItem = Menu.FirstOrDefault(x => x.ViewType == viewType);
         }
 
         private void UndoRedoManger_UndoRedoChanged(object sender, EventArgs e)

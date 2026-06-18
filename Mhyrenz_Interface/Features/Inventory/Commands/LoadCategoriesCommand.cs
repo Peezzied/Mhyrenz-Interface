@@ -1,10 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
 {
+    [Obsolete]
     public class LoadCategoriesCommand : BaseAsyncCommand
     {
         private readonly ICategoryService _categoryService;

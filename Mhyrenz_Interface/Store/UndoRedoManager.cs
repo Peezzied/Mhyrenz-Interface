@@ -14,6 +14,12 @@ namespace Mhyrenz_Interface.Store
         public IUndoableCommand Command { get; internal set; }
     }
 
+    public class UndoRedoInfo
+    {
+        public bool Cancel { get; set; } = false;
+        public ActionType Type { get; set; } = ActionType.Normal;
+    }
+
     public class UndoRedoManager : IUndoRedoManager
     {
 
@@ -26,22 +32,17 @@ namespace Mhyrenz_Interface.Store
             _navigationService = navigationServiceEx;
         }
 
-        public void Execute(IUndoableCommand command)
+        public async Task Execute(IUndoableCommand command)
         {
-            if (!Push(command))
+            await command.Execute();
+
+            if (command.Cancel)
                 return;
 
-            command.Execute();
-
-            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool Push(IUndoableCommand command)
-        {
             _undoStack.Push(command);
             _redoStack.Clear();
 
-            return true;
+            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task Undo()
@@ -51,7 +52,9 @@ namespace Mhyrenz_Interface.Store
 
             var command = _undoStack.Peek();
 
-            if (!command.Undo())
+            await command.Undo(); 
+
+            if (command.Cancel)
                 return;
 
             command = _undoStack.Pop();
@@ -69,7 +72,9 @@ namespace Mhyrenz_Interface.Store
 
             var command = _redoStack.Peek();
 
-            if (!command.Redo())
+            await command.Redo();
+
+            if (command.Cancel)
                 return;
 
             command = _redoStack.Pop();
@@ -84,11 +89,11 @@ namespace Mhyrenz_Interface.Store
         {
             await _navigationService.NavigateAsync(command.CurrentViewIn);
 
-            if (command.SideEffect != null)
+            if (command.Completer != null)
             {
                 await App.Current.Dispatcher.InvokeAsync(async () =>
                 {
-                    await command.SideEffect(_navigationService.CurrentViewModel);
+                    await command.Completer(_navigationService.CurrentViewModel);
                 }, System.Windows.Threading.DispatcherPriority.Loaded);
             }
 

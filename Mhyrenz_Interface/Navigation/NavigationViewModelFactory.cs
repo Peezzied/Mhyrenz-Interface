@@ -39,7 +39,7 @@ namespace Mhyrenz_Interface.Navigation
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
         private readonly CreateViewModel<CheckoutViewModel> _createTransactionsViewModel;
-        private readonly Dictionary<Type, (Type viewModelType, Delegate factory)> _viewsSet = new Dictionary<Type, (Type, Delegate)>();
+        private static readonly Dictionary<Type, (Type viewModelType, Delegate factory)> _viewsSet = new Dictionary<Type, (Type, Delegate)>();
 
         public NavigationViewModelFactory(CreateViewModel<HomeViewModel> createHomeViewModel,
             CreateViewModel<InventoryViewModel> createInventoryViewModel,
@@ -66,7 +66,7 @@ namespace Mhyrenz_Interface.Navigation
             throw new ArgumentException($"No view model found for type {viewType.Name}");
         }
 
-        public Type GetViewModelType(Type viewType)
+        public static Type GetViewModelType(Type viewType)
         {
             _viewsSet.TryGetValue(viewType, out var viewModelType);
 

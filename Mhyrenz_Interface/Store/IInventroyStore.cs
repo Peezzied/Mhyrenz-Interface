@@ -19,5 +19,6 @@ namespace Mhyrenz_Interface.Store
         void RemoveProduct(IEnumerable<ProductDataViewModel> product);
         IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products);
         void PurchaseProduct(int productId, int amount);
+        void RemoveProduct(IEnumerable<int> products);
     }
 }

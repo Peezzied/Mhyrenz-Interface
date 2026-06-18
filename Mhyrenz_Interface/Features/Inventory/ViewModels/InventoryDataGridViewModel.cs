@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
-using Microsoft.EntityFrameworkCore.Internal;
 using ObservableCollections;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
@@ -18,7 +15,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public NotifyCollectionChangedSynchronizedViewList<ProductDataViewModel> Inventory { get; }
 
         public event Action CommitEdits;
-        public ICommand DeleteCommand { get; set; }
 
         private IEnumerable<ProductDataViewModel> _selectedItems;
         /// <summary>
@@ -44,13 +40,14 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public event Action OnLoad;
 
         private readonly IInventoryStore _inventoryStore;
+        private readonly CreateCommand<DeleteCommand> _deleteCommand;
 
         public ISynchronizedView<ProductDataViewModel, ProductDataViewModel> InventoryView { get; private set; }
         public bool IsEditCancelled { get; private set; }
 
         private readonly IUndoRedoManager _undoRedoManager;
 
-        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, ISessionStore sessionStore, IInventoryStore inventoryStore, CreateCommand<DeleteCommand> deleteCommand, NavigationViewModel viewHost)
+        public InventoryDataGridViewModel(IUndoRedoManager undoRedoManager, ISessionStore sessionStore, IInventoryStore inventoryStore, NavigationViewModel viewHost)
         {
             _undoRedoManager = undoRedoManager;
             _inventoryStore = inventoryStore;
@@ -58,8 +55,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             InventoryView = _inventoryStore.Store.Source.CreateView(v => v);
             Inventory = InventoryView.ToNotifyCollectionChanged(
                 SynchronizationContextCollectionEventDispatcher.Current);
-
-            DeleteCommand = deleteCommand();
 
             SessionClosed = sessionStore.CurrentSession == null;
         }

@@ -28,15 +28,10 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             _dto = dto;
             _checkoutService = checkoutService;
             _transactionStore = transactionStore;
-            SideEffect = SideEffectHandler;
+            Completer = CompleterHandler;
         }
 
-        private async Task SideEffectHandler(NavigationViewModel vm)
-        {
-            await Completer();
-        }
-
-        private async Task Completer()
+        private async Task Complete()
         {
             var result = await _result;
             _transactionStore.AddToSale(result);
@@ -44,8 +39,16 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             _dto.TransactionId = result.Transaction.Id;
         }
 
-        public override async void Command(object parameter, ActionType intent)
+        private async Task CompleterHandler(NavigationViewModel vm)
         {
+            await Complete();
+            // TODO RowIntoView
+        }
+
+        public override async Task Command()
+        {
+            await base.Command();
+
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
@@ -57,7 +60,7 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             var isIncrease = newValue > oldValue;
 
             var shouldAdd =
-                intent == ActionType.Undo
+                Intent == ActionType.Undo
                     ? !isIncrease
                     : isIncrease;
 
@@ -70,9 +73,9 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
                 _result = _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, amount);
             }
 
-            if (intent == ActionType.Normal)
+            if (Intent == ActionType.Normal)
             {
-                await Completer();
+                await Complete();
             }
         }
 

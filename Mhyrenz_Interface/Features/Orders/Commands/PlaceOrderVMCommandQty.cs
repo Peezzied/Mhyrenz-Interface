@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Domain.Models;
@@ -25,8 +26,10 @@ namespace Mhyrenz_Interface.Features.Orders.Commands
             _orderStore = orderStore;
         }
 
-        public override async void Command(object parameter, ActionType intent)
+        public override async Task Command()
         {
+            await base.Command();
+
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 

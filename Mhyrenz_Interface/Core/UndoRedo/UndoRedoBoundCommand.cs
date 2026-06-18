@@ -1,41 +1,40 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Core.UndoRedo
 {
 
-    public class UndoRedoBoundCommand : IUndoableCommand
+    public abstract class UndoRedoBoundCommand : IUndoableCommand
     {
-        public IUndoRedoBound Command { get; private set; }
-        public PostNavigation SideEffect { get; }
+        public PostNavigation Completer { get; set; }
         public Type CurrentViewIn { get; }
+        public ActionType Intent { get; set; } = ActionType.Normal;
+        public bool Cancel { get; set; } = false;
 
-        private readonly object _commandParameter;
-
-        public UndoRedoBoundCommand(IUndoRedoBound command, PostNavigation sideEffect, Type view, object commandParameter = null)
+        public UndoRedoBoundCommand(Type view)
         {
-            Command = command;
-            SideEffect = sideEffect;
             CurrentViewIn = view;
-            _commandParameter = commandParameter;
         }
 
+        public abstract Task Command();
 
-        public void Execute()
+        public async Task Execute()
         {
-            Command.Execute(_commandParameter);
+            await Command();
         }
 
-        public bool Redo()
+        public async Task Undo()
         {
-            Command.Redo(_commandParameter);
-            return Command.AllowBack;
+            Intent = ActionType.Undo;
+            await Command();
         }
 
-        public bool Undo()
+        public async Task Redo()
         {
-            Command.Undo(_commandParameter);
-            return Command.AllowBack;
+            Intent = ActionType.Redo;
+            await Command();
         }
     }
 }

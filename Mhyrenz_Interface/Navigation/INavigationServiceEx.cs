@@ -8,7 +8,7 @@ namespace Mhyrenz_Interface.Navigation
     public interface INavigationServiceEx
     {
         NavigationViewModel CurrentViewModel { get; }
-        event Action<NavigationViewModel> CurrentViewModelChanged;
+        event Action<NavigationViewModel, Type> Navigated;
 
         Task<bool> NavigateAsync(Type viewType, PostNavigation postNavigationCallback = null);
     }

@@ -25,19 +25,21 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             _transactionStore = transactionStore;
         }
 
-        protected override async Task SideEffectHandler(NavigationViewModel vm)
+        protected override async Task CompleterHandler(NavigationViewModel vm)
         {
-            await base.SideEffectHandler(vm);
-            await Completer();
+            await base.CompleterHandler(vm);
+            await Complete();
         }
 
-        private async Task Completer()
+        private async Task Complete()
         {
             _transactionStore.AddToSale(await _result);
         }
 
-        public override async void Command(object parameter, ActionType intent)
+        public override async Task Command()
         {
+            await base.Command();
+
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
@@ -48,7 +50,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             var isIncrease = newValue > oldValue;
 
             var shouldAdd =
-                intent == ActionType.Undo
+                Intent == ActionType.Undo
                     ? !isIncrease
                     : isIncrease;
 
@@ -61,9 +63,9 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
                 _result = _checkoutService.Subtract(_dto.ProductId, _sessionStore.CurrentSession.Id, amount);
             }
 
-            if (intent == ActionType.Normal)
+            if (Intent == ActionType.Normal)
             {
-                await Completer();
+                await Complete();
             }
         }
 

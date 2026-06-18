@@ -38,7 +38,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _parent = parent;
             _transactionView = transactionView;
 
-            CheckoutCommand = new RelayCommand(CheckoutAction, ValidateCheckout);
+            CheckoutCommand = new AsyncRelayCommand(CheckoutAction, ValidateCheckout);
             VoidCommand = new AsyncRelayCommand(VoidAction);
 
             Sale = sale;
@@ -76,9 +76,9 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 _parent.DropCurrentTab(this, asCompleted: false);
         }
 
-        private void CheckoutAction(object obj)
+        private async Task CheckoutAction(object obj)
         {
-            _checkoutCommand(Sale.Id, Received).Execute();
+            await _checkoutCommand(Sale.Id, Received).Execute();
         }
 
         private bool ValidateCheckout(object arg)
@@ -148,7 +148,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public SaleDropTarget SaleDropHandler { get; }
         public RelayCommand RemoveCommand { get; }
-        public RelayCommand CheckoutCommand { get; private set; }
+        public AsyncRelayCommand CheckoutCommand { get; private set; }
         public AsyncRelayCommand VoidCommand { get; private set; }
 
         private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;

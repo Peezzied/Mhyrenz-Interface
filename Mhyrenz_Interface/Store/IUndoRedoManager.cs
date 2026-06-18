@@ -13,8 +13,7 @@ namespace Mhyrenz_Interface.Store
         event EventHandler UndoRedoChanged;
 
         void Clear();
-        void Execute(IUndoableCommand command);
-        bool Push(IUndoableCommand command);
+        Task Execute(IUndoableCommand command);
         Task Redo();
         Task Undo();
     }
