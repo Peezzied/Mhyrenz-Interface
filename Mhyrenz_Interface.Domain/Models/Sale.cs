@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using ClosedXML.Report.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Vml;
-using Mhyrenz_Interface.Domain.Services.TransactionService;
-using MoreLinq;
 
 namespace Mhyrenz_Interface.Domain.Models
 {
@@ -24,37 +19,9 @@ namespace Mhyrenz_Interface.Domain.Models
         public ICollection<Transaction> Transactions { get; private set; }
             = new List<Transaction>();
 
-        [Obsolete]
-        public Guid SessionId { get; set; }
-        public Session Session { get; set; }
-
-        public Transaction AddItem(Product product, Guid sessionId, int amount = 1)
-        {
-            if (amount <= 0)
-                throw new InvalidOperationException("Amount must be greater than zero.");
-            
-            var transaction = Transactions.FirstOrDefault(t => t.ProductId == product.Id && t.SessionId == sessionId);
-
-            if (transaction != null)
-            {
-                transaction.IncreaseAmount(amount);
-            }
-            else
-            {
-                transaction = new Transaction
-                {
-                    ProductId = product.Id,
-                    Amount = amount,
-                    RetailPrice = product.RetailPrice,
-                    CostPrice = product.CostPrice,
-                    SessionId = sessionId
-                };
-                Transactions.Add(transaction);
-            }
-
-            RecalculateTotals();
-            return transaction;
-        }
+        [NotMapped]
+        public IEnumerable<Transaction> ActiveTransactions =>
+            Transactions.Where(t => !t.IsDeleted);
 
         public void ReceiveCash(decimal cashReceived)
         {
@@ -65,34 +32,16 @@ namespace Mhyrenz_Interface.Domain.Models
             Paid = cashReceived - Total;
         }
 
-        public void RecalculateTotals()
+        public void RecalculateTotals(bool isFiltered = true)
         {
-            SubTotal = Transactions.Sum(t => t.SubTotal);
-            Total = Transactions.Sum(t => t.LineTotal);
+            var tx = isFiltered ? ActiveTransactions.ToList() : Transactions;
+            SubTotal = tx.Sum(t => t.SubTotal);
+            Total = tx.Sum(t => t.LineTotal);
         }
 
-        public Transaction SubtractItem(Transaction transaction, int amount)
+        public string GetCustomerName()
         {
-            if (amount <= 0)
-                throw new InvalidOperationException("Amount must be greater than zero.");
-
-            transaction = Transactions.FirstOrDefault(t => t.Id == transaction.Id) 
-                ?? throw new InvalidOperationException("Transaction not found in sale.");
-
-            transaction.DecreaseAmount(amount);
-
-            if (transaction.Amount == 0)
-            {
-                Transactions.Remove(transaction);
-                return null;
-            }
-            RecalculateTotals();
-            return transaction;
-        }
-
-        public string FromStartCount(int startSaleCount)
-        {
-            return (Id - startSaleCount).ToString("D3");
+            return $"{Id:D3} {(Discount == Discount.None ? "Regular" : Discount.ToString())} Customer";
         }
     }
 }

@@ -163,6 +163,8 @@
     <Compile Include="Exceptions\InvalidSession.cs" />
     <Compile Include="Exceptions\NegativeException.cs" />
     <Compile Include="Models\Category.cs" />
+    <Compile Include="Models\DiscountResult.cs" />
+    <Compile Include="Models\IQueryFiltered.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\PharmaDetails.cs" />
     <Compile Include="Models\Product.cs" />

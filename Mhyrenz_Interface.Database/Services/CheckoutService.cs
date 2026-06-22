@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
+using System.Data;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
-using Mhyrenz_Interface.Domain.Services.SessionService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,143 +22,173 @@ namespace Mhyrenz_Interface.Database.Services
         public async Task<CheckoutResult> AddItem(int saleId, int productId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = await context.Sales
-                    .Include(s => s.Transactions)
-                    .FirstOrDefaultAsync(s => s.Id == saleId)
-                    ?? throw new InvalidOperationException("Sale not found.");
-
-                var product = await context.Products
-                    .FirstOrDefaultAsync(p => p.Id == productId)
-                    ?? throw new InvalidOperationException("Product not found.");
-
-                var transaction = sale.AddItem(product, sale.SessionId, amount);
-
-                await context.SaveChangesAsync();
-
-                await context.Entry(transaction)
-                    .Reference(t => t.Product)
-                    .Query()
-                    .Include(t => t.Category)
-                    .LoadAsync();
-
-                await LoadSale(context, sale);
-
-                await ApplyProductPurchase(context, new List<Sale> { sale });
-
-                return new CheckoutResult
+                try
                 {
-                    Sale = sale,
-                    Transaction = transaction
-                };
+                    var sale = await context.Sales
+                        .Include(s => s.Transactions)
+                        .FirstOrDefaultAsync(s => s.Id == saleId)
+                        ?? throw new InvalidOperationException("Sale not found.");
+
+                    var transaction = await context.Transactions
+                        .IgnoreQueryFilters()
+                        .FirstOrDefaultAsync(t => t.ProductId == productId && t.SaleId == saleId);
+
+                    if (transaction != null)
+                    {
+                        transaction.IncreaseAmount(amount);
+                        transaction.Restore();
+                    }
+                    else
+                    {
+                        var product = await context.Products
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(p => p.Id == productId)
+                            ?? throw new InvalidOperationException("Product not found.");
+
+                        transaction = new Transaction
+                        {
+                            ProductId = product.Id,
+                            Amount = amount,
+                            RetailPrice = product.RetailPrice,
+                            CostPrice = product.CostPrice
+                        };
+
+                        sale.Transactions.Add(transaction);
+                    }
+
+                    sale.RecalculateTotals(isFiltered: false);
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+
+                    return new CheckoutResult
+                    {
+                        Sale = sale,
+                        Transaction = transaction
+                    };
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
-        public async Task<CheckoutResult> AddItem(int productId, Guid sessionId, int amount = 1)
+        public async Task<CheckoutResult> AddItem(int productId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var product = await context.Products
-                    .Include(p => p.Transactions)
-                    .FirstOrDefaultAsync(p => p.Id == productId)
-                    ?? throw new InvalidOperationException("Product not found.");
-
-                var transaction = product.AddItem(amount, sessionId);
-                product.RecalculatePurchase();
-
-                await context.SaveChangesAsync();
-
-                transaction.Product = product;
-
-                return new CheckoutResult
+                try
                 {
-                    Transaction = transaction
-                };
+                    var product = await context.Products
+                        .Include(p => p.Transactions)
+                        .FirstOrDefaultAsync(p => p.Id == productId)
+                        ?? throw new InvalidOperationException("Product not found.");
+
+                    var transaction = product.AddItem(amount);
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+
+                    return new CheckoutResult
+                    {
+                        Transaction = transaction
+                    };
+                }
+                catch (Exception)
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
         public async Task<CheckoutResult> Subtract(int saleId, int transactionId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = await context.Sales
-                    .Include(s => s.Transactions)
-                    .FirstOrDefaultAsync(s => s.Id == saleId)
-                    ?? throw new InvalidOperationException("Sale not found.");
-
-                var transaction = await context.Transactions
-                    .Include(t => t.Product)
-                    .FirstOrDefaultAsync(t =>
-                        t.Id == transactionId &&
-                        t.SaleId == saleId)
-                    ?? throw new InvalidOperationException("Transaction not found.");
-
-                var resultTransaction = sale.SubtractItem(transaction, amount);
-
-                if (resultTransaction == null)
+                try
                 {
-                    context.Transactions.Remove(transaction);
+                    var sale = await context.Sales
+                        .Include(s => s.Transactions)
+                        .FirstOrDefaultAsync(s => s.Id == saleId)
+                        ?? throw new InvalidOperationException("Sale not found.");
+
+                    var transaction = sale.Transactions.FirstOrDefault(t => t.Id == transactionId)
+                        ?? throw new InvalidOperationException("Transaction not found in sale.");
+
+                    transaction.DecreaseAmount(amount);
+
+                    if (transaction.Amount == 0)
+                    {
+                        transaction.Delete();
+                    }
+
+                    sale.RecalculateTotals();
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+
+                    var checkoutResult = new CheckoutResult
+                    {
+                        Sale = sale,
+                        Transaction = transaction,
+                    };
+
+                    return checkoutResult;
                 }
-
-                await context.SaveChangesAsync();
-
-                await LoadSale(context, sale);
-
-                await ApplyProductPurchase(context, new List<Sale> { sale });
-
-                var checkoutResult = new CheckoutResult
+                catch
                 {
-                    Sale = sale,
-                    Transaction = resultTransaction,
-                };
-
-                if (resultTransaction == null)
-                {
-                    checkoutResult.WasRemoved = true;
-                    checkoutResult.Transaction = transaction;
+                    await dbTransaction.RollbackAsync();
+                    throw;
                 }
-                else
-                {
-                    await context.Entry(resultTransaction)
-                       .Reference(t => t.Product)
-                       .Query()
-                       .Include(p => p.Category)
-                       .LoadAsync();
-                }
-
-                return checkoutResult;
             }
         }
 
-        public async Task<CheckoutResult> Subtract(int productId, Guid sessionId, int amount = 1)
+        public async Task<CheckoutResult> Subtract(int productId, int amount = 1)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var product = await context.Products
-                    .Include(p => p.Transactions)
-                    .FirstOrDefaultAsync(p => p.Id == productId)
-                    ?? throw new InvalidOperationException("Product not found.");
-
-                var resultTransaction = product.SubtractItem(sessionId, amount);
-
-                var checkoutResult = new CheckoutResult
+                try
                 {
-                    Transaction = resultTransaction
-                };
+                    var product = await context.Products
+                        .Include(p => p.Transactions)
+                        .FirstOrDefaultAsync(p => p.Id == productId)
+                        ?? throw new InvalidOperationException("Product not found.");
 
-                if (resultTransaction.Amount == 0)
-                {
-                    context.Transactions.Remove(resultTransaction);
-                    checkoutResult.WasRemoved = true; 
+                    var transaction = product.SubtractItem(amount);
+
+                    var checkoutResult = new CheckoutResult
+                    {
+                        Transaction = transaction
+                    };
+
+                    if (transaction.Amount == 0)
+                    {
+                        context.Transactions.Remove(transaction);
+                        transaction.Delete();
+                    }
+
+                    product.RecalculatePurchase();
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+
+                    checkoutResult.Transaction.Product = product;
+
+                    return checkoutResult;
                 }
-
-                product.RecalculatePurchase();
-
-                await context.SaveChangesAsync();
-
-                checkoutResult.Transaction.Product = product;
-
-                return checkoutResult;
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
@@ -171,17 +197,39 @@ namespace Mhyrenz_Interface.Database.Services
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
                 var sales = await context.Sales
-                .AsNoTracking()
-                .Include(s => s.Transactions)
-                    .ThenInclude(t => t.Product)
-                .Include(s => s.Transactions)
-                    .ThenInclude(t => t.Product)
-                        .ThenInclude(p => p.PharmaDetails) // TODO: can be drop
-                .ToListAsync();
-
-                await ApplyProductPurchase(context, sales);
+                    .AsNoTracking()
+                    .Include(s => s.Transactions)
+                    .ToListAsync();
 
                 return sales;
+            }
+        }
+
+        public async Task<int> GetSaleSequence()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var connection = context.Database.GetDbConnection();
+
+                if (connection.State != ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText =
+                        "SELECT seq FROM sqlite_sequence WHERE name = @name";
+
+                    var parameter = command.CreateParameter();
+                    parameter.ParameterName = "@name";
+                    parameter.Value = nameof(context.Sales); 
+                    command.Parameters.Add(parameter);
+
+                    var result = await command.ExecuteScalarAsync();
+
+                    return result == DBNull.Value || result == null
+                        ? 0
+                        : Convert.ToInt32(result);
+                }
             }
         }
 
@@ -190,15 +238,8 @@ namespace Mhyrenz_Interface.Database.Services
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
                 var transactions = await context.Transactions
-                .AsNoTracking()
-                .Include(t => t.Product)
-                    .ThenInclude(p => p.PharmaDetails)
-                .ToListAsync();
-
-                foreach (var transaction in transactions)
-                {
-                    transaction.Product.Purchase = transaction.Amount;
-                }
+                    .AsNoTracking()
+                    .ToListAsync();
 
                 return transactions;
             }
@@ -231,7 +272,6 @@ namespace Mhyrenz_Interface.Database.Services
                 return await context.Sales
                     .AsNoTracking()
                     .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Product)
                     .Where(s => s.Completed_at != null)
                     .ToListAsync();
             }
@@ -240,39 +280,58 @@ namespace Mhyrenz_Interface.Database.Services
         public async Task DiscardSale(int saleId)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = await context.Sales
-                    .Include(s => s.Transactions)
-                    .FirstOrDefaultAsync(s => s.Id == saleId)
-                    ?? throw new InvalidOperationException("Sale not found.");
+                try
+                {
+                    var transactions = await context.Transactions
+                        .Where(t => t.SaleId.HasValue && t.SaleId.Value == saleId)
+                        .ToListAsync();
 
-                context.Transactions.RemoveRange(sale.Transactions);
+                    context.Transactions.RemoveRange(transactions);
 
-                context.Sales.Remove(sale);
+                    context.Sales.Remove(await context.Sales.FindAsync(saleId));
 
-                await context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
         public async Task<Sale> CompleteSale(int saleId, decimal received)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = await context.Sales
+                try
+                {
+                    var sale = await context.Sales
                     .Where(s => s.Completed_at == null)
                     .Include(s => s.Transactions)
                     .FirstOrDefaultAsync(s => s.Id == saleId)
                     ?? throw new InvalidOperationException("Sale not found.");
 
-                if (!sale.Transactions.Any())
-                    throw new InvalidOperationException("Cannot complete an empty sale.");
+                    if (!sale.Transactions.Any())
+                        throw new InvalidOperationException("Cannot complete an empty sale.");
 
-                sale.Completed_at = DateTime.Now;
-                sale.ReceiveCash(received);
+                    sale.Completed_at = DateTime.Now;
+                    sale.ReceiveCash(received);
 
-                await context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
 
-                return sale;
+                    return sale;
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
@@ -282,8 +341,7 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 var sale = new Sale
                 {
-                    Created_at = DateTime.Now,
-                    SessionId = sessionId
+                    Created_at = DateTime.Now
                 };
                 context.Sales.Add(sale);
                 await context.SaveChangesAsync();
@@ -292,66 +350,110 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId)
+        public async Task<DiscountResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, IEnumerable<Transaction> transactions, bool isReversed = false)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = await context.Sales
-                    .Include(s => s.Transactions)
-                    .FirstOrDefaultAsync(s => s.Id == saleId)
-                    ?? throw new InvalidOperationException("Sale not found.");
-
-                var transaction = await context.Transactions
-                    .Include(t => t.Product)
-                    .FirstOrDefaultAsync(t =>
-                        t.Id == transactionId &&
-                        t.SaleId == saleId)
-                    ?? throw new InvalidOperationException("Transaction not found.");
-
-                sale.Discount = discountInfo.Discount;
-
-                transaction.Discount = discountInfo.Discount;
-                transaction.ApplyDiscount(discountInfo.DiscountRate);
-
-                sale.RecalculateTotals();
-
-                await context.SaveChangesAsync();
-
-                return new CheckoutResult
+                try
                 {
-                    Sale = sale,
-                    Transaction = transaction
-                };
+                    var sale = await context.Sales
+                       .Include(s => s.Transactions)
+                       .FirstOrDefaultAsync(s => s.Id == saleId)
+                       ?? throw new InvalidOperationException("Sale not found.");
+
+                    var transactionIds = transactions.Select(t => t.Id).ToHashSet();
+
+                    var targetTransactions = sale.Transactions
+                        .Where(t => transactionIds.Contains(t.Id))
+                        .ToList();
+
+                    if (targetTransactions.Count != transactionIds.Count)
+                        throw new InvalidOperationException("One or more transactions were not found.");
+
+                    if (isReversed)
+                    {
+                        var snapshots = transactions.ToDictionary(t => t.Id);
+
+                        foreach (var transaction in targetTransactions)
+                        {
+                            var snapshot = snapshots[transaction.Id];
+
+                            if (snapshot.Discount != Discount.None && discountInfo.Discount == Discount.None)
+                                transaction.ApplyDiscount(snapshot.DiscountRate);
+                            else
+                                transaction.RemoveDiscount();
+
+                            transaction.Discount = snapshot.Discount;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var transaction in targetTransactions)
+                        {
+                            if (transaction.Discount != Discount.None && discountInfo.Discount == Discount.None)
+                                transaction.RemoveDiscount();
+                            else
+                                transaction.ApplyDiscount(discountInfo.DiscountRate);
+
+                            transaction.Discount = discountInfo.Discount;
+                        }
+                    }
+
+                    sale.Discount = sale.Transactions
+                        .FirstOrDefault(t => t.Discount != Discount.None)?.Discount ?? Discount.None;
+                    sale.RecalculateTotals(isFiltered: false);
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+
+                    return new DiscountResult
+                    {
+                        Sale = sale,
+                        Transactions = targetTransactions
+                    };
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
-        public async Task ConvertAgnosticTransactions(Guid sessionId)
+        public async Task ConvertAgnosticTransactions()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
             {
-                var sale = new Sale
+                try
                 {
-                    Created_at = DateTime.Now,
-                    SessionId = sessionId,
-                    Total = 0,
-                    SubTotal = 0
-                };
-
-                await context.Sales.AddAsync(sale);
-                await context.SaveChangesAsync(); // sale.Id is now populated
-
-                var transactionData = await context.Transactions
-                    .AsNoTracking()
+                    var orphanTransactions = await context.Transactions
                     .Where(t => t.SaleId == null)
-                    .Select(t => new { t.Id, t.RetailPrice, t.Amount })
                     .ToListAsync();
 
-                var lineTotal = transactionData.Sum(t => t.RetailPrice * t.Amount);
+                    if (orphanTransactions.Count == 0)
+                        return;
 
-                sale.Total = lineTotal;
-                sale.SubTotal = lineTotal;
+                    var lineTotal = orphanTransactions.Sum(t => t.RetailPrice * t.Amount);
 
-                await context.SaveChangesAsync();
+                    var sale = new Sale
+                    {
+                        Created_at = DateTime.Now,
+                        Total = lineTotal,
+                        SubTotal = lineTotal
+                    };
+
+                    context.Sales.Add(sale);
+
+                    await context.SaveChangesAsync();
+                    await dbTransaction.CommitAsync();
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 
@@ -361,7 +463,8 @@ namespace Mhyrenz_Interface.Database.Services
             {
                 transaction.Id = id;
 
-                context.Transactions.Update(transaction);
+                context.Attach(transaction);
+                context.Entry(transaction).State = EntityState.Modified;
 
                 await context.SaveChangesAsync();
 
@@ -369,41 +472,64 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        private static async Task LoadSale(InventoryDbContext context, Sale sale)
+        public async Task RemovePhysically()
         {
-            await context.Entry(sale)
-                .Collection(s => s.Transactions)
-                .Query()
-                .Include(t => t.Product)
-                .LoadAsync();
-        }
-        private static async Task ApplyProductPurchase(InventoryDbContext context, List<Sale> sales)
-        {
-            var productIds = sales
-                .SelectMany(s => s.Transactions)
-                .Select(t => t.ProductId)
-                .Distinct()
-                .ToList();
-
-            var purchasesByProductId = await context.Transactions
-                .AsNoTracking()
-                .Where(t => productIds.Contains(t.ProductId))
-                .GroupBy(t => t.ProductId)
-                .Select(g => new
-                {
-                    ProductId = g.Key,
-                    Purchase = g.Sum(t => t.Amount)
-                })
-                .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
-
-            foreach (var transaction in sales.SelectMany(s => s.Transactions))
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                if (purchasesByProductId.TryGetValue(transaction.ProductId, out var purchase))
-                {
-                    transaction.Product.Purchase = purchase;
-                }
+                var transactions = context.Transactions
+                    .IgnoreQueryFilters()
+                    .Where(t => t.IsDeleted);
+
+                context.RemoveRange(transactions);
+
+                await context.SaveChangesAsync();
             }
         }
 
+        public async Task<CheckoutResult> MarkRemoveMany(int saleId, IEnumerable<int> transactions, bool isDeleted = true)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            using (var dbTransaction = await context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var ids = transactions.ToHashSet();
+
+                    var affectedTransactions = await context.Transactions
+                        .IgnoreQueryFilters()
+                        .Where(t => ids.Contains(t.Id) && t.SaleId == saleId)
+                        .ToListAsync();
+
+                    foreach (var transaction in affectedTransactions)
+                    {
+                        if (isDeleted)
+                            transaction.Delete();
+                        else
+                            transaction.Restore();
+                    }
+
+                    var sale = await context.Sales
+                        .Include(s => s.Transactions)
+                        .FirstOrDefaultAsync(s => s.Id == saleId);
+
+                    sale.RecalculateTotals();
+
+                    await context.SaveChangesAsync();
+
+                    await dbTransaction.CommitAsync();
+
+                    return new CheckoutResult
+                    {
+                        Sale = sale,
+                        Transactions = affectedTransactions
+                    };
+                }
+                catch
+                {
+                    await dbTransaction.RollbackAsync();
+                    throw;
+                }
+            }
+        }
     }
 }

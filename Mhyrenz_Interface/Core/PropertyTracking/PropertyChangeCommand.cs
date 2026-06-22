@@ -13,7 +13,7 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
 
         public ChangedArgs PropertyChangedArgs { get; set; }
 
-        public PropertyChangeCommand(DTO dto): base(dto.CurrentViewIn)
+        public PropertyChangeCommand(DTO dto, Type context): base(context)
         {
             PropertyChangedArgs = dto.ChangedArgs;
             _setter = dto.Setter;
@@ -46,7 +46,6 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
             public ChangedArgs ChangedArgs { get; set; }
             public TrackPropertyHelper.Setter Setter { get; set; }
             public Action PropertyChangeHandler { get; set; }
-            public Type CurrentViewIn { get; set; }
         }
     }
 }

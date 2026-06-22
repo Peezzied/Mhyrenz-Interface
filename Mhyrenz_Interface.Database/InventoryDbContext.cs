@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace Mhyrenz_Interface.Database
 {
-    public class InventoryDbContext: DbContext
+    public class InventoryDbContext : DbContext
     {
         public DbSet<Session> Sessions { get; set; }
-        public DbSet<Product> Products { get; set; }    
+        public DbSet<Product> Products { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<SalesRecord> SalesRecords { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<Sundry> Sundry { get; set; }
-        public DbSet<Order> Orders { get; set;  }
+        public DbSet<Order> Orders { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<PharmaDetails> PharmaDetails { get; set; }
@@ -36,7 +36,7 @@ namespace Mhyrenz_Interface.Database
                 .HasIndex(x => x.Code)
                 .IsUnique();
             modelBuilder.Entity<Transaction>()
-                .HasQueryFilter(i => !i.Product.IsDeleted);
+                .HasQueryFilter(Transaction.QueryFilterExpression);
         }
     }
 }

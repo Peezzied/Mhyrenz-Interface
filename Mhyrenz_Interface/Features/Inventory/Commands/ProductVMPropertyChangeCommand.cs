@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Features.Inventory.Views;
 using Mhyrenz_Interface.Navigation;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
@@ -13,7 +14,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
 
     public abstract class ProductVMPropertyChangeCommand : PropertyChangeCommand<ProductVMRowInfo>
     {
-        public ProductVMPropertyChangeCommand(DTO dto) : base(dto)
+        public ProductVMPropertyChangeCommand(DTO dto) : base(dto, typeof(InventoryView))
         {
             Completer = CompleterHandler;
         }

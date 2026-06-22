@@ -47,7 +47,10 @@ namespace Mhyrenz_Interface
     {
         private IHost _appHost;
         private readonly string _appsettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+
+        [Obsolete]
         public static IServiceProvider ServiceProvider { get; set; }
+        public static IUndoRedoManager UndoRedoManager { get; private set; }
         public static AppPresenter Presenter { get; set; }
 
         protected override async void OnStartup(StartupEventArgs e)
@@ -68,6 +71,10 @@ namespace Mhyrenz_Interface
 
             await _appHost.StartAsync();
             ServiceProvider = _appHost.Services;
+
+            UndoRedoManager = _appHost.Services.GetRequiredService<IUndoRedoManager>();
+
+            await _appHost.Services.GetRequiredService<ICheckoutService>().RemovePhysically();
 
             using (var context = ServiceProvider.GetRequiredService<InventoryDbContextFactory>().CreateDbContext())
             {
@@ -138,8 +145,8 @@ namespace Mhyrenz_Interface
                 //.AddSingleton<ICachePath, CachePath>()
                 .AddSingleton<IBarcodeImageCache, BarcodeImageCache>()
                 .AddSingleton<IReportService, ReportService>()
-                
-                .AddSingleton<IDatabaseSnapshotService, DatabaseSnapshotService>(s => 
+
+                .AddSingleton<IDatabaseSnapshotService, DatabaseSnapshotService>(s =>
                     ActivatorUtilities.CreateInstance<DatabaseSnapshotService>(s, Path.Combine(AppContext.BaseDirectory, ".Mhyrenz Export"))) // TODO temporary
 
                 .AddSingleton<IDialogCoordinator, DialogCoordinator>() // MahApps DIALOG
@@ -180,6 +187,7 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<LoadCategoriesCommand>()
                 .AddCommandFactory<CheckoutCommand>()
                 .AddCommandFactory<TransactionVMCommandDiscount, TransactionVMCommandDiscount.DTO>()
+                .AddCommandFactory<TransactionVMCommandDelete, TransactionVMCommandDelete.DTO>()
                 .AddCommandFactory<TransactionVMCommandPurchase, TransactionVMCommandPurchase.DTO>()
                 .AddCommandFactory<ProductVMCommandCommonProp, ProductVMCommandCommonProp.DTO>()
                 .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()

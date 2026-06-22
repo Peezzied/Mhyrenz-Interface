@@ -478,17 +478,22 @@
     <Compile Include="Core\MVVM\ICommandAsync.cs" />
     <Compile Include="Core\MVVM\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Core\Utilities\UiTimeSlicer.cs" />
+    <Compile Include="Features\Checkout\Behaviors\SaleDataGridBehavior.cs" />
+    <Compile Include="Features\Checkout\Commands\ISaleBoundCommand.cs" />
+    <Compile Include="Features\Checkout\Commands\TransactionVMCommandDelete.cs" />
     <Compile Include="Features\Checkout\Controls\CompletedSalesTreeView.xaml.cs">
       <DependentUpon>CompletedSalesTreeView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Features\Home\Converters\BooleanToVirtualVisibilityConverter.cs" />
     <Compile Include="Features\Home\Controls\ActionButton.cs" />
     <Compile Include="Features\Home\Controls\SessionBox.xaml.cs">
       <DependentUpon>SessionBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Features\Home\Converters\BooleanToVirtualVisibilityConverter.cs" />
     <Compile Include="Features\Home\ViewModels\ActionViewModel.cs" />
     <Compile Include="Features\Home\ViewModels\SessionBoxContext.cs" />
-    <Compile Include="Features\Inventory\Columns\PurchaseColumn.cs" />
+    <Compile Include="Shared\Columns\ColumnHelper.cs" />
+    <Compile Include="Shared\Columns\TemplateColumn.cs" />
+    <Compile Include="Shared\Converters\IntegerGreaterThanZero.cs" />
     <Compile Include="Features\Inventory\ViewModels\PharmaDetailsViewModel.cs" />
     <Compile Include="Shared\Adorners\RowFlashAdorner.cs" />
     <Compile Include="Features\Inventory\Commands\AddCommand.cs" />
@@ -520,7 +525,7 @@
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridAdorned.cs" />
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDetailed.cs" />
     <Compile Include="Features\Inventory\Behaviors\InventoryDataGridDelete.cs" />
-    <Compile Include="Features\Inventory\Behaviors\InventoryDataGridBehavior.cs" />
+    <Compile Include="Shared\Behaviors\DynamicCellControlBehavior.cs" />
     <Compile Include="Shared\Behaviors\UndoRedoBehavior.cs" />
     <Compile Include="Shared\Controls\CategoryTag.cs" />
     <Compile Include="Shared\Adorners\CellAdorner.cs" />

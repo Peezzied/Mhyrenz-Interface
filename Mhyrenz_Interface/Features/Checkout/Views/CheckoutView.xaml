@@ -19,7 +19,7 @@
             <Setter Property="ClosingItemCallback" Value="{Binding DataContext.OnTabClosing, ElementName=Root}"/>
             <Setter Property="ShowDefaultAddButton" Value="False" />
             <Setter Property="ShowDefaultCloseButton" Value="True" />
-            <Setter Property="BorderThickness" Value="0,1,0,0"/>
+            <Setter Property="BorderThickness" Value="0,2,0,0"/>
             <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Control.Border}"/>
         </Style>
     </UserControl.Resources>
@@ -43,12 +43,16 @@
                 </Grid.RowDefinitions>
                 <dragablz:TabablzControl VerticalAlignment="Top" x:Name="TabControl" Unloaded="TabablzControl_Unloaded" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemsSource="{Binding SaleTabItems}" >
                     <dragablz:TabablzControl.HeaderSuffixContent>
-                        <Button
-                            HorizontalAlignment="Left"
-                            Style="{StaticResource AddItemCommandButtonStyle}"
-                            Command="{Binding AddSaleCommand}"
-                            ToolTip="New Sale"
-                            Padding="8"/>
+                        <hc:SimplePanel Width="100" HorizontalAlignment="Left">
+                            <Button
+                                Margin="0 0 20 0"
+                                Width="30"
+                                Height="30"
+                                HorizontalAlignment="Left"
+                                Style="{StaticResource AddItemCommandButtonStyle}"
+                                Command="{Binding AddSaleCommand}"
+                                ToolTip="New Sale"/>
+                        </hc:SimplePanel>
                     </dragablz:TabablzControl.HeaderSuffixContent>
                     <dragablz:TabablzControl.ContentTemplate>
                         <DataTemplate>

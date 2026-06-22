@@ -9,13 +9,13 @@ namespace Mhyrenz_Interface.Core.UndoRedo
     public abstract class UndoRedoBoundCommand : IUndoableCommand
     {
         public PostNavigation Completer { get; set; }
-        public Type CurrentViewIn { get; }
+        public Type Context { get; }
         public ActionType Intent { get; set; } = ActionType.Normal;
         public bool Cancel { get; set; } = false;
 
         public UndoRedoBoundCommand(Type view)
         {
-            CurrentViewIn = view;
+            Context = view;
         }
 
         public abstract Task Command();

@@ -10,9 +10,10 @@ namespace Mhyrenz_Interface.Store
     {
         event EventHandler<Sale> SaleChange;
 
-        void AddToSale(CheckoutResult result);
+        void AddToSale(CheckoutResult result, int amount);
         Task InitializeAsync();
         void OnSaleChange(Sale sale);
+        Task RemoveFromSale(CheckoutResult result);
         Task<bool> UpdateTransaction(Transaction transaction);
     }
 }

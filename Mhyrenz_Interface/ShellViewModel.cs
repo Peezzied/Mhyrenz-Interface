@@ -84,8 +84,8 @@ namespace Mhyrenz_Interface
 
             await _sessionStore.UpdateSession();
 
-            var sales = _sessionStore.CurrentSession.Sales.Where(s => s.Completed_at == null);
-            if (sales.Any())
+            var sales = _sessionStore.CurrentSession?.Sales.Where(s => s.Completed_at == null);
+            if (sales?.Any() ?? false)
             {
                 var salesSet = sales.Select(s => s.Id).ToHashSet();
                 var productsInSales = _transactionStore.Store

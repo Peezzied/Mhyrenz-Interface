@@ -22,9 +22,8 @@ namespace Mhyrenz_Interface.Store
 
     public class UndoRedoManager : IUndoRedoManager
     {
-
-        private readonly Stack<IUndoableCommand> _undoStack = new Stack<IUndoableCommand>();
-        private readonly Stack<IUndoableCommand> _redoStack = new Stack<IUndoableCommand>();
+        private readonly List<IUndoableCommand> _undoList = new List<IUndoableCommand>();
+        private readonly List<IUndoableCommand> _redoList = new List<IUndoableCommand>();
         private readonly INavigationServiceEx _navigationService;
 
         public UndoRedoManager(INavigationServiceEx navigationServiceEx)
@@ -34,31 +33,38 @@ namespace Mhyrenz_Interface.Store
 
         public async Task Execute(IUndoableCommand command)
         {
+            if (CanRedo && CanUndo)
+            {
+                if (!ShowWarning())
+                    return;
+            }
+
             await command.Execute();
 
             if (command.Cancel)
                 return;
 
-            _undoStack.Push(command);
-            _redoStack.Clear();
+            _undoList.Add(command);
+            _redoList.Clear();
 
             UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task Undo()
         {
-            if (_undoStack.Count == 0)
+            if (_undoList.Count == 0)
                 return;
 
-            var command = _undoStack.Peek();
+            var index = _undoList.Count - 1;
+            var command = _undoList[index];
 
-            await command.Undo(); 
+            await command.Undo();
 
             if (command.Cancel)
                 return;
 
-            command = _undoStack.Pop();
-            _redoStack.Push(command);
+            _undoList.RemoveAt(index);
+            _redoList.Add(command);
 
             await RaiseUndoRedoEvent(ActionType.Undo, command);
 
@@ -67,18 +73,19 @@ namespace Mhyrenz_Interface.Store
 
         public async Task Redo()
         {
-            if (_redoStack.Count == 0)
+            if (_redoList.Count == 0)
                 return;
 
-            var command = _redoStack.Peek();
+            var index = _redoList.Count - 1;
+            var command = _redoList[index];
 
             await command.Redo();
 
             if (command.Cancel)
                 return;
 
-            command = _redoStack.Pop();
-            _undoStack.Push(command);
+            _redoList.RemoveAt(index);
+            _undoList.Add(command);
 
             await RaiseUndoRedoEvent(ActionType.Redo, command);
 
@@ -87,7 +94,7 @@ namespace Mhyrenz_Interface.Store
 
         private async Task RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)
         {
-            await _navigationService.NavigateAsync(command.CurrentViewIn);
+            await _navigationService.NavigateAsync(command.Context);
 
             if (command.Completer != null)
             {
@@ -108,9 +115,18 @@ namespace Mhyrenz_Interface.Store
 
         public void Clear()
         {
-            _redoStack.Clear();
-            _undoStack.Clear();
+            _redoList.Clear();
+            _undoList.Clear();
         }
+
+        public void RemoveAll(Predicate<IUndoableCommand> match)
+        {
+            _undoList.RemoveAll(match);
+            _redoList.RemoveAll(match);
+
+            UndoRedoChanged?.Invoke(this, EventArgs.Empty);
+        }
+
 
         public static bool ShowWarning(Action rejectEffect = null)
         {
@@ -132,8 +148,8 @@ namespace Mhyrenz_Interface.Store
 
         public event EventHandler UndoRedoChanged;
 
-        public bool CanUndo => _undoStack.Count > 0;
-        public bool CanRedo => _redoStack.Count > 0;
+        public bool CanUndo => _undoList.Count > 0;
+        public bool CanRedo => _redoList.Count > 0;
     }
 
 }

@@ -19,7 +19,7 @@ namespace Mhyrenz_Interface.Features.Orders.Commands
         private readonly IOrderService _orderService;
         private readonly IOrderStore _orderStore;
 
-        public PlaceOrderVMCommandQty(DTO dto, IOrderService orderService, IOrderStore orderStore) : base(dto)
+        public PlaceOrderVMCommandQty(DTO dto, IOrderService orderService, IOrderStore orderStore) : base(dto, null)
         {
             _dto = dto;
             _orderService = orderService;

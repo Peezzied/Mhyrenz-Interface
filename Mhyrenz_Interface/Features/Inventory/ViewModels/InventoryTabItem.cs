@@ -139,8 +139,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 {
                     Product = viewModel.Item,
                     ChangedArgs = changedArgs(getter()),
-                    Setter = setter,
-                    CurrentViewIn = typeof(InventoryView)
+                    Setter = setter
                 }));
             }
 
@@ -162,8 +161,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     ProductId = key,
                     Setter = setter,
                     ChangedArgs = changedArgs(getter()),
-                    PropertyChangeHandler = handlePropChange,
-                    CurrentViewIn = typeof(InventoryView)
+                    PropertyChangeHandler = handlePropChange
                 }));
             }
 

@@ -15,9 +15,11 @@ using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
+using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
@@ -45,6 +47,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly CreateViewModel<InventoryTabItem> _inventoryTabItemFactory;
         private readonly IProductService _productService;
         private readonly IReportService _reportService;
+        private readonly ICheckoutService _checkoutService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly IOrderStore _orderStore;
 
@@ -182,6 +185,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
         }
 
+        public HashSet<int> ProductsInCheckout { get; private set; }
+
         #endregion
 
 
@@ -191,6 +196,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             ISessionStore sessionStore,
             IProductService productService,
             IReportService reportService,
+            ICheckoutService checkoutService,
             IUndoRedoManager undoRedoManager,
             IOrderStore orderStore,
             ShellViewModel shellViewModel,
@@ -210,6 +216,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _placeOrderViewModelFactory = placeOrderViewModelFactory;
             _productService = productService;
             _reportService = reportService;
+            _checkoutService = checkoutService;
             _undoRedoManager = undoRedoManager;
             _orderStore = orderStore;
 
@@ -254,6 +261,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public async Task InitializeAsync(CancellationToken token)
         {
             List<InventoryTabItem> tabs = new List<InventoryTabItem>();
+
+            token.ThrowIfCancellationRequested();
+            ProductsInCheckout = (await _checkoutService.GetActiveSales()).SelectMany(s => s.Transactions).Select(t => t.ProductId).ToHashSet();
 
             token.ThrowIfCancellationRequested();
             _inventoryDataGridVm = _inventoryDataGridViewModelFactory(this);

@@ -15,6 +15,7 @@ namespace Mhyrenz_Interface.Store
         void Clear();
         Task Execute(IUndoableCommand command);
         Task Redo();
+        void RemoveAll(Predicate<IUndoableCommand> match);
         Task Undo();
     }
 }

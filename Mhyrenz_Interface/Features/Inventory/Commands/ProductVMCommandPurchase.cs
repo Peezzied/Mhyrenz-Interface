@@ -16,6 +16,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         private readonly ISessionStore _sessionStore;
         private readonly ITransactionStore _transactionStore;
         private Task<CheckoutResult> _result;
+        private int _amount;
 
         public ProductVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ISessionStore sessionStore, ITransactionStore transactionStore) : base(dto)
         {
@@ -33,7 +34,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
 
         private async Task Complete()
         {
-            _transactionStore.AddToSale(await _result);
+            _transactionStore.AddToSale(await _result, _amount);
         }
 
         public override async Task Command()
@@ -44,9 +45,12 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
             if (newValue == oldValue)
+            {
+                Cancel = true;
                 return;
+            }
 
-            var amount = Math.Abs(newValue - oldValue);
+            _amount = Math.Abs(newValue - oldValue);
             var isIncrease = newValue > oldValue;
 
             var shouldAdd =
@@ -56,11 +60,11 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
 
             if (shouldAdd)
             {
-                _result = _checkoutService.AddItem(_dto.ProductId, _sessionStore.CurrentSession.Id, amount);
+                _result = _checkoutService.AddItem(_dto.ProductId, _amount);
             }
             else
             {
-                _result = _checkoutService.Subtract(_dto.ProductId, _sessionStore.CurrentSession.Id, amount);
+                _result = _checkoutService.Subtract(_dto.ProductId, _amount);
             }
 
             if (Intent == ActionType.Normal)

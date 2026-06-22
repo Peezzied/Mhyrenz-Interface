@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Shared.Controls;
 
 namespace Mhyrenz_Interface.Shared.Columns
@@ -28,6 +29,17 @@ namespace Mhyrenz_Interface.Shared.Columns
             };
             textBlock.SetBinding(TextBlock.TextProperty, Binding);
             return textBlock;
+        }
+
+        protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
+        {
+            if (!cell.IsEditable(((ProductDataViewModel)dataItem).Item))
+            {
+                cell.IsEditing = false;
+                return base.GenerateElement(cell, dataItem);
+            }
+
+            return base.GenerateEditingElement(cell, dataItem);
         }
     }
 }

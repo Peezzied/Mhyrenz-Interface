@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
-using Mhyrenz_Interface.Features.Inventory.Views;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 
@@ -42,7 +40,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         }
 
         public ProductDataViewModel(ISessionStore sessionStore,
-            ITransactionStore transactionStore,
             ICategoryStore categoryStore,
             Product product,
             ISerialBarcodeService serialBarcodeService,
@@ -56,7 +53,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _categoryStore = categoryStore;
             _serialBarcodeService = serialBarcodeService;
             _navigationService = navigationServiceEx;
-            _transactionStore = transactionStore;
 
             if (product.Category.IsPharma)
             {
@@ -64,26 +60,12 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 PharmaDetails.TrackedPropertyChanged += PharmaDetails_TrackedPropertyChanged;
             }
 
-            _transactionStore.SaleChange += TransactionStore_SaleChange;
-
             GoToItemCommand = new AsyncRelayCommand(GoToItemActionCommand);
         }
 
         private void PharmaDetails_TrackedPropertyChanged(object sender, TrackedPropertyChangedEventArgs e)
         {
             OnTrackedPropertyChanged(e.OldValue, e.PropertyName);
-        }
-
-        private void TransactionStore_SaleChange(object sender, Sale sale)
-        {
-            if (sale.Completed_at == null && _transactionStore.Store.TryGetValue(Transaction.CreateTransactionKey(Item.Id, sale.Id), out var _))
-            {
-                HasActiveSale = true;
-            }
-            else if (HasActiveSale)
-            {
-                HasActiveSale = false;
-            }
         }
 
         public void LoadReceiver()

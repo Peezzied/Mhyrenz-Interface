@@ -18,6 +18,8 @@ namespace Mhyrenz_Interface.Domain.Models
         public int ProductId { get; set; }
         public Product Product { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         /// <summary>
         /// Empty SaleId is populated  once the session has ended.
         /// </summary>
@@ -30,8 +32,8 @@ namespace Mhyrenz_Interface.Domain.Models
 
         public Sale Sale { get; set; }
 
-        [Obsolete]
-        public Guid SessionId { get; set; }
+        //[Obsolete]
+        //public Guid SessionId { get; set; }
         //public Session Session { get; set; }
 
         public int Amount { get; set; }
@@ -66,10 +68,23 @@ namespace Mhyrenz_Interface.Domain.Models
         [NotMapped]
         public long TransactionKey => CreateTransactionKey(ProductId, SaleId);
 
+        public static Expression<Func<Transaction, bool>> QueryFilterExpression { get; } =
+            t => !t.IsDeleted;
+
+        public static Func<Transaction, bool> QueryFilter { get; } =
+            QueryFilterExpression.Compile();
+
+
         public void ApplyDiscount(decimal discountRate)
         {
             DiscountRate = discountRate;
             RetailPrice *= (1 - DiscountRate);
+        }
+
+        public void RemoveDiscount()
+        {
+            RetailPrice /= (1 - DiscountRate);
+            DiscountRate = 0m;
         }
 
         public void IncreaseAmount(int amount)
@@ -80,7 +95,7 @@ namespace Mhyrenz_Interface.Domain.Models
             Amount += amount;
         }
 
-        internal void DecreaseAmount(int amount)
+        public void DecreaseAmount(int amount)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
@@ -100,6 +115,16 @@ namespace Mhyrenz_Interface.Domain.Models
         public static decimal CalculateProfit(decimal retail, decimal cost, int amount)
         {
             return (retail - cost) * amount;
+        }
+
+        public void Delete()
+        {
+            IsDeleted = true;
+        }
+
+        public void Restore()
+        {
+            IsDeleted = false;
         }
     }
 }

@@ -9,17 +9,16 @@
                     <StackPanel Orientation="Horizontal" 
                             VerticalAlignment="Center">
                         <ContentPresenter Content="{TemplateBinding Content}"
-                                      VerticalAlignment="Center"/>
+                                        VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding KeyBindDisplay, 
-                                   RelativeSource={RelativeSource AncestorType=controls:HotButton},
-                                   StringFormat='({0})'}"
-                               Foreground="{Binding KeyBindForeground, 
-                                   RelativeSource={RelativeSource AncestorType=controls:HotButton}, TargetNullValue={StaticResource MahApps.Brushes.Badged.Background.Disabled}}"
-                               Margin="6 0 0 0"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding KeyBind, 
-                                   RelativeSource={RelativeSource AncestorType=controls:HotButton},
-                                   Converter={StaticResource StringToVisibilityConverter}}"/>
+                                       RelativeSource={RelativeSource AncestorType=controls:HotButton},
+                                       StringFormat='({0})'}"
+                                   Opacity="0.5"
+                                   Margin="6 0 0 0"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding KeyBind, 
+                                       RelativeSource={RelativeSource AncestorType=controls:HotButton},
+                                       Converter={StaticResource StringToVisibilityConverter}}"/>
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>

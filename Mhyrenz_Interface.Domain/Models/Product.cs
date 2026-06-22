@@ -35,6 +35,7 @@ namespace Mhyrenz_Interface.Domain.Models
         // Transaction
         public ICollection<Transaction> Transactions { get; set; }
             = new List<Transaction>();
+
         [NotMapped]
         public int Purchase { get; set; }
 
@@ -59,12 +60,12 @@ namespace Mhyrenz_Interface.Domain.Models
             Qty -= purchase;
         }
 
-        public Transaction AddItem(int amount, Guid sessionId)
+        public Transaction AddItem(int amount)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
-            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SessionId == sessionId);
+            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id);
             if (transaction == null)
             {
                 transaction = new Transaction
@@ -72,8 +73,7 @@ namespace Mhyrenz_Interface.Domain.Models
                     ProductId = Id,
                     Amount = amount,
                     RetailPrice = RetailPrice,
-                    CostPrice = CostPrice,
-                    SessionId = sessionId
+                    CostPrice = CostPrice
                 };
                 Transactions.Add(transaction);
                 return transaction;
@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.Domain.Models
             return transaction;
         }
 
-        public Transaction SubtractItem(Guid sessionId, int amount)
+        public Transaction SubtractItem(int amount)
         {
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
@@ -96,8 +96,7 @@ namespace Mhyrenz_Interface.Domain.Models
                 {
                     ProductId = Id,
                     Amount = -amount,
-                    RetailPrice = RetailPrice,
-                    SessionId = sessionId
+                    RetailPrice = RetailPrice
                 };
                 Transactions.Add(transaction);
                 return transaction;

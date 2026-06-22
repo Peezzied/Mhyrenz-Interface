@@ -137,7 +137,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<decimal>("Paid")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("SessionId")
+                    b.Property<Guid?>("SessionId")
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("SubTotal")
@@ -254,6 +254,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<decimal>("DiscountRate")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
@@ -262,9 +265,6 @@ namespace Mhyrenz_Interface.Database.Migrations
 
                     b.Property<int?>("SaleId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -305,11 +305,9 @@ namespace Mhyrenz_Interface.Database.Migrations
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Sale", b =>
                 {
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", "Session")
+                    b.HasOne("Mhyrenz_Interface.Domain.Models.Session", null)
                         .WithMany("Sales")
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SessionId");
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>

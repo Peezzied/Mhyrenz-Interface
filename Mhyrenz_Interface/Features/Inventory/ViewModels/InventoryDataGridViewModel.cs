@@ -61,21 +61,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public bool SessionClosed { get; set; }
 
-        private bool _isReadOnly = false;
-        public bool IsReadOnly
-        {
-            get => _isReadOnly;
-            set
-            {
-                _isReadOnly = value;
-                OnPropertyChanged(nameof(IsReadOnly));
-            }
-        }
-
         public void Load()
         {
-            // FIXME: the subscription may cause the lag
-            _undoRedoManager.UndoRedoEvent += UndoRedoManager_UndoRedoEvent;
             IsEditCancelled = false;
             OnLoad?.Invoke();
         }
@@ -84,7 +71,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             IsEditCancelled = true;
             CommitEdits?.Invoke();
-            _undoRedoManager.UndoRedoEvent -= UndoRedoManager_UndoRedoEvent;
 
         }
 
@@ -94,13 +80,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             SwitchSelectedItem?.Invoke();
         }
-
-        #region "Event handlers"
-        private void UndoRedoManager_UndoRedoEvent(ActionType obj, UndoRedoEventArgs e)
-        {
-
-        }
-        #endregion
 
         public class SelectionRowsInfo
         {

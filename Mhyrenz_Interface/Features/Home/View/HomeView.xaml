@@ -165,8 +165,8 @@
                             <Button Command="{Binding ActionViewModel.CreateCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource ButtonCustom}">
                                 <hc:DashedBorder IsHitTestVisible="True" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlBackgroundBaseMedium}" BorderThickness="1.5" BorderDashArray="6 3" Padding="40">
                                     <hc:UniformSpacingPanel Spacing="12">
-                                        <iconPacks:PackIconMaterialLight Kind="Plus" Width="14" Height="14"/>
-                                        <TextBlock Text="Start New Session" FontSize="14" FontWeight="Medium"/>
+                                        <iconPacks:PackIconMaterialLight Kind="Plus" Opacity="0.7" Width="14" Height="14"/>
+                                        <TextBlock Text="Start New Session" Opacity="0.7" FontSize="14" FontWeight="Medium"/>
                                     </hc:UniformSpacingPanel>
                                 </hc:DashedBorder>
                             </Button>

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class Sundry : Migration
+    public partial class DropSessionId : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -104,7 +104,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                     Total = table.Column<decimal>(nullable: false),
                     Paid = table.Column<decimal>(nullable: false),
                     Discount = table.Column<int>(nullable: false),
-                    SessionId = table.Column<Guid>(nullable: false)
+                    SessionId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -114,7 +114,7 @@ namespace Mhyrenz_Interface.Database.Migrations
                         column: x => x.SessionId,
                         principalTable: "Sessions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,8 +185,8 @@ namespace Mhyrenz_Interface.Database.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ProductId = table.Column<int>(nullable: false),
+                    IsDeleted = table.Column<bool>(nullable: false),
                     SaleId = table.Column<int>(nullable: true),
-                    SessionId = table.Column<Guid>(nullable: false),
                     Amount = table.Column<int>(nullable: false),
                     RetailPrice = table.Column<decimal>(nullable: false),
                     CostPrice = table.Column<decimal>(nullable: false),

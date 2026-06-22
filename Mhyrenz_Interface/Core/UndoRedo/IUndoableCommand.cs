@@ -13,7 +13,7 @@ namespace Mhyrenz_Interface.Core.UndoRedo
     public interface IUndoableCommand
     {
         PostNavigation Completer { get; }
-        Type CurrentViewIn { get; }
+        Type Context { get; }
         ActionType Intent { get; set; }
         bool Cancel { get; set; }
 

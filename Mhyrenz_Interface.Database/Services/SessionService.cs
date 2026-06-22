@@ -84,7 +84,7 @@ namespace Mhyrenz_Interface.Domain.Services.SessionService
                 var session = await context.Sessions
                     .FirstAsync();
 
-                await _checkoutService.ConvertAgnosticTransactions(session.Id);
+                await _checkoutService.ConvertAgnosticTransactions();
 
                 await _databaseSnapshotService.ExportSnapshot(session);
 

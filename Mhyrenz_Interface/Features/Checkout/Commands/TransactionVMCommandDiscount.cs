@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Core.UndoRedo;
@@ -6,42 +10,58 @@ using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.TransactionService;
+using Mhyrenz_Interface.Features.Checkout.Views;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.Commands
 {
-    public class TransactionVMCommandDiscount : PropertyChangeCommand<TransactionVMRowInfo>
+    public class TransactionVMCommandDiscount : UndoRedoBoundCommand, ISaleBoundCommand
     {
         private readonly DTO _dto;
         private readonly ICheckoutService _checkoutService;
         private readonly ITransactionStore _transactionStore;
-        private CheckoutResult _result;
+        private DiscountResult _result;
+        private TransactionVMRowInfo _rowInfo;
 
-        public TransactionVMCommandDiscount(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto)
+        public int SaleId { get; }
+
+        public TransactionVMCommandDiscount(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(typeof(CheckoutView))
         {
             _dto = dto;
             _checkoutService = checkoutService;
             _transactionStore = transactionStore;
             Completer = CompleterHandler;
+
+            SaleId = _dto.SaleId;
         }
 
         private async Task CompleterHandler(NavigationViewModel navigationViewModel)
         {
-            await Complete();
-            // TOOD RowIntoView
+            if (navigationViewModel is IDataGridTabHost host)
+            {
+                await App.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    host.RowIntoView(_rowInfo.Sale, null);
+                });
+                await Complete();
+            }
         }
 
         public override async Task Command()
         {
-            await base.Command();
-
-            var discount = (Discount)(Intent == ActionType.Undo ? _dto.ChangedArgs.OldValue : _dto.ChangedArgs.NewValue);
             _result = await _checkoutService.ApplyDiscount(new DiscountInfo
             {
-                Discount = discount,
-                DiscountRate = discount == Discount.None ? 0m : 0.20m // FIXME source the discount rate from user preference
-            }, saleId: _dto.SaleId, transactionId: _dto.TransactionId);
+                Discount = _dto.Discount,
+                DiscountRate = _dto.Discount == Discount.None ? 0m : 0.20m // FIXME source the discount rate from user preference
+            }, saleId: _dto.SaleId, transactions: _dto.Transactions, isReversed: Intent == ActionType.Undo);
+
+            _rowInfo = new TransactionVMRowInfo
+            {
+                Sale = _dto.SaleId
+            };
 
             if (Intent == ActionType.Normal)
             {
@@ -52,13 +72,16 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
         private async Task Complete()
         {
             _transactionStore.OnSaleChange(_result.Sale);
-            await _transactionStore.UpdateTransaction(_result.Transaction);
+
+            // FIXME consider better solution because this is slow
+            await Task.WhenAll(_result.Transactions.Select(t => _transactionStore.UpdateTransaction(t)));
         }
 
-        public new class DTO : PropertyChangeCommand<TransactionVMRowInfo>.DTO
+        public class DTO
         {
+            public Discount Discount { get; set; }
             public int SaleId { get; internal set; }
-            public int TransactionId { get; internal set; }
+            public IEnumerable<Transaction> Transactions { get; internal set; }
         }
     }
 }

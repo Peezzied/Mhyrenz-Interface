@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Checkout.Views;
+using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
@@ -21,48 +25,85 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
     public class SaleTabItem : ValidationViewModel<Sale>, IEditCancelState
     {
         public SaleTabItem(
-            string header,
             Sale sale,
             CheckoutViewModel parent,
-            IUndoRedoManager undoRedoManager,
             ITransactionStore transactionStore,
+            ICheckoutService checkoutService,
+            ISessionStore sessionStore,
             ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> transactionView,
             CreateViewModel<TransactionDataViewModel> transactionDataViewModel,
             CreateCommand<CheckoutCommand> checkoutCommand,
             CreateCommand<TransactionVMCommandPurchase> transctionPurchaseCommand,
-            CreateCommand<TransactionVMCommandDiscount> transactionPropCommand)
+            CreateCommand<TransactionVMCommandDelete> transctionDeleteCommand,
+            CreateCommand<TransactionVMCommandDiscount> transactionDiscountCommand)
         {
             _transactionDataViewModel = transactionDataViewModel;
-            _undoRedoManager = undoRedoManager;
             _transactionStore = transactionStore;
-            _parent = parent;
+            _checkoutService = checkoutService;
+            _sessionStore = sessionStore;
+            Owner = parent;
             _transactionView = transactionView;
 
             CheckoutCommand = new AsyncRelayCommand(CheckoutAction, ValidateCheckout);
             VoidCommand = new AsyncRelayCommand(VoidAction);
 
             Sale = sale;
-            Header = header;
+            Header = sale.GetCustomerName();
 
             _checkoutCommand = checkoutCommand;
             _transctionPurchaseCommand = transctionPurchaseCommand;
-            _transactionPropCommand = transactionPropCommand;
+            _transctionDeleteCommand = transctionDeleteCommand;
+            _transactionDiscountCommand = transactionDiscountCommand;
             SaleDropHandler = new SaleDropTarget(this, transactionStore);
 
-            RemoveCommand = new RelayCommand(RemoveAction);
-            RemoveCommand = new RelayCommand(RemoveAction);
-            DiscountCommand = new RelayCommand(DiscountAction);
+            RemoveCommand = new AsyncRelayCommand(RemoveAction);
+            DiscountCommand = new AsyncRelayCommand(DiscountAction, CanDiscountCommand);
+            AddCommand = new HandyControl.Tools.Command.RelayCommand(AddAction);
 
         }
 
-        private void RemoveAction(object obj)
+        protected void AddAction(object obj)
         {
-            throw new NotImplementedException(); // TODO execute standalone undo redo command
+            var product = ((ProductDataViewModel)obj).Item;
+
+            if (_transactionStore.Store.TryGetValue(
+                    Transaction.CreateTransactionKey(product.Id, Sale.Id), out var transaction))
+            {
+                transaction.Qty += 1;
+            }
+            else
+            {
+                TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty),
+                    productId: product.Id,
+                    oldValue: 0,
+                    newValue: 1);
+            }
         }
 
-        private void DiscountAction(object obj)
+        private bool CanDiscountCommand(object obj)
         {
-            throw new NotImplementedException(); // TODO execute standalone undo redo command
+            return Sale.Discount == Domain.Models.Discount.None || Sale.Discount == (Discount)obj || (Discount)obj == Domain.Models.Discount.None;
+        }
+
+        private async Task RemoveAction(object obj)
+        {
+            await App.UndoRedoManager.Execute(_transctionDeleteCommand(new TransactionVMCommandDelete.DTO
+            {
+                SaleId = Sale.Id,
+                Transactions = !(obj is TransactionDataViewModel transaction)
+                    ? SelectedItems.Select(t => t.Transaction.Id).ToList()
+                    : new[] { transaction.Transaction.Id }.ToList()
+            }));
+        }
+
+        private async Task DiscountAction(object obj)
+        {
+            await App.UndoRedoManager.Execute(_transactionDiscountCommand(new TransactionVMCommandDiscount.DTO
+            {
+                Discount = (Discount)obj,
+                SaleId = Sale.Id,
+                Transactions = SelectedItems.Select(t => t.Transaction).ToList()
+            }));
         }
 
         private readonly ISynchronizedView<TransactionDataViewModel, TransactionDataViewModel> _transactionView;
@@ -73,12 +114,23 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private async Task VoidAction(object arg)
         {
             if (CheckoutViewModel.ClosingPrompt(this))
-                _parent.DropCurrentTab(this, asCompleted: false);
+                Owner.DropCurrentTab(this, asCompleted: false);
         }
 
         private async Task CheckoutAction(object obj)
         {
-            await _checkoutCommand(Sale.Id, Received).Execute();
+            var result = MessageBox.Show(
+                "Do you want to complete this sale?",
+                "Complete Sale",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            var sale = await _checkoutService.CompleteSale(Sale.Id, _received);
+
+            _transactionStore.OnSaleChange(sale);
         }
 
         private bool ValidateCheckout(object arg)
@@ -95,10 +147,24 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 _sale = value;
                 OnPropertyChanged(null);
                 Validate(nameof(Received), Received);
+
+                Header = Sale.GetCustomerName();
             }
         }
 
-        public string Header { get; set; }
+        private string _header;
+        public string Header
+        {
+            get => _header;
+            set
+            {
+                if (_header != value)
+                {
+                    _header = value;
+                    OnPropertyChanged(nameof(Header));
+                }
+            }
+        }
 
         private IEnumerable<TransactionDataViewModel> _selectedItems;
         public IEnumerable<TransactionDataViewModel> SelectedItems
@@ -144,20 +210,24 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         private readonly CreateCommand<CheckoutCommand> _checkoutCommand;
         private readonly CreateCommand<TransactionVMCommandPurchase> _transctionPurchaseCommand;
-        private readonly CreateCommand<TransactionVMCommandDiscount> _transactionPropCommand;
+        private readonly CreateCommand<TransactionVMCommandDelete> _transctionDeleteCommand;
+        private readonly CreateCommand<TransactionVMCommandDiscount> _transactionDiscountCommand;
 
         public SaleDropTarget SaleDropHandler { get; }
-        public RelayCommand RemoveCommand { get; }
+        public AsyncRelayCommand RemoveCommand { get; }
         public AsyncRelayCommand CheckoutCommand { get; private set; }
         public AsyncRelayCommand VoidCommand { get; private set; }
 
         private readonly CreateViewModel<TransactionDataViewModel> _transactionDataViewModel;
-        private readonly IUndoRedoManager _undoRedoManager;
         private readonly ITransactionStore _transactionStore;
-        private readonly CheckoutViewModel _parent;
+        private readonly ICheckoutService _checkoutService;
+        private readonly ISessionStore _sessionStore;
+
+        public CheckoutViewModel Owner { get; private set; }
 
         public bool IsEditCancelled { get; set; }
-        public RelayCommand DiscountCommand { get; }
+        public AsyncRelayCommand DiscountCommand { get; }
+        public HandyControl.Tools.Command.RelayCommand AddCommand { get; }
 
         public void Load()
         {
@@ -227,7 +297,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             {
                 if (e.Completed_at != null)
                 {
-                    _parent.DropCurrentTab(this, asCompleted: true);
+                    Owner.DropCurrentTab(this, asCompleted: true);
                     return;
                 }
                 Sale = e;
@@ -255,28 +325,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 return;
 
             var viewModel = sender as TransactionDataViewModel;
-            TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id)
-                .Track(nameof(TransactionDataViewModel.Discount), discountMethod);
-
-            void discountMethod(Setter setter, Getter getter, long key)
-            {
-                _undoRedoManager.Execute(_transactionPropCommand(new TransactionVMCommandDiscount.DTO
-                {
-                    SaleId = Sale.Id,
-                    TransactionId = ((TransactionDataViewModel)sender).Transaction.Id,
-                    ChangedArgs = new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
-                    {
-                        OldValue = args.OldValue,
-                        NewValue = getter(),
-                        RowInfo = new TransactionVMRowInfo
-                        {
-                            Sale = Sale.Id
-                        }
-                    },
-                    Setter = setter,
-                    CurrentViewIn = typeof(CheckoutView)
-                }));
-            }
+            TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id);
         }
 
         public TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
@@ -291,7 +340,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             void method(Setter setter, Getter getter, long key)
             {
-                _undoRedoManager.Execute(_transctionPurchaseCommand(new TransactionVMCommandPurchase.DTO
+                App.UndoRedoManager.Execute(_transctionPurchaseCommand(new TransactionVMCommandPurchase.DTO
                 {
                     SaleId = Sale.Id,
                     ProductId = productId,
@@ -305,8 +354,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                             Sale = Sale.Id
                         }
                     },
-                    Setter = setter,
-                    CurrentViewIn = typeof(CheckoutView)
+                    Setter = setter
                 }));
             }
 
@@ -341,20 +389,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             public override void Drop(IDropInfo dropInfo)
             {
-                var product = (dropInfo.Data as ProductDataViewModel).Item;
-
-                if (transactionStore.Store.TryGetValue(
-                    Transaction.CreateTransactionKey(product.Id, saleTabItem.Sale.Id), out var transaction))
-                {
-                    transaction.Qty += 1;
-                }
-                else
-                {
-                    saleTabItem.TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty),
-                        productId: product.Id,
-                        oldValue: 0,
-                        newValue: 1);
-                }
+                saleTabItem.AddAction((ProductDataViewModel)dropInfo.Data);
             }
         }
     }

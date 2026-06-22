@@ -4,15 +4,17 @@ using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Shared.Behaviors;
+using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
 
     public class TransactionDataViewModel : TrackedViewModel, IFlashRequestable
     {
-        public TransactionDataViewModel(Transaction transaction)
+        public TransactionDataViewModel(Transaction transaction, IInventoryStore inventoryStore)
         {
             Transaction = transaction;
+            _inventoryStore = inventoryStore;
         }
 
         private Transaction _transaction;
@@ -56,6 +58,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         }
 
         private int _qtyIncrementEdit;
+        private readonly IInventoryStore _inventoryStore;
+
         public int QtyIncrementEdit
         {
             get => _qtyIncrementEdit;
@@ -82,15 +86,15 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
         }
 
-        public int MaxQty => Product.NetQty;
+        public int MaxQty => Product.Qty;
 
         public int MaxIncrementQty => Product.NetQty;
 
-        public bool IsPharma => Transaction.Product.IsPharma;
+        public bool IsPharma => Product.IsPharma;
 
         public bool IsPrescribed { get; set; }
 
-        public Product Product => Transaction.Product;
+        public Product Product => _inventoryStore.Store[Transaction.ProductId].Item;
 
         public decimal RetailPrice => Transaction.RetailPrice;
 

@@ -5,6 +5,7 @@ using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
+using Mhyrenz_Interface.Features.Checkout.Views;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 
@@ -16,25 +17,30 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
         public int[] Transactions { get; set; }
     }
 
-    public class TransactionVMCommandPurchase : PropertyChangeCommand<TransactionVMRowInfo>
+    public class TransactionVMCommandPurchase : PropertyChangeCommand<TransactionVMRowInfo>, ISaleBoundCommand
     {
         private readonly DTO _dto;
         private readonly ICheckoutService _checkoutService;
         private readonly ITransactionStore _transactionStore;
         private Task<CheckoutResult> _result;
+        private int _amount;
 
-        public TransactionVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto)
+        public int SaleId { get; }
+
+        public TransactionVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto, typeof(CheckoutView))
         {
             _dto = dto;
             _checkoutService = checkoutService;
             _transactionStore = transactionStore;
             Completer = CompleterHandler;
+
+            SaleId = _dto.SaleId;
         }
 
         private async Task Complete()
         {
             var result = await _result;
-            _transactionStore.AddToSale(result);
+            _transactionStore.AddToSale(result, _amount);
 
             _dto.TransactionId = result.Transaction.Id;
         }
@@ -47,15 +53,19 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
 
         public override async Task Command()
         {
-            await base.Command();
-
             var newValue = PropertyChangedArgs.NewValue as int? ?? 0;
             var oldValue = PropertyChangedArgs.OldValue as int? ?? 0;
 
             if (newValue == oldValue)
+            {
+                Cancel = true;
                 return;
+            }
 
-            var amount = Math.Abs(oldValue - newValue);
+            await base.Command();
+
+
+            _amount = Math.Abs(oldValue - newValue);
 
             var isIncrease = newValue > oldValue;
 
@@ -66,11 +76,11 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
 
             if (shouldAdd)
             {
-                _result = _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, amount);
+                _result = _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, _amount);
             }
             else
             {
-                _result = _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, amount);
+                _result = _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, _amount);
             }
 
             if (Intent == ActionType.Normal)

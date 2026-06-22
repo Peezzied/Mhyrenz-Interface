@@ -13,7 +13,9 @@ using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
+using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
+using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
@@ -22,7 +24,7 @@ using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class CheckoutViewModel : NavigationViewModel, IAsyncInitializable
+    public class CheckoutViewModel : NavigationViewModel, IAsyncInitializable, IDataGridTabHost
     {
 
         public CheckoutViewModel(INavigationServiceEx navigationServiceEx, ICheckoutService checkoutService,
@@ -47,10 +49,12 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _completedSaleViewModel = completedSaleViewModel;
 
             AddSaleCommand = new AsyncRelayCommand(CreateSale);
-
+  
             InventoryDragHandler = new InventoryDragSource(this);
 
             _transactionView = _transactionStore.Store.Source.CreateView(v => v);
+
+            InventoryDataGridViewModel = _inventoryDataGridFactory(this);
 
             _searchTimer = new DispatcherTimer
             {
@@ -77,22 +81,16 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         {
             token.ThrowIfCancellationRequested();
             var sales = await _checkoutService.GetActiveSales();
-            token.ThrowIfCancellationRequested();
 
             token.ThrowIfCancellationRequested();
-            _startSaleCount = _transactionStore.Store.Count;
-            token.ThrowIfCancellationRequested();
+            _startSaleCount = await _checkoutService.GetSaleSequence();
 
             if (sales.Count == 0)
             {
+                token.ThrowIfCancellationRequested();
                 await CreateSale();
                 return;
             }
-
-            token.ThrowIfCancellationRequested();
-            InventoryDataGridViewModel = _inventoryDataGridFactory(this);
-            token.ThrowIfCancellationRequested();
-            InventoryDataGridViewModel.IsReadOnly = true;
 
             List<SaleTabItem> tabs = new List<SaleTabItem>();
 
@@ -105,7 +103,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                     tabs.Add(_saleTabItemFactory(
                         this,
                         _transactionView,
-                        sale.FromStartCount(_startSaleCount) + " Regular Customer",
                         sale));
                 }
                 );
@@ -131,11 +128,26 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         public async void DropCurrentTab(SaleTabItem saleTabItem, bool asCompleted)
         {
             if (!asCompleted)
+            {
                 await _checkoutService.DiscardSale(saleTabItem.Sale.Id);
+
+                foreach (var item in saleTabItem.Sale.Transactions)
+                {
+                    _inventoryStore.Store.TryGetValue(item.ProductId, out var product);
+                    product.Purchase -= item.Amount;
+                }
+            }
+
+            App.UndoRedoManager.RemoveAll(c =>
+                c is ISaleBoundCommand saleCommand &&
+                saleCommand.SaleId == saleTabItem.Sale.Id);
+
             await CreateOrIgnore();
 
             saleTabItem.Dispose();
             SaleTabItems.Remove(saleTabItem);
+
+            await _sessionStore.UpdateSession();
         }
 
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridFactory;
@@ -299,7 +311,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             SaleTabItem item = _saleTabItemFactory(
                 this,
                 _transactionView,
-                sale.FromStartCount(_startSaleCount) + " Regular Customer",
                 sale);
 
             SaleTabItems.Add(item);
@@ -325,6 +336,22 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             InventoryDataGridViewModel?.Dispose();
             InventoryDataGridViewModel = null;
+        }
+
+        public event Action<TransactionVMRowInfo> RowIntoViewRequested;
+
+        public void RowIntoView(int tab, int[] items)
+        {
+            RowIntoViewRequested?.Invoke(new TransactionVMRowInfo
+            {
+                Sale = tab,
+                Transactions = items
+            });
+        }
+
+        internal void SelectTab(int sale)
+        {
+            SelectedItem = SaleTabItems.FirstOrDefault(s => s.Sale.Id == sale);
         }
 
         public class InventoryDragSource : DefaultDragHandler

@@ -67,22 +67,25 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<CheckoutResult> AddItem(int productId, Guid sessionId, int amount = 1);
-        Task<CheckoutResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, int transactionId);
+        Task<CheckoutResult> AddItem(int productId, int amount = 1);
+        Task<DiscountResult> ApplyDiscount(DiscountInfo discountInfo, int saleId, IEnumerable<Transaction> transactions, bool isReversed);
         Task<Sale> CompleteSale(int saleId, decimal received);
 
         /// <summary>
         /// Collect transactions without sale id to a single sale.
         /// </summary>
         /// <returns></returns>
-        Task ConvertAgnosticTransactions(Guid sessionId);
+        Task ConvertAgnosticTransactions();
         Task<Sale> Create(Guid sessionId);
         Task DiscardSale(int saleId);
         Task<IReadOnlyList<Sale>> GetActiveSales();
         Task<IReadOnlyList<Transaction>> GetAllTransactions();
+        Task<int> GetSaleSequence();
         Task<IReadOnlyList<Sale>> GetSalesHistory();
         Task<bool> HasActiveSales();
         Task<bool> HasCompletedSales();
+        Task<CheckoutResult> MarkRemoveMany(int saleId, IEnumerable<int> transactions, bool isDeleted = true);
+        Task RemovePhysically();
 
 
         /// <summary>
@@ -139,7 +142,7 @@ namespace Mhyrenz_Interface.Domain.Services.SalesRecordService
         /// <returns>
         /// The updated and hydrated <see cref="Product"/>.
         /// </returns>
-        Task<CheckoutResult> Subtract(int productId, Guid sessionId, int amount = 1);
+        Task<CheckoutResult> Subtract(int productId, int amount = 1);
         Task<Transaction> Update(int id, Transaction product);
     }
 }

@@ -48,6 +48,10 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             await _sessionStore.UpdateSession();
 
             _transactionStore.OnSaleChange(sale);
+
+            App.UndoRedoManager.RemoveAll(c => 
+                c is ISaleBoundCommand saleCommand && 
+                saleCommand.SaleId == _saleId);
         }
     }
 }

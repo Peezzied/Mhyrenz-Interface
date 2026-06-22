@@ -90,13 +90,13 @@ namespace Mhyrenz_Interface.Store
         {
             if (Store.TryGetValue(productId, out var product))
             {
-                product.Purchase = amount;
+                product.Purchase += amount;
 
-                PurchaseEvent?.Invoke(this, new InventoryStoreEventArgs
-                {
-                    ProductId = productId,
-                    Product = product
-                });
+                //PurchaseEvent?.Invoke(this, new InventoryStoreEventArgs
+                //{
+                //    ProductId = productId,
+                //    Product = product
+                //});
             }
         }
 

@@ -21,5 +21,10 @@ namespace Mhyrenz_Interface.Test
         {
             _service = new CheckoutService(Factory);
         }
+
+        [Test]
+        public async Task ManyRemoveTest()
+        {
+        }
     }
 }

@@ -35,13 +35,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         }
 
         public override async Task Command()
-        {
-            if (_undoRedoManager.CanRedo)
-            {
-                if (!UndoRedoManager.ShowWarning())
-                    return;
-            }
-            
+        {   
             var prompt = MessageBox.Show($"Do you really want to remove {_productIds.Count()} items?", "Remove Action", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (prompt == MessageBoxResult.No)

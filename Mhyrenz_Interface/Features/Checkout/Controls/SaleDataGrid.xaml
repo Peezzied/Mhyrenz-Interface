@@ -12,6 +12,7 @@
              xmlns:columns="clr-namespace:Mhyrenz_Interface.Shared.Columns"
              xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
              xmlns:behaviors="clr-namespace:Mhyrenz_Interface.Shared.Behaviors"
+             xmlns:localBehaviors="clr-namespace:Mhyrenz_Interface.Features.Checkout.Behaviors"
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:markupEx="clr-namespace:Mhyrenz_Interface.Shared.MarkupEx"
              xmlns:dd="urn:gong-wpf-dragdrop"
@@ -21,11 +22,16 @@
              xmlns:fake="clr-namespace:Mhyrenz_Interface.DesignTime"
              d:DataContext="{d:DesignInstance Type=fake:FakeTransactionDataGridViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:Width="450">
+    <UserControl.Resources>
+        <hc:BindingProxy Value="{Binding}" x:Key="TabContext"/>
+    </UserControl.Resources>
     <DataGrid Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
               Name="DataGrid"
+              Background="Transparent"
               ItemsSource="{Binding DataContext.Transactions, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"
               d:ItemsSource="{Binding Transactions}"
               SelectionChanged="DataGrid_SelectionChanged"
+              SelectionMode="Extended"
               GridLinesVisibility="Horizontal"
               AutoGenerateColumns="False"
               CanUserResizeColumns="False"
@@ -38,6 +44,8 @@
               dd:DragDrop.DropHandler="{Binding SaleDropHandler}"
               dd:DragDrop.UseDropTargetHint="True">
         <i:Interaction.Behaviors>
+            <behaviors:DynamicCellControlBehavior/>
+            <localBehaviors:SaleDataGridBehavior Owner="{Binding DataContext, RelativeSource={RelativeSource AncestorType=checkout:CheckoutView}}"/>
             <behaviors:DataGridFlashBehavior WatchedItemsSource="Transactions"/>
         </i:Interaction.Behaviors>
         <DataGrid.Resources>
@@ -53,27 +61,14 @@
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
-                            <MenuItem
-                                Header="Remove"
-                                Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                            <MenuItem Header="Remove" Command="{Binding Value.RemoveCommand, Source={StaticResource TabContext}}"/>
 
                             <MenuItem Header="Discount" ItemsSource="{markupEx:EnumValues {x:Type model:Discount}}">
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                         <Setter Property="Header" Value="{Binding}" />
                                         <Setter Property="Command" Value="{Binding DataContext.DiscountCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
-                                        <Setter Property="CommandParameter">
-                                            <Setter.Value>
-                                                <MultiBinding>
-                                                    <MultiBinding.Converter>
-                                                        <converters:DiscountCommandParamsConverter />
-                                                    </MultiBinding.Converter>
-                                                    <Binding />
-                                                    <Binding Path="SelectedItems" RelativeSource="{RelativeSource AncestorType=DataGrid}"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter> 
+                                        <Setter Property="CommandParameter" Value="{Binding}"/>
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
                             </MenuItem>
@@ -83,17 +78,17 @@
             </Style>
         </DataGrid.RowStyle>
         <DataGrid.Columns>
-            <columns:NumberColumn Header="Qty" Width="Auto" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}{0}x}">
+            <columns:NumberColumn ContextMenuService.IsEnabled="False" behaviors:DynamicCellControlBehavior.RightClickBound="True" Header="Qty" Width="45" FontSize="16" Minimum="0" DisplayBinding="{Binding Qty, StringFormat={}x{0}}">
                 <columns:NumberColumn.Style>
                     <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
                         <Setter Property="Value" Value="{Binding QtyIncrementEdit, UpdateSourceTrigger=Explicit}"/>
                         <Setter Property="Maximum" Value="{Binding MaxIncrementQty}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsRightClicked}" Value="True">
+                            <DataTrigger Binding="{Binding Path=(behaviors:DynamicCellControlBehavior.IsRightClicked), RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
                                 <DataTrigger.Setters>
                                     <Setter Property="Maximum" Value="{Binding MaxQty}"/>
                                     <Setter Property="HideUpDownButtons" Value="True"/>
-                                    <Setter Property="Value" Value="{Binding Qty, StringFormat={}{0}x, Converter={StaticResource EmptyStringToZero}, UpdateSourceTrigger=Explicit}"/>
+                                    <Setter Property="Value" Value="{Binding Qty, UpdateSourceTrigger=Explicit}"/>
                                 </DataTrigger.Setters>
                             </DataTrigger>
                         </Style.Triggers>
@@ -155,7 +150,8 @@
                                     <ToolTip Content="Check if the item is doctor prescribed."/>
                                 </CheckBox.ToolTip>
                             </CheckBox>
-                            <controls:IconButtonWithTip Grid.Column="2" IsEnabled="{Binding CanDelete}" Command="{Binding DeleteProductCommand}" Foreground="Red" Tiptext="Delete selected">
+                            <controls:IconButtonWithTip Grid.Column="2" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=DataGridRow}}" 
+                                                        Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Foreground="Red" Tiptext="Delete selected">
                                 <controls:IconButtonWithTip.IconContent>
                                     <iconPacks:PackIconMaterial Kind="CloseCircle" />
                                 </controls:IconButtonWithTip.IconContent>

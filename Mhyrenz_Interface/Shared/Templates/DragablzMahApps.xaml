@@ -120,10 +120,10 @@
                                  Fill="{TemplateBinding Background}"/>
                         <Path x:Name="Path"
                               Data="M38,6L38.0003451911513,70.6666666666666 M70.3336667356886,38L5.50002465137562,38" 
-                              Width="6" Height="6"
+                              Width="14" Height="Auto"
                               Stretch="Uniform"
                               Stroke="{TemplateBinding Foreground}"
-                              StrokeThickness="1.5"
+                              StrokeThickness="2"
                               StrokeStartLineCap="Square" 
                               StrokeEndLineCap="Square"
                               SnapsToDevicePixels="True" />
