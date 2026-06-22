@@ -476,6 +476,7 @@
     <Compile Include="Core\MVVM\BaseCommand.cs" />
     <Compile Include="Core\MVVM\FlyoutViewModel.cs" />
     <Compile Include="Core\MVVM\ICommandAsync.cs" />
+    <Compile Include="Core\MVVM\IFlyoutViewModel.cs" />
     <Compile Include="Core\MVVM\IRaiseCanExecuteChanged.cs" />
     <Compile Include="Core\Utilities\UiTimeSlicer.cs" />
     <Compile Include="Features\Checkout\Behaviors\SaleDataGridBehavior.cs" />

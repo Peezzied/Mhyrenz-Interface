@@ -51,34 +51,15 @@
                    Text="Select the business date that will be associated with this session." />
 
             <!-- Form -->
-            <StackPanel Grid.Row="2" Margin="0 0 0 16">
-
-                <TextBlock Text="Session Date"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,6"/>
-
-                <hc:DatePicker FontSize="14" Height="35" 
-                    attach:ValidationHelper.HasError="{Binding ValidationHasError, Mode=OneWayToSource}"
-                    SelectedDate="{Binding Session, NotifyOnValidationError=True, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"
-                    SelectedDateFormat="Long">
-                    <hc:DatePicker.Style>
-                        <Style TargetType="hc:DatePicker"
-                           BasedOn="{StaticResource {x:Type hc:DatePicker}}">
-                            <Setter Property="Validation.ErrorTemplate"
-                                Value="{DynamicResource MahApps.Templates.ValidationError}" />
-
-                            <Style.Triggers>
-                                <Trigger Property="Validation.HasError"
-                                     Value="True">
-                                    <Setter Property="CaretBrush"
-                                        Value="Red" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </hc:DatePicker.Style>
-                </hc:DatePicker>
-
-            </StackPanel>
+            <hc:DatePicker Grid.Row="2" FontSize="14" VerticalAlignment="Top"
+                Margin="0 0 0 16"
+                hc:InfoElement.Necessary="True"
+                hc:InfoElement.Symbol="*"
+                hc:InfoElement.Title="Session"
+                hc:InfoElement.ShowClearButton="True"
+                attach:ValidationHelper.HasError="{Binding ValidationHasError, Mode=OneWayToSource}"
+                SelectedDate="{Binding Session, NotifyOnValidationError=True, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"
+                SelectedDateFormat="Long"/>
 
             <!-- Footer -->
             <StackPanel Grid.Row="3"

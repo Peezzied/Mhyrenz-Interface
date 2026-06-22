@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:hc="https://handyorg.github.io/handycontrol"  
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -20,52 +21,75 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <controls:FlyoutHeader/>
-            <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" 
-              AutoGenerateColumns="False"
-              GridLinesVisibility="Horizontal"
-              EnableRowVirtualization="True"
-              VirtualizingPanel.IsContainerVirtualizable="True"
-              VirtualizingPanel.IsVirtualizing="True"
-              VirtualizingPanel.VirtualizationMode="Recycling"
-              CanUserResizeColumns="False"
-              dd:DragDrop.IsDropTarget="True"
-              dd:DragDrop.DropHandler="{Binding OrderDropHandler}"
-              dd:DragDrop.UseDropTargetHint="True"
-              mah:DataGridHelper.CellPadding="4 2"
-              CellStyle="{StaticResource DataGridCell}"
-              Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
-              RowStyle="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
-                <i:Interaction.Behaviors>
-                    <behaviors:DataGridFlashBehavior WatchedItemsSource="Orders"/>
-                </i:Interaction.Behaviors>
-                <DataGrid.Columns>
-                    <columns:NumberColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="0"/>
-                    <DataGridTemplateColumn Width="Auto" Header="Category" IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <controls:CategoryTag
-                            FontSize="11"
-                            CategoryName="{Binding CategoryName, Mode=OneTime}"
-                            CategoryColor="{Binding CategoryColor, Mode=OneTime}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellStyle>
-                            <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBox 
+                    Text="{Binding Supplier, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True, ValidatesOnDataErrors=True}"
+                    Margin="20 10 20 30"
+                    hc:InfoElement.Title="Supplier Name"
+                    hc:InfoElement.ShowClearButton="True"
+                    hc:InfoElement.Necessary="True"
+                    hc:InfoElement.Symbol="*"
+                    Style="{StaticResource TextBoxExtend}"/>
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Orders}" 
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="Horizontal"
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsContainerVirtualizable="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  CanUserResizeColumns="False"
+                  dd:DragDrop.IsDropTarget="True"
+                  dd:DragDrop.DropHandler="{Binding OrderDropHandler}"
+                  dd:DragDrop.UseDropTargetHint="True"
+                  mah:DataGridHelper.CellPadding="4 2"
+                  CellStyle="{StaticResource DataGridCell}"
+                  Style="{StaticResource MahApps.Styles.DataGrid.Azure}"
+                  RowStyle="{StaticResource MahApps.Styles.DataGridRow.AzureWithMargin}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:DataGridFlashBehavior WatchedItemsSource="Orders"/>
+                    </i:Interaction.Behaviors>
+                    <DataGrid.Columns>
+                        <columns:NumberColumn Header="Qty" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="0"/>
+                        <DataGridTemplateColumn Width="Auto" Header="Category" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <controls:CategoryTag
+                                FontSize="11"
+                                CategoryName="{Binding CategoryName, Mode=OneTime}"
+                                CategoryColor="{Binding CategoryColor, Mode=OneTime}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell}">
 
-                            </Style>
-                        </DataGridTemplateColumn.CellStyle>
-                    </DataGridTemplateColumn>
-                    <columns:TextColumn Width="*" Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
-                    <columns:NumberColumn Header="Retail" Width="70" IsReadOnly="True" Binding="{Binding RetailPrice, StringFormat=C}"/>
-                    <columns:NumberColumn Header="List" Width="70" IsReadOnly="True" Binding="{Binding ListPrice, StringFormat=C}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <Grid Grid.Row="2" Margin="20">
-                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="12">
-                    <Button Command="{Binding EmailCommand}">Generate Email</Button>
-                    <Button Command="{Binding SendTelegramCommand}">Send to Telegram</Button>
-                </hc:UniformSpacingPanel>
+                                </Style>
+                            </DataGridTemplateColumn.CellStyle>
+                        </DataGridTemplateColumn>
+                        <columns:TextColumn Width="*" Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
+                        <columns:NumberColumn Header="Retail" Width="70" IsReadOnly="True" Binding="{Binding RetailPrice, StringFormat=C}"/>
+                        <columns:NumberColumn Header="List" Width="70" IsReadOnly="True" Binding="{Binding ListPrice, StringFormat=C}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
+            <Border Background="{StaticResource MahApps.Brushes.SystemControlBackgroundChromeMedium}" BorderBrush="{StaticResource MahApps.Brushes.SystemControlBackgroundBaseMediumLow}" BorderThickness="0 1 0 0" Grid.Row="2" Padding="20">
+                <hc:UniformSpacingPanel Orientation="Vertical" Spacing="8">
+                    <Button Command="{Binding PlaceOrderCommand}" 
+                            Style="{StaticResource ButtonPrimary}" Content="Generate Email">
+                        <Button.CommandParameter>
+                            <sys:Boolean>False</sys:Boolean>
+                        </Button.CommandParameter>
+                    </Button>
+                    <Button Command="{Binding PlaceOrderCommand}" Content="Send to Telegram">
+                        <Button.CommandParameter>
+                            <sys:Boolean>True</sys:Boolean>
+                        </Button.CommandParameter>
+                    </Button>
+                </hc:UniformSpacingPanel>
+            </Border>
         </Grid>
     </Border>
 </UserControl>

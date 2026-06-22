@@ -245,7 +245,7 @@
                         hc:BackgroundSwitchElement.MouseHoverBackground="#D97706"
                         hc:BackgroundSwitchElement.MouseDownBackground="#B45309"/>
                     <hc:Divider Orientation="Vertical" LineStroke="#AFC7DB"/>
-                    <controls:ActionButton x:Name="EditSession"
+                    <controls:ActionButton IsEnabled="False" x:Name="EditSession"
                         Command="{Binding EditCommand}"
                         Text="Edit Session"
                         IconKind="Pencil"

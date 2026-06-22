@@ -454,7 +454,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private void ShowProductAdd(object parameter)
         {
             AddProductViewModel = _addProductViewModelFactory();
-            AddProductViewModel.SubmitSuccess += Vm_SubmitSuccess;
+            //AddProductViewModel.SubmitSuccess += Vm_SubmitSuccess;
             AddProductViewModel.RowIntoView += Vm_RowIntoView;
 
             AddProductIsOpen = true;

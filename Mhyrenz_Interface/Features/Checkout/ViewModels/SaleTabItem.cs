@@ -22,7 +22,7 @@ using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Sette
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class SaleTabItem : ValidationViewModel<Sale>, IEditCancelState
+    public class SaleTabItem : ValidationViewModel, IEditCancelState
     {
         public SaleTabItem(
             Sale sale,

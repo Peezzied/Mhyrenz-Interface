@@ -10,7 +10,7 @@ namespace Mhyrenz_Interface.Domain.Services
     public interface IOrderService
     {
         Task<Order> AddItem(int productId, int amount = 1);
-        Task GenerateEmail(string title, string supplier);
+        Task GenerateEmail(string supplier);
         Task<IReadOnlyList<Order>> GetOrders();
         Task SaveOrdersMessage(string title, string supplier);
         Task<Order> SubtractItem(int productId, int amount = 1);

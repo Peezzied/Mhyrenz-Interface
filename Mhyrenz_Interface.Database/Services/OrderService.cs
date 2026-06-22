@@ -86,7 +86,7 @@ namespace Mhyrenz_Interface.Database.Services
             }
         }
 
-        public async Task GenerateEmail(string title, string supplier)
+        public async Task GenerateEmail(string supplier)
         {
             var lines = await GenerateOrderLines();
 
@@ -97,12 +97,11 @@ namespace Mhyrenz_Interface.Database.Services
                 "Thank you,\n" +
                 "Mhyrenz Pharmacy";
 
-            title = Uri.EscapeDataString(title);
             body = Uri.EscapeDataString(body);
 
             Process.Start(new ProcessStartInfo
             {
-                FileName = $"mailto:?subject={title}&body={body}",
+                FileName = $"mailto:?body={body}",
                 UseShellExecute = true
             });
         }
@@ -111,8 +110,7 @@ namespace Mhyrenz_Interface.Database.Services
         {
             var lines = await GenerateOrderLines();
 
-            await _telegramBotService.SendMessage($"Order: {title}\n" +
-                $"Supplier: {supplier}\n\n" +
+            await _telegramBotService.SendMessage($"Supplier: {supplier}\n\n" +
                 string.Join("\n", lines));
         }
 

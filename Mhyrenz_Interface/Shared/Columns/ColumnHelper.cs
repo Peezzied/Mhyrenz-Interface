@@ -11,11 +11,28 @@ namespace Mhyrenz_Interface.Shared.Columns
 {
     public static class ColumnHelper
     {
-        public static bool IsEditable(this DataGridCell cell, Product product)
+        public static bool GetMonitorSale(DependencyObject obj)
         {
+            return (bool)obj.GetValue(MonitorSaleProperty);
+        }
+
+        public static void SetMonitorSale(DependencyObject obj, bool value)
+        {
+            obj.SetValue(MonitorSaleProperty, value);
+        }
+
+        public static readonly DependencyProperty MonitorSaleProperty =
+            DependencyProperty.RegisterAttached("MonitorSale", typeof(bool), typeof(ColumnHelper), new PropertyMetadata(false));
+
+
+        public static bool IsEditable(this DataGridCell cell, object dataItem)
+        {
+            if (!GetMonitorSale(cell.Column))
+                return true;
+
             var inventoryView = TreeHelper.TryFindParent<InventoryView>(cell);
 
-            if (inventoryView.DataContext is InventoryViewModel vm && vm.ProductsInCheckout.Contains(product.Id))
+            if (inventoryView.DataContext is InventoryViewModel vm && vm.ProductsInCheckout.Contains(((ProductDataViewModel)dataItem).Item.Id))
             {
                 MessageBox.Show(
                     "This product cannot be modified or deleted because it is currently part of an active sale.\n\n" +

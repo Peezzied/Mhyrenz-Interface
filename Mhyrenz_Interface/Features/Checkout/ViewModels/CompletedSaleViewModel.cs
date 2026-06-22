@@ -9,11 +9,11 @@ using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class CompletedSaleViewModel : FlyoutViewModel
+    public class CompletedSaleViewModel : BaseViewModel, IFlyoutViewModel
     {
         private readonly ISessionStore _sessionStore;
 
-        public CompletedSaleViewModel(ICheckoutService checkoutService, ISessionStore sessionStore): base(title: "Today's Sales History")
+        public CompletedSaleViewModel(ICheckoutService checkoutService, ISessionStore sessionStore)
         {
             App.Current.Dispatcher.BeginInvoke(new Action(async () =>
             {
@@ -44,6 +44,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             = new ObservableCollection<Sale>();
 
         public bool HasCompletedSales => CompletedSales.Count > 0;
+
+        public string FlyoutTitle => "Today's Sales History";
 
         public override void Dispose()
         {

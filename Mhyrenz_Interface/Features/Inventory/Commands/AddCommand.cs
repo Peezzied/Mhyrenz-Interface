@@ -80,7 +80,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
                 Message = $"Product \"{product.Name}\" has been added successfully!",
                 ShowDateTime = false,
             });
-            _viewModel.RaiseSubmitSuccess(_products.First());
+            //_viewModel.RaiseSubmitSuccess(_products.First());
         }
 
         //public override async Task Redo(UndoRedoInfo info)

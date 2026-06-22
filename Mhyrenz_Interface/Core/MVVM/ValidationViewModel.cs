@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Mhyrenz_Interface.Core.MVVM
 {
-    public abstract class ValidationViewModel<T> : BaseViewModel, INotifyDataErrorInfo where T : class
+    public abstract class ValidationViewModel : BaseViewModel, INotifyDataErrorInfo
     {
 
         public Dictionary<string, List<string>> PropertyErrors { get; } = new Dictionary<string, List<string>>();
@@ -16,14 +16,7 @@ namespace Mhyrenz_Interface.Core.MVVM
 
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-        public event EventHandler<T> SubmitSuccess;
-
         protected abstract IRaiseCanExecuteChanged SubmitActionCommand();
-
-        public void RaiseSubmitSuccess(T product)
-        {
-            SubmitSuccess?.Invoke(this, product);
-        }
 
         public IEnumerable GetErrors(string propertyName)
         {
@@ -105,7 +98,6 @@ namespace Mhyrenz_Interface.Core.MVVM
         public override void Dispose()
         {
             ErrorsChanged = null;
-            SubmitSuccess = null;
         }
     }
 }

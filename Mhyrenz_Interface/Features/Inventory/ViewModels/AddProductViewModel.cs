@@ -16,7 +16,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
     #endregion
 
-    public class AddProductViewModel : ValidationViewModel<ProductDataViewModel>
+    public class AddProductViewModel : ValidationViewModel
     {
         private Category _category;
         private readonly ICategoryStore _categoryStore;

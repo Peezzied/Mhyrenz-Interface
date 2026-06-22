@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Windows;
 using GongSolutions.Wpf.DragDrop;
@@ -9,6 +10,7 @@ using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Store;
+using NUnit.Framework;
 using ObservableCollections;
 using static Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper;
 using MessageBox = HandyControl.Controls.MessageBox;
@@ -16,15 +18,14 @@ using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Sette
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
 {
-    public class PlaceOrderViewModel : FlyoutViewModel
+    public class PlaceOrderViewModel : ValidationViewModel, IFlyoutViewModel
     {
         private readonly IOrderStore _orderStore;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly CreateCommand<PlaceOrderVMCommandQty> _placeOrderQtyCommand;
         private readonly IOrderService _orderService;
 
-        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand, IOrderService orderService) :
-            base(title: "Place Order")
+        public PlaceOrderViewModel(IOrderStore orderStore, IUndoRedoManager undoRedoManager, CreateCommand<PlaceOrderVMCommandQty> placeOrderQtyCommand, IOrderService orderService)
         {
             _orderStore = orderStore;
             _undoRedoManager = undoRedoManager;
@@ -38,8 +39,25 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
             OrderDropHandler = new OrderDropTarget(this, orderStore);
 
-            EmailCommand = new AsyncRelayCommand(EmailAction, CanEmailCommand);
-            SendTelegramCommand = new AsyncRelayCommand(SendTelegramAction, CanSendTelegramCommand);
+            PlaceOrderCommand = new AsyncRelayCommand<bool>(PlaceOrderAction, CanEmailCommand);
+        }
+
+        private string _supplier;
+        [Required(
+            ErrorMessage = "Supplier is required.",
+            AllowEmptyStrings = false)]
+        public string Supplier
+        {
+            get => _supplier;
+            set
+            {
+                if (_supplier == value)
+                    return;
+
+                _supplier = value;
+                OnPropertyChanged();
+                Validate(nameof(Supplier), value);
+            }
         }
 
         public void Load()
@@ -53,42 +71,45 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             }));
         }
 
-        private async Task SendTelegramAction(object arg)
+        private bool CanEmailCommand(bool obj)
         {
-            var result = MessageBox.Show(
+            return !HasErrors && Orders.Count > 0;
+        }
+
+        private async Task PlaceOrderAction(bool arg)
+        {
+            Validate(nameof(Supplier), Supplier);
+
+            if (HasErrors)
+                return;
+
+            if (arg)
+            {
+                var result = MessageBox.Show(
                 "Send the purchase order to Telegram?",
                 "Send Telegram Order",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
-            if (result != MessageBoxResult.Yes)
-                return;
+                if (result != MessageBoxResult.Yes)
+                    return;
 
-            await _orderService.SaveOrdersMessage("test", "supplier");
-        }
-
-        private bool CanSendTelegramCommand(object obj)
-        {
-            return Orders.Count > 0;
-        }
-
-        private bool CanEmailCommand(object obj)
-        {
-            return Orders.Count > 0;
-        }
-
-        private async Task EmailAction(object arg)
-        {
-            var result = MessageBox.Show(
+                await _orderService.SaveOrdersMessage("test", "supplier");
+            }
+            else
+            {
+                var result = MessageBox.Show(
                 "Generate supplier order email?",
                 "Generate Email",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
-            if (result != MessageBoxResult.Yes)
-                return;
+                if (result != MessageBoxResult.Yes)
+                    return;
 
-            await _orderService.GenerateEmail("test", "supplier");
+                await _orderService.GenerateEmail(Supplier);
+            }
+
         }
 
         private void OrderView_ViewChanged(in SynchronizedViewChangedEventArgs<OrderDataViewModel, OrderDataViewModel> e)
@@ -98,8 +119,7 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             else if (e.Action == NotifyCollectionChangedAction.Remove)
                 e.OldItem.View.TrackedPropertyChanged -= OrderView_TrackedPropertyChanged;
 
-            EmailCommand.OnCanExecuteChanged();
-            SendTelegramCommand.OnCanExecuteChanged();
+            PlaceOrderCommand.OnCanExecuteChanged();
         }
 
         private void OrderView_TrackedPropertyChanged(object sender, TrackedPropertyChangedEventArgs args)
@@ -116,8 +136,9 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         public NotifyCollectionChangedSynchronizedViewList<OrderDataViewModel> Orders { get; }
 
         public OrderDropTarget OrderDropHandler { get; }
-        public AsyncRelayCommand EmailCommand { get; }
-        public AsyncRelayCommand SendTelegramCommand { get; }
+        public AsyncRelayCommand<bool> PlaceOrderCommand { get; }
+
+        public string FlyoutTitle => "Place Order";
 
         protected TrackPropertyHelper<int, OrderDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue = null)
         {
@@ -152,7 +173,10 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             }
         }
 
-
+        protected override IRaiseCanExecuteChanged SubmitActionCommand()
+        {
+            return PlaceOrderCommand;
+        }
 
         public class OrderDropTarget : DefaultDropHandler
         {

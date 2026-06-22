@@ -15,7 +15,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Mhyrenz_Interface.Features.Home.ViewModels
 {
-    public class SessionBoxContext : ValidationViewModel<Session>
+    public class SessionBoxContext : ValidationViewModel
     {
         private readonly ISessionStore _sessionStore;
         private readonly ISessionService _sessionService;
