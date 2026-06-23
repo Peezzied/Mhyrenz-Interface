@@ -41,7 +41,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
                 var product = await context.Products
-                    .Include(p => p.Supplier)
                     .Include(p => p.Category)
                     .Include(p => p.PharmaDetails)
                     .FirstOrDefaultAsync(p => p.Id == id) ?? throw new KeyNotFoundException($"Product with id {id} not found.");
@@ -61,7 +60,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             {
                 var products = await context.Products
                     .AsNoTracking()
-                    .Include(p => p.Supplier)
                     .Include(p => p.Category)
                     .Include(p => p.PharmaDetails)
                     .ToListAsync();
@@ -85,9 +83,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             {
                 var products = await context.Products
                    .AsNoTracking()
-                   .Include(p => p.Supplier)
-                   .Include(p => p.Category)
-                   .Include(p => p.PharmaDetails)
                    .ToListAsync();
 
                 var purchases = await GetTransactions(context);
@@ -101,6 +96,23 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                 }
 
                 await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Product> SetMarkupRate(int productId, decimal rate)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                var product = await context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.PharmaDetails)
+                    .FirstOrDefaultAsync(p => p.Id == productId);
+
+                product.SetMarkupRate(rate);
+
+                await context.SaveChangesAsync();
+
+                return product;
             }
         }
 

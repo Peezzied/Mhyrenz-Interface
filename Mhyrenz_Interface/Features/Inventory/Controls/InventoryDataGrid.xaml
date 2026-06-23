@@ -221,7 +221,7 @@
                 <Setter Property="EnableRowVirtualization" Value="True"/>
                 <Setter Property="EnableColumnVirtualization" Value="True"/>
                 <Setter Property="GridLinesVisibility" Value="All"/>
-                <Setter Property="ItemsSource" Value="{Binding Inventory, IsAsync=True}"/>
+                <Setter Property="ItemsSource" Value="{Binding Inventory}"/>
                 <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
@@ -348,6 +348,7 @@
                           dd:DragDrop.IsDragSource="True"
                           dd:DragDrop.UseDefaultDragAdorner="True">
                     <i:Interaction.Behaviors>
+                        <sharedBehaviors:DataGridFlashBehavior WatchedItemsSource="Inventory"/>
                         <behaviors:InventoryDataGridDetailed TabOwner="{Binding TabOwner, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                         <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
                         <sharedBehaviors:DynamicCellControlBehavior/>
@@ -358,7 +359,8 @@
                         <columns:TextColumn columns:ColumnHelper.MonitorSale="True" Binding="{Binding Batch, UpdateSourceTrigger=Explicit}" Header="Batch" Width="125" />
                         <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
                         <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="List" Width="100" Binding="{Binding ListPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Cost" Width="100" Binding="{Binding CostPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Markup %" Width="100" Binding="{Binding MarkupRate, UpdateSourceTrigger=Explicit, StringFormat=P2}" Minimum="0" Maximum="1" Interval="0.1" NumericInputMode="Decimal" StringFormat="P2" ButtonsAlignment="Opposite"/>
                         <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" sharedBehaviors:DynamicCellControlBehavior.RightClickBound="True" IsReadOnly="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" 
                                                      local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite">
                             <columns:NumberColumn.Style>

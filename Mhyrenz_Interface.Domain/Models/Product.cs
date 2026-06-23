@@ -11,12 +11,10 @@ namespace Mhyrenz_Interface.Domain.Models
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public int SupplierId { get; set; }
-        public Supplier Supplier { get; set; }
-
         public int Qty { get; set; }
         public decimal RetailPrice { get; set; }
         public decimal CostPrice { get; set; }
+        public decimal MarkupRate { get; set; }
         public string Barcode { get; set; }
         public DateTime? Expiry { get; set; }
         public string Batch { get; set; }
@@ -113,6 +111,12 @@ namespace Mhyrenz_Interface.Domain.Models
         public void RecalculatePurchase()
         {
             Purchase = Transactions.Sum(t => t.Amount);
+        }
+
+        public void SetMarkupRate(decimal rate)
+        {
+            RetailPrice = CostPrice * (1 + rate);
+            MarkupRate = rate;
         }
     }
 }

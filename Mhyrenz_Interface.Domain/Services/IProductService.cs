@@ -14,6 +14,7 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<int> productIds);
         Task<IReadOnlyList<Product>> RemoveManyBack(IEnumerable<int> productIds);
         Task RemovePhysically();
+        Task<Product> SetMarkupRate(int productId, decimal rate);
         Task<Product> Update(int id, Product product);
     }
 }

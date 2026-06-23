@@ -17,8 +17,8 @@ try:
                 row["RetailPrice"],
                 row["ListPrice"],
                 row["CategoryId"],
-                1,
-                0
+                0,
+                0.10
             )
             for row in reader
         ]
@@ -32,12 +32,6 @@ try:
     )
     VALUES (?, ?, ?)
     """, categories)
-    
-        
-    cursor.execute("""
-    INSERT OR IGNORE INTO Suppliers (Id, Name)
-    VALUES (?, ?)
-    """, (1, "Dyna"))
 
     cursor.executemany("""
     INSERT OR IGNORE INTO Products (
@@ -46,8 +40,8 @@ try:
         RetailPrice,
         CostPrice,
         CategoryId,
-        SupplierId,
-        IsDeleted
+        IsDeleted,
+        MarkupRate
     )
     VALUES (?, ?, ?, ?, ?, ?, ?)
     """, products)

@@ -171,10 +171,10 @@
     <Compile Include="Models\Sale.cs" />
     <Compile Include="Models\SalesRecord.cs" />
     <Compile Include="Models\Session.cs" />
+    <Compile Include="Models\Settings\DiscountSettings.cs" />
     <Compile Include="Models\Snapshots\SaleSnapshot.cs" />
     <Compile Include="Models\Snapshots\TransactionSnapshot.cs" />
     <Compile Include="Models\Sundry.cs" />
-    <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\Snapshots\DatabaseSnapshot.cs" />
     <Compile Include="Models\Snapshots\ProductSnapshot.cs" />
@@ -182,7 +182,7 @@
     <Compile Include="Services\IDatabaseSnapshotService.cs" />
     <Compile Include="Services\IOrderService.cs" />
     <Compile Include="Services\ITelegramBotService.cs" />
-    <Compile Include="Services\Settings\AppSettings.cs" />
+    <Compile Include="Models\Settings\AppSettings.cs" />
     <Compile Include="Services\Settings\ConfigManager.cs" />
     <Compile Include="Services\BarcodeCacheService\BarcodeImageCache.cs" />
     <Compile Include="Services\BarcodeCacheService\CachePath.cs" />
@@ -198,9 +198,9 @@
     <Compile Include="Services\SerialBarcodeService\SerialBarcodeService.cs" />
     <Compile Include="Services\ISessionService.cs" />
     <Compile Include="Models\DiscountInfo.cs" />
-    <Compile Include="Services\Settings\InventoryDataGridColumnSetting.cs" />
-    <Compile Include="Services\Settings\InventoryDataGridSettings.cs" />
-    <Compile Include="Services\Settings\TelegramSettings.cs" />
+    <Compile Include="Models\Settings\InventoryDataGridColumnSetting.cs" />
+    <Compile Include="Models\Settings\InventoryDataGridSettings.cs" />
+    <Compile Include="Models\Settings\TelegramSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

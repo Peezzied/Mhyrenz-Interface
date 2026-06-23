@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Mhyrenz_Interface.Database.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260620102124_DropSessionId")]
-    partial class DropSessionId
+    [Migration("20260622113839_Product")]
+    partial class Product
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -92,6 +92,9 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("MarkupRate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -104,9 +107,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.Property<decimal>("RetailPrice")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Barcode")
@@ -115,8 +115,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("PharmaDetailsId");
-
-                    b.HasIndex("SupplierId");
 
                     b.ToTable("Products");
                 });
@@ -224,20 +222,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.ToTable("Sundry");
                 });
 
-            modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Suppliers");
-                });
-
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -297,12 +281,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                     b.HasOne("Mhyrenz_Interface.Domain.Models.PharmaDetails", "PharmaDetails")
                         .WithMany()
                         .HasForeignKey("PharmaDetailsId");
-
-                    b.HasOne("Mhyrenz_Interface.Domain.Models.Supplier", "Supplier")
-                        .WithMany("Products")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Mhyrenz_Interface.Domain.Models.Sale", b =>

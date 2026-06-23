@@ -18,7 +18,6 @@ namespace Mhyrenz_Interface.Database
         public DbSet<Sundry> Sundry { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<PharmaDetails> PharmaDetails { get; set; }
 
         public InventoryDbContext(DbContextOptions options) : base(options) { }

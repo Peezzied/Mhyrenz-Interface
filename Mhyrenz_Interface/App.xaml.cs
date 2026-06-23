@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Configuration;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Bootstrap;
 using Mhyrenz_Interface.Core.MVVM;
@@ -9,6 +13,7 @@ using Mhyrenz_Interface.Core.Utilities;
 using Mhyrenz_Interface.Database;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Models.Settings;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
 using Mhyrenz_Interface.Domain.Services.CategoryService;
@@ -26,6 +31,7 @@ using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Properties;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
 using Mhyrenz_Interface.Test;
@@ -55,6 +61,21 @@ namespace Mhyrenz_Interface
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            var culture = new CultureInfo("en- PH");
+
+            //culture.NumberFormat.CurrencySymbol = "₱";
+
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+    typeof(FrameworkElement),
+    new FrameworkPropertyMetadata(
+        XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -81,9 +102,6 @@ namespace Mhyrenz_Interface
                 context.Database.Migrate();
             } // FIXME: TEMPORARY, CHANGE LATER. DEFER TO DATABASE INTIALIZER
 
-            ServiceProvider.GetRequiredService<ConfigManager<AppSettings>>()
-                .GenerateConfig(nameof(AppSettings)); // FIXME: TEMPORARY
-
             Resources.Add("BarcodeToImageConverter",
                 ServiceProvider.GetRequiredService<BarcodeToImageConverter>());
 
@@ -107,11 +125,20 @@ namespace Mhyrenz_Interface
 
             void inventoryConfig(DbContextOptionsBuilder options)
             {
-                options.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")); // FIXME: TEMPORARY, CHANGE LATER
+                options.UseSqlite(
+#if DEBUG
+                    "Data Source=dev_inventory.db"
+#else
+                    Settings.Default["ConnectionString"] as string
+#endif
+                );
             }
 
             services.AddOptions<AppSettings>()
                 .BindConfiguration(nameof(AppSettings));
+
+            services.AddOptions<DiscountSettings>()
+                .BindConfiguration(nameof(DiscountSettings));
 
             services.AddOptions<InventoryDataGridSettings>()
                 .BindConfiguration(nameof(InventoryDataGridSettings));
@@ -120,8 +147,6 @@ namespace Mhyrenz_Interface
                 .BindConfiguration("Telegram");
 
             services
-                .AddSingleton(s => ActivatorUtilities.CreateInstance<ConfigManager<AppSettings>>(s, _appsettingsPath))
-
                 .AddDbContext<InventoryDbContext>(inventoryConfig)
                 .AddSingleton(new InventoryDbContextFactory(inventoryConfig))
 
@@ -191,6 +216,7 @@ namespace Mhyrenz_Interface
                 .AddCommandFactory<TransactionVMCommandPurchase, TransactionVMCommandPurchase.DTO>()
                 .AddCommandFactory<ProductVMCommandCommonProp, ProductVMCommandCommonProp.DTO>()
                 .AddCommandFactory<ProductVMCommandPurchase, ProductVMCommandPurchase.DTO>()
+                .AddCommandFactory<ProductVMCommandMarkupRate, ProductVMCommandMarkupRate.DTO>()
                 .AddCommandFactory<PlaceOrderVMCommandQty, PlaceOrderVMCommandQty.DTO>()
 
                 .AddSingleton<ShellViewModel>()

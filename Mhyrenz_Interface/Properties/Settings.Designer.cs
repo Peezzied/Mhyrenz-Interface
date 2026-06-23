@@ -34,5 +34,14 @@ namespace Mhyrenz_Interface.Properties {
                 this["InventoryDataGrid"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=inventory.db;Foreign Keys=True;Cache=Shared")]
+        public string ConnectionString {
+            get {
+                return ((string)(this["ConnectionString"]));
+            }
+        }
     }
 }

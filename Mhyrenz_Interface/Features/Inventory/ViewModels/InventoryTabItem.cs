@@ -10,6 +10,7 @@ using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
+using Mhyrenz_Interface.Domain.Models.Settings;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.Behaviors;
@@ -52,7 +53,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private readonly ICollectionView _view;
         private readonly IProductService _productService;
-        private readonly IUndoRedoManager _undoRedoManager;
         private readonly ICategoryStore _categoryStore;
         private readonly Category _category;
         private readonly Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> _searchFilter;
@@ -62,6 +62,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly IOptionsMonitor<InventoryDataGridSettings> _inventoryDataGridSettingsProvider;
         private readonly CreateCommand<ProductVMCommandPurchase> _productCommandPurchase;
         private readonly CreateCommand<ProductVMCommandCommonProp> _productCommandCommonProp;
+        private readonly CreateCommand<ProductVMCommandMarkupRate> _productCommandMarkupRate;
         private readonly CreateCommand<ProductVMCommandPurchase> productCommandPurchase;
         private readonly CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp;
         private readonly IInventoryStore _inventoryStore;
@@ -69,21 +70,18 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public ICommand ToggleColumnCommand { get; }
 
         public InventoryTabItem(
-            //InventoryDataGridViewModel inventoryDataGridViewModel,
             Category category,
             Predicate<ProductDataViewModel> filter,
             CreateViewModel<ColumnSettingViewModel> columnSettingViewModelFactory,
             ICategoryStore categoryStore,
             CreateCommand<ProductVMCommandPurchase> productCommandPurchase,
             CreateCommand<ProductVMCommandCommonProp> productCommandCommonProp,
+            CreateCommand<ProductVMCommandMarkupRate> productCommandMarkupRate,
             IInventoryStore inventoryStore,
-            IUndoRedoManager undoRedoManager,
             IProductService productService
-            //Func<KeyValuePair<int, ProductDataViewModel>, ProductDataViewModel, bool> searchFilter
             )
         {
             _productService = productService;
-            _undoRedoManager = undoRedoManager;
             _categoryStore = categoryStore;
             _category = category;
 
@@ -96,6 +94,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             Columns = new ObservableDictionary<string, ColumnSettingViewModel>();
             _productCommandPurchase = productCommandPurchase;
             _productCommandCommonProp = productCommandCommonProp;
+            _productCommandMarkupRate = productCommandMarkupRate;
             _inventoryStore = inventoryStore;
         }
 
@@ -135,7 +134,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             void commonPropHandler(Setter setter, Getter getter, int key)
             {
-                _undoRedoManager.Execute(_productCommandCommonProp(new ProductVMCommandCommonProp.DTO
+                App.UndoRedoManager.Execute(_productCommandCommonProp(new ProductVMCommandCommonProp.DTO
                 {
                     Product = viewModel.Item,
                     ChangedArgs = changedArgs(getter()),
@@ -152,11 +151,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     {
                         if (!_inventoryStore.Store.TryGetValue(key, out var vm))
                             return;
-                        vm.Item = await _productService.Get(key);
+                        vm.Item = await _productService.Get(key); // FIXME: hacky solution
                     }));
                 }
 
-                _undoRedoManager.Execute(_productCommandPurchase(new ProductVMCommandPurchase.DTO
+                App.UndoRedoManager.Execute(_productCommandPurchase(new ProductVMCommandPurchase.DTO
                 {
                     ProductId = key,
                     Setter = setter,
@@ -165,13 +164,25 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 }));
             }
 
+            void markupRateHandler(Setter setter, Getter getter, int key)
+            {
+                App.UndoRedoManager.Execute(_productCommandMarkupRate(new ProductVMCommandMarkupRate.DTO
+                {
+                    ProductId = key,
+                    ChangedArgs = changedArgs(getter()),
+                    Setter = setter
+                }));
+            }
+
             TrackPropertyHelper.Build(_inventoryStore, viewModel.Item.Id, args.PropertyName)
                 .Track(nameof(ProductDataViewModel.Qty), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Name), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.RetailPrice), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.CostPrice), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Barcode), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Expiry), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Batch), commonPropHandler)
+                .Track(nameof(ProductDataViewModel.MarkupRate), markupRateHandler)
                 .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler)
                 .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, key) =>
                 {
@@ -180,7 +191,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 })
                 .Track(nameof(PharmaDetailsViewModel.GenericName), (setter, getter, key) =>
                 {
-                    
+
                 }, setterPharmaDetals, getterPharmaDetails);
 
             void setterPharmaDetals(object val, PropertyChangeOrigin origin)
@@ -220,7 +231,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             var newEntries = new Dictionary<string, ColumnSettingViewModel>(); // no notifications yet
             var newColumnsView = new List<ColumnSettingViewModel>();
 
-            var settings = (InventoryGridSettingsStore.Load() ?? new InventoryDataGridSettings())
+            var settings = (InventoryDataGridSettingsStore.Load() ?? new InventoryDataGridSettings())
                 .ToDictionary(k => k.Header, v => v);
 
 
@@ -260,7 +271,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
 
             if (needsSave)
-                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(settings.Values));
+                InventoryDataGridSettingsStore.Save(new InventoryDataGridSettings(settings.Values));
 
             // --- Phase 2: apply atomically so bindings only cascade once the dict is complete ---
 
@@ -285,7 +296,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             if (e.PropertyName == nameof(ColumnSettingViewModel.IsVisible) && !_placeOrderMode)
             {
-                InventoryGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
+                InventoryDataGridSettingsStore.Save(new InventoryDataGridSettings(ColumnsView.Select(x => x.ColumnSetting)));
             }
         }
 
@@ -356,7 +367,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
             else
             { // restore
-                foreach (var item in InventoryGridSettingsStore.Load())
+                foreach (var item in InventoryDataGridSettingsStore.Load())
                 {
                     var col = Columns[item.Header];
                     col.IsVisible = item.IsVisible;

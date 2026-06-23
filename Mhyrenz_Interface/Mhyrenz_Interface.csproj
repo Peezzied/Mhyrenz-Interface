@@ -492,6 +492,7 @@
     </Compile>
     <Compile Include="Features\Home\ViewModels\ActionViewModel.cs" />
     <Compile Include="Features\Home\ViewModels\SessionBoxContext.cs" />
+    <Compile Include="Features\Inventory\Commands\ProductVMCommandMarkupRate.cs" />
     <Compile Include="Shared\Columns\ColumnHelper.cs" />
     <Compile Include="Shared\Columns\TemplateColumn.cs" />
     <Compile Include="Shared\Converters\IntegerGreaterThanZero.cs" />

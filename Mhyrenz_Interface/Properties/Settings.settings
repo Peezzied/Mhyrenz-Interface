@@ -5,5 +5,8 @@
     <Setting Name="InventoryDataGrid" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ConnectionString" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Data Source=inventory.db;Foreign Keys=True;Cache=Shared</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

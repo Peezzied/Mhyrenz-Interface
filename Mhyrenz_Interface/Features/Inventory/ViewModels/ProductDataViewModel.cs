@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -7,6 +8,7 @@ using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
@@ -19,7 +21,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         void LoadReceiver();
     }
 
-    public class ProductDataViewModel : TrackedViewModel, IBarcodeBound
+    public class ProductDataViewModel : TrackedViewModel, IBarcodeBound, IFlashRequestable
     {
         private readonly ISessionStore _sessionStore;
         private readonly ICategoryStore _categoryStore;
@@ -47,6 +49,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             PharmaDetailsViewModel pharmaDetailsViewModel)
         {
             Item = product;
+
             _purchaseNormal = Item.Purchase;
 
             _sessionStore = sessionStore;
@@ -97,6 +100,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         }
 
         public event Action BarcodeReceived;
+        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
         private bool _hasActiveSale = false;
         public bool HasActiveSale
@@ -122,17 +126,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             {
                 _isSelected = value;
                 OnPropertyChanged(nameof(IsSelected));
-            }
-        }
-
-        private bool _isRightClicked = false;
-        public bool IsRightClicked
-        {
-            get => _isRightClicked;
-            set
-            {
-                _isRightClicked = value;
-                OnPropertyChanged(nameof(IsRightClicked));
             }
         }
 
@@ -187,6 +180,19 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
         }
 
+        public decimal MarkupRate
+        {
+            get => Item.MarkupRate;
+            set
+            {
+                if (Item.MarkupRate != value)
+                {
+                    SetTrackedProperty(Item.MarkupRate, value,
+                        v => Item.MarkupRate = v, nameof(MarkupRate));
+                }
+            }
+        }
+
         public string Name
         {
             get => Item.Name;
@@ -198,16 +204,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     SetTrackedProperty(Item.Name, value,
                         v => Item.Name = v, nameof(Name));
                 }
-            }
-        }
-
-        private Supplier _supplier;
-        public Supplier Supplier
-        {
-            get => _supplier;
-            set
-            {
-                SetTrackedProperty(ref _supplier, value, nameof(Supplier));
             }
         }
 
@@ -242,7 +238,18 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 }
             }
         }
-        public decimal ListPrice => Item.CostPrice;
+        public decimal CostPrice
+        {
+            get => Item.CostPrice;
+            set
+            {
+                if (Item.CostPrice != value)
+                {
+                    SetTrackedProperty(Item.CostPrice, value,
+                       v => Item.CostPrice = v, nameof(CostPrice));
+                }
+            }
+        }
 
         public string Barcode
         {
@@ -288,6 +295,14 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             if (_categoryStore.Colors.TryGetValue(CategoryId, out var color)) return color;
             return null;
+        }
+
+        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
+        {
+            var args = new RowFlashRequestedEventArgs(type);
+            FlashRequested?.Invoke(this, args);
+
+            return args.Completion.Task;
         }
 
         private Brush _categoryColor;

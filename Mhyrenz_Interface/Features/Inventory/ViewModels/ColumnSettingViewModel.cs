@@ -1,5 +1,5 @@
 ﻿using Mhyrenz_Interface.Core.MVVM;
-using Mhyrenz_Interface.Domain.Services.Settings;
+using Mhyrenz_Interface.Domain.Models.Settings;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {

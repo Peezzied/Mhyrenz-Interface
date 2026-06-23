@@ -1,10 +1,10 @@
-﻿namespace Mhyrenz_Interface.Domain.Services.Settings
+﻿namespace Mhyrenz_Interface.Domain.Models.Settings
 {
     public class InventoryDataGridColumnSetting
     {
         public InventoryDataGridColumnSetting()
         {
-            
+
         }
 
         public InventoryDataGridColumnSetting(InventoryDataGridColumnSetting @this)

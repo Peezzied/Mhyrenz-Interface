@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Mhyrenz_Interface.Database.Migrations
 {
-    public partial class DropSessionId : Migration
+    public partial class Product : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -80,16 +80,38 @@ namespace Mhyrenz_Interface.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Suppliers",
+                name: "Products",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    Qty = table.Column<int>(nullable: false),
+                    RetailPrice = table.Column<decimal>(nullable: false),
+                    CostPrice = table.Column<decimal>(nullable: false),
+                    MarkupRate = table.Column<decimal>(nullable: false),
+                    Barcode = table.Column<string>(nullable: true),
+                    Expiry = table.Column<DateTime>(nullable: true),
+                    Batch = table.Column<string>(nullable: true),
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    PharmaDetailsId = table.Column<int>(nullable: true),
+                    CategoryId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Suppliers", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_PharmaDetails_PharmaDetailsId",
+                        column: x => x.PharmaDetailsId,
+                        principalTable: "PharmaDetails",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -115,47 +137,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                         principalTable: "Sessions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Products",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true),
-                    SupplierId = table.Column<int>(nullable: false),
-                    Qty = table.Column<int>(nullable: false),
-                    RetailPrice = table.Column<decimal>(nullable: false),
-                    CostPrice = table.Column<decimal>(nullable: false),
-                    Barcode = table.Column<string>(nullable: true),
-                    Expiry = table.Column<DateTime>(nullable: true),
-                    Batch = table.Column<string>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false),
-                    PharmaDetailsId = table.Column<int>(nullable: true),
-                    CategoryId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Products", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Products_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Products_PharmaDetails_PharmaDetailsId",
-                        column: x => x.PharmaDetailsId,
-                        principalTable: "PharmaDetails",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Products_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -232,11 +213,6 @@ namespace Mhyrenz_Interface.Database.Migrations
                 column: "PharmaDetailsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_SupplierId",
-                table: "Products",
-                column: "SupplierId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Sales_SessionId",
                 table: "Sales",
                 column: "SessionId");
@@ -283,9 +259,6 @@ namespace Mhyrenz_Interface.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "PharmaDetails");
-
-            migrationBuilder.DropTable(
-                name: "Suppliers");
 
             migrationBuilder.DropTable(
                 name: "Sessions");

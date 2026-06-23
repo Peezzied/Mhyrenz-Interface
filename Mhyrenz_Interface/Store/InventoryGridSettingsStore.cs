@@ -1,9 +1,9 @@
-﻿using Mhyrenz_Interface.Domain.Services.Settings;
+﻿using Mhyrenz_Interface.Domain.Models.Settings;
 using Newtonsoft.Json;
 
 namespace Mhyrenz_Interface.Store
 {
-    public static class InventoryGridSettingsStore
+    public static class InventoryDataGridSettingsStore
     {
         private const string SettingsKey = "InventoryDataGrid";
 

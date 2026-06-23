@@ -1,4 +1,4 @@
-﻿namespace Mhyrenz_Interface.Domain.Services.Settings
+﻿namespace Mhyrenz_Interface.Domain.Models.Settings
 {
     public class AppSettings
     {
