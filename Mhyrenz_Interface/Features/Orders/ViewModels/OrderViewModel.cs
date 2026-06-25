@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Shared.Behaviors;
@@ -9,15 +7,13 @@ using Brush = System.Windows.Media.Brush;
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
 {
-    public class OrderDataViewModel : TrackedViewModel, IFlashRequestable
+    public class OrderDataViewModel : TrackedViewModel, IFlashReceiver
     {
         public OrderDataViewModel(Order order, ICategoryStore categoryStore)
         {
             Order = order;
             _categoryStore = categoryStore;
         }
-
-        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
         private Order _order;
         public Order Order
@@ -78,12 +74,5 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
         public string Name => Order.Product.Name;
 
-        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
-        {
-            var args = new RowFlashRequestedEventArgs(type);
-            FlashRequested?.Invoke(this, args);
-
-            return args.Completion.Task;
-        }
     }
 }

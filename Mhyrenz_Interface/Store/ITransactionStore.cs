@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 
@@ -10,10 +10,9 @@ namespace Mhyrenz_Interface.Store
     {
         event EventHandler<Sale> SaleChange;
 
-        void AddToSale(CheckoutResult result, int amount);
+        IEnumerable<TransactionDataViewModel> AddManyTransactions(IEnumerable<Transaction> transactions);
+        TransactionDataViewModel AddTransaction(Transaction transaction);
         Task InitializeAsync();
         void OnSaleChange(Sale sale);
-        Task RemoveFromSale(CheckoutResult result);
-        Task<bool> UpdateTransaction(Transaction transaction);
     }
 }

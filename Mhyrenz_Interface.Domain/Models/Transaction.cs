@@ -63,6 +63,7 @@ namespace Mhyrenz_Interface.Domain.Models
         /// <summary>
         /// Total with discount.
         /// </summary>
+        [NotMapped]
         public decimal LineTotal => RetailPrice * Amount;
 
         [NotMapped]

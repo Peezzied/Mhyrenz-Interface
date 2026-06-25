@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -91,8 +92,12 @@ namespace Mhyrenz_Interface.Database.Services
 
                     var transaction = product.AddItem(amount);
 
+                    product.RecalculatePurchase();
+
                     await context.SaveChangesAsync();
                     await dbTransaction.CommitAsync();
+
+                    transaction.Product = product;
 
                     return new CheckoutResult
                     {
@@ -164,25 +169,17 @@ namespace Mhyrenz_Interface.Database.Services
 
                     var transaction = product.SubtractItem(amount);
 
-                    var checkoutResult = new CheckoutResult
-                    {
-                        Transaction = transaction
-                    };
-
-                    if (transaction.Amount == 0)
-                    {
-                        context.Transactions.Remove(transaction);
-                        transaction.Delete();
-                    }
-
                     product.RecalculatePurchase();
 
                     await context.SaveChangesAsync();
                     await dbTransaction.CommitAsync();
 
-                    checkoutResult.Transaction.Product = product;
+                    transaction.Product = product;
 
-                    return checkoutResult;
+                    return new CheckoutResult
+                    {
+                        Transaction = transaction
+                    };
                 }
                 catch
                 {
@@ -199,9 +196,22 @@ namespace Mhyrenz_Interface.Database.Services
                 var sales = await context.Sales
                     .AsNoTracking()
                     .Include(s => s.Transactions)
+                    .Where(s => s.Completed_at == null)
                     .ToListAsync();
 
                 return sales;
+            }
+        }
+
+        public HashSet<int> GetActiveSalesSet()
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return context.Sales
+                    .AsNoTracking()
+                    .Where(s => s.Completed_at == null)
+                    .Select(s => s.Id)
+                    .ToHashSet();
             }
         }
 
@@ -221,7 +231,7 @@ namespace Mhyrenz_Interface.Database.Services
 
                     var parameter = command.CreateParameter();
                     parameter.ParameterName = "@name";
-                    parameter.Value = nameof(context.Sales); 
+                    parameter.Value = nameof(context.Sales);
                     command.Parameters.Add(parameter);
 
                     var result = await command.ExecuteScalarAsync();

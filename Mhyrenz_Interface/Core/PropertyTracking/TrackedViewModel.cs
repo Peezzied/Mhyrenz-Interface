@@ -10,9 +10,9 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
 
         public event TrackedPropertyChangedHandler TrackedPropertyChanged;
 
-        protected virtual void OnTrackedPropertyChanged<T>(T oldValue, [CallerMemberName] string propertyName = null)
+        protected virtual void OnTrackedPropertyChanged<T>(T newValue, T oldValue, [CallerMemberName] string propertyName = null)
         {
-            TrackedPropertyChanged?.Invoke(this, new TrackedPropertyChangedEventArgs(oldValue, propertyName, TrackingOrigin));
+            TrackedPropertyChanged?.Invoke(this, new TrackedPropertyChangedEventArgs(newValue, oldValue, propertyName, TrackingOrigin));
             base.OnPropertyChanged(propertyName);
         }
 
@@ -20,13 +20,23 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
         {
             var prev = storage;
             storage = value;
-            OnTrackedPropertyChanged(prev, propertyName);
+            OnTrackedPropertyChanged(value, prev, propertyName);
         }
 
         protected void SetTrackedProperty<T>(T prev, T value, Action<T> setter, [CallerMemberName] string propertyName = null)
         {
             setter(value);
-            OnTrackedPropertyChanged(prev, propertyName);
+            OnTrackedPropertyChanged(value, prev, propertyName);
+        }
+
+        protected void DeferSetTrackedProperty<T>(T prev, T value, [CallerMemberName] string propertyName = null)
+        {
+            TrackedPropertyChanged?.Invoke(this, new TrackedPropertyChangedEventArgs(value, prev, propertyName, TrackingOrigin));
+        }
+
+        public virtual void SetValue(string propertyName, object value)
+        {
+            base.OnPropertyChanged(propertyName);
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using HandyControl.Controls;
 using HandyControl.Data;
@@ -11,7 +9,6 @@ using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Inventory.Views;
-using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
@@ -47,10 +44,10 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         //        && CanSubmit;
         //}
 
-        private async Task SideEffect(NavigationViewModel vm)
+        private async Task SideEffect(BaseViewModel vm)
         {
             var view = vm as InventoryViewModel;
-            view.RowIntoView(_rowInfo.Category, _rowInfo.Products);
+            view.RowIntoView(_rowInfo);
         }
 
         public override async Task Command()
@@ -108,7 +105,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
         //{
         //    var deleteCmd = _deleteCommand();
 
-            
+
         //}
     }
 }

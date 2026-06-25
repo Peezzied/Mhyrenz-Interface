@@ -4,8 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
-using Mhyrenz_Interface.Store;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Features.Inventory.Behaviors

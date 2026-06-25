@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using HandyControl.Controls;
 using HandyControl.Tools;
 using Mhyrenz_Interface.Domain.Services.BarcodeCacheService;
-using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Startup;
 using Mhyrenz_Interface.Store;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +41,7 @@ namespace Mhyrenz_Interface.Bootstrap
 
         public async Task ShowMainWindowAsync()
         {
-            var vm = _serviceProvider.GetRequiredService<ShellViewModel>();
+            var vm = App.ShellViewModel;
 
             var mainWindow = _serviceProvider.GetRequiredService<CreateWindow<MainWindow>>().Invoke(vm);
 

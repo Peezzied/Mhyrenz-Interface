@@ -2,7 +2,7 @@
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
-    public class PharmaDetailsViewModel: TrackedViewModel
+    public class PharmaDetailsViewModel : TrackedViewModel
     {
         public string GenericName { get; set; }
     }

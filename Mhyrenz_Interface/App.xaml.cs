@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -22,7 +21,6 @@ using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Domain.Services.SessionService;
-using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Features.Home.ViewModels;
@@ -31,7 +29,6 @@ using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.Properties;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
 using Mhyrenz_Interface.Test;
@@ -57,11 +54,12 @@ namespace Mhyrenz_Interface
         [Obsolete]
         public static IServiceProvider ServiceProvider { get; set; }
         public static IUndoRedoManager UndoRedoManager { get; private set; }
+        public static ShellViewModel ShellViewModel { get; private set; }
         public static AppPresenter Presenter { get; set; }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            var culture = new CultureInfo("en- PH");
+            var culture = new CultureInfo("en-PH");
 
             //culture.NumberFormat.CurrencySymbol = "₱";
 
@@ -72,9 +70,9 @@ namespace Mhyrenz_Interface
             CultureInfo.DefaultThreadCurrentUICulture = culture;
 
             FrameworkElement.LanguageProperty.OverrideMetadata(
-    typeof(FrameworkElement),
-    new FrameworkPropertyMetadata(
-        XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(
+                    XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
 
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
@@ -94,6 +92,7 @@ namespace Mhyrenz_Interface
             ServiceProvider = _appHost.Services;
 
             UndoRedoManager = _appHost.Services.GetRequiredService<IUndoRedoManager>();
+            ShellViewModel = _appHost.Services.GetRequiredService<ShellViewModel>();
 
             await _appHost.Services.GetRequiredService<ICheckoutService>().RemovePhysically();
 

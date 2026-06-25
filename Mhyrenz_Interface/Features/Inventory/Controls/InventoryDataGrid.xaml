@@ -23,14 +23,10 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Features/Inventory/Templates/BarcodeColumn.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="TextBlockCenter" TargetType="TextBlock">
                 <Setter Property="TextAlignment" Value="Center"/>
             </Style>
-
 
             <converters:EmptyStringToZero x:Key="EmptyStringToZero"/>
             <converters:OrConverter x:Key="OrConverter"/>
@@ -156,6 +152,98 @@
                 </adorn:CellAdorner>
             </DataTemplate>
             <!--#endregion-->
+            <!--#region BarcodeColumn-->
+
+            <DataTemplate x:Key="BarcodeColumnEdit">
+                <adorn:CellAdorner>
+                    <TextBox Text="{Binding Barcode}" mah:TextBoxHelper.Watermark="Enter Barcode" Style="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:BarcodeCellBehavior>
+                                <behaviors:BarcodeCellBehavior.Popup>
+                                    <DataTemplate>
+                                        <Grid SnapsToDevicePixels="True">
+                                            <Rectangle x:Name="PopupTargetElement"
+                                                       Margin="-5 0"
+                                                       StrokeThickness="0" />
+                                            <Border x:Name="ValidationErrorElement"
+                                                    BorderBrush="DarkOrange"
+                                                    BorderThickness="1"
+                                                    SnapsToDevicePixels="True"/>
+
+                                            <local:TrackedPopup
+                                                Placement="Right"
+                                                PlacementTarget="{Binding ElementName=PopupTargetElement}"
+                                                Anchor="{Binding ElementName=PopupTargetElement}"
+                                                IsOpen="True"
+                                                AllowsTransparency="True">
+                                                <Grid x:Name="Root" Margin="4">
+                                                    <Border Margin="4 4 -4 -4"
+                                                            Background="{DynamicResource MahApps.Brushes.Validation1}"
+                                                            CornerRadius="5" />
+                                                    <Border Margin="3 3 -3 -3"
+                                                            Background="{DynamicResource MahApps.Brushes.Validation2}"
+                                                            CornerRadius="4" />
+                                                    <Border Margin="2 2 -2 -2"
+                                                            Background="{DynamicResource MahApps.Brushes.Validation3}"
+                                                            CornerRadius="3" />
+                                                    <Border Margin="1 1 -1 -1"
+                                                            Background="{DynamicResource MahApps.Brushes.Validation4}"
+                                                            CornerRadius="2" />
+                                                    <Border Background="DarkOrange"
+                                                            CornerRadius="6"
+                                                            Padding="10">
+
+                                                        <TextBlock Text="Scan a barcode to fill out the field."
+                                                                   Foreground="White"
+                                                                   TextWrapping="Wrap"
+                                                                   MaxWidth="250"/>
+                                                    </Border>
+                                                </Grid>
+                                            </local:TrackedPopup>
+                                        </Grid>
+                                    </DataTemplate>
+                                </behaviors:BarcodeCellBehavior.Popup>
+                            </behaviors:BarcodeCellBehavior>
+                        </i:Interaction.Behaviors>
+                    </TextBox>
+                </adorn:CellAdorner>
+            </DataTemplate>
+
+            <DataTemplate x:Key="BarcodeColumnContent">
+                <ContentControl x:Name="BarcodeContent" Content="{Binding}" Width="90">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Image Source="{Binding Barcode, Converter={StaticResource BarcodeToImageConverter}, IsAsync=True}" MaxWidth="130"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <Binding Path="Barcode"
+                                         Converter="{StaticResource BarcodeToImageConverter}"/>
+                                    </DataTrigger.Binding>
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="Invalid!" Style="{StaticResource MahApps.Styles.TextBlock.DataGrid}"
+                                           Foreground="Red"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+            </DataTemplate>
+
+            <!--#endregion-->
 
             <DataTemplate x:Key="DetailsRow">
                 <Border BorderThickness="0" Padding="10">
@@ -218,11 +306,11 @@
 
             <Style x:Key="DataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid.Azure}">
                 <Setter Property="CanUserSortColumns" Value="False"/>
+                <Setter Property="GridLinesVisibility" Value="All"/>
+                <Setter Property="ItemsSource" Value="{Binding Inventory, IsAsync=True}"/>
+                <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="EnableRowVirtualization" Value="True"/>
                 <Setter Property="EnableColumnVirtualization" Value="True"/>
-                <Setter Property="GridLinesVisibility" Value="All"/>
-                <Setter Property="ItemsSource" Value="{Binding Inventory}"/>
-                <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
                 <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
@@ -230,12 +318,11 @@
                 <Setter Property="VirtualizingPanel.CacheLength" Value="1"/>
                 <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
                 <Setter Property="CanUserReorderColumns" Value="False"/>
-                <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/>
                 <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
                 <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
                 <Setter Property="CanUserResizeColumns" Value="True" />
-                <!--<Setter Property="SelectedItem" Value="{Binding SelectedItem, Mode=TwoWay}"/>-->
-                <Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>
+                <!--TODO: this breaks-->
+                <!--<Setter Property="RowDetailsTemplate" Value="{StaticResource DetailsRow}"/>-->
                 <Setter Property="ColumnHeaderStyle">
                     <Setter.Value>
                         <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}">
@@ -338,6 +425,7 @@
 
             <DataTemplate x:Key="DataGridDetailedLayout">
                 <DataGrid FrozenColumnCount="2" 
+                          CanUserSortColumns="True"
                           Background="Transparent"
                           x:Name="DataGridDetailed"
                           SelectionMode="Extended"
@@ -354,17 +442,20 @@
                         <sharedBehaviors:DynamicCellControlBehavior/>
                     </i:Interaction.Behaviors>
                     <DataGrid.Columns>
-                        <DataGridTextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" Header="Id" Width="Auto" IsReadOnly="True" Binding="{Binding Item.Id}" ElementStyle="{StaticResource IdColumnElementStyle}" local:InventoryDataGridColumn.IgnoreReorder="True" />
-                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" Header="Name" SortDirection="Ascending" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" CellEditingTemplate="{StaticResource NameColumnCellEditingTemplate}" local:InventoryDataGridColumn.IgnoreReorder="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" />
+                        <DataGridTextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" Header="Id" Width="Auto" IsReadOnly="True" Binding="{Binding Item.Id}" ElementStyle="{StaticResource IdColumnElementStyle}" local:InventoryDataGridColumn.IgnoreReorder="True" CanUserSort="False" />
+                        <columns:TemplateColumn local:InventoryDataGridColumn.PlaceOrderBound="True" Header="Name" MaxWidth="545" HeaderStyle="{StaticResource NameColumnHeaderStyle}" CellTemplate="{StaticResource NameColumnCellTemplate}" CellEditingTemplate="{StaticResource NameColumnCellEditingTemplate}" local:InventoryDataGridColumn.IgnoreReorder="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" SortMemberPath="Name"/>
                         <columns:TextColumn columns:ColumnHelper.MonitorSale="True" Binding="{Binding Batch, UpdateSourceTrigger=Explicit}" Header="Batch" Width="125" />
-                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
+                        <columns:TemplateColumn Header="Expiry" Width="125" CellTemplate="{StaticResource ExpiryColumnCellTemplate}" CellEditingTemplate="{StaticResource ExpiryColumnCellEditingTemplate}" />
                         <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Retail" Width="100" Binding="{Binding RetailPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
+                        <columns:TextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" Header="Sales" TextAlignment="Center" Width="100" IsReadOnly="True" Binding="{Binding Sales, StringFormat=C}"/>
                         <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Cost" Width="100" Binding="{Binding CostPrice, UpdateSourceTrigger=Explicit, StringFormat=C}" Minimum="0" StringFormat="C" ButtonsAlignment="Opposite"/>
-                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Markup %" Width="100" Binding="{Binding MarkupRate, UpdateSourceTrigger=Explicit, StringFormat=P2}" Minimum="0" Maximum="1" Interval="0.1" NumericInputMode="Decimal" StringFormat="P2" ButtonsAlignment="Opposite"/>
-                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" sharedBehaviors:DynamicCellControlBehavior.RightClickBound="True" IsReadOnly="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" 
-                                                     local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite">
+                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Markup %" Width="100" Binding="{Binding MarkupRate, UpdateSourceTrigger=Explicit, StringFormat=P2}" Minimum="0" Maximum="1" Interval="0.1" NumericInputMode="Decimal" StringFormat="P2" ButtonsAlignment="Opposite"/>
+                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" sharedBehaviors:DynamicCellControlBehavior.RightClickBound="True" SortMemberPath="Purchase"
+                                              local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Purchase" Width="85" DisplayBinding="{Binding Purchase}" Minimum="0" ButtonsAlignment="Opposite"
+                                              IsReadOnly="True"
+                                              d:IsReadOnly="{Binding Value.SessionClosed, Mode=OneTime, Source={StaticResource InventoryDataGridContext}}" >
                             <columns:NumberColumn.Style>
-                                <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource MahApps.Styles.NumericUpDown.DataGrid.Editing}">
+                                <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource {x:Type mah:NumericUpDown}}">
                                     <Setter Property="Value" Value="{Binding PurchaseDefaultEdit, UpdateSourceTrigger=Explicit}"/>
                                     <Setter Property="Maximum" Value="{Binding PurchaseMax}"/>
                                     <Style.Triggers>
@@ -399,19 +490,26 @@
                                 </Style>
                             </columns:NumberColumn.HeaderStyle>
                         </columns:NumberColumn>
-                        <DataGridTextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" ElementStyle="{StaticResource TextBlockCenter}" IsReadOnly="True" Binding="{Binding NetQty}"/>
-                        <DataGridTextColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.PharmaColumn="True" Header="Generic Name" Width="70" Binding="{Binding PharmaDetails.GenericName}"/>
-                        <columns:NumberColumn columns:ColumnHelper.MonitorSale="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}" Minimum="{Binding QtyMin}"/>
-                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeEdit}" CellTemplate="{StaticResource BarcodeContent}"  />
+                        <columns:TextColumn local:InventoryDataGridColumn.PlaceOrderBound="True" local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Net Qty" Width="70" TextAlignment="Center" IsReadOnly="True" Binding="{Binding NetQty}"/>
+                        <DataGridTextColumn local:InventoryDataGridColumn.PharmaColumn="True" Header="Generic Name" Width="70" Binding="{Binding PharmaDetails.GenericName}"/>
+                        <columns:NumberColumn local:InventoryDataGridColumn.IgnoreVisibilityToggle="True" Header="Qty" Width="85" Binding="{Binding Qty, UpdateSourceTrigger=Explicit}">
+                            <columns:NumberColumn.Style>
+                                <Style TargetType="mah:NumericUpDown" BasedOn="{StaticResource {x:Type mah:NumericUpDown}}">
+                                    <Setter Property="Minimum" Value="{Binding QtyMin}"/>
+                                </Style>
+                            </columns:NumberColumn.Style>
+                        </columns:NumberColumn>
+                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeColumnEdit}" CellTemplate="{StaticResource BarcodeColumnContent}" CanUserSort="False" />
                         <DataGridTemplateColumn local:InventoryDataGridColumn.PlaceOrderBound="True" IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <ContentControl Content="{Binding}" Background="Transparent">
-        <ContentControl.Style>
-            <Style TargetType="ContentControl">
+
+    <ContentPresenter Content="{Binding}">
+        <ContentPresenter.Style>
+            <Style TargetType="ContentPresenter">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Layout, ElementName=Root}" Value="{x:Static local:InventoryDataGridLayout.Detailed}">
                         <Setter Property="ContentTemplate" Value="{StaticResource DataGridDetailedLayout}"/>
@@ -421,6 +519,6 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-        </ContentControl.Style>
-    </ContentControl>
+        </ContentPresenter.Style>
+    </ContentPresenter>
 </UserControl>

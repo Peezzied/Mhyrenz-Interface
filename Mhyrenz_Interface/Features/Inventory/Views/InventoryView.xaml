@@ -81,7 +81,6 @@
                             RelativeSource={RelativeSource AncestorType=TabControl}, Mode=TwoWay}"/>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
-                
             </TabControl>
         </Grid>
     </hc:DrawerContainer>

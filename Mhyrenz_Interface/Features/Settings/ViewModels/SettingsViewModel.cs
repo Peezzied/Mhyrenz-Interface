@@ -1,10 +1,10 @@
-﻿using Mhyrenz_Interface.Navigation;
+﻿using Mhyrenz_Interface.Core.MVVM;
 
 namespace Mhyrenz_Interface.Features.Settings.ViewModels
 {
-    public class SettingsViewModel : NavigationViewModel
+    public class SettingsViewModel : BaseViewModel
     {
-        public SettingsViewModel(INavigationServiceEx navigationServiceEx) : base(navigationServiceEx)
+        public SettingsViewModel()
         {
         }
     }

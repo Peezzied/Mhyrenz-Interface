@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Navigation;
-using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Core.UndoRedo
 {
@@ -20,6 +19,8 @@ namespace Mhyrenz_Interface.Core.UndoRedo
 
         public abstract Task Command();
 
+        protected virtual async Task Complete() { }
+
         public async Task Execute()
         {
             await Command();
@@ -27,12 +28,14 @@ namespace Mhyrenz_Interface.Core.UndoRedo
 
         public async Task Undo()
         {
+            Cancel = false;
             Intent = ActionType.Undo;
             await Command();
         }
 
         public async Task Redo()
         {
+            Cancel = false;
             Intent = ActionType.Redo;
             await Command();
         }

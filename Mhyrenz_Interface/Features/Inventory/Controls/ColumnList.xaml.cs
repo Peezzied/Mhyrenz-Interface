@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Dragablz;
 using Mhyrenz_Interface.Domain.Models.Settings;
-using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Store;
 
@@ -36,7 +35,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Controls
         {
             App.Current.Dispatcher.Invoke(new Action(() =>
             {
-                var tab = ((InventoryTabItem)DataContext);
+                var tab = (InventoryTabItem)DataContext;
                 var pharmaColumns = InventoryDataGridSettingsStore.Load().Where(s => s.PharmaColumn);
 
                 var list = DragablzItemsControl.ItemsOrganiser.Sort(DragablzItemsControl.Items.Cast<object>()

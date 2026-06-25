@@ -6,7 +6,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
-using MahApps.Metro.Controls;
+using HandyControl.Controls;
+using HandyControl.Data;
+using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
@@ -15,7 +17,6 @@ using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.Settings;
 using Mhyrenz_Interface.Features.Inventory.Behaviors;
 using Mhyrenz_Interface.Features.Inventory.Commands;
-using Mhyrenz_Interface.Features.Inventory.Views;
 using Mhyrenz_Interface.Store;
 using Microsoft.Extensions.Options;
 using ObservableCollections;
@@ -118,59 +119,39 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             var viewModel = sender as ProductDataViewModel;
 
-            PropertyChangeCommand<ProductVMRowInfo>.ChangedArgs changedArgs(object newVal)
+            var changedArgs = new PropertyChangeCommand<ProductVMRowInfo>.ChangedArgs
             {
-                return new PropertyChangeCommand<ProductVMRowInfo>.ChangedArgs
+                OldValue = args.OldValue,
+                NewValue = args.NewValue,
+                RowInfo = new ProductVMRowInfo
                 {
-                    OldValue = args.OldValue,
-                    NewValue = newVal,
-                    RowInfo = new ProductVMRowInfo
-                    {
-                        Category = viewModel.Item.CategoryId,
-                        Products = new[] { viewModel.Item.Id }
-                    }
-                };
-            }
+                    Category = viewModel.Item.CategoryId,
+                    Products = new[] { viewModel.Item.Id }
+                }
+            };
 
-            void commonPropHandler(Setter setter, Getter getter, int key)
+            Action<Product> updater = null;
+
+            void commonPropHandler(Setter setter, int key)
             {
                 App.UndoRedoManager.Execute(_productCommandCommonProp(new ProductVMCommandCommonProp.DTO
                 {
+                    Updater = updater,
+                    PropertyName = args.PropertyName,
                     Product = viewModel.Item,
-                    ChangedArgs = changedArgs(getter()),
+                    ChangedArgs = changedArgs,
                     Setter = setter
                 }));
+                updater = null;
             }
 
-            void purchasePropHandler(Setter setter, Getter getter, int key)
+            void purchasePropHandler(Setter setter, int key)
             {
-
-                void handlePropChange()
-                {
-                    App.Current.BeginInvoke(new Action(async () =>
-                    {
-                        if (!_inventoryStore.Store.TryGetValue(key, out var vm))
-                            return;
-                        vm.Item = await _productService.Get(key); // FIXME: hacky solution
-                    }));
-                }
-
                 App.UndoRedoManager.Execute(_productCommandPurchase(new ProductVMCommandPurchase.DTO
                 {
                     ProductId = key,
                     Setter = setter,
-                    ChangedArgs = changedArgs(getter()),
-                    PropertyChangeHandler = handlePropChange
-                }));
-            }
-
-            void markupRateHandler(Setter setter, Getter getter, int key)
-            {
-                App.UndoRedoManager.Execute(_productCommandMarkupRate(new ProductVMCommandMarkupRate.DTO
-                {
-                    ProductId = key,
-                    ChangedArgs = changedArgs(getter()),
-                    Setter = setter
+                    ChangedArgs = changedArgs
                 }));
             }
 
@@ -178,21 +159,70 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 .Track(nameof(ProductDataViewModel.Qty), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Name), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.RetailPrice), commonPropHandler)
-                .Track(nameof(ProductDataViewModel.CostPrice), commonPropHandler)
-                .Track(nameof(ProductDataViewModel.Barcode), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Expiry), commonPropHandler)
                 .Track(nameof(ProductDataViewModel.Batch), commonPropHandler)
-                .Track(nameof(ProductDataViewModel.MarkupRate), markupRateHandler)
+                .Track(nameof(ProductDataViewModel.Barcode), async (s, k) =>
+                {
+                    var barcode = args.NewValue as string;
+                    if (await _productService.IsBarcodeUnique(barcode) || barcode.IsNullOrEmpty())
+                    {
+                        viewModel.SetValue(nameof(viewModel.Barcode), barcode);
+                        commonPropHandler(s, k);
+                    }
+                    else
+                    {
+                        Growl.Warning(new GrowlInfo
+                        {
+                            Message = $"The barcode \"{barcode}\" is already taken.",
+                            ShowDateTime = false,
+                        });
+                    }
+                }, setterBarcode)
+                .Track(nameof(ProductDataViewModel.CostPrice), (s, k) =>
+                {
+                    updater = p =>
+                    {
+                        p.CostPrice = viewModel.CostPrice;
+                        p.RetailPrice = viewModel.RetailPrice;
+                    };
+                    commonPropHandler(s, k);
+                })
+                .Track(nameof(ProductDataViewModel.MarkupRate), (s, k) =>
+                {
+                    updater = p =>
+                    {
+                        p.MarkupRate = viewModel.MarkupRate;
+                        p.RetailPrice = viewModel.RetailPrice;
+                    };
+                    commonPropHandler(s, k);
+                })
                 .Track(nameof(ProductDataViewModel.PurchaseNormalEdit), purchasePropHandler)
-                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, getter, key) =>
+                .Track(nameof(ProductDataViewModel.PurchaseDefaultEdit), (setter, key) =>
                 {
                     args.OldValue = 0;
-                    purchasePropHandler(setter, getter, key);
+                    purchasePropHandler(setter, key);
                 })
-                .Track(nameof(PharmaDetailsViewModel.GenericName), (setter, getter, key) =>
+                .Track(nameof(PharmaDetailsViewModel.GenericName), (setter, key) =>
                 {
+                    // TODO Generic name tracker
+                }, setterPharmaDetals);
 
-                }, setterPharmaDetals, getterPharmaDetails);
+            void setterBarcode(object val, PropertyChangeOrigin origin)
+            {
+                if (!_inventoryStore.Store.TryGetValue(viewModel.Item.Id, out var vm))
+                    return;
+
+                vm.TrackingOrigin = origin;
+
+                try
+                {
+                    vm.SetValue(nameof(vm.Barcode), val);
+                }
+                finally
+                {
+                    vm.TrackingOrigin = default;
+                }
+            }
 
             void setterPharmaDetals(object val, PropertyChangeOrigin origin)
             {
@@ -211,16 +241,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 {
                     vm.TrackingOrigin = default;
                 }
-            }
-
-            object getterPharmaDetails()
-            {
-                if (!_inventoryStore.Store.TryGetValue(viewModel.Item.Id, out var vm))
-                    return null;
-
-                var property = vm.GetType().GetProperty(nameof(ProductDataViewModel.PharmaDetails));
-
-                return property.GetType().GetProperty(args.PropertyName).GetValue(vm);
             }
         }
 
@@ -369,8 +389,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             { // restore
                 foreach (var item in InventoryDataGridSettingsStore.Load())
                 {
-                    var col = Columns[item.Header];
-                    col.IsVisible = item.IsVisible;
+                    if (Columns.TryGetValue(item.Header, out var col))
+                        col.IsVisible = item.IsVisible;
                 }
             }
             _placeOrderMode = false;

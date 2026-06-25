@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using Mhyrenz_Interface.Features.Inventory.ViewModels;
 
 namespace Mhyrenz_Interface.Shared.Columns
 {
-    public class TemplateColumn: DataGridTemplateColumn
+    public class TemplateColumn : DataGridTemplateColumn
     {
         protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
         {

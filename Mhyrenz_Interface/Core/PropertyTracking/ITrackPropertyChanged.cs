@@ -11,13 +11,15 @@
 
     public class TrackedPropertyChangedEventArgs
     {
-        public TrackedPropertyChangedEventArgs(object oldValue, string propertyName, PropertyChangeOrigin origin)
+        public TrackedPropertyChangedEventArgs(object newValue, object oldValue, string propertyName, PropertyChangeOrigin origin)
         {
+            NewValue = newValue;
             OldValue = oldValue;
             PropertyName = propertyName;
             Origin = origin;
         }
 
+        public object NewValue { get; set; }
         public object OldValue { get; set; }
         public string PropertyName { get; set; }
         public PropertyChangeOrigin Origin { get; set; }

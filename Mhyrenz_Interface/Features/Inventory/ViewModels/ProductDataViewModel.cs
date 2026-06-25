@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Mhyrenz_Interface.Core.MVVM;
@@ -10,6 +10,7 @@ using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
+using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
@@ -18,17 +19,17 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         string Barcode { get; set; }
 
         event Action BarcodeReceived;
-        void LoadReceiver();
+        void LoadBarcodeReceiver();
+        void UnloadBarcodeReceiver();
     }
 
-    public class ProductDataViewModel : TrackedViewModel, IBarcodeBound, IFlashRequestable
+    public class ProductDataViewModel : TrackedViewModel, IBarcodeBound, IFlashReceiver
     {
         private readonly ISessionStore _sessionStore;
         private readonly ICategoryStore _categoryStore;
         private readonly ISerialBarcodeService _serialBarcodeService;
         private readonly INavigationServiceEx _navigationService;
         private readonly ITransactionStore _transactionStore;
-        private readonly Action _requireSession;
 
         private Product _item;
         public Product Item
@@ -44,6 +45,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public ProductDataViewModel(ISessionStore sessionStore,
             ICategoryStore categoryStore,
             Product product,
+            ITransactionStore transactionStore,
             ISerialBarcodeService serialBarcodeService,
             INavigationServiceEx navigationServiceEx,
             PharmaDetailsViewModel pharmaDetailsViewModel)
@@ -52,6 +54,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             _purchaseNormal = Item.Purchase;
 
+            _transactionStore = transactionStore;
             _sessionStore = sessionStore;
             _categoryStore = categoryStore;
             _serialBarcodeService = serialBarcodeService;
@@ -71,9 +74,15 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             OnTrackedPropertyChanged(e.OldValue, e.PropertyName);
         }
 
-        public void LoadReceiver()
+        public void LoadBarcodeReceiver()
         {
             _serialBarcodeService.OnBarcodeReceived += SerialBarcodeService_OnBarcodeReceived;
+        }
+
+        public void UnloadBarcodeReceiver()
+        {
+            _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
+            BarcodeReceived = null;
         }
 
         private async Task GoToItemActionCommand(object obj)
@@ -87,20 +96,23 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             //});
         }
 
-        private void SerialBarcodeService_OnBarcodeReceived(string obj)
+        private void SerialBarcodeService_OnBarcodeReceived(string code)
         {
-            Barcode = obj;
-            Dispose();
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Barcode = code;
+                BarcodeReceived?.Invoke();
+                //UnloadBarcodeReceiver();
+            });
         }
+
 
         public override void Dispose()
         {
-            _serialBarcodeService.OnBarcodeReceived -= SerialBarcodeService_OnBarcodeReceived;
-            BarcodeReceived = null;
+            // TODO
         }
 
         public event Action BarcodeReceived;
-        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
         private bool _hasActiveSale = false;
         public bool HasActiveSale
@@ -169,7 +181,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         public int Purchase
         {
             get => Item.Purchase;
-            internal set
+            set
             {
                 if (Item.Purchase != value)
                 {
@@ -185,10 +197,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             get => Item.MarkupRate;
             set
             {
-                if (Item.MarkupRate != value)
+                if (Item.MarkupRate != value && EnsurePurchaseRigidity())
                 {
                     SetTrackedProperty(Item.MarkupRate, value,
                         v => Item.MarkupRate = v, nameof(MarkupRate));
+
+                    Item.SetMarkupRate(value);
+                    OnPropertyChanged(nameof(RetailPrice));
                 }
             }
         }
@@ -222,31 +237,62 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 }
             }
         }
-        public decimal NetRetailPrice => Item.NetRetail;
+
+        public decimal Sales
+        {
+            get => Item.Sales;
+            set
+            {
+                if (Item.Sales != value)
+                {
+                    Item.Sales = value;
+                    OnPropertyChanged(nameof(Sales));
+                }
+            }
+        }
 
         public decimal RetailPrice
         {
             get => Item.RetailPrice;
             set
             {
-                if (Item.RetailPrice != value)
+                if (Item.RetailPrice != value && EnsurePurchaseRigidity())
                 {
                     SetTrackedProperty(Item.RetailPrice, value,
                        v => Item.RetailPrice = v, nameof(RetailPrice));
 
-                    OnPropertyChanged(nameof(NetRetailPrice));
+                    OnPropertyChanged(nameof(Sales));
                 }
             }
         }
+
+        private bool EnsurePurchaseRigidity()
+        {
+            if (Purchase > 0)
+            {
+                var result = MessageBox.Show(
+                    "This change will only affect future sales. Previous sales and transactions that have already been recorded will not be updated.\n\nDo you want to continue?",
+                    "Item Price Change",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information);
+
+                return result == MessageBoxResult.Yes;
+            }
+            return true;
+        }
+
         public decimal CostPrice
         {
             get => Item.CostPrice;
             set
             {
-                if (Item.CostPrice != value)
+                if (Item.CostPrice != value && EnsurePurchaseRigidity())
                 {
                     SetTrackedProperty(Item.CostPrice, value,
                        v => Item.CostPrice = v, nameof(CostPrice));
+
+                    Item.SetMarkupRate(MarkupRate);
+                    OnPropertyChanged(nameof(RetailPrice));
                 }
             }
         }
@@ -259,8 +305,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             {
                 if (Item.Barcode != value)
                 {
-                    SetTrackedProperty(Item.Barcode, value,
-                        v => Item.Barcode = v, nameof(Barcode));
+                    DeferSetTrackedProperty(Item.Barcode, value, nameof(Barcode));
                 }
             }
         }
@@ -297,14 +342,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             return null;
         }
 
-        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
-        {
-            var args = new RowFlashRequestedEventArgs(type);
-            FlashRequested?.Invoke(this, args);
-
-            return args.Completion.Task;
-        }
-
         private Brush _categoryColor;
         public Brush CategoryColor
         {
@@ -320,5 +357,18 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         public ICommand GoToItemCommand { get; }
 
+        public override void SetValue(string propertyName, object value)
+        {
+            switch (propertyName)
+            {
+                case nameof(Barcode):
+                    Item.Barcode = value as string;
+                    break;
+                default:
+                    return;
+            }
+
+            base.SetValue(propertyName, value);
+        }
     }
 }

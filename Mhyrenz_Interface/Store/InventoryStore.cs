@@ -22,8 +22,6 @@ namespace Mhyrenz_Interface.Store
 
         public event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         public event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
-        public event EventHandler<IEnumerable<ProductDataViewModel>> AddProductEvent;
-        public event EventHandler<IEnumerable<ProductDataViewModel>> RemoveProductEvent;
         public event Action Loaded;
 
         public InventoryStore(
@@ -57,22 +55,11 @@ namespace Mhyrenz_Interface.Store
 
             Store.Clear();
 
-            Store.AddRange(displayProducts);
+            Store.AddRange(displayProducts.OrderBy(p => p.Name));
 
             Loaded?.Invoke();
         }
         #endregion
-
-        public void RemoveProduct(IEnumerable<ProductDataViewModel> products)
-        {
-            RemoveProductEvent?.Invoke(this, products);
-            Store.RemoveMany(products.Select(x => x.Item.Id));
-        }
-
-        public void RemoveProduct(IEnumerable<int> products)
-        {
-            Store.RemoveMany(products);
-        }
 
         public IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products)
         {
@@ -81,23 +68,7 @@ namespace Mhyrenz_Interface.Store
 
             Store.AddRange(displayProducts);
 
-            AddProductEvent?.Invoke(this, displayProducts);
-
             return displayProducts;
-        }
-
-        public void PurchaseProduct(int productId, int amount)
-        {
-            if (Store.TryGetValue(productId, out var product))
-            {
-                product.Purchase += amount;
-
-                //PurchaseEvent?.Invoke(this, new InventoryStoreEventArgs
-                //{
-                //    ProductId = productId,
-                //    Product = product
-                //});
-            }
         }
 
     }

@@ -9,32 +9,10 @@ using Mhyrenz_Interface.Features.Home.ViewModels;
 using Mhyrenz_Interface.Features.Home.Views;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Inventory.Views;
-using Mhyrenz_Interface.Features.Settings.ViewModels;
-using Mhyrenz_Interface.Features.Settings.Views;
 
 namespace Mhyrenz_Interface.Navigation
 {
-    public class NavigationViewModel : BaseViewModel
-    {
-        private readonly INavigationServiceEx _navigationServiceEx;
-
-        public NavigationViewModel(INavigationServiceEx navigationServiceEx)
-        {
-            _navigationServiceEx = navigationServiceEx;
-            //_navigationServiceEx.Navigating += (s, e) => Navigating?.Invoke(s, e);
-            //_navigationServiceEx.TransitionCompleted += () => TransitionCompleted?.Invoke();
-        }
-
-        public event EventHandler Navigating;
-        public event Action TransitionCompleted;
-
-        public override void Dispose()
-        {
-            //_navigationServiceEx.Navigating -= (s, e) => Navigating?.Invoke(s, e);
-            //_navigationServiceEx.TransitionCompleted -= () => TransitionCompleted?.Invoke(); base.Dispose();
-        }
-    }
-    public class NavigationViewModelFactory : IViewModelFactory<NavigationViewModel>
+    public class NavigationViewModelFactory : IViewModelFactory<BaseViewModel>
     {
         private readonly CreateViewModel<HomeViewModel> _createHomeViewModel;
         private readonly CreateViewModel<InventoryViewModel> _createInventoryViewModel;
@@ -54,13 +32,13 @@ namespace Mhyrenz_Interface.Navigation
             _viewsSet[typeof(CheckoutView)] = (typeof(CheckoutViewModel), _createTransactionsViewModel);
         }
 
-        public NavigationViewModel CreateViewModel(object parameter)
+        public BaseViewModel CreateViewModel(object parameter)
         {
             var viewType = parameter as Type;
             if (_viewsSet.TryGetValue(viewType, out var viewModel))
             {
 
-                return viewModel.factory.CastTo<CreateViewModel<NavigationViewModel>>().Invoke();
+                return viewModel.factory.CastTo<CreateViewModel<BaseViewModel>>().Invoke();
             }
 
             throw new ArgumentException($"No view model found for type {viewType.Name}");

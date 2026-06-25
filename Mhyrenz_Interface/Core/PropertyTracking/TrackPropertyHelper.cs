@@ -7,6 +7,7 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
     public static class TrackPropertyHelper
     {
         public delegate void Setter(object value, PropertyChangeOrigin origin = PropertyChangeOrigin.Programmatic);
+        [Obsolete]
         public delegate object Getter();
 
         public static TrackPropertyHelper<TKey, TValue> Build<TKey, TValue>(IViewModelStore<TKey, TValue> store, TKey key, string propertyName)
@@ -30,9 +31,9 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
             _propertyName = propertyName;
         }
 
-        public delegate void Handler(Setter setter, Getter getter, TKey key);
+        public delegate void Handler(Setter setter, TKey key);
 
-        public TrackPropertyHelper<TKey, TValue> Track(string propertyName, Handler handler, Setter setter = null, Getter getter = null)
+        public TrackPropertyHelper<TKey, TValue> Track(string propertyName, Handler handler, Setter setter = null)
         {
             if (string.IsNullOrEmpty(propertyName))
             {
@@ -64,24 +65,8 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
                 };
             }
 
-            if (getter == null)
-            {
-                getter = () =>
-                {
-                    if (!_store.Store.TryGetValue(_key, out var vm))
-                        return null;
-
-                    var property = vm.GetType().GetProperty(propertyName) ?? throw new InvalidOperationException(
-                            $"Property '{propertyName}' was not found on '{typeof(TValue).Name}'.");
-
-                    return property.GetValue(vm);
-                };
-            }
-
-            handler(setter, getter, _key);
+            handler(setter, _key);
             return this;
         }
-
-
     }
 }

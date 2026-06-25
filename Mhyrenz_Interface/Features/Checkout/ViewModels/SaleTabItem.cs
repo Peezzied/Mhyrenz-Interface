@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,18 +10,15 @@ using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.Commands;
-using Mhyrenz_Interface.Features.Checkout.Views;
-using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
 using ObservableCollections;
-using static Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper;
 using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Setter;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class SaleTabItem : ValidationViewModel, IEditCancelState
+    public class SaleTabItem : ValidationViewModel, IEditCancelState, IFlashRequestable
     {
         public SaleTabItem(
             Sale sale,
@@ -191,7 +187,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public decimal Due => Sale.Total;
         public int Items => Sale.Transactions.Count;
-        public decimal Discount => Sale.Total - Sale.SubTotal;
+        public decimal Discount => Sale.SubTotal - Sale.Total;
         public bool HasDiscount => Discount > 0;
 
         private decimal _received;
@@ -222,6 +218,8 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly ITransactionStore _transactionStore;
         private readonly ICheckoutService _checkoutService;
         private readonly ISessionStore _sessionStore;
+
+        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
 
         public CheckoutViewModel Owner { get; private set; }
 
@@ -325,20 +323,20 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                 return;
 
             var viewModel = sender as TransactionDataViewModel;
-            TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, viewModel.Transaction.Id);
+            TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, args.NewValue, viewModel.Transaction.Id);
         }
 
-        public TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, int? transactionId = null, object newValue = null)
+        public TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue, int? transactionId = null)
         {
             var tracker = TrackPropertyHelper.Build(_transactionStore, Transaction.CreateTransactionKey(productId, Sale.Id), propertyName)
-                .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, getter, key) =>
+                .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, key) =>
                 {
                     oldValue = 0;
-                    method(setter, getter, key);
+                    method(setter, key);
                 })
                 .Track(nameof(TransactionDataViewModel.Qty), method);
 
-            void method(Setter setter, Getter getter, long key)
+            void method(Setter setter, long key)
             {
                 App.UndoRedoManager.Execute(_transctionPurchaseCommand(new TransactionVMCommandPurchase.DTO
                 {
@@ -348,7 +346,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
                     ChangedArgs = new PropertyChangeCommand<TransactionVMRowInfo>.ChangedArgs
                     {
                         OldValue = oldValue,
-                        NewValue = newValue ?? getter(),
+                        NewValue = newValue,
                         RowInfo = new TransactionVMRowInfo
                         {
                             Sale = Sale.Id
@@ -364,6 +362,11 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         protected override IRaiseCanExecuteChanged SubmitActionCommand()
         {
             return CheckoutCommand;
+        }
+
+        public async Task RequestFlash(IFlashReceiver item, DataGridFlashBehavior.OperationType type)
+        {
+            await FlashRequested.RequestFlash(item, type);
         }
 
         public class SaleDropTarget : DefaultDropHandler

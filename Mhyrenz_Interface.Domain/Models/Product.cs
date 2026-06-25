@@ -36,12 +36,15 @@ namespace Mhyrenz_Interface.Domain.Models
 
         [NotMapped]
         public int Purchase { get; set; }
+        [NotMapped]
+        public decimal Sales { get; set; }
 
         // Calculated
         public int NetQty => Qty - Purchase;
         public decimal NetRetail => Purchase * RetailPrice;
         //public decimal CostPrice => Qty * RetailPrice;
         public decimal LineCost => CostPrice * Qty;
+
 
         public void Delete()
         {
@@ -63,7 +66,7 @@ namespace Mhyrenz_Interface.Domain.Models
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
-            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id);
+            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SaleId == null);
             if (transaction == null)
             {
                 transaction = new Transaction
@@ -79,6 +82,12 @@ namespace Mhyrenz_Interface.Domain.Models
 
             transaction.IncreaseAmount(amount);
 
+            if (transaction.Amount == 0)
+            {
+                Transactions.Remove(transaction);
+                transaction.Delete();
+            }
+
             return transaction;
         }
 
@@ -87,25 +96,29 @@ namespace Mhyrenz_Interface.Domain.Models
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be greater than zero.");
 
-            var existing = Transactions.FirstOrDefault(t => t.ProductId == Id);
-            if (existing == null)
+            var transaction = Transactions.FirstOrDefault(t => t.ProductId == Id && t.SaleId == null);
+            if (transaction == null)
             {
-                var transaction = new Transaction
+                transaction = new Transaction
                 {
                     ProductId = Id,
                     Amount = -amount,
-                    RetailPrice = RetailPrice
+                    RetailPrice = RetailPrice,
+                    CostPrice = CostPrice
                 };
                 Transactions.Add(transaction);
                 return transaction;
             }
 
-            existing.DecreaseAmount(amount);
+            transaction.DecreaseAmount(amount);
 
-            if (existing.Amount == 0)
-                Transactions.Remove(existing);
-            
-            return existing;
+            if (transaction.Amount == 0)
+            {
+                Transactions.Remove(transaction);
+                transaction.Delete();
+            }
+
+            return transaction;
         }
 
         public void RecalculatePurchase()

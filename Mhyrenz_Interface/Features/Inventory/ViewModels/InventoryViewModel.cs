@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using GongSolutions.Wpf.DragDrop;
@@ -15,8 +13,6 @@ using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
-using Mhyrenz_Interface.Database.Services;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.ReportsService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
@@ -24,17 +20,18 @@ using Mhyrenz_Interface.Features.Inventory.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
-using Microsoft.EntityFrameworkCore.Internal;
 using ObservableCollections;
 
 namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 {
+    public interface IRowInfo { }
+
     public interface IDataGridTabHost
     {
-        void RowIntoView(int tab, int[] items);
+        void RowIntoView(IRowInfo rowInfo);
     }
 
-    public class InventoryViewModel : NavigationViewModel, IDataGridTabHost, IAsyncInitializable
+    public class InventoryViewModel : BaseViewModel, IDataGridTabHost, IAsyncInitializable
     {
 
         private readonly CreateViewModel<InventoryDataGridViewModel> _inventoryDataGridViewModelFactory;
@@ -47,6 +44,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private readonly CreateViewModel<InventoryTabItem> _inventoryTabItemFactory;
         private readonly IProductService _productService;
         private readonly IReportService _reportService;
+        private readonly ITransactionStore _transactionStore;
         private readonly ICheckoutService _checkoutService;
         private readonly IUndoRedoManager _undoRedoManager;
         private readonly IOrderStore _orderStore;
@@ -59,7 +57,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         private PlaceOrderViewModel _placeOrderViewModel;
         private bool IsSwitchReady = false;
         private ProductDataViewModel AddedProduct;
-        private InventoryDataGridViewModel _inventoryDataGridVm;
+
+        public InventoryDataGridViewModel InventoryDataGrid { get; private set; }
 
         public InventoryDragSource InventoryDragHandler { get; }
 
@@ -128,7 +127,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         }
 
         public ObservableCollection<InventoryTabItem> TabItems { get; private set; } = new ObservableCollection<InventoryTabItem>();
-        public RelayCommand DeleteProductCommand { get; set; }
+        public AsyncRelayCommand DeleteProductCommand { get; set; }
 
         private readonly CreateCommand<DeleteCommand> _deleteCommand;
 
@@ -185,17 +184,19 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             }
         }
 
-        public HashSet<int> ProductsInCheckout { get; private set; }
+        public HashSet<int> ProductsInActiveSales { get; private set; } = new HashSet<int>();
+        public HashSet<int> ProductsInTransactions { get; private set; } = new HashSet<int>();
 
         #endregion
 
 
-        public InventoryViewModel(INavigationServiceEx navigationServiceEx,
+        public InventoryViewModel(
             ICategoryStore categoryStore,
             IInventoryStore inventoryStore,
             ISessionStore sessionStore,
             IProductService productService,
             IReportService reportService,
+            ITransactionStore transactionStore,
             ICheckoutService checkoutService,
             IUndoRedoManager undoRedoManager,
             IOrderStore orderStore,
@@ -204,7 +205,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             CreateViewModel<InventoryTabItem> inventoryTabItemFactory,
             CreateViewModel<InventoryDataGridViewModel> inventoryDataGridviewModelFactory,
             CreateViewModel<AddProductViewModel> addProductViewModelFactory,
-            CreateViewModel<PlaceOrderViewModel> placeOrderViewModelFactory) : base(navigationServiceEx)
+            CreateViewModel<PlaceOrderViewModel> placeOrderViewModelFactory)
         {
             _mainViewModel = shellViewModel;
             _categorystore = categoryStore;
@@ -216,6 +217,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             _placeOrderViewModelFactory = placeOrderViewModelFactory;
             _productService = productService;
             _reportService = reportService;
+            _transactionStore = transactionStore;
             _checkoutService = checkoutService;
             _undoRedoManager = undoRedoManager;
             _orderStore = orderStore;
@@ -223,7 +225,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             //_categorystore.Updated += CategoryStore_Updated;
             PlaceOrderCommand = new RelayCommand(PlaceOrderAction);
             AddProductCommand = new RelayCommand(ShowProductAdd);
-            DeleteProductCommand = new RelayCommand(DeleteCommand, CanDeleteCommand);
+            DeleteProductCommand = new AsyncRelayCommand(DeleteCommand, CanDeleteCommand);
             _deleteCommand = deleteCommand;
             ExportInventoryCommand = new AsyncRelayCommand(ExportCommand);
 
@@ -241,9 +243,9 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             _searchTimer.Stop();
 
-            var filter = _inventoryDataGridVm.InventoryView.Filter;
+            var filter = InventoryDataGrid.InventoryView.Filter;
 
-            _inventoryDataGridVm.InventoryView.AttachFilter(
+            InventoryDataGrid.InventoryView.AttachFilter(
                 p => (string.IsNullOrWhiteSpace(_searchBar) ||
                      p.Name.IndexOf(_searchBar, StringComparison.OrdinalIgnoreCase) >= 0)
                      && filter.IsMatch(p, p)
@@ -252,7 +254,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private bool CanDeleteCommand(object obj)
         {
-            return _inventoryDataGridVm.SelectedItems?.Any() ?? false;
+            return InventoryDataGrid.SelectedItems?.All(p => !ProductsInTransactions.Contains(p.Item.Id)) ?? false;
         }
 
 
@@ -263,12 +265,17 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             List<InventoryTabItem> tabs = new List<InventoryTabItem>();
 
             token.ThrowIfCancellationRequested();
-            ProductsInCheckout = (await _checkoutService.GetActiveSales()).SelectMany(s => s.Transactions).Select(t => t.ProductId).ToHashSet();
+            foreach (var transactions in _transactionStore.Store)
+            {
+                token.ThrowIfCancellationRequested();
+                if (transactions.IsActive)
+                    ProductsInActiveSales.Add(transactions.Transaction.ProductId);
+                ProductsInTransactions.Add(transactions.Transaction.ProductId);
+            }
 
             token.ThrowIfCancellationRequested();
-            _inventoryDataGridVm = _inventoryDataGridViewModelFactory(this);
-            _inventoryDataGridVm.Load();
-            _inventoryDataGridVm.SelectedItemsChanged += Vm_SelectedItemsChanged;
+            InventoryDataGrid = _inventoryDataGridViewModelFactory(this);
+            InventoryDataGrid.SelectedItemsChanged += Vm_SelectedItemsChanged;
             token.ThrowIfCancellationRequested();
 
             await UiTimeSlicer.RunAsync(
@@ -278,7 +285,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     token.ThrowIfCancellationRequested();
 
                     var item = _inventoryTabItemFactory(x.Key, x.Value);
-                    item.ContentViewModel = _inventoryDataGridVm;
+                    item.ContentViewModel = InventoryDataGrid;
 
                     tabs.Add(item);
                 });
@@ -307,7 +314,7 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                 _selectedItem = null;
             }
 
-            _inventoryDataGridVm.SelectedItemsChanged -= Vm_SelectedItemsChanged;
+            InventoryDataGrid.SelectedItemsChanged -= Vm_SelectedItemsChanged;
 
             foreach (var item in TabItems.ToList())
             {
@@ -329,13 +336,15 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         #region Public Methods
 
-        public void RowIntoView(int category, int[] products)
+        public void RowIntoView(IRowInfo rowInfo)
         {
-            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            App.Current.Dispatcher.Invoke(() =>
             {
+                var info = (ProductVMRowInfo)rowInfo;
+
                 var tabItems = TabItems.ToDictionary(t => t.Id, t => t);
 
-                InventoryTabItem newTab = tabItems[category];
+                InventoryTabItem newTab = tabItems[info.Category];
 
                 var vm = newTab.ContentViewModel;
                 bool canSelectTab = false;
@@ -345,8 +354,8 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
                     canSelectTab = true;
                 }
 
-                vm.SelectItem(canSelectTab, products);
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
+                vm.SelectItem(canSelectTab, info.Products);
+            });
 
         }
 
@@ -354,31 +363,6 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
         {
             var map = TabItems.ToDictionary(t => t.Id, t => t);
             SelectedItem = map[categoryId];
-        }
-
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// for each category, create a tab item with a datagrid and filter for the category
-        /// </summary>
-        private void AddTabItem(Category category, Predicate<ProductDataViewModel> filter)
-        {
-            //var vm = _inventoryDataGridViewModelFactory(this, InventoryDataGridLayout.Detailed);
-            //vm.SelectedItemsChanged += Vm_SelectedItemsChanged;
-
-            bool searchFilter(ProductDataViewModel vm)
-            {
-                if (string.IsNullOrWhiteSpace(SearchBar))
-                    return true;
-
-                return vm.Name.IndexOf(SearchBar, StringComparison.InvariantCultureIgnoreCase) >= 0;
-            }
-
-            var tab = _inventoryTabItemFactory(category, filter);
-
-            TabItems.Add(tab);
         }
 
         #endregion
@@ -400,7 +384,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
             IsSwitchReady = false;
 
-            RowIntoView(AddedProduct.Item.CategoryId, new[] { AddedProduct.Item.Id });
+            //RowIntoView(new ProductVMRowInfo
+            //{
+            //    Category = AddedProduct.Item.CategoryId,
+            //    Products = new[] { AddedProduct.Item.Id }
+            //});
 
             AddProductViewModel.Dispose();
             AddProductViewModel = null;
@@ -413,7 +401,11 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
 
         private void Vm_RowIntoView(ProductDataViewModel item)
         {
-            RowIntoView(AddedProduct.Item.CategoryId, new[] { item.Item.Id });
+            //RowIntoView(new ProductVMRowInfo
+            //{
+            //    Category = AddedProduct.Item.CategoryId,
+            //    Products = new[] { item.Item.Id }
+            //});
         }
 
         private void Vm_SubmitSuccess(object sender, ProductDataViewModel vm)
@@ -441,14 +433,13 @@ namespace Mhyrenz_Interface.Features.Inventory.ViewModels
             });
         }
 
-        private void DeleteCommand(object parameter)
+        private async Task DeleteCommand(object parameter)
         {
-            var tab = (InventoryTabItem)SelectedItem;
-            var vm = tab.ContentViewModel;
+            var vm = SelectedItem.ContentViewModel;
 
-            _undoRedoManager.Execute(_deleteCommand(
-                tab.Id,
-                vm.SelectedItems.Select(t => t.Item.Id)));
+            await App.UndoRedoManager.Execute(_deleteCommand(
+                SelectedItem.Id,
+                vm.SelectedItems.Select(t => t.Item.Id).ToList()));
         }
 
         private void ShowProductAdd(object parameter)

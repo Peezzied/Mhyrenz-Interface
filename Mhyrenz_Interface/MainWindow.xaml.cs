@@ -23,7 +23,7 @@ namespace Mhyrenz_Interface
             DataContext = shellVIewModel;
             _undoRedoManager = undoRedoManager;
 
-            Closing += MainWindow_Closing;  
+            Closing += MainWindow_Closing;
 
             var menu = shellVIewModel.Menu;
 
@@ -57,7 +57,7 @@ namespace Mhyrenz_Interface
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_undoRedoManager.CanUndo)
+            if (_undoRedoManager.CanUndo || _undoRedoManager.CanRedo)
             {
                 var prompt = MessageBox.Show("Are you sure you want to exit after the changes you've made?",
                     "Inventory Changes",

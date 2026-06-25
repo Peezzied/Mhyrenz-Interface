@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using HandyControl.Controls;
 using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Inventory.Views;
 using MessageBox = HandyControl.Controls.MessageBox;
@@ -32,7 +30,7 @@ namespace Mhyrenz_Interface.Shared.Columns
 
             var inventoryView = TreeHelper.TryFindParent<InventoryView>(cell);
 
-            if (inventoryView.DataContext is InventoryViewModel vm && vm.ProductsInCheckout.Contains(((ProductDataViewModel)dataItem).Item.Id))
+            if (inventoryView.DataContext is InventoryViewModel vm && vm.ProductsInActiveSales.Contains(((ProductDataViewModel)dataItem).Item.Id))
             {
                 MessageBox.Show(
                     "This product cannot be modified or deleted because it is currently part of an active sale.\n\n" +

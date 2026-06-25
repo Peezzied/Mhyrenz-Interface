@@ -45,10 +45,19 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                     .Include(p => p.PharmaDetails)
                     .FirstOrDefaultAsync(p => p.Id == id) ?? throw new KeyNotFoundException($"Product with id {id} not found.");
 
-                var purchase = await context.Transactions
+                var totals = await context.Transactions
+                    .AsNoTracking()
                     .Where(t => t.ProductId == id)
-                    .SumAsync(t => t.Amount);
-                product.Purchase = purchase;
+                    .GroupBy(t => 1)
+                    .Select(g => new
+                    {
+                        Purchase = g.Sum(t => t.Amount),
+                        Sales = g.Sum(t => t.LineTotal)
+                    })
+                    .FirstOrDefaultAsync();
+
+                product.Purchase = totals?.Purchase ?? 0;
+                product.Sales = totals?.Sales ?? 0m;
 
                 return product;
             }
@@ -64,13 +73,20 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                     .Include(p => p.PharmaDetails)
                     .ToListAsync();
 
-                var purchases = await GetTransactions(context);
+                var productTotals = await GetProductTotals(context);
 
-                foreach (var product in products)
+                foreach (var p in products)
                 {
-                    product.Purchase = purchases.TryGetValue(product.Id, out var purchase)
-                        ? purchase
-                        : 0;
+                    if (productTotals.TryGetValue(p.Id, out var totals))
+                    {
+                        p.Purchase = totals.Purchase;
+                        p.Sales = totals.Sales;
+                    }
+                    else
+                    {
+                        p.Purchase = 0;
+                        p.Sales = 0;
+                    }
                 }
 
                 return products;
@@ -85,13 +101,13 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
                    .AsNoTracking()
                    .ToListAsync();
 
-                var purchases = await GetTransactions(context);
+                var productTotals = await GetProductTotals(context);
 
                 foreach (var product in products)
                 {
-                    if (purchases.TryGetValue(product.Id, out var purchase))
+                    if (productTotals.TryGetValue(product.Id, out var totals))
                     {
-                        product.ApplyPurchase(purchase);
+                        product.ApplyPurchase(totals.Purchase);
                     }
                 }
 
@@ -116,18 +132,27 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
-        private static async Task<Dictionary<int, int>> GetTransactions(InventoryDbContext context)
+        private static async Task<Dictionary<int, (int Purchase, decimal Sales)>> GetProductTotals(InventoryDbContext context)
         {
-            return await context.Transactions
+            var raw = await context.Transactions
                 .IgnoreQueryFilters()
                 .AsNoTracking()
-                .GroupBy(t => t.ProductId)
-                .Select(g => new
+                .Select(t => new
                 {
-                    ProductId = g.Key,
-                    Purchase = g.Sum(t => t.Amount)
+                    t.ProductId,
+                    t.Amount,
+                    t.RetailPrice
                 })
-                .ToDictionaryAsync(x => x.ProductId, x => x.Purchase);
+                .ToListAsync();
+
+            return raw
+                .GroupBy(t => t.ProductId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => (
+                        Purchase: g.Sum(t => t.Amount),
+                        Sales: g.Sum(t => t.RetailPrice * t.Amount) // LineTotal formula
+                    ));
         }
 
         public async Task<IReadOnlyList<Product>> RemoveMany(IEnumerable<int> productIds)
@@ -139,13 +164,20 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                var purchases = await GetTransactions(context);
+                var productTotals = await GetProductTotals(context);
                 return await SoftRemove(productIds, p =>
                 {
                     p.DeleteBack();
-                    p.Purchase = purchases.TryGetValue(p.Id, out var purchase)
-                        ? purchase
-                        : 0;
+                    if (productTotals.TryGetValue(p.Id, out var totals))
+                    {
+                        p.Purchase = totals.Purchase;
+                        p.Sales = totals.Sales;
+                    }
+                    else
+                    {
+                        p.Purchase = 0;
+                        p.Sales = 0;
+                    }
                 });
             }
         }
@@ -173,17 +205,27 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
-        public async Task<Product> Update(int id, Product product)
+        public async Task Update(int id, Action<Product> updater)
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())
             {
-                product.Id = id;
+                var product = await context.Products.FindAsync(id);
 
-                context.Products.Update(product);
+                if (product == null)
+                    return;
+
+                updater(product);
 
                 await context.SaveChangesAsync();
+            }
+        }
 
-                return product;
+        public async Task<bool> IsBarcodeUnique(string barcode)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return !(await context.Products
+                    .AnyAsync(p => p.Barcode == barcode));
             }
         }
 

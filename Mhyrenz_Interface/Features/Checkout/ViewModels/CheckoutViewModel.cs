@@ -13,7 +13,6 @@ using GongSolutions.Wpf.DragDrop;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
@@ -24,17 +23,17 @@ using MessageBox = HandyControl.Controls.MessageBox;
 
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
-    public class CheckoutViewModel : NavigationViewModel, IAsyncInitializable, IDataGridTabHost
+    public class CheckoutViewModel : BaseViewModel, IAsyncInitializable, IDataGridTabHost
     {
 
-        public CheckoutViewModel(INavigationServiceEx navigationServiceEx, ICheckoutService checkoutService,
+        public CheckoutViewModel(ICheckoutService checkoutService,
             ISessionStore sessionStore,
             IInventoryStore inventoryStore,
             ITransactionStore transactionStore,
             ShellViewModel shellViewModel,
             CreateViewModel<CompletedSaleViewModel> completedSaleViewModel,
             CreateViewModel<SaleTabItem> saleTabItemFactory,
-            CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory) : base(navigationServiceEx)
+            CreateViewModel<InventoryDataGridViewModel> inventoryDataGridFactory)
         {
             _shellViewModel = shellViewModel;
             shellViewModel.RibbonBarViewModel = this;
@@ -49,7 +48,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _completedSaleViewModel = completedSaleViewModel;
 
             AddSaleCommand = new AsyncRelayCommand(CreateSale);
-  
+
             InventoryDragHandler = new InventoryDragSource(this);
 
             _transactionView = _transactionStore.Store.Source.CreateView(v => v);
@@ -340,12 +339,14 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         public event Action<TransactionVMRowInfo> RowIntoViewRequested;
 
-        public void RowIntoView(int tab, int[] items)
+        public void RowIntoView(IRowInfo rowInfo)
         {
+            var info = (TransactionVMRowInfo)rowInfo;
+
             RowIntoViewRequested?.Invoke(new TransactionVMRowInfo
             {
-                Sale = tab,
-                Transactions = items
+                Sale = info.Sale,
+                Transactions = info.Transactions
             });
         }
 

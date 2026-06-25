@@ -1,11 +1,8 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using HandyControl.Tools.Extension;
-using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
-using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Features.Checkout.Behaviors

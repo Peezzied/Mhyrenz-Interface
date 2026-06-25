@@ -13,6 +13,7 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
         private readonly int _saleId;
         private readonly decimal _received;
         private readonly ISessionStore _sessionStore;
+        private readonly IInventoryStore _inventoryStore;
         private readonly ICheckoutService _checkoutService;
         private readonly ITransactionStore _transactionStore;
 
@@ -22,12 +23,14 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             int saleId,
             decimal received,
             ISessionStore sessionStore,
+            IInventoryStore inventoryStore,
             ICheckoutService checkoutService,
             ITransactionStore transactionStore) : base(typeof(CheckoutView))
         {
             _saleId = saleId;
             _received = received;
             _sessionStore = sessionStore;
+            _inventoryStore = inventoryStore;
             _checkoutService = checkoutService;
             _transactionStore = transactionStore;
         }
@@ -49,8 +52,21 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
 
             _transactionStore.OnSaleChange(sale);
 
-            App.UndoRedoManager.RemoveAll(c => 
-                c is ISaleBoundCommand saleCommand && 
+            foreach (var item in sale.Transactions)
+            {
+                if (_transactionStore.Store.TryGetValue(item.Id, out var transaction))
+                {
+                    transaction.IsActive = false;
+                }
+
+                if (_inventoryStore.Store.TryGetValue(item.ProductId, out var product))
+                {
+                    product.Sales += item.LineTotal;
+                }
+            }
+
+            App.UndoRedoManager.RemoveAll(c =>
+                c is ISaleBoundCommand saleCommand &&
                 saleCommand.SaleId == _saleId);
         }
     }

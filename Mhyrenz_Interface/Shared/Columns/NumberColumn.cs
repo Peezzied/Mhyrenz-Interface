@@ -1,11 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using HandyControl.Controls;
 using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Shared.Adorners;
-using MessageBox = HandyControl.Controls.MessageBox;
 using NumericUpDown = MahApps.Metro.Controls.NumericUpDown;
 using Style = System.Windows.Style;
 

@@ -2,10 +2,8 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
-using Mhyrenz_Interface.Features.Inventory.Controls;
 using Microsoft.Xaml.Behaviors;
 
 namespace Mhyrenz_Interface.Shared.Behaviors

@@ -74,9 +74,9 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
         {
             ChangeTab(TabOwner, null);
 
-            App.Current.Dispatcher.BeginInvoke(
-                new Action(() => SelectRow()),
-                DispatcherPriority.Background);
+            //App.Current.Dispatcher.BeginInvoke(
+            //    new Action(() => SelectRow()),
+            //    DispatcherPriority.Background);
         }
 
         private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
@@ -267,7 +267,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
 
         private async void SelectRow(bool isFromSwitch = false)
         {
-            await App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            await App.Current.Dispatcher.Invoke(async () =>
             {
                 var vm =
                     AssociatedObject.DataContext
@@ -291,7 +291,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
                         AssociatedObject.SelectedItems.Add(item);
                 }
 
-                App.Current.Dispatcher.BeginInvoke(new Action(() =>
+                _ = App.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (AssociatedObject.SelectedItem != null)
                         AssociatedObject.ScrollIntoView(
@@ -300,7 +300,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Behaviors
 
                 vm.SelectionInfo.CanSelect = false;
 
-            }), DispatcherPriority.ContextIdle);
+            });
         }
     }
 

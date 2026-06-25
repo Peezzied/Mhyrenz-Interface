@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using HandyControl.Controls;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Navigation;
 using MessageBox = HandyControl.Controls.MessageBox;
@@ -10,7 +12,7 @@ namespace Mhyrenz_Interface.Store
 {
     public class UndoRedoEventArgs
     {
-        public NavigationViewModel CurrentView { get; internal set; }
+        public BaseViewModel CurrentView { get; internal set; }
         public IUndoableCommand Command { get; internal set; }
     }
 
@@ -33,7 +35,7 @@ namespace Mhyrenz_Interface.Store
 
         public async Task Execute(IUndoableCommand command)
         {
-            if (CanRedo && CanUndo)
+            if (CanRedo)
             {
                 if (!ShowWarning())
                     return;
@@ -41,7 +43,12 @@ namespace Mhyrenz_Interface.Store
 
             await command.Execute();
 
-            if (command.Cancel)
+            if (HandleCancelled(command))
+                return;
+
+            await Completer(command);
+
+            if (HandleCancelled(command))
                 return;
 
             _undoList.Add(command);
@@ -60,13 +67,20 @@ namespace Mhyrenz_Interface.Store
 
             await command.Undo();
 
-            if (command.Cancel)
+            if (HandleCancelled(command))
                 return;
+
+            var currentView = App.ShellViewModel.SelectedMenuItem.ViewType;
+            await RaiseUndoRedoEvent(ActionType.Undo, command);
+
+            if (HandleCancelled(command))
+            {
+                await _navigationService.NavigateAsync(currentView);
+                return;
+            }
 
             _undoList.RemoveAt(index);
             _redoList.Add(command);
-
-            await RaiseUndoRedoEvent(ActionType.Undo, command);
 
             UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -81,28 +95,29 @@ namespace Mhyrenz_Interface.Store
 
             await command.Redo();
 
-            if (command.Cancel)
+            if (HandleCancelled(command))
                 return;
+
+            var currentView = App.ShellViewModel.SelectedMenuItem.ViewType;
+            await RaiseUndoRedoEvent(ActionType.Redo, command);
+
+            if (HandleCancelled(command))
+            {
+                await _navigationService.NavigateAsync(currentView);
+                return;
+            }
 
             _redoList.RemoveAt(index);
             _undoList.Add(command);
 
-            await RaiseUndoRedoEvent(ActionType.Redo, command);
-
             UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
+
 
         private async Task RaiseUndoRedoEvent(ActionType intent, IUndoableCommand command)
         {
             await _navigationService.NavigateAsync(command.Context);
-
-            if (command.Completer != null)
-            {
-                await App.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    await command.Completer(_navigationService.CurrentViewModel);
-                }, System.Windows.Threading.DispatcherPriority.Loaded);
-            }
+            await Completer(command);
 
             UndoRedoEvent?.Invoke(
                 intent,
@@ -111,6 +126,17 @@ namespace Mhyrenz_Interface.Store
                     CurrentView = _navigationService.CurrentViewModel,
                     Command = command
                 });
+        }
+
+        private async Task Completer(IUndoableCommand command)
+        {
+            if (command.Completer != null)
+            {
+                await App.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await command.Completer(_navigationService.CurrentViewModel);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         public void Clear()
@@ -127,11 +153,20 @@ namespace Mhyrenz_Interface.Store
             UndoRedoChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        private static bool HandleCancelled(IUndoableCommand command)
+        {
+            if (!command.Cancel)
+                return false;
+
+            Growl.Warning("The operation could not be completed and has been cancelled.");
+
+            return true;
+        }
 
         public static bool ShowWarning(Action rejectEffect = null)
         {
             MessageBoxResult prompt = MessageBox.Show("Are you sure you want to proceed with the action after the changes you've made?",
-                        "Action warning",
+                        "Action override warning",
                         MessageBoxButton.YesNoCancel,
                         MessageBoxImage.Warning);
 

@@ -474,6 +474,7 @@
     </ApplicationDefinition>
     <Compile Include="Bootstrap\AppPresenter.cs" />
     <Compile Include="Core\MVVM\BaseCommand.cs" />
+    <Compile Include="Core\MVVM\DataGridHostViewModel.cs" />
     <Compile Include="Core\MVVM\FlyoutViewModel.cs" />
     <Compile Include="Core\MVVM\ICommandAsync.cs" />
     <Compile Include="Core\MVVM\IFlyoutViewModel.cs" />
@@ -493,6 +494,7 @@
     <Compile Include="Features\Home\ViewModels\ActionViewModel.cs" />
     <Compile Include="Features\Home\ViewModels\SessionBoxContext.cs" />
     <Compile Include="Features\Inventory\Commands\ProductVMCommandMarkupRate.cs" />
+    <Compile Include="Features\Inventory\Controls\TrackedPopup.cs" />
     <Compile Include="Shared\Columns\ColumnHelper.cs" />
     <Compile Include="Shared\Columns\TemplateColumn.cs" />
     <Compile Include="Shared\Converters\IntegerGreaterThanZero.cs" />
@@ -736,10 +738,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Features\Inventory\Templates\BarcodeColumn.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Shared\Templates\DragablzMahApps.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -855,7 +853,9 @@
   <ItemGroup>
     <Content Include="Resources\Images\Bg_Pattern.svg" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Features\Inventory\Templates\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets" Condition="Exists('..\packages\HarfBuzzSharp.NativeAssets.macOS.7.3.0.3\build\net462\HarfBuzzSharp.NativeAssets.macOS.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

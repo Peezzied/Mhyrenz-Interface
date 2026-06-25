@@ -1,14 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core.Collection;
 using Mhyrenz_Interface.Core.MVVM;
-using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
-using Mhyrenz_Interface.Shared.Behaviors;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Store
@@ -32,82 +30,20 @@ namespace Mhyrenz_Interface.Store
 
         public event EventHandler<Sale> SaleChange;
 
-        public async void AddToSale(CheckoutResult result, int amount)
+        public TransactionDataViewModel AddTransaction(Transaction transaction)
         {
-            var transaction = result.Transaction ??
-                throw new ArgumentNullException(nameof(result.Transaction), "Transaction cannot be null in CheckoutResult.");
+            var vm = _transactionDataViewModel(transaction);
+            Store.Add(vm);
 
-            _inventoryStore.PurchaseProduct(transaction.ProductId, transaction.IsDeleted ? -amount : amount);
-
-            if (result.Sale != null)
-                OnSaleChange(result.Sale);
-
-            if (transaction.IsDeleted)
-            {
-                if (Store.TryGetValue(transaction.TransactionKey, out var vm))
-                {
-                    await vm.RequestFlash(DataGridFlashBehavior.OperationType.Remove);
-                    Store.Remove(transaction.TransactionKey);
-                }
-                return;
-            }
-
-            if (!(await UpdateTransaction(transaction)))
-            {
-                var vm = _transactionDataViewModel(transaction);
-                Store.Add(vm);
-
-                App.Current.BeginInvoke(new Action(() => vm.RequestFlash(DataGridFlashBehavior.OperationType.New)));
-            }
+            return vm;
         }
 
-        public async Task RemoveFromSale(CheckoutResult result)
+        public IEnumerable<TransactionDataViewModel> AddManyTransactions(IEnumerable<Transaction> transactions)
         {
-            var isDeleted = false;
-
-            OnSaleChange(result.Sale);
-
-            async Task apply(Transaction transaction)
-            {
-                _inventoryStore.Store.TryGetValue(transaction.ProductId, out var productVm);
-                Store.TryGetValue(transaction.TransactionKey, out var transactionVm);
-
-
-                if (transaction.IsDeleted)
-                {
-                    //await transactionVm.RequestFlash(DataGridFlashBehavior.OperationType.Remove);
-                    productVm.Purchase -= transaction.Amount;
-                }   
-                else
-                    productVm.Purchase += transaction.Amount;
-                isDeleted = transaction.IsDeleted;
-            }
-
-            await Task.WhenAll(result.Transactions.Select(t => apply(t)));
-
-
-            if (isDeleted)
-            {
-                Store.RemoveMany(result.Transactions.Select(t => t.TransactionKey));
-                return;
-            }
-
-            var vms = result.Transactions.Select(t => _transactionDataViewModel(t));
+            var vms = transactions.Select(t => _transactionDataViewModel(t));
             Store.AddRange(vms);
 
-            //_ = App.Current.Dispatcher.BeginInvoke(new Action(async () => await Task.WhenAll(vms.Select(t => t.RequestFlash(DataGridFlashBehavior.OperationType.New)))));
-        }
-
-        public async Task<bool> UpdateTransaction(Transaction transaction)
-        {
-            if (Store.TryGetValue(transaction.TransactionKey, out var existingVm))
-            {
-                existingVm.Transaction = transaction;
-                await existingVm.RequestFlash(DataGridFlashBehavior.OperationType.Update);
-
-                return true;
-            }
-            return false;
+            return vms;
         }
 
         public void OnSaleChange(Sale sale)

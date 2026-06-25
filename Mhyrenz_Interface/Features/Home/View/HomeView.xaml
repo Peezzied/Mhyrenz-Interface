@@ -72,7 +72,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <hc:FlexPanel Margin="14 0" MaxWidth="800" JustifyContent="SpaceBetween" Grid.Row="0" VerticalAlignment="Center">
+                        <hc:FlexPanel Margin="14 0" MaxWidth="600" JustifyContent="SpaceBetween" Grid.Row="0" VerticalAlignment="Center">
                             <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
                                 <iconPacks:PackIconMaterial Kind="CashMultiple"
                                     Width="36"
@@ -88,7 +88,7 @@
                                                FontSize="24"/>
                                 </hc:UniformSpacingPanel>
                             </hc:UniformSpacingPanel>
-                            <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
+                            <!--<hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
                                 <iconPacks:PackIconMaterial Kind="DotsHorizontalCircle"
                                     Width="36"
                                     Height="36"
@@ -102,7 +102,7 @@
                                                Text="{Binding Profit, StringFormat=C}"
                                                FontSize="24"/>
                                 </hc:UniformSpacingPanel>
-                            </hc:UniformSpacingPanel>
+                            </hc:UniformSpacingPanel>-->
                             <hc:UniformSpacingPanel Orientation="Horizontal" Spacing="12">
                                 <iconPacks:PackIconMaterial Kind="AccountGroup"
                                                             Width="36"
@@ -236,6 +236,7 @@
                         hc:BackgroundSwitchElement.MouseHoverBackground="#43A047"
                         hc:BackgroundSwitchElement.MouseDownBackground="#388E3C"/>
                     <controls:ActionButton
+                        Visibility="Collapsed"
                         Command="{Binding SundryCommand}"
                         Text="Sundry Options"
                         IconKind="FormatListBulleted"

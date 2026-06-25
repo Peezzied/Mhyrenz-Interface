@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Mhyrenz_Interface.Core.MVVM;
+﻿using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Shared.Behaviors;
@@ -9,13 +7,15 @@ using Mhyrenz_Interface.Store;
 namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 {
 
-    public class TransactionDataViewModel : TrackedViewModel, IFlashRequestable
+    public class TransactionDataViewModel : TrackedViewModel, IFlashReceiver
     {
         public TransactionDataViewModel(Transaction transaction, IInventoryStore inventoryStore)
         {
             Transaction = transaction;
             _inventoryStore = inventoryStore;
         }
+
+        public bool IsActive { get; set; } = true;
 
         private Transaction _transaction;
         public Transaction Transaction
@@ -31,16 +31,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         }
 
         public RelayCommand DiscountCommand { get; }
-
-        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
-
-        public Task RequestFlash(DataGridFlashBehavior.OperationType type)
-        {
-            var args = new RowFlashRequestedEventArgs(type);
-            FlashRequested?.Invoke(this, args);
-
-            return args.Completion.Task;
-        }
 
         private int _qty;
 

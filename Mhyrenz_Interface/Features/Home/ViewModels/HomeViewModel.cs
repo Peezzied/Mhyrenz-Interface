@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
@@ -13,7 +14,7 @@ using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Home.ViewModels
 {
-    public class HomeViewModel : NavigationViewModel, IAsyncInitializable
+    public class HomeViewModel : BaseViewModel, IAsyncInitializable
     {
         private readonly ICheckoutService _checkoutService;
         private readonly ISessionStore _sessionStore;
@@ -76,10 +77,9 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             ITransactionStore transactionStore,
             IInventoryStore inventroyStore,
             ICategoryStore categoryStore,
-            INavigationServiceEx navigationServiceEx,
             OverviewChartViewModel overviewChartViewModel,
             ActionViewModel actionViewModel,
-            CompletedSaleViewModel completedSaleViewModel) : base(navigationServiceEx)
+            CompletedSaleViewModel completedSaleViewModel)
         {
             _checkoutService = checkoutService;
             _sessionStore = sessionStore;
@@ -120,7 +120,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
             // TODO account the sundry once it's available
             Profit = sales
                 .SelectMany(s => s.Transactions)
-                .Sum(t => Transaction.CalculateProfit(t.RetailPrice, t.CostPrice, t.Amount)) 
+                .Sum(t => Transaction.CalculateProfit(t.RetailPrice, t.CostPrice, t.Amount))
                 + _transactionStore.Store
                     .Where(t => t.Transaction.SaleId == null)
                     .Sum(t => Transaction.CalculateProfit(

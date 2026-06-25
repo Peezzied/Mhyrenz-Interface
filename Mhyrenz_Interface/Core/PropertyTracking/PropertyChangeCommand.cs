@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.UndoRedo;
-using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Core.PropertyTracking
 {
@@ -13,7 +12,7 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
 
         public ChangedArgs PropertyChangedArgs { get; set; }
 
-        public PropertyChangeCommand(DTO dto, Type context): base(context)
+        public PropertyChangeCommand(DTO dto, Type context) : base(context)
         {
             PropertyChangedArgs = dto.ChangedArgs;
             _setter = dto.Setter;
@@ -25,10 +24,10 @@ namespace Mhyrenz_Interface.Core.PropertyTracking
             switch (Intent)
             {
                 case ActionType.Undo:
-                    _setter(PropertyChangedArgs.NewValue, PropertyChangeOrigin.UndoRedo);
+                    _setter(PropertyChangedArgs.OldValue, PropertyChangeOrigin.UndoRedo);
                     break;
                 case ActionType.Redo:
-                    _setter(PropertyChangedArgs.OldValue, PropertyChangeOrigin.UndoRedo);
+                    _setter(PropertyChangedArgs.NewValue, PropertyChangeOrigin.UndoRedo);
                     break;
             }
             _propertyChangeHandler?.Invoke();

@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MahApps.Metro.Controls;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
-using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
-using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Inventory.Commands
 {
+    [Obsolete]
     public class ProductVMCommandMarkupRate : ProductVMPropertyChangeCommand
     {
         private readonly DTO _dto;
@@ -25,7 +21,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             _inventoryStore = inventoryStore;
         }
 
-        protected override async Task CompleterHandler(NavigationViewModel vm)
+        protected override async Task CompleterHandler(BaseViewModel vm)
         {
             await base.CompleterHandler(vm);
             await Complete();
@@ -39,7 +35,6 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             if (_inventoryStore.Store.TryGetValue(_dto.ProductId, out var vm))
             {
                 vm.Item = product;
-                await vm.RequestFlash(Shared.Behaviors.DataGridFlashBehavior.OperationType.Update);
             }
         }
 
@@ -53,7 +48,7 @@ namespace Mhyrenz_Interface.Features.Inventory.Commands
             }
         }
 
-        public new class DTO: ProductVMPropertyChangeCommand.DTO
+        public new class DTO : ProductVMPropertyChangeCommand.DTO
         {
             public int ProductId { get; set; }
         }

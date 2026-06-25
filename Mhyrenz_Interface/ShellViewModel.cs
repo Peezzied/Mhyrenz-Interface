@@ -16,7 +16,6 @@ using Mhyrenz_Interface.Features.Home.Views;
 using Mhyrenz_Interface.Navigation;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
-using Microsoft.ApplicationInsights.DataContracts;
 using MenuItem = Mhyrenz_Interface.Shared.Controls.MenuItem;
 
 namespace Mhyrenz_Interface
@@ -58,8 +57,8 @@ namespace Mhyrenz_Interface
             _navigationService.Navigated += OnCurrentViewModelChanged;
             _undoRedoManger = undoRedoManager;
 
-            UndoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo);
-            RedoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo);
+            UndoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanUndo && !RedoCommand.IsExecuting);
+            RedoCommand = new AsyncRelayCommand(UndoRedoActionCommand, (parameter) => _undoRedoManger.CanRedo && !UndoCommand.IsExecuting);
 
             _dialogCoordinator = dialogCoordinator;
 
@@ -109,8 +108,8 @@ namespace Mhyrenz_Interface
         public bool CanMainBarcodeReceive { get; private set; } = true;
 
 
-        private NavigationViewModel _currentViewModel;
-        public NavigationViewModel CurrentViewModel
+        private BaseViewModel _currentViewModel;
+        public BaseViewModel CurrentViewModel
         {
             get => _currentViewModel;
             set => SetProperty(ref _currentViewModel, value);
@@ -215,11 +214,11 @@ namespace Mhyrenz_Interface
             }
         }
 
-        private void OnCurrentViewModelChanged(NavigationViewModel vm, Type viewType)
+        private void OnCurrentViewModelChanged(BaseViewModel vm, Type viewType)
         {
             CurrentViewModel = vm;
 
-            if (CurrentViewModel != null) 
+            if (CurrentViewModel != null)
                 SelectedMenuItem = Menu.FirstOrDefault(x => x.ViewType == viewType);
         }
 

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using MahApps.Metro.Controls;
 using Mhyrenz_Interface.Core.Collection;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
-using Mhyrenz_Interface.Shared.Behaviors;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mhyrenz_Interface.Store
@@ -28,30 +26,12 @@ namespace Mhyrenz_Interface.Store
             _categoryStore = categoryStore;
         }
 
-        public async void AddItem(Order order, int productId)
+        public OrderDataViewModel AddItem(Order order)
         {
-            if (order == null)
-            {
-                if (!Store.TryGetValue(productId, out var item))
-                    return;
-
-                await item.RequestFlash(DataGridFlashBehavior.OperationType.Remove);
-                Store.Remove(productId);
-                return;
-            }
-
-            if (Store.TryGetValue(productId, out var existing))
-            {
-                existing.Order = order;
-                await existing.RequestFlash(DataGridFlashBehavior.OperationType.Update);
-                return;
-            }
-
             var vm = _createViewModel(order);
-
             Store.Add(vm);
 
-            App.Current.BeginInvoke(new Action(() => vm.RequestFlash(DataGridFlashBehavior.OperationType.New)));
+            return vm;
         }
 
         public async Task InitializeAsync()

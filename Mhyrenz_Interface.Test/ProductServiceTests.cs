@@ -24,6 +24,16 @@ namespace Mhyrenz_Interface.Test
         }
 
         [Test]
+        public async Task Should_IsBarcodeUnique()
+        {
+            var product = await _service.Create(NewProduct("Barcode"));
+
+            var eval = await _service.IsBarcodeUnique(product.Barcode);
+
+            Assert.That(eval, Is.False);
+        }
+
+        [Test]
         public async Task Create_Should_Add_Product()
         {
             // Arrange
@@ -91,7 +101,7 @@ namespace Mhyrenz_Interface.Test
             }
 
             // Act
-            var deletedCount = await _service.RemovePhysically();
+            var deletedCount = _service.RemovePhysically();
 
             // Assert
             using (var context = Factory.CreateDbContext())
@@ -126,7 +136,7 @@ namespace Mhyrenz_Interface.Test
                 Name = name,
                 Qty = 10,
                 CategoryId = 1,
-                SupplierId = 1,
+                MarkupRate = 1,
                 RetailPrice = 50m,
                 CostPrice = 45m,
                 Barcode = Guid.NewGuid().ToString("N")

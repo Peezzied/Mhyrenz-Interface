@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Mhyrenz_Interface.Core.PropertyTracking;
-using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Orders.Commands
@@ -18,6 +18,7 @@ namespace Mhyrenz_Interface.Features.Orders.Commands
         private readonly DTO _dto;
         private readonly IOrderService _orderService;
         private readonly IOrderStore _orderStore;
+        private Order _result;
 
         public PlaceOrderVMCommandQty(DTO dto, IOrderService orderService, IOrderStore orderStore) : base(dto, null)
         {
@@ -40,21 +41,46 @@ namespace Mhyrenz_Interface.Features.Orders.Commands
 
             var isIncrease = newValue > oldValue;
 
-            Order result;
             if (isIncrease)
             {
-                result = await _orderService.AddItem(_dto.ProductId, amount);
+                _result = await _orderService.AddItem(_dto.ProductId, amount);
             }
             else
             {
-                result = await _orderService.SubtractItem(_dto.ProductId, amount);
+                _result = await _orderService.SubtractItem(_dto.ProductId, amount);
             }
 
-            _orderStore.AddItem(result, _dto.ProductId);
+            if (_dto.Owner is IFlashRequestable flasher)
+            {
+                if (_result == null)
+                {
+                    if (!_orderStore.Store.TryGetValue(_dto.ProductId, out var item))
+                        return;
+
+                    await flasher.RequestFlash(item, DataGridFlashBehavior.OperationType.Remove);
+                    _orderStore.Store.Remove(_dto.ProductId);
+                    return;
+                }
+
+                if (_orderStore.Store.TryGetValue(_dto.ProductId, out var existing))
+                {
+                    existing.Order = _result;
+                    await flasher.RequestFlash(existing, DataGridFlashBehavior.OperationType.Update);
+                    return;
+                }
+
+                var vm = _orderStore.AddItem(_result);
+                _ = App.Current.Dispatcher.BeginInvoke(new Action(() => flasher.RequestFlash(vm, DataGridFlashBehavior.OperationType.New)));
+            }
+            else
+            {
+                Cancel = true;
+            }
         }
 
         public new class DTO : PropertyChangeCommand<PlaceOrderVMRowInfo>.DTO
         {
+            public IFlashRequestable Owner { get; set; } // FIXME Temporary property
             public int ProductId { get; set; }
         }
     }

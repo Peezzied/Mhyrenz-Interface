@@ -23,9 +23,11 @@ namespace Mhyrenz_Interface.Bootstrap
             {
                 EventName = name;
                 // FIXME: this undermines the Task of the action
-                Method = async (p) => { 
-                    await action(p); 
-                    return await Task.FromResult(string.Empty); };
+                Method = async (p) =>
+                {
+                    await action(p);
+                    return await Task.FromResult(string.Empty);
+                };
                 Output = output;
             }
         }

@@ -12,7 +12,6 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Domain.Models;
-using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Store;
 using SkiaSharp;
 
@@ -88,7 +87,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
                 .GroupBy(t => t.Product.CategoryId)
                 .ToDictionary(k => k.Key, v =>
                 {
-                    var transactions = v.Where(t => !t.Transaction.SaleId.HasValue || 
+                    var transactions = v.Where(t => !t.Transaction.SaleId.HasValue ||
                         (t.Transaction.SaleId.HasValue && completedSales.Contains(t.Transaction.SaleId.Value)));
                     return (double)transactions.Sum(t => t.TotalPrice);
                 });

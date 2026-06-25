@@ -99,7 +99,7 @@ namespace Mhyrenz_Interface.Features.Home.ViewModels
 
             var hasAgnosticTransactions = _transactionStore.Store.Where(t => t.Transaction.SaleId == null).Any();
 
-            if (!(await _checkoutService.HasCompletedSales()) && !hasAgnosticTransactions)
+            if (!await _checkoutService.HasCompletedSales() && !hasAgnosticTransactions)
             {
                 MessageBox.Show(
                     "Cannot register the session without any sales or transactions.",

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,12 +24,19 @@ namespace Mhyrenz_Interface.Shared.Behaviors
         public TaskCompletionSource<bool> Completion { get; }
     }
 
+    public static class DataGridFlashHelper
+    {
+        public static Task RequestFlash(this EventHandler<RowFlashRequestedEventArgs> eventHandler, IFlashReceiver item, DataGridFlashBehavior.OperationType type)
+        {
+            var args = new RowFlashRequestedEventArgs(type);
+            eventHandler?.Invoke(item, args);
+
+            return args.Completion.Task;
+        }
+    }
+
     public class DataGridFlashBehavior : Behavior<DataGrid>
     {
-        private NotifyCollectionChangedEventHandler _collectionChangedHandler;
-        private EventHandler<RowFlashRequestedEventArgs> _flashHandler;
-        private PropertyChangedEventHandler _dataContextPropertyChangedHandler;
-
         public static readonly DependencyProperty WatchedItemsSourceProperty =
             DependencyProperty.Register(
                 nameof(WatchedItemsSource),
@@ -48,142 +52,72 @@ namespace Mhyrenz_Interface.Shared.Behaviors
 
         protected override void OnAttached()
         {
-            base.OnAttached();
+            AssociatedObject.Loaded += AssociatedObject_Loaded;
+            AssociatedObject.Unloaded += AssociatedObject_Unloaded;
+            AssociatedObject.DataContextChanged += AssociatedObject_DataContextChanged;
+            HookFlasher(AssociatedObject.DataContext);
+        }
 
-            AssociatedObject.Loaded += Grid_Loaded;
-            AssociatedObject.Unloaded += Grid_Unloaded;
-            AssociatedObject.DataContextChanged += Grid_DataContextChanged;
+        private IFlashRequestable _currentFlasher;
 
-            SubscribeDataContext();
-            SubscribeItems();
+        private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
+        {
+            AssociatedObject.DataContextChanged += AssociatedObject_DataContextChanged;
+
+            HookFlasher(AssociatedObject.DataContext);
+        }
+
+        private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
+        {
+            AssociatedObject.DataContextChanged -= AssociatedObject_DataContextChanged;
+
+            UnhookFlasher();
+        }
+
+        private void AssociatedObject_DataContextChanged(
+            object sender,
+            DependencyPropertyChangedEventArgs e)
+        {
+            UnhookFlasher();
+            HookFlasher(e.NewValue);
+        }
+
+        private void HookFlasher(object dataContext)
+        {
+            _currentFlasher = dataContext as IFlashRequestable;
+
+            if (_currentFlasher != null)
+            {
+                _currentFlasher.FlashRequested += Flasher_FlashRequested;
+            }
+        }
+
+        private void UnhookFlasher()
+        {
+            if (_currentFlasher != null)
+            {
+                _currentFlasher.FlashRequested -= Flasher_FlashRequested;
+                _currentFlasher = null;
+            }
+        }
+
+        private async void Flasher_FlashRequested(object sender, RowFlashRequestedEventArgs e)
+        {
+            if (!(sender is IFlashReceiver receiver))
+            {
+                throw new InvalidOperationException(
+                    $"Objects raising {nameof(IFlashRequestable.FlashRequested)} must implement {nameof(IFlashReceiver)}.");
+            }
+
+            await ScrollAndFlashAsync(AssociatedObject, receiver, e);
         }
 
         protected override void OnDetaching()
         {
-            AssociatedObject.Loaded -= Grid_Loaded;
-            AssociatedObject.Unloaded -= Grid_Unloaded;
-            AssociatedObject.DataContextChanged -= Grid_DataContextChanged;
-
-            UnsubscribeDataContext(AssociatedObject.DataContext);
-            UnsubscribeItems();
-
-            base.OnDetaching();
-        }
-
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
-        {
-            SubscribeDataContext();
-            SubscribeItems();
-        }
-
-        private void Grid_Unloaded(object sender, RoutedEventArgs e)
-        {
-            UnsubscribeDataContext(AssociatedObject.DataContext);
-            UnsubscribeItems();
-        }
-
-        private void Grid_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            UnsubscribeDataContext(e.OldValue);
-            SubscribeDataContext();
-            SubscribeItems();
-        }
-
-        private void SubscribeDataContext()
-        {
-            UnsubscribeDataContext(AssociatedObject.DataContext);
-
-            if (!(AssociatedObject.DataContext is INotifyPropertyChanged notify))
-                return;
-
-            _dataContextPropertyChangedHandler = (sender, e) =>
-            {
-                if (e.PropertyName != WatchedItemsSource)
-                    return;
-
-                AssociatedObject.Dispatcher.BeginInvoke(new Action(SubscribeItems), DispatcherPriority.Loaded);
-            };
-
-            notify.PropertyChanged += _dataContextPropertyChangedHandler;
-        }
-
-        private void UnsubscribeDataContext(object dataContext)
-        {
-            if (_dataContextPropertyChangedHandler != null &&
-                dataContext is INotifyPropertyChanged notify)
-            {
-                notify.PropertyChanged -= _dataContextPropertyChangedHandler;
-            }
-
-            _dataContextPropertyChangedHandler = null;
-        }
-
-        private void SubscribeItems()
-        {
-            UnsubscribeItems();
-
-            if (!(AssociatedObject.ItemsSource is IEnumerable items))
-                return;
-
-            _flashHandler = async (sender, e) =>
-            {
-                if (sender != null)
-                    await ScrollAndFlashAsync(AssociatedObject, sender, e);
-            };
-
-            foreach (var item in items)
-            {
-                if (item is IFlashRequestable vm)
-                    vm.FlashRequested += _flashHandler;
-            }
-
-            if (AssociatedObject.ItemsSource is INotifyCollectionChanged observable)
-            {
-                _collectionChangedHandler = (sender, e) =>
-                {
-                    if (e.OldItems != null)
-                    {
-                        foreach (var item in e.OldItems)
-                        {
-                            if (item is IFlashRequestable vm)
-                                vm.FlashRequested -= _flashHandler;
-                        }
-                    }
-
-                    if (e.NewItems != null)
-                    {
-                        foreach (var item in e.NewItems)
-                        {
-                            if (item is IFlashRequestable vm)
-                                vm.FlashRequested += _flashHandler;
-                        }
-                    }
-                };
-
-                observable.CollectionChanged += _collectionChangedHandler;
-            }
-        }
-
-        private void UnsubscribeItems()
-        {
-            if (_flashHandler != null &&
-                AssociatedObject.ItemsSource is IEnumerable items)
-            {
-                foreach (var item in items)
-                {
-                    if (item is IFlashRequestable vm)
-                        vm.FlashRequested -= _flashHandler;
-                }
-            }
-
-            if (_collectionChangedHandler != null &&
-                AssociatedObject.ItemsSource is INotifyCollectionChanged observable)
-            {
-                observable.CollectionChanged -= _collectionChangedHandler;
-            }
-
-            _flashHandler = null;
-            _collectionChangedHandler = null;
+            AssociatedObject.Loaded -= AssociatedObject_Loaded;
+            AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
+            AssociatedObject.DataContextChanged -= AssociatedObject_DataContextChanged;
+            UnhookFlasher();
         }
 
         private static async Task ScrollAndFlashAsync(DataGrid grid, object item, RowFlashRequestedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,16 +10,15 @@ using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Domain.Services;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
-using NUnit.Framework;
 using ObservableCollections;
-using static Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper;
 using MessageBox = HandyControl.Controls.MessageBox;
 using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Setter;
 
 namespace Mhyrenz_Interface.Features.Orders.ViewModels
 {
-    public class PlaceOrderViewModel : ValidationViewModel, IFlyoutViewModel
+    public class PlaceOrderViewModel : ValidationViewModel, IFlyoutViewModel, IFlashRequestable
     {
         private readonly IOrderStore _orderStore;
         private readonly IUndoRedoManager _undoRedoManager;
@@ -33,7 +33,8 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
             _orderService = orderService;
 
             OrderView = orderStore.Store.Source.CreateView(v => v);
-            Orders = OrderView.ToNotifyCollectionChanged();
+            Orders = OrderView.ToNotifyCollectionChanged(
+                SynchronizationContextCollectionEventDispatcher.Current);
 
             OrderView.ViewChanged += OrderView_ViewChanged;
 
@@ -43,6 +44,9 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         }
 
         private string _supplier;
+
+        public event EventHandler<RowFlashRequestedEventArgs> FlashRequested;
+
         [Required(
             ErrorMessage = "Supplier is required.",
             AllowEmptyStrings = false)]
@@ -129,7 +133,7 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
             var viewModel = sender as OrderDataViewModel;
 
-            TrackQtyProps(args.PropertyName, viewModel.Order.ProductId, args.OldValue);
+            TrackQtyProps(args.PropertyName, viewModel.Order.ProductId, args.OldValue, args.NewValue);
         }
 
         public ISynchronizedView<OrderDataViewModel, OrderDataViewModel> OrderView { get; }
@@ -140,19 +144,20 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
 
         public string FlyoutTitle => "Place Order";
 
-        protected TrackPropertyHelper<int, OrderDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue = null)
+        protected TrackPropertyHelper<int, OrderDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue)
         {
             var tracker = TrackPropertyHelper.Build(_orderStore, productId, propertyName)
                 .Track(nameof(OrderDataViewModel.Qty), method);
 
-            async void method(Setter setter, Getter getter, int key)
+            async void method(Setter setter, int key)
             {
                 await _placeOrderQtyCommand(new PlaceOrderVMCommandQty.DTO
                 {
+                    Owner = this,
                     ProductId = productId,
                     ChangedArgs = new PlaceOrderVMCommandQty.ChangedArgs
                     {
-                        NewValue = newValue ?? getter(),
+                        NewValue = newValue,
                         OldValue = oldValue,
                         RowInfo = null
                     }
@@ -176,6 +181,11 @@ namespace Mhyrenz_Interface.Features.Orders.ViewModels
         protected override IRaiseCanExecuteChanged SubmitActionCommand()
         {
             return PlaceOrderCommand;
+        }
+
+        public async Task RequestFlash(IFlashReceiver item, DataGridFlashBehavior.OperationType type)
+        {
+            await FlashRequested.RequestFlash(item, type);
         }
 
         public class OrderDropTarget : DefaultDropHandler

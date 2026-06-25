@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MahApps.Metro.Controls;
+using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Database.Services;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.ViewModels;
 using Mhyrenz_Interface.Features.Checkout.Views;
-using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Features.Inventory.ViewModels;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
 
 namespace Mhyrenz_Interface.Features.Checkout.Commands
 {
-    public class TransactionVMRowInfo
+    public class TransactionVMRowInfo : IRowInfo
     {
         public int Sale { get; set; }
         public int[] Transactions { get; set; }
@@ -20,16 +23,19 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
     public class TransactionVMCommandPurchase : PropertyChangeCommand<TransactionVMRowInfo>, ISaleBoundCommand
     {
         private readonly DTO _dto;
+        private readonly IInventoryStore _inventoryStore;
         private readonly ICheckoutService _checkoutService;
         private readonly ITransactionStore _transactionStore;
-        private Task<CheckoutResult> _result;
         private int _amount;
+        private bool _shouldAdd;
+        private CheckoutResult _result;
 
         public int SaleId { get; }
 
-        public TransactionVMCommandPurchase(DTO dto, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto, typeof(CheckoutView))
+        public TransactionVMCommandPurchase(DTO dto, IInventoryStore inventoryStore, ICheckoutService checkoutService, ITransactionStore transactionStore) : base(dto, typeof(CheckoutView))
         {
             _dto = dto;
+            _inventoryStore = inventoryStore;
             _checkoutService = checkoutService;
             _transactionStore = transactionStore;
             Completer = CompleterHandler;
@@ -37,18 +43,53 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
             SaleId = _dto.SaleId;
         }
 
-        private async Task Complete()
+        private async Task CompleterHandler(BaseViewModel viewModel)
         {
-            var result = await _result;
-            _transactionStore.AddToSale(result, _amount);
+            if (viewModel is CheckoutViewModel checkout
+                && checkout.SelectedItem is IFlashRequestable flasher
+                && viewModel is IDataGridTabHost host)
+            {
+                host.RowIntoView(PropertyChangedArgs.RowInfo);
 
-            _dto.TransactionId = result.Transaction.Id;
-        }
+                if (_result.Sale != null)
+                    _transactionStore.OnSaleChange(_result.Sale);
 
-        private async Task CompleterHandler(NavigationViewModel vm)
-        {
-            await Complete();
-            // TODO RowIntoView
+                var transaction = _result.Transaction;
+
+                if (_inventoryStore.Store.TryGetValue(transaction.ProductId, out var product))
+                {
+                    product.Purchase += !_shouldAdd ? -_amount : _amount;
+                }
+
+
+                if (!_shouldAdd)
+                {
+                    if (_transactionStore.Store.TryGetValue(transaction.TransactionKey, out var vm))
+                    {
+                        await flasher.RequestFlash(vm, DataGridFlashBehavior.OperationType.Remove);
+                        _transactionStore.Store.Remove(transaction.TransactionKey);
+                    }
+                    return;
+                }
+
+                if (_transactionStore.Store.TryGetValue(transaction.TransactionKey, out var existingVm))
+                {
+                    existingVm.Transaction = transaction;
+                    await flasher.RequestFlash(existingVm, DataGridFlashBehavior.OperationType.Update);
+                }
+                else
+                {
+                    var vm = _transactionStore.AddTransaction(transaction);
+
+                    App.Current.BeginInvoke(new Action(() => flasher.RequestFlash(vm, DataGridFlashBehavior.OperationType.New)));
+                }
+
+                _dto.TransactionId = _result.Transaction.Id;
+            }
+            else
+            {
+                Cancel = true;
+            }
         }
 
         public override async Task Command()
@@ -69,23 +110,18 @@ namespace Mhyrenz_Interface.Features.Checkout.Commands
 
             var isIncrease = newValue > oldValue;
 
-            var shouldAdd =
+            _shouldAdd =
                 Intent == ActionType.Undo
                     ? !isIncrease
                     : isIncrease;
 
-            if (shouldAdd)
+            if (_shouldAdd)
             {
-                _result = _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, _amount);
+                _result = await _checkoutService.AddItem(_dto.SaleId, _dto.ProductId, _amount);
             }
             else
             {
-                _result = _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, _amount);
-            }
-
-            if (Intent == ActionType.Normal)
-            {
-                await Complete();
+                _result = await _checkoutService.Subtract(_dto.SaleId, _dto.TransactionId, _amount);
             }
         }
 

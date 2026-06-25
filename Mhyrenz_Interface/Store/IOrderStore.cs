@@ -6,7 +6,7 @@ namespace Mhyrenz_Interface.Store
 {
     public interface IOrderStore : IViewModelStore<int, OrderDataViewModel>
     {
-        void AddItem(Order order, int productId);
+        OrderDataViewModel AddItem(Order order);
         Task InitializeAsync();
     }
 }

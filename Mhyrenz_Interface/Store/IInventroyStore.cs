@@ -10,15 +10,10 @@ namespace Mhyrenz_Interface.Store
     {
         event EventHandler<InventoryStoreEventArgs> PropertyChanged;
         event EventHandler<InventoryStoreEventArgs> PurchaseEvent;
-        event EventHandler<IEnumerable<ProductDataViewModel>> AddProductEvent;
-        event EventHandler<IEnumerable<ProductDataViewModel>> RemoveProductEvent;
         event Action Loaded;
 
         void LoadProducts(IEnumerable<Product> products);
         Task InitializeAsync();
-        void RemoveProduct(IEnumerable<ProductDataViewModel> product);
         IEnumerable<ProductDataViewModel> AddProduct(ICollection<Product> products);
-        void PurchaseProduct(int productId, int amount);
-        void RemoveProduct(IEnumerable<int> products);
     }
 }

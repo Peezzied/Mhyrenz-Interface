@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Mhyrenz_Interface.Core.MVVM;
 
 namespace Mhyrenz_Interface.Navigation
 {
@@ -16,9 +17,9 @@ namespace Mhyrenz_Interface.Navigation
         private CancellationTokenSource _navigationCts;
         private int _navigationVersion;
 
-        public NavigationViewModel CurrentViewModel { get; private set; }
+        public BaseViewModel CurrentViewModel { get; private set; }
 
-        public event Action<NavigationViewModel, Type> Navigated;
+        public event Action<BaseViewModel, Type> Navigated;
 
         public NavigationServiceEx(NavigationViewModelFactory viewModelFactory)
         {
