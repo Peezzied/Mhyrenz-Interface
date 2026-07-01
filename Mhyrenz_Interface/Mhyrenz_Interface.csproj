@@ -94,6 +94,9 @@
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
+    <Reference Include="DataGridExtensions, Version=2.9.1.0, Culture=neutral, PublicKeyToken=43de855f87de903a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DataGridExtensions.2.9.1\lib\net462\DataGridExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="Dragablz, Version=0.0.3.234, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dragablz.0.0.3.234\lib\net45\Dragablz.dll</HintPath>
     </Reference>
@@ -353,7 +356,7 @@
       <HintPath>..\packages\Microsoft.CodeCoverage.18.0.1\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.142\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -497,6 +500,8 @@
     <Compile Include="Features\Inventory\Controls\TrackedPopup.cs" />
     <Compile Include="Shared\Columns\ColumnHelper.cs" />
     <Compile Include="Shared\Columns\TemplateColumn.cs" />
+    <Compile Include="Shared\Commands\ToggleActivateMainWindow.cs" />
+    <Compile Include="Shared\Commands\ControlCommands.cs" />
     <Compile Include="Shared\Converters\IntegerGreaterThanZero.cs" />
     <Compile Include="Features\Inventory\ViewModels\PharmaDetailsViewModel.cs" />
     <Compile Include="Shared\Adorners\RowFlashAdorner.cs" />

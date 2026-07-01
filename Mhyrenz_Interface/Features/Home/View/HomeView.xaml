@@ -50,10 +50,10 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <hc:UniformSpacingPanel HorizontalAlignment="Left" Orientation="Vertical">
+                    <hc:SimpleStackPanel HorizontalAlignment="Left" Orientation="Vertical">
                         <Image HorizontalAlignment="Left" Source="/Resources/Images/Mhyrenz_Interface_IconLarge.png" Width="190" Height="Auto" />
                         <TextBlock Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Text="Mhyrenz Pharamacy" TextAlignment="Center" FontWeight="DemiBold" FontSize="12"/>
-                    </hc:UniformSpacingPanel>
+                    </hc:SimpleStackPanel>
                     <hc:UniformSpacingPanel Width="190" VerticalAlignment="Center" Orientation="Vertical" Grid.Column="1" HorizontalAlignment="Right" Spacing="5">
                         <Border Padding="10 5" Background="{StaticResource MahApps.Brushes.Accent4}">
                             <TextBlock Text="TOTAL SALES" FontSize="14" FontWeight="SemiBold"/>

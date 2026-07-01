@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Markup;
+using HandyControl.Interactivity;
+using HandyControl.Tools;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Bootstrap;
 using Mhyrenz_Interface.Core.MVVM;
@@ -29,6 +32,7 @@ using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Features.Orders.Commands;
 using Mhyrenz_Interface.Features.Orders.ViewModels;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
 using Mhyrenz_Interface.Test;
@@ -49,10 +53,9 @@ namespace Mhyrenz_Interface
     public partial class App : Application
     {
         private IHost _appHost;
+        private System.Windows.Forms.NotifyIcon _notifyIcon;
         private readonly string _appsettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
 
-        [Obsolete]
-        public static IServiceProvider ServiceProvider { get; set; }
         public static IUndoRedoManager UndoRedoManager { get; private set; }
         public static ShellViewModel ShellViewModel { get; private set; }
         public static AppPresenter Presenter { get; set; }
@@ -74,6 +77,7 @@ namespace Mhyrenz_Interface
                 new FrameworkPropertyMetadata(
                     XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
 
+
             _appHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
@@ -89,22 +93,23 @@ namespace Mhyrenz_Interface
                 .Build();
 
             await _appHost.StartAsync();
-            ServiceProvider = _appHost.Services;
+            var serviceProvider = _appHost.Services;
 
             UndoRedoManager = _appHost.Services.GetRequiredService<IUndoRedoManager>();
             ShellViewModel = _appHost.Services.GetRequiredService<ShellViewModel>();
 
             await _appHost.Services.GetRequiredService<ICheckoutService>().RemovePhysically();
 
-            using (var context = ServiceProvider.GetRequiredService<InventoryDbContextFactory>().CreateDbContext())
+            using (var context = serviceProvider.GetRequiredService<InventoryDbContextFactory>().CreateDbContext())
             {
                 context.Database.Migrate();
             } // FIXME: TEMPORARY, CHANGE LATER. DEFER TO DATABASE INTIALIZER
 
-            Resources.Add("BarcodeToImageConverter",
-                ServiceProvider.GetRequiredService<BarcodeToImageConverter>());
 
-            Presenter = new AppPresenter(ServiceProvider);
+            Resources.Add("BarcodeToImageConverter",
+                serviceProvider.GetRequiredService<BarcodeToImageConverter>());
+
+            Presenter = new AppPresenter(serviceProvider);
 
             await Presenter.AppInit();
 
@@ -117,6 +122,22 @@ namespace Mhyrenz_Interface
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
+        }
+
+        public static void ToggleActivateWindow()
+        {
+            var win = App.Current.MainWindow;
+            if (!win.IsActive)
+            {
+                win.WindowState = WindowState.Normal;
+                win.Activate();
+                win.Show();
+                WindowHelper.SetWindowToForeground(win);
+            }
+            else
+            {
+                win.Hide();
+            }
         }
 
         private void CreateServiceCollection(IServiceCollection services, HostBuilderContext context)

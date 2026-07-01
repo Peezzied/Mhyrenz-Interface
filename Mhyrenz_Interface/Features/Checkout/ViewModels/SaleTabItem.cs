@@ -7,12 +7,14 @@ using System.Windows;
 using GongSolutions.Wpf.DragDrop;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.PropertyTracking;
+using Mhyrenz_Interface.Database.Migrations;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
 using Mhyrenz_Interface.Shared.Behaviors;
 using Mhyrenz_Interface.Store;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using ObservableCollections;
 using Setter = Mhyrenz_Interface.Core.PropertyTracking.TrackPropertyHelper.Setter;
 
@@ -58,22 +60,11 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
         }
 
-        protected void AddAction(object obj)
+        private void AddAction(object obj)
         {
             var product = ((ProductDataViewModel)obj).Item;
 
-            if (_transactionStore.Store.TryGetValue(
-                    Transaction.CreateTransactionKey(product.Id, Sale.Id), out var transaction))
-            {
-                transaction.Qty += 1;
-            }
-            else
-            {
-                TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty),
-                    productId: product.Id,
-                    oldValue: 0,
-                    newValue: 1);
-            }
+            IncrementQty(product.Id);
         }
 
         private bool CanDiscountCommand(object obj)
@@ -326,7 +317,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             TrackQtyProps(args.PropertyName, viewModel.Transaction.ProductId, args.OldValue, args.NewValue, viewModel.Transaction.Id);
         }
 
-        public TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue, int? transactionId = null)
+        private TrackPropertyHelper<long, TransactionDataViewModel> TrackQtyProps(string propertyName, int productId, object oldValue, object newValue, int? transactionId = null)
         {
             var tracker = TrackPropertyHelper.Build(_transactionStore, Transaction.CreateTransactionKey(productId, Sale.Id), propertyName)
                 .Track(nameof(TransactionDataViewModel.QtyIncrementEdit), (setter, key) =>
@@ -357,6 +348,22 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             }
 
             return tracker;
+        }
+
+        public void IncrementQty(int productId)
+        {
+            if (_transactionStore.Store.TryGetValue(
+                    Transaction.CreateTransactionKey(productId, Sale.Id), out var transaction))
+            {
+                transaction.Qty += 1;
+            }
+            else
+            {
+                TrackQtyProps(propertyName: nameof(TransactionDataViewModel.Qty),
+                    productId: productId,
+                    oldValue: 0,
+                    newValue: 1);
+            }
         }
 
         protected override IRaiseCanExecuteChanged SubmitActionCommand()
@@ -392,7 +399,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
             public override void Drop(IDropInfo dropInfo)
             {
-                saleTabItem.AddAction((ProductDataViewModel)dropInfo.Data);
+                saleTabItem.IncrementQty(((ProductDataViewModel)dropInfo.Data).Item.Id);
             }
         }
     }

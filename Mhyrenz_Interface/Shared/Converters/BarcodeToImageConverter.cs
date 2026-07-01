@@ -17,7 +17,7 @@ namespace Mhyrenz_Interface.Shared.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (!(value is string code) || string.IsNullOrWhiteSpace(code))
-                return null;
+                return true;
 
             var cache = _cache.GetOrCreate(code);
             if (!(cache is null))

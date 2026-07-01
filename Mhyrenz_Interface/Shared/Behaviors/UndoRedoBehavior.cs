@@ -91,7 +91,6 @@ namespace Mhyrenz_Interface.Shared.Behaviors
 
             var control = target.CastTo<Control>();
             var viewModel = ExpectedRowViewModel ?? control.DataContext;
-            var undoRedoManager = App.ServiceProvider.GetRequiredService<IUndoRedoManager>(); // FIXME: anti-pattern
             var controlPropertyValue = control.GetValue(dp);
 
             var bindingPath = expression.ParentBinding.Path.Path;
@@ -132,7 +131,7 @@ namespace Mhyrenz_Interface.Shared.Behaviors
                 return;
             }
 
-            if (!undoRedoManager.CanRedo ||
+            if (!App.UndoRedoManager.CanRedo ||
                 Equals(controlPropertyValue?.ToString(), vmPropertyValue?.ToString()))
             {
                 expression.UpdateSource();

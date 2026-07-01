@@ -6,22 +6,27 @@
            xmlns:hc="https://handyorg.github.io/handycontrol"
            mc:Ignorable="d"
            ResizeMode="NoResize"
+           Topmost="True"
            BorderThickness="0"
+           Title="Starting Mhyrenz Interface"
+           ShowTitle="False"
            hc:WindowAttach.IgnoreAltF4="True"
            hc:WindowAttach.IsDragElement="True"
            WindowStartupLocation="CenterScreen"
            ShowNonClientArea="False"
            Height="450"
            Width="800">
-    <Grid>
+    <hc:SimplePanel>
         <Image Source="/Resources/Images/Splash.jpg" />
-        <hc:SimpleStackPanel VerticalAlignment="Bottom">
+        <hc:SimplePanel VerticalAlignment="Bottom">
             
-            <TextBlock FontSize="12" d:Text="Lorem Ipsum" Margin="10" Text="{Binding Message, RelativeSource={RelativeSource AncestorType=hc:SplashWindow}}"/>
+            <TextBlock FontSize="10" d:Text="Lorem Ipsum" Margin="10" Text="{Binding Message, RelativeSource={RelativeSource AncestorType=hc:SplashWindow}}"/>
             <ProgressBar 
-                Height="10"
+                VerticalAlignment="Bottom"
+                Height="5"
+                Background="Transparent"
                 Style="{StaticResource ProgressBarFlat}" 
                 IsIndeterminate="True" Orientation="Horizontal"/>
-        </hc:SimpleStackPanel>
-    </Grid>
+        </hc:SimplePanel>
+    </hc:SimplePanel>
 </hc:SplashWindow>

@@ -10,9 +10,11 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Dragablz;
 using GongSolutions.Wpf.DragDrop;
+using HandyControl.Controls;
 using HandyControl.Tools.Extension;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.Utilities;
+using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SalesRecordService;
 using Mhyrenz_Interface.Features.Checkout.Commands;
 using Mhyrenz_Interface.Features.Inventory.ViewModels;
@@ -27,6 +29,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
     {
 
         public CheckoutViewModel(ICheckoutService checkoutService,
+            IProductService productService,
             ISessionStore sessionStore,
             IInventoryStore inventoryStore,
             ITransactionStore transactionStore,
@@ -43,6 +46,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             _inventoryStore = inventoryStore;
             _transactionStore = transactionStore;
             _checkoutService = checkoutService;
+            _productService = productService;
             _saleTabItemFactory = saleTabItemFactory;
 
             _completedSaleViewModel = completedSaleViewModel;
@@ -114,8 +118,25 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
             token.ThrowIfCancellationRequested();
 
             SelectedItem = SaleTabItems.FirstOrDefault();
+        }
 
-            _isInitialized = true;
+        public async Task ReceiveBarcode(string barcode)
+        {
+            var productId = await _productService.LookupBarcode(barcode);
+            if (productId != 0 && _inventoryStore.Store.TryGetValue(productId, out var product))
+            {
+                if (product.NetQty > 0)
+                {
+                    SelectedItem.IncrementQty(productId);
+                    Growl.SuccessGlobal($"Successfully scanned \"{barcode}\".");
+                }
+                else
+                {
+                    Growl.WarningGlobal($"\"{barcode}\" has insufficient stock balance.");
+                }
+                return;
+            }
+            Growl.WarningGlobal($"\"{barcode}\" was not found in products.");
         }
 
 
@@ -154,6 +175,7 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
         private readonly IInventoryStore _inventoryStore;
         private readonly ITransactionStore _transactionStore;
         private readonly ICheckoutService _checkoutService;
+        private readonly IProductService _productService;
         private readonly CreateViewModel<SaleTabItem> _saleTabItemFactory;
         private readonly CreateViewModel<CompletedSaleViewModel> _completedSaleViewModel;
         private readonly ShellViewModel _shellViewModel;
@@ -236,8 +258,6 @@ namespace Mhyrenz_Interface.Features.Checkout.ViewModels
 
 
         private CompletedSaleViewModel completedSaleViewModel;
-
-        private bool _isInitialized = false;
 
         public CompletedSaleViewModel CompletedSaleViewModel
         {

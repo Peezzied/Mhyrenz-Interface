@@ -1,19 +1,27 @@
 ﻿<mah:MetroWindow x:Class="Mhyrenz_Interface.MainWindow"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
-        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Mhyrenz_Interface"
-        xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
-        xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        WindowStartupLocation="CenterScreen"
-        mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
-        Title="MainWindow" MinHeight="500">
-    <mah:MetroWindow.Resources>        
+                 xmlns:hc="https://handyorg.github.io/handycontrol"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:local="clr-namespace:Mhyrenz_Interface"
+                 xmlns:controls="clr-namespace:Mhyrenz_Interface.Shared.Controls"
+                 xmlns:commands="clr-namespace:Mhyrenz_Interface.Shared.Commands"
+                 xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
+                 xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                 WindowStartupLocation="CenterScreen"
+                 TryToBeFlickerFree="True"
+                 mc:Ignorable="d" ResizeMode="CanResizeWithGrip"
+                 TitleAlignment="Center"
+                 TitleCharacterCasing="Normal"
+                 BorderThickness="0"
+                 IconBitmapScalingMode="HighQuality"
+                 GlowBrush="Black"
+                 Title="Mhyrenz Interface" MinHeight="500">
+    <mah:MetroWindow.Resources>
         <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type controls:MenuItem}">
             <Grid Height="48">
                 <Grid.ColumnDefinitions>
@@ -36,82 +44,123 @@
             <Setter Property="Margin" Value="0"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
-
     </mah:MetroWindow.Resources>
-    <hc:DrawerContainer>
-        
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <mah:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <Image Margin="6"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Source="/Resources/Images/Mhyrenz_Interface_IconLarge.png" />
+        </DataTemplate>
+    </mah:MetroWindow.IconTemplate>
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Button
+            Width="40"
+            Height="30"
+            ToolTip="Toggle Full Screen"
+            Click="ToggleFullScreen_Click">
+                <iconPacks:PackIconMaterial Kind="Fullscreen" />
+            </Button>
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.TitleTemplate>
+        <DataTemplate>
+            <TextBlock Text="{Binding}"
+                       FontSize="{DynamicResource MahApps.Font.Size.Window.Title}"
+                       FontWeight="Medium"
+                       TextTrimming="CharacterEllipsis"/>
+        </DataTemplate>
+    </mah:MetroWindow.TitleTemplate>
 
-            <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
-                          DisplayMode="CompactInline"
-                          IsPaneOpen="True"
-                          ItemCommand="{Binding NavigateCommand}"
-                          OptionsItemCommand="{Binding NavigateCommand}"
-                          ItemTemplate="{StaticResource MenuItemTemplate}"
-                          ItemsSource="{Binding Menu}"
-                          OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                          OptionsItemsSource="{Binding OptionsMenu}"
-                          SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
-                          SelectedOptionsItem="{Binding SelectedOptionsMenuItem, Mode=TwoWay}">
-                <mah:HamburgerMenu.ItemCommandParameter>
-                    <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
-                        <Binding RelativeSource="{RelativeSource Self}"/>
-                        <Binding Path="Menu"/>
-                    </MultiBinding>
-                </mah:HamburgerMenu.ItemCommandParameter>
-                <mah:HamburgerMenu.OptionsItemCommandParameter>
-                    <MultiBinding Converter="{StaticResource NavigationCommandParamsConverter}">
-                        <Binding RelativeSource="{RelativeSource Self}"/>
-                        <Binding Path="OptionsMenu"/>
-                    </MultiBinding>
-                </mah:HamburgerMenu.OptionsItemCommandParameter>
-                <mah:HamburgerMenu.Content>
-                    <hc:SimplePanel>
-                        <hc:ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" IsInertiaEnabled="True" IsPenetrating="True">
-                            <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" />
-                        </hc:ScrollViewer>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <controls:RibbonBar/>
-                            <Grid Grid.Row="1" Background="#F4F6F8">
-                                <ContentControl Content="{Binding CurrentViewModel}"
-                                                xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
-                                                xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
-                                                xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
-                                                xmlns:checkoutVm="clr-namespace:Mhyrenz_Interface.Features.Checkout.ViewModels"
-                                                xmlns:home="clr-namespace:Mhyrenz_Interface.Features.Home.Views"
-                                                xmlns:homeVm="clr-namespace:Mhyrenz_Interface.Features.Home.ViewModels"
-                                                xmlns:settings="clr-namespace:Mhyrenz_Interface.Features.Settings.Views"
-                                                xmlns:settingsVm="clr-namespace:Mhyrenz_Interface.Features.Settings.ViewModels">
-                                    <ContentControl.Resources>
-                                        <DataTemplate DataType="{x:Type inventoryVm:InventoryViewModel}">
-                                            <inventory:InventoryView/>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="{x:Type checkoutVm:CheckoutViewModel}">
-                                            <checkout:CheckoutView/>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="{x:Type homeVm:HomeViewModel}">
-                                            <home:HomeView/>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="{x:Type settingsVm:SettingsViewModel}">
-                                            <settings:SettingsView/>
-                                        </DataTemplate>
-                                    </ContentControl.Resources>
-                                </ContentControl>
-                                <hc:LoadingCircle Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            </Grid>
-                        </Grid>
-                    </hc:SimplePanel>
-                </mah:HamburgerMenu.Content>
-        </mah:HamburgerMenu>
-        <controls:StatusBar Grid.Row="1"/>
-    </Grid>
-    </hc:DrawerContainer>
+    <hc:Interaction.Behaviors>
+        <hc:TaskbarRebuildBehavior Element="{Binding ElementName=AppTray}" />
+    </hc:Interaction.Behaviors>
+    <hc:SimplePanel>
+        <hc:NotifyIcon x:Name="AppTray" Icon="/icon.ico" Token="AppTray">
+            <hc:NotifyIcon.ContextContent>
+                <Border CornerRadius="4" Margin="10" Background="{DynamicResource RegionBrush}" Effect="{StaticResource EffectShadow2}">
+                    <hc:SimpleStackPanel VerticalAlignment="Center" Margin="16">
+                        <hc:SimpleStackPanel Orientation="Vertical">
+                            <Image Source="/Resources/Images/Mhyrenz_Interface_IconLarge.png" Width="150" Height="100"/>
+                            <TextBlock Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundChromeBlackMedium}" Text="Mhyrenz Pharamacy" TextAlignment="Center" FontWeight="DemiBold" FontSize="12" Margin="0 -19 0 14"/>
+                        </hc:SimpleStackPanel>
+                        <StackPanel Margin="0,16,0,0" HorizontalAlignment="Center" Orientation="Horizontal">
+                            <Button Command="commands:ControlCommands.ToggleActivateMainWindow" MinWidth="100" Content="Open Interface"/>
+                            <Button Command="hc:ControlCommands.ShutdownApp" Margin="16,0,0,0" MinWidth="100" Style="{StaticResource ButtonPrimary}" Content="Exit"/>
+                        </StackPanel>
+                    </hc:SimpleStackPanel>
+                </Border>
+            </hc:NotifyIcon.ContextContent>
+            <hc:Interaction.Triggers>
+                <hc:EventTrigger EventName="Click">
+                    <hc:EventToCommand Command="commands:ControlCommands.ToggleActivateMainWindow"/>
+                </hc:EventTrigger>
+            </hc:Interaction.Triggers>
+        </hc:NotifyIcon>
+        <hc:DialogContainer>
+            <hc:DrawerContainer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <mah:HamburgerMenu x:Name="HamburgerMenuControl" DockPanel.Dock="Top"
+                      DisplayMode="CompactInline"
+                      IsPaneOpen="True"
+                      ItemCommand="{Binding NavigateCommand}"
+                      ItemTemplate="{StaticResource MenuItemTemplate}"
+                      ItemsSource="{Binding Menu}"
+                      SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
+                      SelectedOptionsItem="{Binding SelectedOptionsMenuItem, Mode=TwoWay}">
+                        <mah:HamburgerMenu.ItemCommandParameter>
+                            <Binding Path="SelectedItem" RelativeSource="{RelativeSource Self}"/>
+                        </mah:HamburgerMenu.ItemCommandParameter>
+                        <mah:HamburgerMenu.Content>
+                            <hc:SimplePanel>
+                                <hc:ScrollViewer Panel.ZIndex="100" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right" IsInertiaEnabled="True" IsPenetrating="True">
+                                    <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" />
+                                </hc:ScrollViewer>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="50"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <controls:RibbonBar/>
+                                    <Grid Grid.Row="1" Background="#F4F6F8">
+                                        <ContentControl Content="{Binding CurrentViewModel}"
+                                            xmlns:inventory="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
+                                            xmlns:inventoryVm="clr-namespace:Mhyrenz_Interface.Features.Inventory.ViewModels"
+                                            xmlns:checkout="clr-namespace:Mhyrenz_Interface.Features.Checkout.Views"
+                                            xmlns:checkoutVm="clr-namespace:Mhyrenz_Interface.Features.Checkout.ViewModels"
+                                            xmlns:home="clr-namespace:Mhyrenz_Interface.Features.Home.Views"
+                                            xmlns:homeVm="clr-namespace:Mhyrenz_Interface.Features.Home.ViewModels"
+                                            xmlns:settings="clr-namespace:Mhyrenz_Interface.Features.Settings.Views"
+                                            xmlns:settingsVm="clr-namespace:Mhyrenz_Interface.Features.Settings.ViewModels">
+                                            <ContentControl.Resources>
+                                                <DataTemplate DataType="{x:Type inventoryVm:InventoryViewModel}">
+                                                    <inventory:InventoryView/>
+                                                </DataTemplate>
+                                                <DataTemplate DataType="{x:Type checkoutVm:CheckoutViewModel}">
+                                                    <checkout:CheckoutView/>
+                                                </DataTemplate>
+                                                <DataTemplate DataType="{x:Type homeVm:HomeViewModel}">
+                                                    <home:HomeView/>
+                                                </DataTemplate>
+                                                <DataTemplate DataType="{x:Type settingsVm:SettingsViewModel}">
+                                                    <settings:SettingsView/>
+                                                </DataTemplate>
+                                            </ContentControl.Resources>
+                                        </ContentControl>
+                                        <hc:LoadingCircle Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </Grid>
+                                </Grid>
+                            </hc:SimplePanel>
+                        </mah:HamburgerMenu.Content>
+                    </mah:HamburgerMenu>
+                    <controls:StatusBar Grid.Row="1"/>
+                </Grid>
+            </hc:DrawerContainer>
+        </hc:DialogContainer>
+    </hc:SimplePanel>
 </mah:MetroWindow>

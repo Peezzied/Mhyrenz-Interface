@@ -16,6 +16,8 @@
              xmlns:converters="clr-namespace:Mhyrenz_Interface.Shared.Converters"
              xmlns:view="clr-namespace:Mhyrenz_Interface.Features.Inventory.Views"
              xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:dgx="clr-namespace:DataGridExtensions;assembly=DataGridExtensions"
+             xmlns:dgxb="clr-namespace:DataGridExtensions.Behaviors;assembly=DataGridExtensions"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d" 
@@ -23,6 +25,10 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
+
+            <Style TargetType="{x:Type DataGridColumnHeader}"
+                BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader.Azure}" />
+
 
             <Style x:Key="TextBlockCenter" TargetType="TextBlock">
                 <Setter Property="TextAlignment" Value="Center"/>
@@ -315,8 +321,8 @@
                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
                 <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
                 <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
-                <Setter Property="VirtualizingPanel.CacheLength" Value="1"/>
-                <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>
+                <!--<Setter Property="VirtualizingPanel.CacheLength" Value="1"/>
+                <Setter Property="VirtualizingPanel.CacheLengthUnit" Value="Page"/>-->
                 <Setter Property="CanUserReorderColumns" Value="False"/>
                 <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
                 <Setter Property="IsSynchronizedWithCurrentItem" Value="False"/>
@@ -434,8 +440,10 @@
                           RowDetailsTemplate="{x:Null}"
                           dd:DragDrop.DragHandler="{Binding DataContext.InventoryDragHandler, RelativeSource={RelativeSource AncestorType=view:InventoryView}}"
                           dd:DragDrop.IsDragSource="True"
+                          dgx:DataGridFilter.IsAutoFilterEnabled="True"
                           dd:DragDrop.UseDefaultDragAdorner="True">
                     <i:Interaction.Behaviors>
+                        <dgxb:ExtendedStarSizeBehavior/>
                         <sharedBehaviors:DataGridFlashBehavior WatchedItemsSource="Inventory"/>
                         <behaviors:InventoryDataGridDetailed TabOwner="{Binding TabOwner, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                         <behaviors:InventoryDataGridDelete Command="{Binding DeleteCommand}"/>
@@ -499,8 +507,8 @@
                                 </Style>
                             </columns:NumberColumn.Style>
                         </columns:NumberColumn>
-                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Barcode" CanUserResize="False" Width="121" CellEditingTemplate="{StaticResource BarcodeColumnEdit}" CellTemplate="{StaticResource BarcodeColumnContent}" CanUserSort="False" />
-                        <DataGridTemplateColumn local:InventoryDataGridColumn.PlaceOrderBound="True" IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
+                        <columns:TemplateColumn columns:ColumnHelper.MonitorSale="True" Header="Barcode" Width="121" CellEditingTemplate="{StaticResource BarcodeColumnEdit}" CellTemplate="{StaticResource BarcodeColumnContent}" CanUserSort="False" dgx:DataGridFilterColumn.IsFilterVisible="True" dgx:DataGridFilterColumn.Template="{StaticResource {x:Static dgx:DataGridFilter.TextColumnFilterTemplateKey}}" SortMemberPath="Barcode" />
+                        <DataGridTemplateColumn dgx:DataGridFilterColumn.IsFilterVisible="False" local:InventoryDataGridColumn.PlaceOrderBound="True" IsReadOnly="True" Header="Category" CanUserResize="False" CellTemplate="{StaticResource CategoryColumnCellTemplate}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </DataTemplate>

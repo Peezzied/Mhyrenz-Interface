@@ -229,6 +229,15 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
             }
         }
 
+        public async Task<int> LookupBarcode(string barcode)
+        {
+            using (var context = _inventoryDbContextFactory.CreateDbContext())
+            {
+                return (await context.Products
+                    .FirstOrDefaultAsync(p => p.Barcode == barcode))?.Id ?? 0;
+            }
+        }
+
         public async Task RemovePhysically()
         {
             using (var context = _inventoryDbContextFactory.CreateDbContext())

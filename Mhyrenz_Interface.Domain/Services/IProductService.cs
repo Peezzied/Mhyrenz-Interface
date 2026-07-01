@@ -18,5 +18,6 @@ namespace Mhyrenz_Interface.Domain.Services.ProductService
         Task RemovePhysically();
         Task<Product> SetMarkupRate(int productId, decimal rate);
         Task<bool> IsBarcodeUnique(string barcode);
+        Task<int> LookupBarcode(string barcode);
     }
 }

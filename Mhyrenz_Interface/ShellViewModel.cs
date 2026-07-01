@@ -4,16 +4,21 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using HandyControl.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Mhyrenz_Interface.Core.MVVM;
 using Mhyrenz_Interface.Core.UndoRedo;
 using Mhyrenz_Interface.Domain.Models;
 using Mhyrenz_Interface.Domain.Services.ProductService;
 using Mhyrenz_Interface.Domain.Services.SerialBarcodeService;
+using Mhyrenz_Interface.Features.Checkout.ViewModels;
+using Mhyrenz_Interface.Features.Checkout.Views;
 using Mhyrenz_Interface.Features.Home.Views;
 using Mhyrenz_Interface.Navigation;
+using Mhyrenz_Interface.Shared.Commands;
 using Mhyrenz_Interface.Shared.Converters;
 using Mhyrenz_Interface.Store;
 using MenuItem = Mhyrenz_Interface.Shared.Controls.MenuItem;
@@ -62,7 +67,7 @@ namespace Mhyrenz_Interface
 
             _dialogCoordinator = dialogCoordinator;
 
-            NavigateCommand = new RelayCommand<NavigationCommandParams>(Navigate);
+            NavigateCommand = new AsyncRelayCommand(NavigateAction);
 
             _baseTime = DateTime.Now;
             _stopwatch.Start();
@@ -251,9 +256,32 @@ namespace Mhyrenz_Interface
             Seconds = accurateNow.Second;
         }
 
-        private void SerialBarcodeService_OnBarcodeReceived(string obj)
+        private void SerialBarcodeService_OnBarcodeReceived(string barcode)
         {
-            //throw new NotImplementedException();
+            App.Current.Dispatcher.Invoke(async () =>
+            {
+                if (CanMainBarcodeReceive)
+                {
+                    var win = App.Current.MainWindow;
+                    if (win.Visibility == System.Windows.Visibility.Visible
+                        && win.WindowState != WindowState.Minimized
+                        && CurrentViewModel is CheckoutViewModel checkout)
+                    {
+                        if (!win.IsActive)
+                            ToggleActivateMainWindow.ActivateMainWindow();
+
+                        await checkout.ReceiveBarcode(barcode);
+                        NotifyIcon.ShowBalloonTip("Barcode Scan", $"{barcode}", HandyControl.Data.NotifyIconInfoType.Info, MainWindow.AppTrayToken);
+                    }
+                    else
+                    {
+                        NotifyIcon.ShowBalloonTip("Missed Barcode", "Scan the barcode again in a correct checkout tab.", HandyControl.Data.NotifyIconInfoType.Warning, MainWindow.AppTrayToken);
+                        ToggleActivateMainWindow.ActivateMainWindow();
+
+                        await Navigate(Menu.FirstOrDefault(m => m.ViewType == typeof(CheckoutView)));
+                    }
+                }
+            });
         }
 
         private async Task UndoRedoActionCommand(object parameter)
@@ -269,39 +297,32 @@ namespace Mhyrenz_Interface
             }
         }
 
-        private async void Navigate(NavigationCommandParams parameters)
+        private async Task NavigateAction(object parameter)
         {
-            var isMainMenu = ReferenceEquals(parameters.MenuItem, Menu);
+            //var isMainMenu = ReferenceEquals(parameters.MenuItem, Menu); TODO only applicable when there's an optionmenu
 
-            var menuItem = isMainMenu
-                ? parameters.Menu.SelectedItem as MenuItem
-                : parameters.Menu.SelectedOptionsItem as MenuItem;
-
-            if (menuItem == null)
+            if (!(parameter is MenuItem menuItem))
                 return;
+            await Navigate(menuItem);
+        }
 
+        private async Task Navigate(MenuItem menuItem, PostNavigation postNavigation = null)
+        {
             IsLoading = true;
 
             var navigated = false;
 
             try
             {
-                navigated = await _navigationService.NavigateAsync(menuItem.ViewType);
+                navigated = await _navigationService.NavigateAsync(menuItem.ViewType, postNavigation);
             }
             finally
             {
                 if (navigated)
                 {
-                    if (isMainMenu)
-                    {
-                        SelectedMenuItem = menuItem;
-                        SelectedOptionsMenuItem = null;
-                    }
-                    else
-                    {
-                        SelectedOptionsMenuItem = menuItem;
-                        SelectedMenuItem = null;
-                    }
+                    SelectedMenuItem = menuItem;
+                    SelectedOptionsMenuItem = null;
+
                 }
 
                 IsLoading = false;
